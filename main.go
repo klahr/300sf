@@ -6,4 +6,3 @@ func main() {
 	r := gin.New()
 	r.Run("localhost:8080")
 }
-
