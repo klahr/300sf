@@ -1,10 +1,7 @@
 package models
 
-import "time"
-
 type Age struct {
-	Id        int64       `json:"-"`
-	Timestamp time.Time   `json:"-"`
-	Uuid      string      `json:"uuid"`
-	Name      Translation `json:"name"`
+	Model
+	NameId int64       `json:"-"`
+	Name   Translation `json:"name"`
 }
