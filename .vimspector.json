@@ -10,6 +10,7 @@
       "configuration": {
         "request": "launch",
         "program": "${fileDirname}",
+        "args": ["--config", "config.json"],
         "mode": "debug"
       }
     }
