@@ -7,6 +7,8 @@ import (
 	"syscall"
 
 	"git.sr.ht/~klahr/300sf/config"
+	"git.sr.ht/~klahr/300sf/log"
+	"git.sr.ht/~klahr/300sf/models"
 	"github.com/gin-gonic/gin"
 )
 
@@ -46,8 +48,31 @@ func main() {
 	}
 
 	r := gin.New()
+	r.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Authorization,Content-Type,X-Access-Token,X-Refresh-Token,X-App-Version,X-App-Language")
+		c.Writer.Header().Set("Content-Type", "application/json")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	})
+
+	if err := models.SetupDB(ctx, config.AppConfig.DataSource, config.GetLogLevelAsInt()); err != nil {
+		log.Error(ctx, 0, err.Error())
+		panic(err)
+	}
+
+	if err := models.SetupCache(ctx, config.AppConfig.RedisHost); err != nil {
+		log.Error(ctx, 0, err.Error())
+		panic(err)
+	}
 
 	SetupRoutes(r)
 
-	r.Run("localhost:8080")
+	r.Run(config.AppConfig.Address)
 }
