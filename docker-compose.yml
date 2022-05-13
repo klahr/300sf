@@ -31,7 +31,7 @@ services:
       context: ../300sf
       dockerfile: Dockerfile
       args:
-        CONFIG_FILE: zonventure-blackbird.conf
+        CONFIG_FILE: 300sf-blackbird.conf
     restart: unless-stopped
     ports:
       - "8091:8091"
