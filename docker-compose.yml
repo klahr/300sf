@@ -1,0 +1,53 @@
+version: '3.5'
+
+networks:
+  monitor-net:
+    driver: bridge
+
+services:
+  # api.300sf.se
+  albatross:
+    container_name: albatross
+    network_mode: host
+    build:
+      context: ../300sf
+      dockerfile: Dockerfile
+      args:
+        CONFIG_FILE: 300sf-albatross.conf
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+    environment:
+      - "LOG_FILE_LOCATION=/logs/albatross.log"
+      - "DATA_STORAGE_PATH=/resources/"
+    volumes:
+      - /home/klarre/logs:/logs
+
+  # api.300sf.se
+  blackbird:
+    container_name: blackbird
+    network_mode: host
+    build:
+      context: ../300sf
+      dockerfile: Dockerfile
+      args:
+        CONFIG_FILE: zonventure-blackbird.conf
+    restart: unless-stopped
+    ports:
+      - "8091:8091"
+    environment:
+      - "LOG_FILE_LOCATION=/logs/blackbird.log"
+      - "DATA_STORAGE_PATH=/resources/"
+    volumes:
+      - /home/klarre/logs:/logs
+
+  # 300sf.se
+  # woodpecker:
+  #   container_name: woodpecker
+  #   network_mode: host
+  #   build:
+  #     context: ../300sf-web
+  #     dockerfile: Dockerfile
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8080:8080"
