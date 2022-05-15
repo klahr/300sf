@@ -1,4 +1,4 @@
-ROM node:alpine
+FROM node:alpine
 
 RUN mkdir /app
 ADD . /app
