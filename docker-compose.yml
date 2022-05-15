@@ -44,10 +44,10 @@ services:
   # 300sf.se
   woodpecker:
     container_name: woodpecker
-      network_mode: host
-      build:
-        context: ../300sf-web
-        dockerfile: Dockerfile
-      restart: unless-stopped
-      ports:
-        - "8080:8080"
+    network_mode: host
+    build:
+      context: ../300sf-web
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
