@@ -6,5 +6,6 @@ import (
 )
 
 func SetupRoutes(r *gin.Engine) {
-	r.GET("/v1/user", controllers.User)
+	// Users
+	r.POST("/v1/users", controllers.User)
 }

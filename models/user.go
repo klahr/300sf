@@ -6,12 +6,17 @@ import (
 
 type User struct {
 	Model
-	LastSeen      zero.Time `json:"last_seen"`
-	DeactivatedAt zero.Time `json:"-"`
-	DeletedAt     zero.Time `json:"-"`
-	Username      string    `json:"username"`
-	Email         string    `json:"-"`
-	Password      string    `json:"-"`
-	PasswordSalt  string    `json:"password_salt"`
-	Permissions   int64     `json:"-"`
+	DisplayName     string    `json:"display_name"`
+	Email           string    `json:"-"`
+	Password        string    `json:"-"`
+	PasswordSalt    string    `json:"-"`
+	Permissions     int64     `json:"permissions"`
+	IconId          int64     `json:"-"`
+	Icon            Resource  `json:"icon"`
+	Notifications   int64     `json:"notifications"`
+	LastSeenAt      zero.Time `json:"last_seen_at"`
+	Confirmed_at    zero.Time `json:"confirmed_at"`
+	DeactivatedAt   zero.Time `json:"deactivated_at"`
+	DeletedAt       zero.Time `json:"deleted_at"`
+	AcceptedTermsAt zero.Time `json:"accepted_terms_at"`
 }

@@ -3,6 +3,7 @@ module git.sr.ht/~klahr/300sf
 go 1.18
 
 require (
+	github.com/badoux/checkmail v1.2.1
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/google/uuid v1.3.0
