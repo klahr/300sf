@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"time"
 
 	"git.sr.ht/~klahr/300sf/models"
 	"git.sr.ht/~klahr/300sf/utils"
@@ -22,11 +23,23 @@ func Gender(c *gin.Context) {
 		return
 	}
 
+	name := r.Name
+	name.Timestamp = time.Now()
+	name.Uuid = utils.GenerateUuid()
+	if err := models.DB.Create(&name).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
 	gender := models.Gender{
 		Model: models.Model{
-			Uuid: utils.GenerateUuid(),
+			Timestamp: time.Now(),
+			Uuid:      utils.GenerateUuid(),
 		},
-		Name: r.Name,
+		NameId: name.Id,
+		Name:   name,
 	}
 
 	if err := models.DB.Create(&gender).Error; err != nil {

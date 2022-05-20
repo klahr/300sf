@@ -1,8 +1,10 @@
 package models
 
+import "gopkg.in/guregu/null.v4/zero"
+
 type Translation struct {
 	Model
-	Sv string `json:"sv"`
-	En string `json:"en"`
-	La string `json:"la"`
+	Sv zero.String `json:"sv"`
+	En zero.String `json:"en"`
+	La zero.String `json:"la"`
 }
