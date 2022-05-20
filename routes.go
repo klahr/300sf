@@ -6,6 +6,9 @@ import (
 )
 
 func SetupRoutes(r *gin.Engine) {
+	// Authenticate
+	r.POST("/v1/auth", controllers.Auth)
+
 	// Users
 	r.POST("/v1/users", controllers.User)
 }
