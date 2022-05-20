@@ -23,6 +23,7 @@ func Auth(c *gin.Context) {
 
 	var r request
 	if err := c.ShouldBindJSON(&r); err != nil {
+
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
 			"message": err.Error(),
@@ -84,7 +85,7 @@ func Auth(c *gin.Context) {
 
 	authenticationResponse := auth.Authenticate(user.Uuid, user.Permissions, r.Permissions, config.AppConfig.AccessTokenLifetime, config.AppConfig.RefreshTokenLifetime, privateKey)
 
-	models.DB.Table(table.Users).Where("id=?", user.Id).UpdateColumn("last_seen", time.Now())
+	models.DB.Table(table.Users).Where("id=?", user.Id).UpdateColumn("last_seen_at", time.Now())
 
 	c.JSON(http.StatusOK, authenticationResponse)
 }
