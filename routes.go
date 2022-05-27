@@ -90,6 +90,8 @@ func SetupRoutes(r *gin.Engine) {
 
 	r.GET("/v1/test", apiKeyMiddleware)
 
+	r.POST("/v1/observation_lists", basicMiddleware, controllers.ObservationList)
+
 	setupPrivateRoutes(r)
 }
 
