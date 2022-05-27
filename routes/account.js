@@ -13,9 +13,24 @@ router.post('/signup', function(req, res) {
 	};
 
 	nm.request(nm.Method.POST, '/v1/users', {}, function(response) {
-		console.log(response);
+		res.render('pages/login', {message: "Du kan nu logga in med ditt nya konto!", error: ""});
 	}, function(error) {
-		console.log(error);
+		var message;
+		switch (error.code) {
+			case -20002:
+				message = "Ogiltig epost-adress!";
+				break;
+			case -20003:
+				message = "Ogiltigt namn!";
+				break;
+			case -2004:
+				message = "Ogiltigt lösenord!";
+				break;
+			default:
+				message = "Ett oväntat fel har uppstått!";
+				break;
+		}
+		res.render('pages/signup', {error: message});
 	}, JSON.stringify(request));
 });
 

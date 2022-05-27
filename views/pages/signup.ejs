@@ -5,10 +5,6 @@
 
 	<h2><%= __('sign-up') %></h2>
 
-	<% if (message) { %>
-		<p class="message">Kontot har skapats och du kan nu logga in!</p>
-	<% } %>
-
 	<% if (error) { %>
 		<% if (error === "duplicate_user") { %>
 			<p class="error">Epost-adressen är redan registrerad.</p>
