@@ -42,6 +42,10 @@ func basicMiddleware(c *gin.Context) {
 	requirePermission(c, auth.AuthPermissionBasic)
 }
 
+func editMiddleware(c *gin.Context) {
+	requirePermission(c, auth.AuthPermissionEdit)
+}
+
 func adminMiddleware(c *gin.Context) {
 	requirePermission(c, auth.AuthPermissionAdmin)
 }
@@ -74,7 +78,6 @@ func apiKeyMiddleware(c *gin.Context) {
 		return
 	}
 
-	print("ok")
 	c.Next()
 }
 
@@ -95,6 +98,6 @@ func setupPrivateRoutes(r *gin.Engine) {
 
 	// API Key
 	r.POST("/v1/p/api_key_tiers", adminMiddleware, controllers.ApiKeyTier)
-	r.POST("/v1/p/api_keys", basicMiddleware, controllers.ApiKey)
-	r.PUT("/v1/p/api_keys/:uuid/deactivate", basicMiddleware, controllers.ApiKeyDeactivate)
+	r.POST("/v1/p/api_keys", editMiddleware, controllers.ApiKey)
+	r.PUT("/v1/p/api_keys/:uuid/deactivate", editMiddleware, controllers.ApiKeyDeactivate)
 }

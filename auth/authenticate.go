@@ -39,6 +39,8 @@ func Authenticate(uuid string, availablePermissions int64, permissions string, a
 		switch permission {
 		case "basic":
 			add = AuthPermissionBasic
+		case "edit":
+			add = AuthPermissionEdit
 		case "admin":
 			add = AuthPermissionAdmin
 		}
