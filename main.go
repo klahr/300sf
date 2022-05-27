@@ -17,9 +17,6 @@ func main() {
 	log.Initialize()
 	log.Info(ctx, 0, "starting server")
 
-	var taskUpdater1s chan bool
-	var taskUpdater1m chan bool
-
 	sigc := make(chan os.Signal, 1)
 	signal.Notify(sigc,
 		syscall.SIGHUP,
@@ -27,8 +24,6 @@ func main() {
 		syscall.SIGTERM,
 		syscall.SIGQUIT)
 	go func() {
-		taskUpdater1s <- true
-		taskUpdater1m <- true
 		s := <-sigc
 		print(s.String())
 		log.Info(ctx, 0, s.String())

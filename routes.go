@@ -51,7 +51,7 @@ func SetupRoutes(r *gin.Engine) {
 	r.POST("/v1/users", controllers.User)
 
 	// API Key
-	r.POST("/v1/api_key", controllers.ApiKey)
+	r.POST("/v1/api_key", basicMiddleware, controllers.ApiKey)
 
 	setupPrivateRoutes(r)
 }

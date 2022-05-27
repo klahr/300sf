@@ -41,5 +41,11 @@ func ApiKeyTier(c *gin.Context) {
 		})
 		return
 	}
+	if err := models.DB.Create(&apiKeyTier).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
 	c.JSON(http.StatusOK, apiKeyTier)
 }

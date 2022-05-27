@@ -7,7 +7,7 @@ type ApiKey struct {
 	Name          string     `json:"name"`
 	Prefix        string     `json:"prefix"`
 	Hash          string     `json:"hash"`
-	ApiKeyTierId  int        `json:"-"`
+	ApiKeyTierId  int64      `json:"-"`
 	ApiKeyTier    ApiKeyTier `json:"api_key_tier"`
 	UserId        int64      `json:"-"`
 	User          User       `json:"user"`
