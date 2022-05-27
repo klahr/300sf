@@ -1,0 +1,30 @@
+<%- contentFor('body') %>
+
+<div class="base-frame">
+	<a href="/" class="logo" style="margin: 24px 0 64px 0;">300 Svenska Fåglar</a>
+
+	<h2><%= __('sign-up') %></h2>
+
+	<% if (message) { %>
+		<p class="message">Kontot har skapats och du kan nu logga in!</p>
+	<% } %>
+
+	<% if (error) { %>
+		<% if (error === "duplicate_user") { %>
+			<p class="error">Epost-adressen är redan registrerad.</p>
+		<% } else if (error === "invalid_password") { %>
+			<p class="error">Lösenordet måste vara minst 8 tecken.</p>
+		<% } else  { %>
+			<p class="error"><%= error %></p>
+		<% } %>
+	<% } %>
+
+	<form action="/signup" method="post">
+		<label for="email"><%= __('email') %></label>
+		<input id="email" type="email" name="email" style="margin-bottom: 16px;"></input>
+		<label for="password"><%= __('password') %></label>
+		<input id="password" type="password" name="password" style="margin-bottom: 16px;"></input>
+		<button type="submit" style="margin-top: 16px;"><%= __('sign-up') %></button>
+	</form>
+	<div class="horizontal-border"></div>
+</div>
