@@ -40,11 +40,10 @@ func ObservationList(c *gin.Context) {
 			Timestamp: time.Now(),
 			Uuid:      utils.GenerateUuid(),
 		},
-		Name:     r.Name,
-		From:     r.From,
-		Until:    r.Until,
-		UserId:   user.Id,
-		Favorite: false,
+		Name:   r.Name,
+		From:   r.From,
+		Until:  r.Until,
+		UserId: user.Id,
 	}
 
 	if err := models.DB.Create(&observationList).Error; err != nil {

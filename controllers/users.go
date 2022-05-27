@@ -36,11 +36,28 @@ func User(c *gin.Context) {
 		return
 	}
 
-	if utils.VerifyEmail(r.Email) == false {
+	if !utils.VerifyEmail(r.Email) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -20002,
 			"message": "invalid email",
 		})
+		return
+	}
+
+	if !utils.VerifyDisplayName(r.DisplayName) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -20003,
+			"message": "invalid display name",
+		})
+		return
+	}
+
+	if len(r.Password) < 4 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -20004,
+			"message": "invalid password",
+		})
+		return
 	}
 
 	p := utils.Password{}
