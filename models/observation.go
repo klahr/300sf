@@ -5,8 +5,8 @@ import (
 )
 
 type ObservationData struct {
-	BirdId    int64       `json:"-"`
-	Bird      Bird        `json:"bird"`
+	SpeciesId int64       `json:"-"`
+	Species   Species     `json:"species"`
 	Latitude  zero.Float  `json:"latitude"`
 	Longitude zero.Float  `json:"longitude"`
 	Count     zero.Int    `json:"count"`

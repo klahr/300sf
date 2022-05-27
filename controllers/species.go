@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Bird(c *gin.Context) {
+func Species(c *gin.Context) {
 	type request struct {
 		Name      models.Translation `json:"name"`
 		OrderUuid string             `json:"order_uuid"`
@@ -43,7 +43,7 @@ func Bird(c *gin.Context) {
 		return
 	}
 
-	bird := models.Bird{
+	species := models.Species{
 		Model: models.Model{
 			Timestamp: time.Now(),
 			Uuid:      utils.GenerateUuid(),
@@ -53,11 +53,11 @@ func Bird(c *gin.Context) {
 		OrderId: order.Id,
 	}
 
-	if err := models.DB.Create(&bird).Error; err != nil {
+	if err := models.DB.Create(&species).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
 		return
 	}
-	c.JSON(http.StatusOK, bird)
+	c.JSON(http.StatusOK, species)
 }
