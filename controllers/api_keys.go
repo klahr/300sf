@@ -7,6 +7,7 @@ import (
 	"git.sr.ht/~klahr/300sf/models"
 	"git.sr.ht/~klahr/300sf/utils"
 	"github.com/gin-gonic/gin"
+	"gopkg.in/guregu/null.v4/zero"
 )
 
 func ApiKey(c *gin.Context) {
@@ -74,4 +75,32 @@ func ApiKey(c *gin.Context) {
 		ApiKey: apiKey,
 		Key:    originalKey,
 	})
+}
+
+func ApiKeyDeactivate(c *gin.Context) {
+	var user models.User
+	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var apiKey models.ApiKey
+	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("user_id=?", user.Id).First(&apiKey).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "api key could not be found",
+		})
+		return
+	}
+
+	if err := models.DB.Model(&apiKey).Updates(models.ApiKey{
+		DeactivatedAt: zero.TimeFrom(time.Now()),
+	}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "could not deactivate api key",
+		})
+		return
+	}
+	c.JSON(http.StatusNoContent, nil)
 }
