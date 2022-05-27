@@ -8,7 +8,18 @@ var router = express.Router();
 module.exports = router;
 
 router.get('/', function(req, res) {
-	res.render('pages/landing-page');
+	const accessToken = req.cookies.sf300_access_token;
+	if (accessToken != null) {
+		res.render('pages/dashboard');
+		// postRequest('GET', '/v1/page/dashboard', {"X-Access-Token":accessToken}, function(response) {
+		// 	res.render('pages/dashboard', { data: response });
+		// }, function(error) {
+		// 	console.log(error.description);
+		// 	res.render('pages/home');
+		// });
+	} else {
+		res.render('pages/landing-page');
+	}
 });
 
 router.get('/login', function(req, res) {

@@ -34,3 +34,34 @@ router.post('/signup', function(req, res) {
 	}, JSON.stringify(request));
 });
 
+router.post('/login', function(req, res) {
+	const email = req.body.email;
+	const password = req.body.password;
+
+	const basicAuth = "Basic " + Buffer.from(email + ':' + password).toString('base64');
+	const keepLoggedIn = req.body.keep_logged_in == "on";
+
+	const requestData = {
+		"permissions": "basic,edit,admin"
+	};
+
+	nm.request('POST', '/v1/auth', {'Authorization': basicAuth}, function(response, statusCode) {
+		if (keepLoggedIn) {
+			const date = new Date();
+			res.cookie("sf300_access_token", response.access_token, {
+				expires: new Date(date.getFullYear(), date.getMonth() + 1, date.getDate())
+			});
+		} else {
+			res.cookie("sf300_access_token", response.access_token);
+		}
+		res.redirect('/');
+	}, function(error, statusCode) {
+		res.render('pages/login', {message: "", error: error.error});
+	}, JSON.stringify(requestData));
+});
+
+router.post('/logout', function(req, res) {
+	res.clearCookie("sf300_access_token");
+	res.redirect('/');
+});
+

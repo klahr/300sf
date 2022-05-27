@@ -17,17 +17,17 @@
 		<% } %>
 	<% } %>
 
-	<form action="/login" method="post">
-		<label for="username"><%= __('email') %></label>
-		<input id="username" type="text" name="username" style="margin-bottom: 16px;"></input>
-		<label for="password"><%= __('password') %></label>
+	<form action="/account/login" method="post">
+		<label for="email">Epost</label>
+		<input id="email" type="email" name="email" style="margin-bottom: 16px;"></input>
+		<label for="password">Lösenord</label>
 		<input id="password" type="password" name="password" style="margin-bottom: 16px;"></input>
-		<input id="keepsignedin" type="checkbox" name="keepsignedin"></input>
-		<label for="keepsignedin"><%= __('keep-signed-in-header') %></label>
-		<p class="details"><%= __('keep-signed-in-body') %></p>
+		<input id="keep_logged_in" type="checkbox" name="keep_logged_in"></input>
+		<label for="keep_logged_in">Håll mig inloggad</label>
+		<p class="details">Förbli inloggad 1 månad</p>
 		<button type="submit" style="margin-top: 16px;"><%= __('sign-in') %></button>
 	</form>
 	<div class="horizontal-border"></div>
-	<p><%= __('no-account-yet') %> <a href="/signup"><%= __('sign-up-here') %></a>.</p>
-	<a href="forgot-password"><%= __('forgot-your-password') %></a>
+	<p><%= __('no-account-yet') %> <a href="/signup">Skapa konto här</a>.</p>
+	<a href="forgot-password">Glömt ditt lösenord?</a>
 </div>
