@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://300sf.se/sitemap.xml
