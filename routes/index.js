@@ -2,6 +2,7 @@ var express = require('express');
 const fileUpload = require('express-fileupload');
 var http    = require('http');
 const { stringify } = require('querystring');
+var nm = require('./network_manager');
 
 var router = express.Router();
 module.exports = router;

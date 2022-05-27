@@ -22,8 +22,10 @@ app.use(i18n.init);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({ secret: 'keyboard cat', cookie: { maxAge: 60000 * 60 * 48 }}))
 
-var router = require('./app/routes');
-app.use('/', router);
+var index = require('./routes/index');
+var account = require('./routes/account');
+app.use('/', index);
+app.use('/account', account);
 
 app.use(express.static(__dirname + '/public'));
 
