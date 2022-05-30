@@ -49,3 +49,8 @@ h1.logo {
 	padding: 16px;
 	color: white;
 }
+
+h2 {
+	font-size: 18px;
+	font-weight: normal;
+}
