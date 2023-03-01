@@ -21,6 +21,7 @@ class Config:
         with open(filename) as file:
             stream = file.read()
             self.data = yaml.safe_load(stream)
+            file.close()
 
     def get(self, key):
         try:
@@ -54,9 +55,7 @@ def signup(display_name, password, email, accepted_terms):
         'email': str(email or ''),
         'accepted_terms': accepted_terms
     })
-    if r.status_code == 200:
-        print('success')
-    else:
+    if r.status_code != 200:
         response = r.json()
         code = response['code']
         if code == -20001:
@@ -82,16 +81,26 @@ def login(email, password):
         'Authorization': 'Basic ' + base64.b64encode((email + ':' + password).encode()).decode(),
     }, {})
     if r.status_code == 200:
-        print("success")
-        #print(r.json())
+        session_filename = os.path.join(os.path.expanduser('~'), '.config/300sf/session.json')
+        with open(session_filename, 'w') as file:
+            file.write(json.dumps(r.json(), indent=4))
+            file.close()
     else:
         response = r.json()
         err_print(f'err: {response["message"]}')
 
 
+def logout():
+    session_filename = os.path.join(os.path.expanduser('~'), '.config/300sf/session.json')
+    if os.path.exists(session_filename):
+        os.remove(session_filename)
+    else:
+        err_print('err: already logged out')
+
+
 def main():
     global config
-    config = Config('/home/klarre/.config/300sf/config.yml')
+    config = Config(os.path.join(os.path.expanduser('~'), '.config/300sf/config.yml'))
 
     parser = argparse.ArgumentParser(description='300sf arguments and options')
     subparsers = parser.add_subparsers(dest='subparser')
@@ -107,6 +116,8 @@ def main():
     login_parser = subparsers.add_parser('login', help='Log in.')
     login_parser.add_argument('--email', dest='email', help='Email address.')
     login_parser.add_argument('--password', dest='password', help='Log in password')
+
+    logout_parser = subparsers.add_parser('logout', help='Log out.')
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
