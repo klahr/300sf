@@ -1,5 +1,7 @@
 import argparse
+import base64
 import httpx
+import json
 import os
 import sys
 import yaml
@@ -35,14 +37,56 @@ def http_get(path):
     return r
 
 
+def http_post(path, headers, body):
+    global config
+    headers['X-Api-Key'] = str(config.get('api-key'))
+    r = httpx.post(f'{config.get("api-endpoint")}{path}', headers=headers, content=json.dumps(body))
+    return r
+
 def version():
     print(__version__)
 
 
-def signup(display_name, password, email):
-    r = http_get('/v1/test')
-    print(r.status_code)
-    print(r.text)
+def signup(display_name, password, email, accepted_terms):
+    r = http_post('/v1/users', {}, {
+        'password': str(password or ''),
+        'display_name': str(display_name or ''),
+        'email': str(email or ''),
+        'accepted_terms': accepted_terms
+    })
+    if r.status_code == 200:
+        print('success')
+    else:
+        response = r.json()
+        code = response['code']
+        if code == -20001:
+            err_print('err: terms must be accepted.')
+        elif code == -20002:
+            err_print('err: email is invalid or already taken.')
+        elif code == -20003:
+            err_print('err: display name is invalid.')
+        elif code == -20004:
+            err_print('err: password is invalid.')
+        else:
+            err_print(f'err: unknown error {response["message"]}')
+
+def login(email, password):
+    if email == None:
+        err_print('err: no email (--email) provided.')
+        return
+    elif password == None:
+        err_print('err: no password (--password) provided.')
+        return
+
+    r = http_post('/v1/auth', {
+        'Authorization': 'Basic ' + base64.b64encode((email + ':' + password).encode()).decode(),
+    }, {})
+    if r.status_code == 200:
+        print("success")
+        #print(r.json())
+    else:
+        response = r.json()
+        err_print(f'err: {response["message"]}')
 
 
 def main():
@@ -58,6 +102,11 @@ def main():
     signup_parser.add_argument('--display-name', dest='display_name', help='Public display name.')
     signup_parser.add_argument('--password', dest='password', help='Log in password.')
     signup_parser.add_argument('--email', dest='email', help='Email address.')
+    signup_parser.add_argument('--accepted-terms', action="store_true", dest='accepted_terms', help='Terms accepted.')
+
+    login_parser = subparsers.add_parser('login', help='Log in.')
+    login_parser.add_argument('--email', dest='email', help='Email address.')
+    login_parser.add_argument('--password', dest='password', help='Log in password')
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
