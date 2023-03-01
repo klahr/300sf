@@ -6,3 +6,5 @@ private_key.pem
 public_key.pem
 300sf
 docs/_build
+*.yml
+logs/

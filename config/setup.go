@@ -1,23 +1,28 @@
 package config
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"os"
+
+	"gopkg.in/yaml.v2"
 )
 
 type App struct {
-	DataSource           string `json:"data_source"`
-	Address              string `json:"address"`
-	AccessTokenLifetime  int64  `json:"access_token_lifetime"`
-	RefreshTokenLifetime int64  `json:"refresh_token_lifetime"`
-	PrivateKeyFilename   string `json:"private_key_filename"`
-	PublicKeyFilename    string `json:"public_key_filename"`
-	Domain               string `json:"domain"`
-	ResourcePath         string `json:"resource_path"`
-	RedisHost            string `json:"redis_host"`
-	LogLevel             string `json:"log_level"`
-	DataStorage          string `json:"data_storage"`
+	DataSource           string `yaml:"data-source"`
+	Address              string `yaml:"address"`
+	AccessTokenLifetime  int64  `yaml:"access-token-lifetime"`
+	RefreshTokenLifetime int64  `yaml:"refresh-token-lifetime"`
+	PrivateKeyFilename   string `yaml:"private-key-filename"`
+	PublicKeyFilename    string `yaml:"public-key-filename"`
+	Domain               string `yaml:"domain"`
+	ResourcePath         string `yaml:"resource-path"`
+	RedisHost            string `yaml:"redis-host"`
+	LogLevel             string `yaml:"log-level"`
+	DataStorage          string `yaml:"data-storage"`
+}
+
+func (c *App) Parse(data []byte) error {
+	return yaml.Unmarshal(data, c)
 }
 
 func (a *App) GetDataStorage() string {
@@ -41,7 +46,10 @@ func SetupAppConfig(filename string) error {
 	}
 
 	AppConfig = new(App)
-	return json.Unmarshal(raw, AppConfig)
+	if err := AppConfig.Parse(raw); err != nil {
+		return err
+	}
+	return nil
 }
 
 func GetLogLevelAsInt() int {
