@@ -53,13 +53,20 @@ func Auth(c *gin.Context) {
 		var password = string(usernameAndPassword[splitIndex+1:])
 
 		if err := models.DB.Where("email=?", email).First(&user).Error; err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_request"})
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    -30002,
+				"message": "invalid email or password",
+			})
+
 			return
 		}
 
 		p := utils.Password{}
 		if !p.IsMatching(password, user.Password, user.PasswordSalt) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_request"})
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    -30002,
+				"message": "invalid email or password",
+			})
 			return
 		}
 	} else if r.RefreshToken != "" {

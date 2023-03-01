@@ -10,15 +10,17 @@ type AuthenticationResponse struct {
 	TokenType    string `json:"token_type"`
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
+	ExpiresAt    int64  `json:"expires_at"`
 }
 
 func Authenticate(uuid string, availablePermissions int64, accessTokenLifetime int64, refreshTokenLifetime int64, privateKey []byte) *AuthenticationResponse {
 	now := time.Now().Unix()
+	expiresAt := now + accessTokenLifetime
 	accessTokenClaims := Token{
 		uuid,
 		0,
 		jwt.StandardClaims{
-			ExpiresAt: now + accessTokenLifetime,
+			ExpiresAt: expiresAt,
 			IssuedAt:  now,
 		},
 	}
@@ -52,6 +54,7 @@ func Authenticate(uuid string, availablePermissions int64, accessTokenLifetime i
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		TokenType:    "bearer",
+		ExpiresAt:    expiresAt,
 	}
 
 	return &authenticationResponseSuccess

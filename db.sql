@@ -34,18 +34,6 @@ CREATE TABLE `300sf`.`users` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
 
-CREATE TABLE `300sf`.`api_key_tiers` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `timestamp` DATETIME NOT NULL DEFAULT NOW(),
-  `uuid` VARCHAR(32) NOT NULL,
-  `name` VARCHAR(128) NOT NULL,
-  `soft_limit` INT NOT NULL,
-  `hard_limit` INT NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE INDEX `name_UNIQUE` (`name` ASC) VISIBLE,
-  UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) VISIBLE,
-  INDEX `index4` (`uuid` ASC) VISIBLE);
-
 CREATE TABLE `300sf`.`api_keys` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `timestamp` DATETIME NOT NULL DEFAULT NOW(),
@@ -54,20 +42,15 @@ CREATE TABLE `300sf`.`api_keys` (
   `prefix` VARCHAR(7) NOT NULL,
   `hash` VARCHAR(64) NOT NULL,
   `scopes` INT NOT NULL,
-  `api_key_tier_id` INT NOT NULL,
+  `soft_limit` INT NOT NULL,
+  `hard_limit` INT NOT NULL,
   `user_id` INT NOT NULL,
   `deactivated_at` DATETIME NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) VISIBLE,
   UNIQUE INDEX `prefix_UNIQUE` (`prefix` ASC) VISIBLE,
   INDEX `index4` (`uuid` ASC) VISIBLE,
-  INDEX `fk_api_keys_1_idx` (`api_key_tier_id` ASC) VISIBLE,
   INDEX `fk_api_keys_2_idx` (`user_id` ASC) VISIBLE,
-  CONSTRAINT `fk_api_keys_1`
-    FOREIGN KEY (`api_key_tier_id`)
-    REFERENCES `300sf`.`api_key_tiers` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
   CONSTRAINT `fk_api_keys_2`
     FOREIGN KEY (`user_id`)
     REFERENCES `300sf`.`users` (`id`)

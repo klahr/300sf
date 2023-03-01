@@ -42,10 +42,6 @@ func basicMiddleware(c *gin.Context) {
 	requirePermission(c, auth.AuthPermissionBasic)
 }
 
-func editMiddleware(c *gin.Context) {
-	requirePermission(c, auth.AuthPermissionEdit)
-}
-
 func adminMiddleware(c *gin.Context) {
 	requirePermission(c, auth.AuthPermissionAdmin)
 }
@@ -102,15 +98,14 @@ func SetupRoutes(r *gin.Engine) {
 
 	r.POST("/v1/observation_lists", basicMiddleware, controllers.ObservationList)
 
+	// Api keys
+	r.POST("/v1/api_keys", adminMiddleware, controllers.ApiKey)
+	r.PUT("/v1/api_keys/:prefix/revoke", basicMiddleware, controllers.ApiKeyRevoke)
+
 	setupPrivateRoutes(r)
 }
 
 func setupPrivateRoutes(r *gin.Engine) {
-	// API Key
-	r.POST("/v1/p/api_key_tiers", adminMiddleware, controllers.ApiKeyTier)
-	r.POST("/v1/p/api_keys", adminMiddleware, controllers.ApiKey)
-	r.PUT("/v1/p/api_keys/:uuid/deactivate", editMiddleware, controllers.ApiKeyDeactivate)
-
 	// Species
 	r.POST("/v1/p/species", adminMiddleware, controllers.Species)
 	r.POST("/v1/p/genders", adminMiddleware, controllers.Gender)

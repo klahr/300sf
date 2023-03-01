@@ -12,8 +12,7 @@ import (
 
 func ApiKey(c *gin.Context) {
 	type request struct {
-		Name           string `json:"name"`
-		ApiKeyTierUuid string `json:"api_key_tier_uuid"`
+		Name string `json:"name"`
 	}
 
 	var r request
@@ -34,15 +33,6 @@ func ApiKey(c *gin.Context) {
 		return
 	}
 
-	var apiKeyTier models.ApiKeyTier
-	if err := models.DB.Where("uuid=?", r.ApiKeyTierUuid).First(&apiKeyTier).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    -10001,
-			"message": err.Error(),
-		})
-		return
-	}
-
 	originalKey := utils.RandomSha256()
 	hashedOriginalKey := utils.ComputeHmac256(originalKey, "0b8879c940c5af8076712b19cc614f732086ad822d41572e39f93be31ef7f550")
 
@@ -52,11 +42,12 @@ func ApiKey(c *gin.Context) {
 			Timestamp: time.Now(),
 			Uuid:      utils.GenerateUuid(),
 		},
-		Name:         r.Name,
-		Prefix:       prefix,
-		Hash:         hashedOriginalKey,
-		UserId:       user.Id,
-		ApiKeyTierId: apiKeyTier.Id,
+		Name:      r.Name,
+		Prefix:    prefix,
+		Hash:      hashedOriginalKey,
+		UserId:    user.Id,
+		SoftLimit: 1000,
+		HardLimit: 1500,
 	}
 	print(hashedOriginalKey)
 
@@ -77,7 +68,7 @@ func ApiKey(c *gin.Context) {
 	})
 }
 
-func ApiKeyDeactivate(c *gin.Context) {
+func ApiKeyRevoke(c *gin.Context) {
 	var user models.User
 	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
