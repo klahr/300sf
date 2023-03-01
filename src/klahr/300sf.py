@@ -98,6 +98,16 @@ def logout():
         err_print('err: already logged out')
 
 
+# create is name and revoke is prefix.
+def apikey(create, revoke):
+    print(create)
+
+    if create:
+
+    elif revoke is not None:
+        pass
+
+
 def main():
     global config
     config = Config(os.path.join(os.path.expanduser('~'), '.config/300sf/config.yml'))
@@ -118,6 +128,11 @@ def main():
     login_parser.add_argument('--password', dest='password', help='Log in password')
 
     logout_parser = subparsers.add_parser('logout', help='Log out.')
+
+    api_key_parser = subparsers.add_parser('apikey', help='API key.')
+    api_key_parser.add_argument('--create', dest='create', help='Create new API key.')
+    api_key_parser.add_argument('--revoke', dest='revoke', help='Revoke API key.')
+#    api_key_parser.add_argument('--scopes', dest='scopes', help='Scopes')
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
