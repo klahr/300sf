@@ -17,13 +17,11 @@ import (
 
 func Auth(c *gin.Context) {
 	type request struct {
-		Permissions  string `json:"permissions"`
 		RefreshToken string `json:"refresh_token"`
 	}
 
 	var r request
 	if err := c.ShouldBindJSON(&r); err != nil {
-
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
 			"message": err.Error(),
@@ -37,7 +35,10 @@ func Auth(c *gin.Context) {
 	if authorization != "" {
 		fields := strings.Fields(authorization)
 		if len(fields) != 2 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_request"})
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    -30001,
+				"message": "invalid authorization header",
+			})
 			return
 		}
 
@@ -83,7 +84,7 @@ func Auth(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal_error"})
 	}
 
-	authenticationResponse := auth.Authenticate(user.Uuid, user.Permissions, r.Permissions, config.AppConfig.AccessTokenLifetime, config.AppConfig.RefreshTokenLifetime, privateKey)
+	authenticationResponse := auth.Authenticate(user.Uuid, user.Permissions, config.AppConfig.AccessTokenLifetime, config.AppConfig.RefreshTokenLifetime, privateKey)
 
 	models.DB.Table(table.Users).Where("id=?", user.Id).UpdateColumn("last_seen_at", time.Now())
 

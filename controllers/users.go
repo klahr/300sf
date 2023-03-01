@@ -28,7 +28,7 @@ func User(c *gin.Context) {
 		return
 	}
 
-	if r.AcceptedTerms == false {
+	if !r.AcceptedTerms {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -20001,
 			"message": "terms not accepted",

@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -13,7 +12,7 @@ type AuthenticationResponse struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
-func Authenticate(uuid string, availablePermissions int64, permissions string, accessTokenLifetime int64, refreshTokenLifetime int64, privateKey []byte) *AuthenticationResponse {
+func Authenticate(uuid string, availablePermissions int64, accessTokenLifetime int64, refreshTokenLifetime int64, privateKey []byte) *AuthenticationResponse {
 	now := time.Now().Unix()
 	accessTokenClaims := Token{
 		uuid,
@@ -32,28 +31,7 @@ func Authenticate(uuid string, availablePermissions int64, permissions string, a
 		},
 	}
 
-	requestedPermissions := strings.Split(permissions, ",")
-	for i := range requestedPermissions {
-		permission := requestedPermissions[i]
-		var add int64 = 0
-		switch permission {
-		case "basic":
-			add = AuthPermissionBasic
-		case "edit":
-			add = AuthPermissionEdit
-		case "admin":
-			add = AuthPermissionAdmin
-		}
-
-		if add > 0 {
-			if availablePermissions&add != 0 {
-				accessTokenClaims.Permissions |= add
-			} else {
-				//				Logger.Warning(ctx, "ApiAuthenticationV1.Auth", ErrorCheat, "user '"+*userDto.Uuid+"' is trying to request non-granted permission")
-			}
-		}
-	}
-
+	accessTokenClaims.Permissions = availablePermissions
 	refreshTokenClaims.Permissions = accessTokenClaims.Permissions
 
 	accessTokenWithClaims := jwt.NewWithClaims(jwt.SigningMethodRS256, accessTokenClaims)
@@ -62,10 +40,14 @@ func Authenticate(uuid string, availablePermissions int64, permissions string, a
 		return nil
 	}
 	accessToken, err := accessTokenWithClaims.SignedString(key)
-
+	if err != nil {
+		return nil
+	}
 	refreshTokenWithClaims := jwt.NewWithClaims(jwt.SigningMethodRS256, refreshTokenClaims)
 	refreshToken, err := refreshTokenWithClaims.SignedString(key)
-
+	if err != nil {
+		return nil
+	}
 	authenticationResponseSuccess := AuthenticationResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
