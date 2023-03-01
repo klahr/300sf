@@ -81,6 +81,15 @@ func apiKeyMiddleware(c *gin.Context) {
 	c.Next()
 }
 
+func Ping(c *gin.Context) {
+	if param, found := c.GetQuery("param"); found {
+		c.Writer.Write([]byte(param))
+	} else {
+		c.Writer.Write([]byte("pong"))
+	}
+	c.Writer.WriteHeader(http.StatusOK)
+}
+
 func SetupRoutes(r *gin.Engine) {
 	// Authenticate
 	r.POST("/v1/auth", controllers.Auth)
@@ -89,6 +98,7 @@ func SetupRoutes(r *gin.Engine) {
 	r.POST("/v1/users", controllers.User)
 
 	r.GET("/v1/test", apiKeyMiddleware)
+	r.GET("ping", Ping)
 
 	r.POST("/v1/observation_lists", basicMiddleware, controllers.ObservationList)
 
