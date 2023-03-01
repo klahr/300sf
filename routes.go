@@ -98,7 +98,7 @@ func SetupRoutes(r *gin.Engine) {
 func setupPrivateRoutes(r *gin.Engine) {
 	// API Key
 	r.POST("/v1/p/api_key_tiers", adminMiddleware, controllers.ApiKeyTier)
-	r.POST("/v1/p/api_keys", editMiddleware, controllers.ApiKey)
+	r.POST("/v1/p/api_keys", adminMiddleware, controllers.ApiKey)
 	r.PUT("/v1/p/api_keys/:uuid/deactivate", editMiddleware, controllers.ApiKeyDeactivate)
 
 	// Species

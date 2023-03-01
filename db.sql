@@ -53,6 +53,7 @@ CREATE TABLE `300sf`.`api_keys` (
   `name` VARCHAR(128) NOT NULL,
   `prefix` VARCHAR(7) NOT NULL,
   `hash` VARCHAR(64) NOT NULL,
+  `scopes` INT NOT NULL,
   `api_key_tier_id` INT NOT NULL,
   `user_id` INT NOT NULL,
   `deactivated_at` DATETIME NULL,
