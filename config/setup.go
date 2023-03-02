@@ -19,6 +19,8 @@ type App struct {
 	RedisHost            string `yaml:"redis-host"`
 	LogLevel             string `yaml:"log-level"`
 	DataStorage          string `yaml:"data-storage"`
+	DefaultApiSoftLimit  int64  `yaml:"default-api-soft-limit"`
+	DefaultApiHardLimit  int64  `yaml:"default-api-hard-limit"`
 }
 
 func (c *App) Parse(data []byte) error {

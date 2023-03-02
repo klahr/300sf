@@ -20,7 +20,7 @@ func requirePermission(c *gin.Context, requiredPermission int64) {
 	xAccessToken := c.Request.Header.Get("X-Access-Token")
 	accessToken := auth.Token{}
 	if err := auth.ParseToken(xAccessToken, &accessToken, publicKey); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error(), "code": 0})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error(), "code": 0})
 		c.Abort()
 		return
 	}
@@ -33,7 +33,7 @@ func requirePermission(c *gin.Context, requiredPermission int64) {
 		c.Set("permissions", accessToken.Permissions)
 		c.Next()
 	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "missing_permission", "code": 0})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "missing_permission", "code": 0})
 		c.Abort()
 	}
 }
@@ -68,7 +68,7 @@ func apiKeyMiddleware(c *gin.Context) {
 		return
 	}
 
-	if apiKey.DeactivatedAt.Valid {
+	if apiKey.RevokedAt.Valid {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid_api_key", "code": 3})
 		c.Abort()
 		return
@@ -99,7 +99,7 @@ func SetupRoutes(r *gin.Engine) {
 	r.POST("/v1/observation_lists", basicMiddleware, controllers.ObservationList)
 
 	// Api keys
-	r.POST("/v1/api_keys", adminMiddleware, controllers.ApiKey)
+	r.POST("/v1/api_keys", basicMiddleware, controllers.ApiKey)
 	r.PUT("/v1/api_keys/:prefix/revoke", basicMiddleware, controllers.ApiKeyRevoke)
 
 	setupPrivateRoutes(r)

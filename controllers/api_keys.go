@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"git.sr.ht/~klahr/300sf/config"
 	"git.sr.ht/~klahr/300sf/models"
 	"git.sr.ht/~klahr/300sf/utils"
 	"github.com/gin-gonic/gin"
@@ -46,8 +47,8 @@ func ApiKey(c *gin.Context) {
 		Prefix:    prefix,
 		Hash:      hashedOriginalKey,
 		UserId:    user.Id,
-		SoftLimit: 1000,
-		HardLimit: 1500,
+		SoftLimit: config.AppConfig.DefaultApiSoftLimit,
+		HardLimit: config.AppConfig.DefaultApiHardLimit,
 	}
 	print(hashedOriginalKey)
 
@@ -59,12 +60,10 @@ func ApiKey(c *gin.Context) {
 	}
 
 	type response struct {
-		ApiKey models.ApiKey `json:"api_key"`
-		Key    string        `json:"key"`
+		ApiKey string `json:"api-key"`
 	}
 	c.JSON(http.StatusOK, response{
-		ApiKey: apiKey,
-		Key:    originalKey,
+		ApiKey: prefix + "." + originalKey,
 	})
 }
 
@@ -86,10 +85,10 @@ func ApiKeyRevoke(c *gin.Context) {
 	}
 
 	if err := models.DB.Model(&apiKey).Updates(models.ApiKey{
-		DeactivatedAt: zero.TimeFrom(time.Now()),
+		RevokedAt: zero.TimeFrom(time.Now()),
 	}).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "could not deactivate api key",
+			"message": "could not revoke api key",
 		})
 		return
 	}
