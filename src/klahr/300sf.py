@@ -31,6 +31,15 @@ class Config:
             return None
 
 
+def get_access_token():
+    session_filename = os.path.join(os.path.expanduser('~'), '.config/300sf/session.json')
+    with open(session_filename, 'r') as file:
+        data = json.load(file)
+        return data['access_token']
+
+    return None
+
+
 def http_get(path):
     global config
     headers = {'X-Api-Key': str(config.get('api-key'))}
@@ -41,8 +50,12 @@ def http_get(path):
 def http_post(path, headers, body):
     global config
     headers['X-Api-Key'] = str(config.get('api-key'))
+    access_token = get_access_token()
+    if access_token is not None:
+        headers['X-Access-Token'] = access_token
     r = httpx.post(f'{config.get("api-endpoint")}{path}', headers=headers, content=json.dumps(body))
     return r
+
 
 def version():
     print(__version__)
@@ -68,6 +81,7 @@ def signup(display_name, password, email, accepted_terms):
             err_print('err: password is invalid.')
         else:
             err_print(f'err: unknown error {response["message"]}')
+
 
 def login(email, password):
     if email == None:
@@ -100,12 +114,18 @@ def logout():
 
 # create is name and revoke is prefix.
 def apikey(create, revoke):
-    print(create)
-
-    if create:
-
+    if create is not None:
+        r = http_post('/v1/api_keys', {}, {
+            'name': str(create or ''),
+        })
+        if r.status_code == 200:
+            print(r.json()['api-key'])
+        else:
+            err_print(f'err: {r.json()["message"]}')
     elif revoke is not None:
-        pass
+        r = http_post(f'/v1/api_keys/{revoke}/revoke', {}, {})
+        if r.status_code != 204:
+            err_print(f'err: {r.json()["message"]}')
 
 
 def main():
