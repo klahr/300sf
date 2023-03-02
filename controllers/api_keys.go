@@ -77,9 +77,9 @@ func ApiKeyRevoke(c *gin.Context) {
 	}
 
 	var apiKey models.ApiKey
-	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("user_id=?", user.Id).First(&apiKey).Error; err != nil {
+	if err := models.DB.Where("prefix=?", c.Param("prefix")).Where("user_id=?", user.Id).First(&apiKey).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "api key could not be found",
+			"message": err.Error(),
 		})
 		return
 	}

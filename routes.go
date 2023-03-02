@@ -100,7 +100,7 @@ func SetupRoutes(r *gin.Engine) {
 
 	// Api keys
 	r.POST("/v1/api_keys", basicMiddleware, controllers.ApiKey)
-	r.PUT("/v1/api_keys/:prefix/revoke", basicMiddleware, controllers.ApiKeyRevoke)
+	r.POST("/v1/api_keys/:prefix/revoke", basicMiddleware, controllers.ApiKeyRevoke)
 
 	setupPrivateRoutes(r)
 }
