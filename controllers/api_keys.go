@@ -6,6 +6,7 @@ import (
 
 	"git.sr.ht/~klahr/300sf/config"
 	"git.sr.ht/~klahr/300sf/models"
+	"git.sr.ht/~klahr/300sf/table"
 	"git.sr.ht/~klahr/300sf/utils"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/guregu/null.v4/zero"
@@ -50,7 +51,6 @@ func ApiKey(c *gin.Context) {
 		SoftLimit: config.AppConfig.DefaultApiSoftLimit,
 		HardLimit: config.AppConfig.DefaultApiHardLimit,
 	}
-	print(hashedOriginalKey)
 
 	if err := models.DB.Create(&apiKey).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -64,6 +64,32 @@ func ApiKey(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, response{
 		ApiKey: prefix + "." + originalKey,
+	})
+}
+
+func ApiKeyList(c *gin.Context) {
+	var user models.User
+	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var apiKeys []models.ApiKeyClean
+	if err := models.DB.Table(table.ApiKeys).Where("user_id=?", user.Id).Find(&apiKeys).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	type response struct {
+		ApiKeys []models.ApiKeyClean `json:"api_keys"`
+	}
+
+	c.JSON(http.StatusOK, response{
+		ApiKeys: apiKeys,
 	})
 }
 

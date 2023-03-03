@@ -62,7 +62,7 @@ func apiKeyMiddleware(c *gin.Context) {
 
 	var apiKey models.ApiKey
 	hashedOrignalKey := utils.ComputeHmac256(v[1], "0b8879c940c5af8076712b19cc614f732086ad822d41572e39f93be31ef7f550")
-	if err := models.DB.Where("hash=?", hashedOrignalKey).First(&apiKey).Error; err != nil {
+	if err := models.DB.Where("hash=?", hashedOrignalKey).Where("prefix=?", v[0]).First(&apiKey).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid_api_key", "code": 2})
 		c.Abort()
 		return
@@ -99,6 +99,7 @@ func SetupRoutes(r *gin.Engine) {
 	r.POST("/v1/observation_lists", basicMiddleware, controllers.ObservationList)
 
 	// Api keys
+	r.GET("/v1/api_keys/list", basicMiddleware, controllers.ApiKeyList)
 	r.POST("/v1/api_keys", basicMiddleware, controllers.ApiKey)
 	r.POST("/v1/api_keys/:prefix/revoke", basicMiddleware, controllers.ApiKeyRevoke)
 

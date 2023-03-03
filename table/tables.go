@@ -1,5 +1,6 @@
 package table
 
 const (
-	Users = "users"
+	Users   = "users"
+	ApiKeys = "api_keys"
 )
