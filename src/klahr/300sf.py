@@ -1,9 +1,13 @@
+#!/usr/bin/env python
+
 import argparse
 import base64
 import httpx
+import datetime
 import json
 import os
 import sys
+import tabulate
 import yaml
 
 __version__ = '0.1.0'
@@ -37,24 +41,29 @@ def get_access_token():
         data = json.load(file)
         return data['access_token']
 
-    return None
 
-
-def http_get(path):
+def http_get(path, headers):
     global config
-    headers = {'X-Api-Key': str(config.get('api-key'))}
-    r = httpx.get(f'{config.get("api-endpoint")}{path}', headers=headers)
-    return r
+    if config is not None:
+        headers['X-Api-Key'] = str(config.get('api-key'))
+        access_token = get_access_token()
+        if access_token is not None:
+            headers['X-Access-Token'] = access_token
+        r = httpx.get(f'{config.get("api-endpoint")}{path}', headers=headers)
+        return r
+    return None
 
 
 def http_post(path, headers, body):
     global config
-    headers['X-Api-Key'] = str(config.get('api-key'))
-    access_token = get_access_token()
-    if access_token is not None:
-        headers['X-Access-Token'] = access_token
-    r = httpx.post(f'{config.get("api-endpoint")}{path}', headers=headers, content=json.dumps(body))
-    return r
+    if config is not None:
+        headers['X-Api-Key'] = str(config.get('api-key'))
+        access_token = get_access_token()
+        if access_token is not None:
+            headers['X-Access-Token'] = access_token
+        r = httpx.post(f'{config.get("api-endpoint")}{path}', headers=headers, content=json.dumps(body))
+        return r
+    return None
 
 
 def version():
@@ -68,7 +77,7 @@ def signup(display_name, password, email, accepted_terms):
         'email': str(email or ''),
         'accepted_terms': accepted_terms
     })
-    if r.status_code != 200:
+    if r is not None and r.status_code != 200:
         response = r.json()
         code = response['code']
         if code == -20001:
@@ -94,14 +103,17 @@ def login(email, password):
     r = http_post('/v1/auth', {
         'Authorization': 'Basic ' + base64.b64encode((email + ':' + password).encode()).decode(),
     }, {})
-    if r.status_code == 200:
-        session_filename = os.path.join(os.path.expanduser('~'), '.config/300sf/session.json')
-        with open(session_filename, 'w') as file:
-            file.write(json.dumps(r.json(), indent=4))
-            file.close()
+    if r is not None:
+        if r.status_code == 200:
+            session_filename = os.path.join(os.path.expanduser('~'), '.config/300sf/session.json')
+            with open(session_filename, 'w') as file:
+                file.write(json.dumps(r.json(), indent=4))
+                file.close()
+        else:
+            response = r.json()
+            err_print(f'err: {response["message"]}')
     else:
-        response = r.json()
-        err_print(f'err: {response["message"]}')
+        err_print('err: internal error')
 
 
 def logout():
@@ -118,14 +130,42 @@ def apikey(create, revoke):
         r = http_post('/v1/api_keys', {}, {
             'name': str(create or ''),
         })
-        if r.status_code == 200:
-            print(r.json()['api-key'])
+        if r is not None:
+            if r.status_code == 200:
+                print(r.json()['api-key'])
+            else:
+                err_print(f'err: {r.json()["message"]}')
         else:
-            err_print(f'err: {r.json()["message"]}')
+            err_print('err: internal error')
     elif revoke is not None:
         r = http_post(f'/v1/api_keys/{revoke}/revoke', {}, {})
-        if r.status_code != 204:
-            err_print(f'err: {r.json()["message"]}')
+        if r is not None:
+            if r.status_code != 204:
+                err_print(f'err: {r.json()["message"]}')
+        else:
+            err_print('err: internal error')
+    else:
+        r = http_get('/v1/api_keys/list', {})
+        if r is not None:
+            if r.status_code == 200:
+                data = r.json()
+                t = []
+                for api_key in data['api_keys']:
+                    revoked_at = datetime.datetime.fromisoformat(api_key['revoked_at'].replace('Z', '+00:00'))
+                    api_key_revoked_at = ''
+                    if revoked_at.year > 1:
+                        api_key_revoked_at = revoked_at.isoformat()
+                    t.append([api_key['name'], api_key['prefix'], api_key['scopes'], api_key['soft_limit'], api_key['hard_limit'], api_key_revoked_at])
+                print(tabulate.tabulate(t, headers=['name', 'prefix', 'scopes', 'soft limit', 'hard limit', 'revoked at'], tablefmt='plain'))
+            else:
+                err_print(f'err: {r.json()["message"]}')
+
+
+def test():
+    r = http_get('/v1/test', {})
+    if r is not None:
+        print(r.status_code)
+        print(r.json())
 
 
 def main():
@@ -141,13 +181,15 @@ def main():
     signup_parser.add_argument('--display-name', dest='display_name', help='Public display name.')
     signup_parser.add_argument('--password', dest='password', help='Log in password.')
     signup_parser.add_argument('--email', dest='email', help='Email address.')
-    signup_parser.add_argument('--accepted-terms', action="store_true", dest='accepted_terms', help='Terms accepted.')
+    signup_parser.add_argument('--accepted-terms', action='store_true', dest='accepted_terms', help='Terms accepted.')
 
     login_parser = subparsers.add_parser('login', help='Log in.')
     login_parser.add_argument('--email', dest='email', help='Email address.')
     login_parser.add_argument('--password', dest='password', help='Log in password')
 
-    logout_parser = subparsers.add_parser('logout', help='Log out.')
+    subparsers.add_parser('logout', help='Log out.')
+
+    subparsers.add_parser('test')
 
     api_key_parser = subparsers.add_parser('apikey', help='API key.')
     api_key_parser.add_argument('--create', dest='create', help='Create new API key.')
