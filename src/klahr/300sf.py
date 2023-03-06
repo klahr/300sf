@@ -37,9 +37,11 @@ class Config:
 
 def get_access_token():
     session_filename = os.path.join(os.path.expanduser('~'), '.config/300sf/session.json')
-    with open(session_filename, 'r') as file:
-        data = json.load(file)
-        return data['access_token']
+    if os.path.exists(session_filename):
+        with open(session_filename, 'r') as file:
+            data = json.load(file)
+            return data['access_token']
+    return None
 
 
 def http_get(path, headers):
