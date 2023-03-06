@@ -1,9 +1,6 @@
 package models
 
-import (
-	"gopkg.in/guregu/null.v4/zero"
-)
-
+/*
 type ObservationData struct {
 	SpeciesId int64       `json:"-"`
 	Species   Species     `json:"species"`
@@ -25,3 +22,4 @@ type Observation struct {
 	Until             zero.Time `json:"until"`
 	ObservationData
 }
+*/

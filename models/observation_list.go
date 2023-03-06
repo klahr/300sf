@@ -11,5 +11,4 @@ type ObservationList struct {
 	User   User      `json:"user"`
 	From   zero.Time `json:"from"`
 	Until  zero.Time `json:"until"`
-	//	Favorite bool      `json:"favorite"`
 }
