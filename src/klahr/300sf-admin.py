@@ -70,9 +70,9 @@ def version():
     print(__version__)
 
 
-def gender(insert):
+def named_record(insert, endpoint):
     if insert is not None:
-        r = http_post('/v1/p/genders', {}, {
+        r = http_post(endpoint, {}, {
             'name': {
                 'en': insert
             }
@@ -82,7 +82,7 @@ def gender(insert):
             code = response['code']
             err_print(f'err: {response["message"]}')
     else:
-        r = http_get('/v1/p/genders/list', {})
+        r = http_get(f'{endpoint}/list', {})
         if r is not None and r.status_code != 200:
             response = r.json()
             code = response['code']
@@ -90,9 +90,19 @@ def gender(insert):
         else:
             data = r.json()
             t = []
-            for gender in data['genders']:
+            for gender in data['result']:
                 t.append([gender['uuid'], gender['name']['en'], gender['name']['sv'], gender['name']['la']])
             print(tabulate.tabulate(t, headers=['uuid', 'en', 'sv', 'la'], tablefmt='plain'))
+
+
+def gender(insert):
+    named_record(insert, '/v1/p/genders')
+    return
+
+
+def order(insert):
+    named_record(insert, '/v1/p/orders')
+    return
 
 
 def translation(update, en, la, sv):
@@ -129,6 +139,9 @@ def main():
 
     gender_parser = subparsers.add_parser('gender', help='Gender.')
     gender_parser.add_argument('--insert', dest='insert', help='Add gender.')
+
+    order_parser = subparsers.add_parser('order', help='Order.')
+    order_parser.add_argument('--insert', dest='insert', help='Add order.')
 
     translation_parser = subparsers.add_parser('translation', help='Translation.')
     translation_parser.add_argument('--update', dest='update', help='Update translation uuid.')
