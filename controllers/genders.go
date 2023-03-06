@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"git.sr.ht/~klahr/300sf/models"
+	"git.sr.ht/~klahr/300sf/table"
 	"git.sr.ht/~klahr/300sf/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -49,4 +50,22 @@ func Gender(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gender)
+}
+
+func GenderList(c *gin.Context) {
+	var genders []models.Gender
+	if err := models.DB.Table(table.Genders).Preload("Name").Find(&genders).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	type response struct {
+		Genders []models.Gender `json:"genders"`
+	}
+
+	c.JSON(http.StatusOK, response{
+		Genders: genders,
+	})
 }

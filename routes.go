@@ -110,5 +110,8 @@ func setupPrivateRoutes(r *gin.Engine) {
 	// Species
 	r.POST("/v1/p/species", adminMiddleware, controllers.Species)
 	r.POST("/v1/p/genders", adminMiddleware, controllers.Gender)
+	r.GET("/v1/p/genders/list", adminMiddleware, controllers.GenderList)
 	r.POST("/v1/p/orders", adminMiddleware, controllers.Order)
+	r.GET("/v1/p/translations/list", adminMiddleware, controllers.TranslationList)
+	r.POST("/v1/p/translations/update", adminMiddleware, controllers.TranslationUpdate)
 }
