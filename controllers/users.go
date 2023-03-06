@@ -10,7 +10,7 @@ import (
 	"gopkg.in/guregu/null.v4/zero"
 )
 
-func User(c *gin.Context) {
+func Users(c *gin.Context) {
 	type request struct {
 		Email         string `json:"email"`
 		DisplayName   string `json:"display_name"`

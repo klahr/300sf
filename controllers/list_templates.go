@@ -7,14 +7,12 @@ import (
 	"git.sr.ht/~klahr/300sf/models"
 	"git.sr.ht/~klahr/300sf/utils"
 	"github.com/gin-gonic/gin"
-	"gopkg.in/guregu/null.v4/zero"
 )
 
-func ObservationList(c *gin.Context) {
+func ListTemplates(c *gin.Context) {
 	type request struct {
-		Name  string    `json:"name"`
-		From  zero.Time `json:"from"`
-		Until zero.Time `json:"until"`
+		Name       models.Translation `json:"name"`
+		Visibility int64              `json:"visibility"`
 	}
 
 	var r request
@@ -35,22 +33,15 @@ func ObservationList(c *gin.Context) {
 		return
 	}
 
-	observationList := models.ObservationList{
+	listTemplate := models.ListTemplate{
 		Model: models.Model{
 			Timestamp: time.Now(),
 			Uuid:      utils.GenerateUuid(),
 		},
-		Name:   r.Name,
-		From:   r.From,
-		Until:  r.Until,
-		UserId: user.Id,
+		UserId:     user.Id,
+		Visibility: r.Visibility,
+		Name:       r.Name,
 	}
 
-	if err := models.DB.Create(&observationList).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err.Error(),
-		})
-		return
-	}
-	c.JSON(http.StatusOK, observationList)
+	c.JSON(http.StatusOK, listTemplate)
 }

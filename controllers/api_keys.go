@@ -12,7 +12,7 @@ import (
 	"gopkg.in/guregu/null.v4/zero"
 )
 
-func ApiKey(c *gin.Context) {
+func ApiKeys(c *gin.Context) {
 	type request struct {
 		Name string `json:"name"`
 	}
@@ -67,7 +67,7 @@ func ApiKey(c *gin.Context) {
 	})
 }
 
-func ApiKeyList(c *gin.Context) {
+func ApiKeysList(c *gin.Context) {
 	var user models.User
 	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -93,7 +93,7 @@ func ApiKeyList(c *gin.Context) {
 	})
 }
 
-func ApiKeyRevoke(c *gin.Context) {
+func ApiKeysRevoke(c *gin.Context) {
 	var user models.User
 	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
