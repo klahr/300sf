@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
-import base64
 import httpx
-import datetime
 import json
 import os
 import sys
@@ -79,13 +77,11 @@ def named_record(insert, endpoint):
         })
         if r is not None and r.status_code != 200:
             response = r.json()
-            code = response['code']
             err_print(f'err: {response["message"]}')
     else:
         r = http_get(f'{endpoint}/list', {})
         if r is not None and r.status_code != 200:
             response = r.json()
-            code = response['code']
             err_print(f'err: {response["message"]}')
         else:
             data = r.json()
@@ -105,6 +101,16 @@ def order(insert):
     return
 
 
+def activity(insert):
+    named_record(insert, '/v1/p/activities')
+    return
+
+
+def method(insert):
+    named_record(insert, '/v1/p/methods')
+    return
+
+
 def translation(update, en, la, sv):
     if update is not None:
         r = http_post('/v1/p/translations/update', {}, {
@@ -115,7 +121,6 @@ def translation(update, en, la, sv):
         });
         if r is not None and r.status_code != 204:
             response = r.json()
-            code = response['code']
             err_print(f'err: {response["message"]}')
     else:
         r = http_get('/v1/p/translations/list', {})
@@ -142,6 +147,12 @@ def main():
 
     order_parser = subparsers.add_parser('order', help='Order.')
     order_parser.add_argument('--insert', dest='insert', help='Add order.')
+
+    activity_parser = subparsers.add_parser('activity', help='Activity.')
+    activity_parser.add_argument('--insert', dest='insert', help='Add activity.')
+
+    method_parser = subparsers.add_parser('method', help='Method.')
+    method_parser.add_argument('--insert', dest='insert', help='Add method.')
 
     translation_parser = subparsers.add_parser('translation', help='Translation.')
     translation_parser.add_argument('--update', dest='update', help='Update translation uuid.')
