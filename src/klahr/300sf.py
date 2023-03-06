@@ -129,6 +129,9 @@ def logout():
         err_print('err: already logged out')
 
 
+def template_list():
+    pass
+
 # create is name and revoke is prefix.
 def apikey(create, revoke):
     if create is not None:
@@ -166,6 +169,10 @@ def apikey(create, revoke):
                 err_print(f'err: {r.json()["message"]}')
 
 
+def listtemplate(create, visibility):
+    pass
+
+
 def test():
     r = http_get('/v1/test', {})
     if r is not None:
@@ -200,6 +207,10 @@ def main():
     api_key_parser.add_argument('--create', dest='create', help='Create new API key.')
     api_key_parser.add_argument('--revoke', dest='revoke', help='Revoke API key.')
 #    api_key_parser.add_argument('--scopes', dest='scopes', help='Scopes')
+
+    list_template_parser = subparsers.add_parser('listtemplate', help='List template.')
+    list_template_parser.add_argument('--create', dest='create', help='Create new list template.')
+    list_template_parser.add_argument('--visibility', dest='visibility', help='Visibility.')
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
