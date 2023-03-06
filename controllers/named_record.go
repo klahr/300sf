@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Order(c *gin.Context) {
+func CreateNamedRecord[T models.Order | models.Gender | models.Activity | models.Method](c *gin.Context) {
 	type request struct {
 		Name models.Translation `json:"name"`
 	}
@@ -33,7 +33,7 @@ func Order(c *gin.Context) {
 		return
 	}
 
-	order := models.Order{
+	t := T{
 		Model: models.Model{
 			Timestamp: time.Now(),
 			Uuid:      utils.GenerateUuid(),
@@ -42,11 +42,29 @@ func Order(c *gin.Context) {
 		Name:   name,
 	}
 
-	if err := models.DB.Create(&order).Error; err != nil {
+	if err := models.DB.Create(&t).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
 		return
 	}
-	c.JSON(http.StatusOK, order)
+	c.JSON(http.StatusOK, t)
+}
+
+func NamedRecordList[T models.Order | models.Gender | models.Activity | models.Method](c *gin.Context) {
+	var result []T
+	if err := models.DB.Preload("Name").Find(&result).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	type response struct {
+		Result []T `json:"result"`
+	}
+
+	c.JSON(http.StatusOK, response{
+		Result: result,
+	})
 }

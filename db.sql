@@ -116,3 +116,33 @@ CREATE TABLE `300sf`.`orders` (
     REFERENCES `300sf`.`translations` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
+
+CREATE TABLE `300sf`.`activities` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `timestamp` DATETIME NOT NULL,
+  `uuid` VARCHAR(32) NOT NULL,
+  `name_id` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) VISIBLE,
+  INDEX `index3` (`uuid` ASC) VISIBLE,
+  INDEX `fk_activities_1_idx` (`name_id` ASC) VISIBLE,
+  CONSTRAINT `fk_activities_1`
+    FOREIGN KEY (`name_id`)
+    REFERENCES `300sf`.`translations` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+CREATE TABLE `300sf`.`methods` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `timestamp` DATETIME NOT NULL,
+  `uuid` VARCHAR(32) NOT NULL,
+  `name_id` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) VISIBLE,
+  INDEX `index3` (`uuid` ASC) VISIBLE,
+  INDEX `fk_methods_1_idx` (`name_id` ASC) VISIBLE,
+  CONSTRAINT `fk_methods_1`
+    FOREIGN KEY (`name_id`)
+    REFERENCES `300sf`.`translations` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
