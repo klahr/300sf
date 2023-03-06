@@ -96,7 +96,10 @@ def login(email, password):
     if email == None:
         err_print('err: no email (--email) provided.')
         return
-    elif password == None:
+    if password == None and not sys.stdin.isatty():
+        password = sys.stdin.read()
+
+    if password == None:
         err_print('err: no password (--password) provided.')
         return
 
@@ -178,13 +181,13 @@ def main():
     subparsers.add_parser('version')
 
     signup_parser = subparsers.add_parser('signup', help='Sign up for a new account.')
-    signup_parser.add_argument('--display-name', dest='display_name', help='Public display name.')
-    signup_parser.add_argument('--password', dest='password', help='Log in password.')
-    signup_parser.add_argument('--email', dest='email', help='Email address.')
-    signup_parser.add_argument('--accepted-terms', action='store_true', dest='accepted_terms', help='Terms accepted.')
+    signup_parser.add_argument('--display-name', dest='display_name', required=True, help='Public display name.')
+    signup_parser.add_argument('--password', dest='password', required=True, help='Log in password.')
+    signup_parser.add_argument('--email', dest='email', required=True, help='Email address.')
+    signup_parser.add_argument('--accepted-terms', action='store_true', dest='accepted_terms', required=True, help='Terms accepted.')
 
     login_parser = subparsers.add_parser('login', help='Log in.')
-    login_parser.add_argument('--email', dest='email', help='Email address.')
+    login_parser.add_argument('--email', dest='email', required=True, help='Email address.')
     login_parser.add_argument('--password', dest='password', help='Log in password')
 
     subparsers.add_parser('logout', help='Log out.')
