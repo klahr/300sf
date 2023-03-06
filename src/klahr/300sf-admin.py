@@ -111,6 +111,30 @@ def method(insert):
     return
 
 
+def species(insert, order):
+    if insert is not None:
+        r = http_post('/v1/p/species', {}, {
+            'name': {
+                'en': insert
+            },
+            'order_uuid': order
+        })
+        if r is not None and r.status_code != 200:
+            response = r.json()
+            err_print(f'err: {response["message"]}')
+    else:
+        r = http_get('/v1/p/species/list', {})
+        if r is not None and r.status_code != 200:
+            response = r.json()
+            err_print(f'err: {response["message"]}')
+        else:
+            data = r.json()
+            t = []
+            for gender in data['result']:
+                t.append([gender['uuid'], gender['name']['en'], gender['name']['sv'], gender['name']['la']])
+            print(tabulate.tabulate(t, headers=['uuid', 'en', 'sv', 'la'], tablefmt='plain'))
+
+
 def translation(update, en, la, sv):
     if update is not None:
         r = http_post('/v1/p/translations/update', {}, {
@@ -153,6 +177,10 @@ def main():
 
     method_parser = subparsers.add_parser('method', help='Method.')
     method_parser.add_argument('--insert', dest='insert', help='Add method.')
+
+    species_parser = subparsers.add_parser('species', help='Species.')
+    species_parser.add_argument('--insert', dest='insert', help='Add species.')
+    species_parser.add_argument('--order', dest='order', help='Order')
 
     translation_parser = subparsers.add_parser('translation', help='Translation.')
     translation_parser.add_argument('--update', dest='update', help='Update translation uuid.')
