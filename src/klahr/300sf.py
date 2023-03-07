@@ -166,14 +166,19 @@ def apikey(create, revoke):
                 err_print(f'err: {r.json()["message"]}')
 
 
-def listtemplate(create, visibility, add, remove, species, archive):
+def template(create, visibility, add, remove, archive, rename):
     global config
     if create is not None:
+        v = 0
+        if visibility == 'hidden':
+            v = 1
+        elif visibility == 'public':
+            v = 2
         r = http_post('/v1/list_templates', {}, {
             'name': {
                 config.get('language'): create
             },
-            'visibility': int(visibility)
+            'visibility': v
         })
         if r is not None:
             if r.status_code == 200:
@@ -182,18 +187,29 @@ def listtemplate(create, visibility, add, remove, species, archive):
                 err_print(f'err: {r.json()["message"]}')
         else:
             err_print('err: internal error')
-    elif add is not None and species is not None:
-        r = http_post(f'/v1/list_templates/{add}/add_species', {}, {
-            'species_uuid': species
+    elif add is not None:
+        r = http_post(f'/v1/list_templates/{add[0]}/add_species', {}, {
+            'species_uuid': add[1]
         })
         if r is not None:
             if r.status_code != 204:
                 err_print(f'err: {r.json()["message"]}')
         else:
             err_print('err: internal error')
-    elif remove is not None and species is not None:
-        r = http_post(f'/v1/list_templates/{remove}remove_species', {}, {
-            'species_uuid': species
+    elif remove is not None:
+        r = http_post(f'/v1/list_templates/{remove[0]}/remove_species', {}, {
+            'species_uuid': remove[1]
+        })
+        if r is not None:
+            if r.status_code != 204:
+                err_print(f'err: {r.json()["message"]}')
+        else:
+            err_print('err: internal error')
+    elif rename is not None:
+        r = http_post(f'/v1/list_templates/{rename[0]}/rename', {}, {
+            'name': {
+                config.get('language'): rename[1]
+            }
         })
         if r is not None:
             if r.status_code != 204:
@@ -282,13 +298,15 @@ def main():
     api_key_parser.add_argument('--revoke', dest='revoke', help='Revoke API key.')
 #    api_key_parser.add_argument('--scopes', dest='scopes', help='Scopes')
 
-    list_template_parser = subparsers.add_parser('listtemplate', help='List template.')
-    list_template_parser.add_argument('--create', dest='create', help='Create new list template.')
-    list_template_parser.add_argument('--visibility', dest='visibility', choices=[0, 1, 2], help='Visibility.')
-    list_template_parser.add_argument('--add', dest='add', help='Add species.')
-    list_template_parser.add_argument('--remove', dest='remove', help='Remove species.')
-    list_template_parser.add_argument('--species', dest='species', help='Species UUID.')
-    list_template_parser.add_argument('--archive', dest='archive', help='Archive.')
+    template_parser = subparsers.add_parser('template', help='Template.')
+    template_parser.add_argument('--create', dest='create', help='Create new template.')
+    template_parser.add_argument('--visibility', dest='visibility', choices=['private', 'hidden', 'public'], help='Visibility.')
+    template_parser.add_argument('--add', dest='add', nargs=2, help='Add species.')
+    template_parser.add_argument('--remove', dest='remove', nargs=2, help='Remove species.')
+    template_parser.add_argument('--archive', dest='archive', help='Archive.')
+    template_parser.add_argument('--rename', dest='rename', nargs=2, help='Rename.')
+
+    ## TODO: Add list_parser.
 
     species_parser = subparsers.add_parser('species', help='Species.')
     species_parser.add_argument('--insert', dest='insert', help='Add species.')
@@ -304,3 +322,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
