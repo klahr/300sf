@@ -11,7 +11,6 @@ import tabulate
 import yaml
 
 __version__ = '0.1.0'
-config = None
 
 
 def err_print(*args, **kwargs):
@@ -21,7 +20,7 @@ def err_print(*args, **kwargs):
 class Config:
     data = {}
 
-    def __init__(self, filename):
+    def open(self, filename):
         with open(filename) as file:
             stream = file.read()
             self.data = yaml.safe_load(stream)
@@ -35,6 +34,9 @@ class Config:
             return None
 
 
+config = Config()
+
+
 def get_access_token():
     session_filename = os.path.join(os.path.expanduser('~'), '.config/300sf/session.json')
     if os.path.exists(session_filename):
@@ -46,26 +48,24 @@ def get_access_token():
 
 def http_get(path, headers):
     global config
-    if config is not None:
-        headers['X-Api-Key'] = str(config.get('api-key'))
-        access_token = get_access_token()
-        if access_token is not None:
-            headers['X-Access-Token'] = access_token
-        r = httpx.get(f'{config.get("api-endpoint")}{path}', headers=headers)
-        return r
-    return None
+ 
+    headers['X-Api-Key'] = str(config.get('api-key'))
+    access_token = get_access_token()
+    if access_token is not None:
+        headers['X-Access-Token'] = access_token
+    r = httpx.get(f'{config.get("api-endpoint")}{path}', headers=headers)
+    return r
 
 
 def http_post(path, headers, body):
     global config
-    if config is not None:
-        headers['X-Api-Key'] = str(config.get('api-key'))
-        access_token = get_access_token()
-        if access_token is not None:
-            headers['X-Access-Token'] = access_token
-        r = httpx.post(f'{config.get("api-endpoint")}{path}', headers=headers, content=json.dumps(body))
-        return r
-    return None
+
+    headers['X-Api-Key'] = str(config.get('api-key'))
+    access_token = get_access_token()
+    if access_token is not None:
+        headers['X-Access-Token'] = access_token
+    r = httpx.post(f'{config.get("api-endpoint")}{path}', headers=headers, content=json.dumps(body))
+    return r
 
 
 def version():
@@ -129,9 +129,6 @@ def logout():
         err_print('err: already logged out')
 
 
-def template_list():
-    pass
-
 # create is name and revoke is prefix.
 def apikey(create, revoke):
     if create is not None:
@@ -170,19 +167,62 @@ def apikey(create, revoke):
 
 
 def listtemplate(create, visibility):
-    pass
+    global config
+    if create is not None:
+        r = http_post('/v1/list_templates', {}, {
+            'name': {
+                config.get('language'): create
+            },
+            'visibility': int(visibility)
+        })
+        if r is not None:
+            if r.status_code == 200:
+                print(r.json()['uuid'])
+            else:
+                err_print(f'err: {r.json()["message"]}')
+        else:
+            err_print('err: internal error')
+    else:
+        r = http_get('/v1/list_templates/list', {})
+        if r is not None:
+            if r.status_code == 200:
+                data = r.json()
+                t = []
+                for template in data['result']:
+                    t.append([template['uuid'], template['name'][config.get('language')], template['visibility']])
+                print(tabulate.tabulate(t, headers=['uuid', f'name ({config.get("language")})', 'visibility'], tablefmt='plain'))
 
 
-def test():
-    r = http_get('/v1/test', {})
-    if r is not None:
-        print(r.status_code)
-        print(r.json())
+def species(insert, order):
+    global config
+
+    if insert is not None:
+        r = http_post('/v1/p/species', {}, {
+            'name': {
+                config.get('language'): insert
+            },
+            'order_uuid': order
+        })
+        if r is not None and r.status_code != 200:
+            response = r.json()
+            err_print(f'err: {response["message"]}')
+    else:
+        r = http_get('/v1/species/list', {})
+        if r is not None and r.status_code != 200:
+            response = r.json()
+            err_print(f'err: {response["message"]}')
+        else:
+            data = r.json()
+            print(data)
+            t = []
+            #for gender in data['result']:
+            #    t.append([gender['uuid'], gender['name']['en'], gender['name']['sv'], gender['name']['la']])
+            #print(tabulate.tabulate(t, headers=['uuid', 'en', 'sv', 'la'], tablefmt='plain'))
 
 
 def main():
     global config
-    config = Config(os.path.join(os.path.expanduser('~'), '.config/300sf/config.yml'))
+    config.open(os.path.join(os.path.expanduser('~'), '.config/300sf/config.yml'))
 
     parser = argparse.ArgumentParser(description='300sf arguments and options')
     subparsers = parser.add_subparsers(dest='subparser')
@@ -210,7 +250,11 @@ def main():
 
     list_template_parser = subparsers.add_parser('listtemplate', help='List template.')
     list_template_parser.add_argument('--create', dest='create', help='Create new list template.')
-    list_template_parser.add_argument('--visibility', dest='visibility', help='Visibility.')
+    list_template_parser.add_argument('--visibility', dest='visibility', choices=[0, 1, 2], help='Visibility.')
+
+    species_parser = subparsers.add_parser('species', help='Species.')
+    species_parser.add_argument('--insert', dest='insert', help='Add species.')
+    species_parser.add_argument('--order', dest='order', help='Order.')
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
