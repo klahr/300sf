@@ -270,6 +270,67 @@ def species(insert, order):
             print(tabulate.tabulate(t, headers=['uuid', f'name({config.get("language")})', f'order({config.get("language")})'], tablefmt='plain'))
 
 
+def list(create, template, visibility, timespan, archive, rename):
+    global config
+    if create is not None:
+        v = 0
+        if visibility == 'hidden':
+            v = 1
+        elif visibility == 'public':
+            v = 2
+        r = http_post('/v1/lists', {}, {
+            'name': {
+                config.get('language'): create
+            },
+            'template': template,
+            'visibility': v
+        })
+        if r is not None:
+            if r.status_code == 200:
+                print(r.json()['uuid'])
+            else:
+                err_print(f'err: {r.json()["message"]}')
+        else:
+            err_print('err: internal error')
+    elif rename is not None:
+        r = http_post(f'/v1/lists/{rename[0]}/rename', {}, {
+            'name': {
+                config.get('language'): rename[1]
+            }
+        })
+        if r is not None:
+            if r.status_code != 204:
+                err_print(f'err: {r.json()["message"]}')
+        else:
+            err_print('err: internal error')
+    elif archive:
+        r = http_post(f'/v1/lists/{archive}/archive', {}, {})
+        if r is not None:
+            if r.status_code != 204:
+                err_print(f'err: {r.json()["message"]}')
+        else:
+            err_print('err: internal error')
+    else:
+        r = http_get('/v1/lists/list', {})
+        if r is not None:
+            if r.status_code == 200:
+                data = r.json()
+                t = []
+                for list in data['result']:
+                    visibility = 'public'
+                    if list['visibility'] == 0:
+                        visibility = 'private'
+                    elif list['visibility'] == 1:
+                        visibility = 'hidden'
+                    species = 0
+                    if list['species'] is not None:
+                        species = len(list['species'])
+                    t.append([list['uuid'], list['name'][config.get('language')], visibility, species])
+                print(tabulate.tabulate(t, headers=['uuid', f'name({config.get("language")})', 'visibility', 'species'], tablefmt='plain'))
+            else:
+                err_print(f'err: {r.json()["message"]}')
+
+
 def main():
     global config
     config.open(os.path.join(os.path.expanduser('~'), '.config/300sf/config.yml'))
@@ -307,6 +368,13 @@ def main():
     template_parser.add_argument('--rename', dest='rename', nargs=2, help='Rename.')
 
     ## TODO: Add list_parser.
+    list_parser = subparsers.add_parser('list', help='List.')
+    list_parser.add_argument('--create', dest='create', help='Create new list.')
+    list_parser.add_argument('--template', dest='template', help='Base list on this template.')
+    list_parser.add_argument('--visibility', dest='visibility', choices=['private', 'hidden', 'public'], help='Visibility.')
+    list_parser.add_argument('--timespan', dest='timespan', nargs=2, help='Timespan when the list can be reported to.')
+    list_parser.add_argument('--archive', dest='archive', help='Archive.')
+    list_parser.add_argument('--rename', dest='rename', nargs=2, help='Rename.')
 
     species_parser = subparsers.add_parser('species', help='Species.')
     species_parser.add_argument('--insert', dest='insert', help='Add species.')
