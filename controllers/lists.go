@@ -163,5 +163,65 @@ func ListsRename(c *gin.Context) {
 }
 
 func ListsTimespan(c *gin.Context) {
-	c.JSON(http.StatusTeapot, nil)
+	type request struct {
+		From  zero.String `json:"from"`
+		Until zero.String `json:"until"`
+	}
+
+	var r request
+	if err := c.ShouldBindJSON(&r); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var user models.User
+	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var list models.List
+	if err := models.DB.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).First(&list).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if r.From.Valid {
+		var err error
+		if r.From.String == "*" {
+			err = models.DB.Table(table.Lists).Where("id=?", list.Id).UpdateColumn("from", nil).Error
+		} else {
+			err = models.DB.Table(table.Lists).Where("id=?", list.Id).UpdateColumn("from", r.From.String).Error
+		}
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": err.Error(),
+			})
+			return
+		}
+	}
+
+	if r.Until.Valid {
+		var err error
+		if r.Until.String == "*" {
+			err = models.DB.Table(table.Lists).Where("id=?", list.Id).UpdateColumn("until", nil).Error
+		} else {
+			err = models.DB.Table(table.Lists).Where("id=?", list.Id).UpdateColumn("until", r.Until.String).Error
+		}
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": err.Error(),
+			})
+			return
+		}
+	}
+
+	c.JSON(http.StatusNoContent, nil)
 }
