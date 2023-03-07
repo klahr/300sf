@@ -166,7 +166,7 @@ def apikey(create, revoke):
                 err_print(f'err: {r.json()["message"]}')
 
 
-def listtemplate(create, visibility, add, remove, species):
+def listtemplate(create, visibility, add, remove, species, archive):
     global config
     if create is not None:
         r = http_post('/v1/list_templates', {}, {
@@ -197,6 +197,13 @@ def listtemplate(create, visibility, add, remove, species):
             'uuid': remove,
             'species_uuid': species
         })
+        if r is not None:
+            if r.status_code != 204:
+                err_print(f'err: {r.json()["message"]}')
+        else:
+            err_print('err: internal error')
+    elif archive:
+        r = http_post(f'/v1/list_templates/{archive}/archive', {}, {})
         if r is not None:
             if r.status_code != 204:
                 err_print(f'err: {r.json()["message"]}')
@@ -283,6 +290,7 @@ def main():
     list_template_parser.add_argument('--add', dest='add', help='Add species.')
     list_template_parser.add_argument('--remove', dest='remove', help='Remove species.')
     list_template_parser.add_argument('--species', dest='species', help='Species UUID.')
+    list_template_parser.add_argument('--archive', dest='archive', help='Archive.')
 
     species_parser = subparsers.add_parser('species', help='Species.')
     species_parser.add_argument('--insert', dest='insert', help='Add species.')
