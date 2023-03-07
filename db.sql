@@ -192,3 +192,23 @@ CREATE TABLE `300sf`.`list_templates` (
     REFERENCES `300sf`.`translations` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
+
+CREATE TABLE `300sf`.`list_template_species` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `timestamp` DATETIME NOT NULL,
+  `list_template_id` INT NOT NULL,
+  `species_id` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `fk_list_template_species_1_idx` (`list_template_id` ASC) VISIBLE,
+  INDEX `fk_list_template_species_2_idx` (`species_id` ASC) VISIBLE,
+  UNIQUE INDEX `index4` (`list_template_id` ASC, `species_id` ASC) VISIBLE,
+  CONSTRAINT `fk_list_template_species_1`
+    FOREIGN KEY (`list_template_id`)
+    REFERENCES `300sf`.`list_templates` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_list_template_species_2`
+    FOREIGN KEY (`species_id`)
+    REFERENCES `300sf`.`species` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);

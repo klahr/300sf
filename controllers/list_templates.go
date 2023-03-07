@@ -78,3 +78,40 @@ func ListTemplatesList(c *gin.Context) {
 		Result: listTemplates,
 	})
 }
+
+func ListTemplatesAddSpecies(c *gin.Context) {
+	type request struct {
+		Uuid        string `json:"uuid"`
+		SpeciesUuid string `json:"species_uuid"`
+	}
+
+	var r request
+	if err := c.ShouldBindJSON(&r); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var listTemplate models.ListTemplate
+	if err := models.DB.Where("uuid=?", r.Uuid).Find(&listTemplate).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var species models.Species
+	if err := models.DB.Where("uuid=?", r.Uuid).Find(&species).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	//if err := models.DB.
+}
+
+func ListTemplatesRemoveSpecies(c *gin.Context) {
+
+}
