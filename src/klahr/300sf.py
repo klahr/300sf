@@ -310,6 +310,16 @@ def list(create, template, visibility, timespan, archive, rename):
                 err_print(f'err: {r.json()["message"]}')
         else:
             err_print('err: internal error')
+    elif timespan is not None:
+        r = http_post(f'/v1/lists/{timespan[0]}/timespan', {}, {
+            'from': timespan[1],
+            'until': timespan[2]
+        })
+        if r is not None:
+            if r.status_code != 204:
+                err_print(f'err: {r.json()["message"]}')
+        else:
+            err_print('err: internal error')
     else:
         r = http_get('/v1/lists/list', {})
         if r is not None:
@@ -372,7 +382,7 @@ def main():
     list_parser.add_argument('--create', dest='create', help='Create new list.')
     list_parser.add_argument('--template', dest='template', help='Base list on this template.')
     list_parser.add_argument('--visibility', dest='visibility', choices=['private', 'hidden', 'public'], help='Visibility.')
-    list_parser.add_argument('--timespan', dest='timespan', nargs=2, help='Timespan when the list can be reported to.')
+    list_parser.add_argument('--timespan', dest='timespan', nargs=3, help='Timespan when the list can be reported to.')
     list_parser.add_argument('--archive', dest='archive', help='Archive.')
     list_parser.add_argument('--rename', dest='rename', nargs=2, help='Rename.')
 
