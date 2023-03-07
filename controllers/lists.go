@@ -8,12 +8,14 @@ import (
 	"git.sr.ht/~klahr/300sf/table"
 	"git.sr.ht/~klahr/300sf/utils"
 	"github.com/gin-gonic/gin"
+	"gopkg.in/guregu/null.v4/zero"
 )
 
 func Lists(c *gin.Context) {
 	type request struct {
 		Name       models.Translation `json:"name"`
 		Visibility int64              `json:"visibility"`
+		Template   zero.String        `json:"template"`
 	}
 
 	var r request
@@ -54,6 +56,17 @@ func Lists(c *gin.Context) {
 		Name:       name,
 	}
 
+	if r.Template.Valid {
+		var template models.ListTemplate
+		if err := models.DB.Where("uuid=?", r.Template).Preload("Species").First(&template).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": err.Error(),
+			})
+			return
+		}
+		list.Species = template.Species
+	}
+
 	if err := models.DB.Create(&list).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
@@ -74,7 +87,7 @@ func ListsList(c *gin.Context) {
 	}
 
 	var lists []models.List
-	if err := models.DB.Table(table.Lists).Where("user_id=?", user.Id).Where("archived IS NULL").Preload("Name").Find(&lists).Error; err != nil {
+	if err := models.DB.Table(table.Lists).Where("user_id=?", user.Id).Where("archived IS NULL").Preload("Name").Preload("Species.Name").Find(&lists).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})

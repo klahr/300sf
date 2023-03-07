@@ -14,4 +14,6 @@ type List struct {
 	Until      zero.Time   `json:"until"`
 	Visibility int64       `json:"visibility"`
 	Archived   zero.Time   `json:"archived"`
+	Species    []Species   `json:"species" gorm:"many2many:list_species"`
+	// Reports    []Report    `json:"reports" gorm:"many2many:list_reports"`
 }

@@ -195,7 +195,6 @@ CREATE TABLE `300sf`.`list_templates` (
 
 CREATE TABLE `300sf`.`list_template_species` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `timestamp` DATETIME NOT NULL,
   `list_template_id` INT NOT NULL,
   `species_id` INT NOT NULL,
   PRIMARY KEY (`id`),
@@ -240,3 +239,21 @@ CREATE TABLE `300sf`.`lists` (
 ALTER TABLE `300sf`.`lists` 
   ADD COLUMN `from` DATETIME NULL AFTER `archived`,
   ADD COLUMN `until` DATETIME NULL AFTER `from`;
+
+CREATE TABLE `300sf`.`list_species` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `list_id` INT NOT NULL,
+  `species_id` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `index2` (`list_id` ASC, `species_id` ASC) VISIBLE,
+  INDEX `fk_list_species_2_idx` (`species_id` ASC) VISIBLE,
+  CONSTRAINT `fk_list_species_1`
+    FOREIGN KEY (`list_id`)
+    REFERENCES `300sf`.`lists` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_list_species_2`
+    FOREIGN KEY (`species_id`)
+    REFERENCES `300sf`.`species` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
