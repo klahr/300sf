@@ -100,7 +100,6 @@ func ListTemplatesList(c *gin.Context) {
 
 func ListTemplatesAddSpecies(c *gin.Context) {
 	type request struct {
-		Uuid        string `json:"uuid"`
 		SpeciesUuid string `json:"species_uuid"`
 	}
 
@@ -122,7 +121,7 @@ func ListTemplatesAddSpecies(c *gin.Context) {
 	}
 
 	var listTemplate models.ListTemplate
-	if err := models.DB.Where("user_id=?", user.Id).Where("uuid=?", r.Uuid).Preload("Species").Find(&listTemplate).Error; err != nil {
+	if err := models.DB.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).Preload("Species").Find(&listTemplate).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -137,13 +136,7 @@ func ListTemplatesAddSpecies(c *gin.Context) {
 		return
 	}
 
-	type list_template_species struct {
-		Timestamp      time.Time `json:"timestamp"`
-		ListTemplateId int64     `json:"list_template_id"`
-		SpeciesId      int64     `json:"species_id"`
-	}
-
-	if err := models.DB.Table("list_template_species").Create(&list_template_species{
+	if err := models.DB.Table("list_template_species").Create(&models.ListTemplateSpecies{
 		Timestamp:      time.Now(),
 		ListTemplateId: listTemplate.Id,
 		SpeciesId:      species.Id,
@@ -153,12 +146,12 @@ func ListTemplatesAddSpecies(c *gin.Context) {
 		})
 		return
 	}
+
 	c.JSON(http.StatusNoContent, nil)
 }
 
 func ListTemplatesRemoveSpecies(c *gin.Context) {
 	type request struct {
-		Uuid        string `json:"uuid"`
 		SpeciesUuid string `json:"species_uuid"`
 	}
 
@@ -180,7 +173,7 @@ func ListTemplatesRemoveSpecies(c *gin.Context) {
 	}
 
 	var listTemplate models.ListTemplate
-	if err := models.DB.Where("user_id=?", user.Id).Where("uuid=?", r.Uuid).Preload("Species").Find(&listTemplate).Error; err != nil {
+	if err := models.DB.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).Preload("Species").Find(&listTemplate).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -195,17 +188,12 @@ func ListTemplatesRemoveSpecies(c *gin.Context) {
 		return
 	}
 
-	type list_template_species struct {
-		Timestamp      time.Time `json:"timestamp"`
-		ListTemplateId int64     `json:"list_template_id"`
-		SpeciesId      int64     `json:"species_id"`
-	}
-
-	if err := models.DB.Where("list_template_id=?", listTemplate.Id).Where("species_id=?", species.Id).Delete(&list_template_species{}).Error; err != nil {
+	if err := models.DB.Where("list_template_id=?", listTemplate.Id).Where("species_id=?", species.Id).Delete(&models.ListTemplateSpecies{}).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
 		return
 	}
+
 	c.JSON(http.StatusNoContent, nil)
 }
