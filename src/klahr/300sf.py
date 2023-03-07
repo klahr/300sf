@@ -215,9 +215,9 @@ def species(insert, order):
             data = r.json()
             print(data)
             t = []
-            #for gender in data['result']:
-            #    t.append([gender['uuid'], gender['name']['en'], gender['name']['sv'], gender['name']['la']])
-            #print(tabulate.tabulate(t, headers=['uuid', 'en', 'sv', 'la'], tablefmt='plain'))
+            for species in data['result']:
+                t.append([species['uuid'], species['name'][config.get('language')], species['order']['name'][config.get('language')]])
+            print(tabulate.tabulate(t, headers=['uuid', f'name ({config.get("language")})', f'order ({config.get("language")})'], tablefmt='plain'))
 
 
 def main():
