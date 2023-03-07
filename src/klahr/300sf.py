@@ -166,7 +166,7 @@ def apikey(create, revoke):
                 err_print(f'err: {r.json()["message"]}')
 
 
-def listtemplate(create, visibility):
+def listtemplate(create, visibility, add, remove, species):
     global config
     if create is not None:
         r = http_post('/v1/list_templates', {}, {
@@ -182,6 +182,26 @@ def listtemplate(create, visibility):
                 err_print(f'err: {r.json()["message"]}')
         else:
             err_print('err: internal error')
+    elif add is not None and species is not None:
+        r = http_post('/v1/list_templates/add_species', {}, {
+            'uuid': add,
+            'species_uuid': species
+        })
+        if r is not None:
+            if r.status_code != 204:
+                err_print(f'err: {r.json()["message"]}')
+        else:
+            err_print('err: internal error')
+    elif remove is not None and species is not None:
+        r = http_post('/v1/list_templates/remove_species', {}, {
+            'uuid': remove,
+            'species_uuid': species
+        })
+        if r is not None:
+            if r.status_code != 204:
+                err_print(f'err: {r.json()["message"]}')
+        else:
+            err_print('err: internal error')
     else:
         r = http_get('/v1/list_templates/list', {})
         if r is not None:
@@ -189,8 +209,18 @@ def listtemplate(create, visibility):
                 data = r.json()
                 t = []
                 for template in data['result']:
-                    t.append([template['uuid'], template['name'][config.get('language')], template['visibility']])
-                print(tabulate.tabulate(t, headers=['uuid', f'name ({config.get("language")})', 'visibility'], tablefmt='plain'))
+                    visibility = 'public'
+                    if template['visibility'] == 0:
+                        visibility = 'private'
+                    elif template['visibility'] == 1:
+                        visibility = 'hidden'
+                    species = 0
+                    if template['species'] is not None:
+                        species = len(template['species'])
+                    t.append([template['uuid'], template['name'][config.get('language')], visibility, species])
+                print(tabulate.tabulate(t, headers=['uuid', f'name({config.get("language")})', 'visibility', 'species'], tablefmt='plain'))
+            else:
+                err_print(f'err: {r.json()["message"]}')
 
 
 def species(insert, order):
@@ -213,11 +243,10 @@ def species(insert, order):
             err_print(f'err: {response["message"]}')
         else:
             data = r.json()
-            print(data)
             t = []
             for species in data['result']:
                 t.append([species['uuid'], species['name'][config.get('language')], species['order']['name'][config.get('language')]])
-            print(tabulate.tabulate(t, headers=['uuid', f'name ({config.get("language")})', f'order ({config.get("language")})'], tablefmt='plain'))
+            print(tabulate.tabulate(t, headers=['uuid', f'name({config.get("language")})', f'order({config.get("language")})'], tablefmt='plain'))
 
 
 def main():
@@ -251,6 +280,9 @@ def main():
     list_template_parser = subparsers.add_parser('listtemplate', help='List template.')
     list_template_parser.add_argument('--create', dest='create', help='Create new list template.')
     list_template_parser.add_argument('--visibility', dest='visibility', choices=[0, 1, 2], help='Visibility.')
+    list_template_parser.add_argument('--add', dest='add', help='Add species.')
+    list_template_parser.add_argument('--remove', dest='remove', help='Remove species.')
+    list_template_parser.add_argument('--species', dest='species', help='Species UUID.')
 
     species_parser = subparsers.add_parser('species', help='Species.')
     species_parser.add_argument('--insert', dest='insert', help='Add species.')
