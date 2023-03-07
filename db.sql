@@ -168,3 +168,27 @@ CREATE TABLE `300sf`.`species` (
     REFERENCES `300sf`.`orders` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
+
+CREATE TABLE `300sf`.`list_templates` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `timestamp` DATETIME NOT NULL,
+  `uuid` VARCHAR(32) NOT NULL,
+  `name_id` INT NOT NULL,
+  `user_id` INT NOT NULL,
+  `visibility` INT NOT NULL,
+  `archived` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) VISIBLE,
+  INDEX `index3` (`uuid` ASC) VISIBLE,
+  INDEX `fk_list_templates_1_idx` (`user_id` ASC) VISIBLE,
+  INDEX `fk_list_templates_2_idx` (`name_id` ASC) VISIBLE,
+  CONSTRAINT `fk_list_templates_1`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `300sf`.`users` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_list_templates_2`
+    FOREIGN KEY (`name_id`)
+    REFERENCES `300sf`.`translations` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);

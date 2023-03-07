@@ -61,3 +61,22 @@ func Species(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, species)
 }
+
+func SpeciesList(c *gin.Context) {
+	var result []models.Species
+
+	if err := models.DB.Preload("Name").Preload("Order.Name").Find(&result).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	type response struct {
+		Result []models.Species `json:"result"`
+	}
+
+	c.JSON(http.StatusOK, response{
+		Result: result,
+	})
+}

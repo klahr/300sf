@@ -100,13 +100,16 @@ func SetupRoutes(r *gin.Engine) {
 	r.POST("/v1/lists", basicMiddleware, controllers.Lists)
 
 	// List templates
-	//	r.GET("/v1/list_templates/list", basicMiddleware, controllers.ListTemplatesList)
+	r.GET("/v1/list_templates/list", basicMiddleware, controllers.ListTemplatesList)
 	r.POST("/v1/list_templates", basicMiddleware, controllers.ListTemplates)
 
 	// Api keys
 	r.GET("/v1/api_keys/list", basicMiddleware, controllers.ApiKeysList)
 	r.POST("/v1/api_keys", basicMiddleware, controllers.ApiKeys)
 	r.POST("/v1/api_keys/:prefix/revoke", basicMiddleware, controllers.ApiKeysRevoke)
+
+	// Species
+	r.GET("/v1/species/list", basicMiddleware, controllers.SpeciesList)
 
 	setupPrivateRoutes(r)
 }

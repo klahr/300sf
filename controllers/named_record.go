@@ -53,6 +53,7 @@ func CreateNamedRecord[T models.Order | models.Gender | models.Activity | models
 
 func NamedRecordList[T models.Order | models.Gender | models.Activity | models.Method](c *gin.Context) {
 	var result []T
+
 	if err := models.DB.Preload("Name").Find(&result).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
