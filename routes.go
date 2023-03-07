@@ -97,7 +97,11 @@ func SetupRoutes(r *gin.Engine) {
 	r.GET("ping", Ping)
 
 	// Lists
+	r.GET("/v1/lists/list", basicMiddleware, controllers.ListsList)
 	r.POST("/v1/lists", basicMiddleware, controllers.Lists)
+	r.POST("/v1/lists/:uuid/archive", basicMiddleware, controllers.ListsArchive)
+	r.POST("/v1/lists/:uuid/rename", basicMiddleware, controllers.ListsRename)
+	r.POST("/v1/lists/:uuid/timespan", basicMiddleware, controllers.ListsTimespan)
 
 	// List templates
 	r.GET("/v1/list_templates/list", basicMiddleware, controllers.ListTemplatesList)
