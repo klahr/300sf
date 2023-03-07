@@ -183,8 +183,7 @@ def listtemplate(create, visibility, add, remove, species, archive):
         else:
             err_print('err: internal error')
     elif add is not None and species is not None:
-        r = http_post('/v1/list_templates/add_species', {}, {
-            'uuid': add,
+        r = http_post(f'/v1/list_templates/{add}/add_species', {}, {
             'species_uuid': species
         })
         if r is not None:
@@ -193,8 +192,7 @@ def listtemplate(create, visibility, add, remove, species, archive):
         else:
             err_print('err: internal error')
     elif remove is not None and species is not None:
-        r = http_post('/v1/list_templates/remove_species', {}, {
-            'uuid': remove,
+        r = http_post(f'/v1/list_templates/{remove}remove_species', {}, {
             'species_uuid': species
         })
         if r is not None:
