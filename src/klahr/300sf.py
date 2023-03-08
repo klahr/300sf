@@ -341,15 +341,61 @@ def list(create, template, visibility, timespan, archive, rename):
                 err_print(f'err: {r.json()["message"]}')
 
 
-def reports(create, species):
+def reports(create, species, age, method, gender, activity, quantity, position, comment, lists, _from, until):
     if create:
-        r = http_post('/v1/reports', {}, {
-            'species_uuid': species 
-        })
+        report = {
+            'species_uuid': species,
+            'age_uuid': str(age or None),
+            'method_uuid': str(method or None),
+            'gender_uuid': str(gender or None),
+            'activity_uuid': str(activity or None),
+            'comment': str(comment or None),
+            'list_uuids': lists,
+            'from': str(_from or None),
+            'until': str(until or None)
+        }
+        if quantity is not None:
+            report['quantity'] = quantity
+        if position is not None:
+            report['latitude'] = position[0]
+            report['longitude'] = position[1]
+        print(report)
+        r = http_post('/v1/reports', {}, report)
         if r is not None:
             if r.status_code == 200:
                 data = r.json()
                 print(data)
+            else:
+                err_print(f'err: {r.json()["message"]}')
+    else:
+        r = http_get('/v1/reports/list', {})
+        if r is not None:
+            if r.status_code == 200:
+                data = r.json()
+                #print(data)
+                t = []
+                for list in data['result']:
+                    if list['gender'] is not None:
+                        gender = list['gender']['name'][config.get('language')]
+                    if list['age'] is not None:
+                        age = list['age']['name'][config.get('language')]
+                    if list['activity'] is not None:
+                        activity = list['activity']['name'][config.get('language')]
+                    if list['method'] is not None:
+                        method = list['method']['name'][config.get('language')]
+                    _from = datetime.datetime.fromisoformat(list['from'].replace('Z', '+00:00'))
+                    __from = ''
+                    if _from.year > 1:
+                        __from = _from.isoformat()
+                    _until = datetime.datetime.fromisoformat(list['until'].replace('Z', '+00:00'))
+                    __until = ''
+                    if _until.year > 1:
+                        __until = _until.isoformat()
+                    lists = []
+                    for l in list['lists']:
+                        lists.append(l['name'][config.get('language')])
+                    t.append([list['uuid'], list['quantity'], list['species']['name'][config.get('language')], __from, __until, list['latitude'], list['longitude'], gender, age, method, activity, list['comment'], lists])
+                print(tabulate.tabulate(t, headers=['uuid', 'quantity', f'species({config.get("language")})', 'from', 'until', 'latitude', 'longitude', f'gender({config.get("language")})', f'age({config.get("language")})', f'method({config.get("language")})', f'activity({config.get("language")})', 'comment', 'lists'], tablefmt='plain'))
             else:
                 err_print(f'err: {r.json()["message"]}')
 
@@ -406,6 +452,16 @@ def main():
     reports_parser = subparsers.add_parser('reports', help='Reports.')
     reports_parser.add_argument('--create', dest='create', action='store_true', help='Create new report.')
     reports_parser.add_argument('--species', dest='species', help='Species.')
+    reports_parser.add_argument('--age', dest='age', help='Age.')
+    reports_parser.add_argument('--method', dest='method', help='Method.')
+    reports_parser.add_argument('--gender', dest='gender', help='Gender.')
+    reports_parser.add_argument('--activity', dest='activity', help='Activity.')
+    reports_parser.add_argument('--quantity', dest='quantity', help='Quantity.')
+    reports_parser.add_argument('--position', dest='position', nargs=2, help='Position WGS84.')
+    reports_parser.add_argument('--comment', dest='comment', help='Comment.')
+    reports_parser.add_argument('--lists', dest='lists', nargs='*', help='Comment.')
+    reports_parser.add_argument('--from', dest='_from', help='From.')
+    reports_parser.add_argument('--until', dest='until', help='Until.')
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
