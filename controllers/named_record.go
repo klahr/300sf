@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func CreateNamedRecord[T models.Order | models.Gender | models.Activity | models.Method](c *gin.Context) {
+func CreateNamedRecord[T models.Age | models.Order | models.Gender | models.Activity | models.Method](c *gin.Context) {
 	type request struct {
 		Name models.Translation `json:"name"`
 	}
@@ -51,7 +51,7 @@ func CreateNamedRecord[T models.Order | models.Gender | models.Activity | models
 	c.JSON(http.StatusOK, t)
 }
 
-func NamedRecordList[T models.Order | models.Gender | models.Activity | models.Method](c *gin.Context) {
+func NamedRecordList[T models.Age | models.Order | models.Gender | models.Activity | models.Method](c *gin.Context) {
 	var result []T
 
 	if err := models.DB.Preload("Name").Find(&result).Error; err != nil {

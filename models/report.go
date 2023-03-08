@@ -4,8 +4,8 @@ import "gopkg.in/guregu/null.v4/zero"
 
 type Report struct {
 	Model
-	ListId     int64       `json:"-"`
-	List       List        `json:"list"`
+	UserId     int64       `json:"-"`
+	User       User        `json:"user"`
 	SpeciesId  int64       `json:"-"`
 	Species    Species     `json:"species"`
 	From       zero.Time   `json:"from"`
@@ -14,12 +14,13 @@ type Report struct {
 	Longitude  zero.Float  `json:"longitude"`
 	Quantity   zero.Int    `json:"quantity"`
 	AgeId      zero.Int    `json:"-"`
-	Age        Age         `json:"age"`
+	Age        *Age        `json:"age"`
 	ActivityId zero.Int    `json:"-"`
-	Activity   Activity    `json:"activity"`
+	Activity   *Activity   `json:"activity"`
 	GenderId   zero.Int    `json:"-"`
-	Gender     Gender      `json:"gender"`
+	Gender     *Gender     `json:"gender"`
 	MethodId   zero.Int    `json:"-"`
-	Method     Method      `json:"method"`
+	Method     *Method     `json:"method"`
 	Comment    zero.String `json:"comment"`
+	Lists      []List      `json:"lists" gorm:"many2many:list_reports"`
 }

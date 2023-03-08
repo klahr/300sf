@@ -147,6 +147,21 @@ CREATE TABLE `300sf`.`methods` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
 
+CREATE TABLE `300sf`.`ages` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `timestamp` DATETIME NOT NULL,
+  `uuid` VARCHAR(32) NOT NULL,
+  `name_id` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) VISIBLE,
+  INDEX `index3` (`uuid` ASC) VISIBLE,
+  INDEX `fk_ages_1_idx` (`name_id` ASC) VISIBLE,
+  CONSTRAINT `fk_ages_1`
+    FOREIGN KEY (`name_id`)
+    REFERENCES `300sf`.`translations` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
 CREATE TABLE `300sf`.`species` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `timestamp` DATETIME NOT NULL,
@@ -255,5 +270,78 @@ CREATE TABLE `300sf`.`list_species` (
   CONSTRAINT `fk_list_species_2`
     FOREIGN KEY (`species_id`)
     REFERENCES `300sf`.`species` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+CREATE TABLE `300sf`.`reports` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `timestamp` DATETIME NOT NULL,
+  `uuid` VARCHAR(32) NOT NULL,
+  `user_id` INT NOT NULL,
+  `species_id` INT NOT NULL,
+  `from` DATETIME NULL,
+  `until` DATETIME NULL,
+  `latitude` FLOAT NULL,
+  `longitude` FLOAT NULL,
+  `quantity` INT NULL,
+  `age_id` INT NULL,
+  `activity_id` INT NULL,
+  `gender_id` INT NULL,
+  `method_id` INT NULL,
+  `comment` TEXT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) VISIBLE,
+  INDEX `index3` (`uuid` ASC) VISIBLE,
+  INDEX `fk_reports_1_idx` (`activity_id` ASC) VISIBLE,
+  INDEX `fk_reports_2_idx` (`user_id` ASC) VISIBLE,
+  INDEX `fk_reports_3_idx` (`species_id` ASC) VISIBLE,
+  INDEX `fk_reports_4_idx` (`gender_id` ASC) VISIBLE,
+  INDEX `fk_reports_5_idx` (`method_id` ASC) VISIBLE,
+  CONSTRAINT `fk_reports_1`
+    FOREIGN KEY (`activity_id`)
+    REFERENCES `300sf`.`activities` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_reports_2`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `300sf`.`users` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_reports_3`
+    FOREIGN KEY (`species_id`)
+    REFERENCES `300sf`.`species` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_reports_4`
+    FOREIGN KEY (`gender_id`)
+    REFERENCES `300sf`.`genders` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_reports_5`
+    FOREIGN KEY (`age_id`)
+    REFERENCES `300sf`.`ages` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_reports_6`
+    FOREIGN KEY (`method_id`)
+    REFERENCES `300sf`.`methods` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+CREATE TABLE `300sf`.`list_reports` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `list_id` INT NOT NULL,
+  `report_id` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `index2` (`list_id` ASC, `report_id` ASC) VISIBLE,
+  INDEX `fk_list_reports_2_idx` (`report_id` ASC) VISIBLE,
+  CONSTRAINT `fk_list_reports_1`
+    FOREIGN KEY (`list_id`)
+    REFERENCES `300sf`.`lists` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_list_reports_2`
+    FOREIGN KEY (`report_id`)
+    REFERENCES `300sf`.`report` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);

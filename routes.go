@@ -119,6 +119,10 @@ func SetupRoutes(r *gin.Engine) {
 	// Species
 	r.GET("/v1/species/list", basicMiddleware, controllers.SpeciesList)
 
+	// Reports
+	r.GET("/v1/reports/list", basicMiddleware, controllers.ReportsList)
+	r.POST("/v1/reports", basicMiddleware, controllers.Reports)
+
 	setupPrivateRoutes(r)
 }
 
@@ -135,4 +139,6 @@ func setupPrivateRoutes(r *gin.Engine) {
 	r.GET("/v1/p/orders/list", adminMiddleware, controllers.NamedRecordList[models.Order])
 	r.GET("/v1/p/translations/list", adminMiddleware, controllers.TranslationList)
 	r.POST("/v1/p/translations/update", adminMiddleware, controllers.TranslationUpdate)
+	r.POST("/v1/p/ages", adminMiddleware, controllers.CreateNamedRecord[models.Age])
+	r.GET("/v1/p/ages/list", adminMiddleware, controllers.NamedRecordList[models.Age])
 }
