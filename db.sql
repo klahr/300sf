@@ -45,7 +45,7 @@ CREATE TABLE `300sf`.`api_keys` (
   `soft_limit` INT NOT NULL,
   `hard_limit` INT NOT NULL,
   `user_id` INT NOT NULL,
-  `deactivated_at` DATETIME NULL,
+  `revoked_at` DATETIME NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) VISIBLE,
   UNIQUE INDEX `prefix_UNIQUE` (`prefix` ASC) VISIBLE,
