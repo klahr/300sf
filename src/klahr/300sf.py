@@ -341,7 +341,7 @@ def list(create, template, visibility, timespan, archive, rename):
                 err_print(f'err: {r.json()["message"]}')
 
 
-def reports(create, species, age, method, gender, activity, quantity, position, comment, lists, _from, until):
+def report(create, species, age, method, gender, activity, quantity, position, comment, lists, _from, until, archive):
     if create:
         report = {
             'species_uuid': species,
@@ -359,14 +359,17 @@ def reports(create, species, age, method, gender, activity, quantity, position, 
         if position is not None:
             report['latitude'] = position[0]
             report['longitude'] = position[1]
-        print(report)
         r = http_post('/v1/reports', {}, report)
         if r is not None:
-            if r.status_code == 200:
-                data = r.json()
-                print(data)
-            else:
+            if r.status_code != 200:
                 err_print(f'err: {r.json()["message"]}')
+    elif archive:
+        r = http_post(f'/v1/reports/{archive}/archive', {}, {})
+        if r is not None:
+            if r.status_code != 204:
+                err_print(f'err: {r.json()["message"]}')
+        else:
+            err_print('err: internal error')
     else:
         r = http_get('/v1/reports/list', {})
         if r is not None:
@@ -449,7 +452,7 @@ def main():
     species_parser.add_argument('--insert', dest='insert', help='Add species.')
     species_parser.add_argument('--order', dest='order', help='Order.')
 
-    reports_parser = subparsers.add_parser('reports', help='Reports.')
+    reports_parser = subparsers.add_parser('report', help='Reports.')
     reports_parser.add_argument('--create', dest='create', action='store_true', help='Create new report.')
     reports_parser.add_argument('--species', dest='species', help='Species.')
     reports_parser.add_argument('--age', dest='age', help='Age.')
@@ -462,6 +465,7 @@ def main():
     reports_parser.add_argument('--lists', dest='lists', nargs='*', help='Comment.')
     reports_parser.add_argument('--from', dest='_from', help='From.')
     reports_parser.add_argument('--until', dest='until', help='Until.')
+    reports_parser.add_argument('--archive', dest='archive', help='Archive.')
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
