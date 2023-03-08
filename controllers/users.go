@@ -66,7 +66,7 @@ func Users(c *gin.Context) {
 	user := models.User{
 		Model: models.Model{
 			Timestamp: time.Now(),
-			Uuid:      utils.GenerateUuid(),
+			Uuid:      utils.GenerateShortUuid(),
 		},
 		Email:           r.Email,
 		DisplayName:     r.DisplayName,

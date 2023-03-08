@@ -122,6 +122,7 @@ func SetupRoutes(r *gin.Engine) {
 	// Reports
 	r.GET("/v1/reports/list", basicMiddleware, controllers.ReportsList)
 	r.POST("/v1/reports", basicMiddleware, controllers.Reports)
+	r.POST("/v1/reports/:uuid/archive", basicMiddleware, controllers.ReportsArchive)
 
 	setupPrivateRoutes(r)
 }

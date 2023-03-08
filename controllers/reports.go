@@ -58,7 +58,7 @@ func Reports(c *gin.Context) {
 	report := models.Report{
 		Model: models.Model{
 			Timestamp: time.Now(),
-			Uuid:      utils.GenerateUuid(),
+			Uuid:      utils.GenerateShortUuid(),
 		},
 		UserId:    user.Id,
 		SpeciesId: species.Id,
@@ -118,6 +118,10 @@ func Reports(c *gin.Context) {
 		report.MethodId = zero.IntFrom(method.Id)
 	}
 
+	for i := range r.ListUuids {
+		r.ListUuids[i] = "'" + r.ListUuids[i] + "'"
+	}
+
 	var lists []models.List
 	if len(r.ListUuids) > 0 {
 		if err := models.DB.Where("uuid IN (" + strings.Join(r.ListUuids, ",") + ")").Find(&lists).Error; err != nil {
@@ -151,7 +155,7 @@ func ReportsList(c *gin.Context) {
 	}
 
 	var reports []models.Report
-	if err := models.DB.Table(table.Reports).Where("user_id=?", user.Id).Preload("Lists").Find(&reports).Error; err != nil {
+	if err := models.DB.Table(table.Reports).Where("user_id=?", user.Id).Where("archived IS NULL").Preload("Lists").Preload("Species.Name").Preload("Age.Name").Preload("Gender.Name").Preload("Activity.Name").Preload("Method.Name").Preload("Lists.Name").Find(&reports).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -165,4 +169,23 @@ func ReportsList(c *gin.Context) {
 	c.JSON(http.StatusOK, response{
 		Result: reports,
 	})
+}
+
+func ReportsArchive(c *gin.Context) {
+	var user models.User
+	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if err := models.DB.Table(table.Reports).Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).Where("archived IS NULL").UpdateColumn("archived", time.Now()).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
 }

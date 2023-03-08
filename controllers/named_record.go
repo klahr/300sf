@@ -25,7 +25,7 @@ func CreateNamedRecord[T models.Age | models.Order | models.Gender | models.Acti
 
 	name := r.Name
 	name.Timestamp = time.Now()
-	name.Uuid = utils.GenerateUuid()
+	name.Uuid = utils.GenerateShortUuid()
 	if err := models.DB.Create(&name).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
@@ -36,7 +36,7 @@ func CreateNamedRecord[T models.Age | models.Order | models.Gender | models.Acti
 	t := T{
 		Model: models.Model{
 			Timestamp: time.Now(),
-			Uuid:      utils.GenerateUuid(),
+			Uuid:      utils.GenerateShortUuid(),
 		},
 		NameId: name.Id,
 		Name:   name,

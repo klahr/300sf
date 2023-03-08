@@ -36,7 +36,7 @@ func ListTemplates(c *gin.Context) {
 
 	name := r.Name
 	name.Timestamp = time.Now()
-	name.Uuid = utils.GenerateUuid()
+	name.Uuid = utils.GenerateShortUuid()
 	if err := models.DB.Create(&name).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
@@ -47,7 +47,7 @@ func ListTemplates(c *gin.Context) {
 	listTemplate := models.ListTemplate{
 		Model: models.Model{
 			Timestamp: time.Now(),
-			Uuid:      utils.GenerateUuid(),
+			Uuid:      utils.GenerateShortUuid(),
 		},
 		UserId:     user.Id,
 		Visibility: r.Visibility,

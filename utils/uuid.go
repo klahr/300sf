@@ -2,14 +2,15 @@ package utils
 
 import (
 	"math/rand"
-	"strings"
 	"time"
-
-	"github.com/google/uuid"
 )
 
-func GenerateUuid() string {
+/*func GenerateUuid() string {
 	return strings.ReplaceAll(uuid.New().String(), "-", "")
+}*/
+
+func GenerateShortUuid() string {
+	return GenerateUuidWithFixedLength(6)
 }
 
 var src = rand.NewSource(time.Now().UnixNano())

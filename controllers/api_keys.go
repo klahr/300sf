@@ -42,7 +42,7 @@ func ApiKeys(c *gin.Context) {
 	apiKey := models.ApiKey{
 		Model: models.Model{
 			Timestamp: time.Now(),
-			Uuid:      utils.GenerateUuid(),
+			Uuid:      utils.GenerateShortUuid(),
 		},
 		Name:      r.Name,
 		Prefix:    prefix,

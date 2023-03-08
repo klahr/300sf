@@ -289,6 +289,7 @@ CREATE TABLE `300sf`.`reports` (
   `gender_id` INT NULL,
   `method_id` INT NULL,
   `comment` TEXT NULL,
+  `archived` DATETIME NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) VISIBLE,
   INDEX `index3` (`uuid` ASC) VISIBLE,
