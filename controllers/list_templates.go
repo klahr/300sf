@@ -25,8 +25,10 @@ func ListTemplates(c *gin.Context) {
 		return
 	}
 
+	tx := models.DB.Begin()
+
 	var user models.User
-	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+	if err := tx.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
 			"message": err.Error(),
@@ -37,7 +39,8 @@ func ListTemplates(c *gin.Context) {
 	name := r.Name
 	name.Timestamp = time.Now()
 	name.Uuid = utils.GenerateShortUuid()
-	if err := models.DB.Create(&name).Error; err != nil {
+	if err := tx.Create(&name).Error; err != nil {
+		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
@@ -54,12 +57,15 @@ func ListTemplates(c *gin.Context) {
 		Name:       name,
 	}
 
-	if err := models.DB.Create(&listTemplate).Error; err != nil {
+	if err := tx.Create(&listTemplate).Error; err != nil {
+		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
 		return
 	}
+
+	tx.Commit()
 
 	c.JSON(http.StatusOK, listTemplate)
 }

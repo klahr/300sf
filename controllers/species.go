@@ -24,10 +24,13 @@ func Species(c *gin.Context) {
 		return
 	}
 
+	tx := models.DB.Begin()
+
 	name := r.Name
 	name.Timestamp = time.Now()
 	name.Uuid = utils.GenerateShortUuid()
-	if err := models.DB.Create(&name).Error; err != nil {
+	if err := tx.Create(&name).Error; err != nil {
+		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
@@ -35,7 +38,8 @@ func Species(c *gin.Context) {
 	}
 
 	var order models.Order
-	if err := models.DB.Where("uuid=?", r.OrderUuid).First(&order).Error; err != nil {
+	if err := tx.Where("uuid=?", r.OrderUuid).First(&order).Error; err != nil {
+		tx.Rollback()
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
 			"message": err.Error(),
@@ -53,7 +57,8 @@ func Species(c *gin.Context) {
 		OrderId: order.Id,
 	}
 
-	if err := models.DB.Create(&species).Error; err != nil {
+	if err := tx.Create(&species).Error; err != nil {
+		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})

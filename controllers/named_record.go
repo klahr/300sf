@@ -23,10 +23,13 @@ func CreateNamedRecord[T models.Age | models.Order | models.Gender | models.Acti
 		return
 	}
 
+	tx := models.DB.Begin()
+
 	name := r.Name
 	name.Timestamp = time.Now()
 	name.Uuid = utils.GenerateShortUuid()
-	if err := models.DB.Create(&name).Error; err != nil {
+	if err := tx.Create(&name).Error; err != nil {
+		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
@@ -42,12 +45,16 @@ func CreateNamedRecord[T models.Age | models.Order | models.Gender | models.Acti
 		Name:   name,
 	}
 
-	if err := models.DB.Create(&t).Error; err != nil {
+	if err := tx.Create(&t).Error; err != nil {
+		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
 		return
 	}
+
+	tx.Commit()
+
 	c.JSON(http.StatusOK, t)
 }
 
