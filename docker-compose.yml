@@ -15,8 +15,6 @@ services:
       args:
         CONFIG_FILE: 300sf-albatross.conf
     restart: unless-stopped
-    ports:
-      - "8090:8090"
     environment:
       - "LOG_FILE_LOCATION=/logs/albatross.log"
       - "DATA_STORAGE_PATH=/resources/"
@@ -33,8 +31,6 @@ services:
       args:
         CONFIG_FILE: 300sf-blackbird.conf
     restart: unless-stopped
-    ports:
-      - "8091:8091"
     environment:
       - "LOG_FILE_LOCATION=/logs/blackbird.log"
       - "DATA_STORAGE_PATH=/resources/"
@@ -49,5 +45,4 @@ services:
   #     context: ../300sf-web
   #     dockerfile: Dockerfile
   #   restart: unless-stopped
-  #   ports:
-  #     - "8080:8080"
+
