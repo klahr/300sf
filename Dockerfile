@@ -1,4 +1,4 @@
-FROM golang:1.18 as builder
+FROM golang:latest as builder
 
 LABEL maintainer="Joachim Klahr <joachim@klahr.se>"
 
