@@ -341,6 +341,19 @@ def list(create, template, visibility, timespan, archive, rename):
                 err_print(f'err: {r.json()["message"]}')
 
 
+def reports(create, species):
+    if create:
+        r = http_post('/v1/reports', {}, {
+            'species_uuid': species 
+        })
+        if r is not None:
+            if r.status_code == 200:
+                data = r.json()
+                print(data)
+            else:
+                err_print(f'err: {r.json()["message"]}')
+
+
 def main():
     global config
     config.open(os.path.join(os.path.expanduser('~'), '.config/300sf/config.yml'))
@@ -389,6 +402,10 @@ def main():
     species_parser = subparsers.add_parser('species', help='Species.')
     species_parser.add_argument('--insert', dest='insert', help='Add species.')
     species_parser.add_argument('--order', dest='order', help='Order.')
+
+    reports_parser = subparsers.add_parser('reports', help='Reports.')
+    reports_parser.add_argument('--create', dest='create', action='store_true', help='Create new report.')
+    reports_parser.add_argument('--species', dest='species', help='Species.')
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)

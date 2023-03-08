@@ -101,6 +101,11 @@ def order(insert):
     return
 
 
+def age(insert):
+    named_record(insert, '/v1/p/ages')
+    return
+
+
 def activity(insert):
     named_record(insert, '/v1/p/activities')
     return
@@ -168,6 +173,9 @@ def main():
 
     gender_parser = subparsers.add_parser('gender', help='Gender.')
     gender_parser.add_argument('--insert', dest='insert', help='Add gender.')
+
+    age_parser = subparsers.add_parser('age', help='Gender.')
+    age_parser.add_argument('--insert', dest='insert', help='Add age.')
 
     order_parser = subparsers.add_parser('order', help='Order.')
     order_parser.add_argument('--insert', dest='insert', help='Add order.')
