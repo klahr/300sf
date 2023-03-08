@@ -70,9 +70,6 @@ ADD COLUMN `accepted_terms_at` DATETIME NULL AFTER `deleted_at`;
 ALTER TABLE `300sf`.`users` 
 CHANGE COLUMN `timestamp` `timestamp` DATETIME NOT NULL ;
 
-ALTER TABLE `300sf`.`api_key_tiers` 
-CHANGE COLUMN `timestamp` `timestamp` DATETIME NOT NULL ;
-
 ALTER TABLE `300sf`.`api_keys` 
 CHANGE COLUMN `timestamp` `timestamp` DATETIME NOT NULL ;
 
@@ -343,6 +340,6 @@ CREATE TABLE `300sf`.`list_reports` (
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_list_reports_2`
     FOREIGN KEY (`report_id`)
-    REFERENCES `300sf`.`report` (`id`)
+    REFERENCES `300sf`.`reports` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
