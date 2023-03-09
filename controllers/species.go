@@ -64,6 +64,9 @@ func Species(c *gin.Context) {
 		})
 		return
 	}
+
+	tx.Commit()
+
 	c.JSON(http.StatusOK, species)
 }
 

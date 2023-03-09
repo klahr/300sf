@@ -134,6 +134,7 @@ func setupPrivateRoutes(r *gin.Engine) {
 	r.POST("/v1/p/methods", adminMiddleware, controllers.CreateNamedRecord[models.Method])
 	r.GET("/v1/p/methods/list", adminMiddleware, controllers.NamedRecordList[models.Method])
 	r.POST("/v1/p/species", adminMiddleware, controllers.Species)
+	r.GET("/v1/p/species/list", adminMiddleware, controllers.SpeciesList)
 	r.POST("/v1/p/genders", adminMiddleware, controllers.CreateNamedRecord[models.Gender])
 	r.GET("/v1/p/genders/list", adminMiddleware, controllers.NamedRecordList[models.Gender])
 	r.POST("/v1/p/orders", adminMiddleware, controllers.CreateNamedRecord[models.Order])
