@@ -132,13 +132,23 @@ func UsersMigrate(c *gin.Context) {
 
 		type jsonrpc_response struct {
 			Result struct {
-				Token string `json:"token"`
+				Token  string `json:"token"`
+				UserId int64  `json:"userid"`
 			}
 		}
 
 		var response jsonrpc_response
 		json.Unmarshal(body, &response)
 
-		print(response.Result.Token)
+		dataJsonRequest := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"method\":\"DataManager.get\",\"params\": {\"userid\":%d},\"id\":1}", response.Result.UserId)
+		dataResponse, _ := http.PostForm("https://angelsware.com/swedbirds/ajax_api.php", url.Values{
+			"data": {dataJsonRequest},
+		})
+
+		defer dataResponse.Body.Close()
+		body, _ = io.ReadAll(dataResponse.Body)
+
+		// TODO: All data seems to be available in the "body" variable. Parse and re-create in new database.
+		print(string(body))
 	}
 }
