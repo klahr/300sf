@@ -1,7 +1,11 @@
 package controllers
 
 import (
+	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
+	"net/url"
 	"time"
 
 	"git.sr.ht/~klahr/300sf/models"
@@ -96,4 +100,45 @@ func UsersWhoAmI(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, user)
+}
+
+func UsersExportData(c *gin.Context) {
+	c.JSON(http.StatusTeapot, nil)
+}
+
+func UsersMigrate(c *gin.Context) {
+	type request struct {
+		OldUsername string `json:"old_username"`
+		OldPassword string `json:"old_password"`
+	}
+
+	var r request
+	if err := c.ShouldBindJSON(&r); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	loginJsonRequest := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"method\":\"SessionManager.create\",\"params\": {\"email\":\"%s\",\"password\":\"%s\"},\"id\":1}", r.OldUsername, r.OldPassword)
+	loginResponse, err := http.PostForm("https://angelsware.com/swedbirds/ajax_api.php", url.Values{
+		"data": {loginJsonRequest},
+	})
+
+	if err == nil {
+		defer loginResponse.Body.Close()
+		body, _ := io.ReadAll(loginResponse.Body)
+
+		type jsonrpc_response struct {
+			Result struct {
+				Token string `json:"token"`
+			}
+		}
+
+		var response jsonrpc_response
+		json.Unmarshal(body, &response)
+
+		print(response.Result.Token)
+	}
 }
