@@ -366,7 +366,7 @@ def list(create, template, visibility, timespan, archive, rename, lang):
                 err_print(f'err: {r.json()["message"]}')
 
 
-def report(create, species, age, method, gender, activity, quantity, position, comment, lists, _from, until, archive, details, lang):
+def report(create, species, age, method, gender, activity, quantity, position, comment, lists, _from, until, archive, details, tags, add_tag, remove_tag, lang):
     if create:
         report = {
             'species_uuid': species,
@@ -377,7 +377,8 @@ def report(create, species, age, method, gender, activity, quantity, position, c
             'comment': str(comment or None),
             'list_uuids': lists,
             'from': str(_from or None),
-            'until': str(until or None)
+            'until': str(until or None),
+            'tag_uuids': tags
         }
         if quantity is not None:
             report['quantity'] = quantity
@@ -386,7 +387,9 @@ def report(create, species, age, method, gender, activity, quantity, position, c
             report['longitude'] = position[1]
         r = http_post('/v1/reports', {}, report)
         if r is not None:
-            if r.status_code != 200:
+            if r.status_code == 200:
+                print(r.json()['uuid'])
+            else:
                 err_print(f'err: {r.json()["message"]}')
     elif archive:
         r = http_post(f'/v1/reports/{archive}/archive', {}, {})
@@ -434,6 +437,22 @@ def report(create, species, age, method, gender, activity, quantity, position, c
         else:
             response = r.json()
             err_print(f'err: {response["message"]}')
+    elif add_tag:
+        r = http_post(f'/v1/reports/{add_tag[0]}/add_tag', {}, {
+            'tag_uuid': add_tag[1]
+        })
+        if r is not None:
+            if r.status_code != 204:
+                response = r.json()
+                err_print(f'err: {response["message"]}')
+    elif remove_tag:
+        r = http_post(f'/v1/reports/{remove_tag[0]}/remove_tag', {}, {
+            'tag_uuid': remove_tag[1]
+        })
+        if r is not None:
+            if r.status_code != 204:
+                response = r.json()
+                err_print(f'err: {response["message"]}')
     else:
         r = http_get('/v1/reports/list', {})
         if r is not None:
@@ -673,6 +692,9 @@ def main():
     reports_parser.add_argument('--until', dest='until', help='Until.')
     reports_parser.add_argument('--archive', dest='archive', help='Archive.')
     reports_parser.add_argument('--details', dest='details', help='Details.')
+    reports_parser.add_argument('--tags', dest='tags', nargs='*', default=[], help='Tags.')
+    reports_parser.add_argument('--add-tag', dest='add_tag', nargs=2, help='Add tag.')
+    reports_parser.add_argument('--remove-tag', dest='remove_tag', nargs=2, help='Remove tag.')
     reports_parser.add_argument('--lang', dest='lang', default=lang, help='Language.')
 
     gender_parser = subparsers.add_parser('gender', help='Gender.')
