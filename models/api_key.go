@@ -11,7 +11,6 @@ type ApiKey struct {
 	SoftLimit int64     `json:"soft_limit"`
 	HardLimit int64     `json:"hard_limit"`
 	UserId    int64     `json:"-"`
-	User      User      `json:"user"`
 	RevokedAt zero.Time `json:"revoked_at"`
 }
 

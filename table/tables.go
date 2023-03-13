@@ -7,6 +7,7 @@ const (
 	ListTemplates = "list_templates"
 	Reports       = "reports"
 	Species       = "species"
+	Tags          = "tags"
 	Translations  = "translations"
 	Users         = "users"
 )

@@ -22,6 +22,6 @@ type Report struct {
 	MethodId   zero.Int    `json:"-"`
 	Method     *Method     `json:"method"`
 	Comment    zero.String `json:"comment"`
-	Archived   zero.Time   `json:"archived"`
+	Archived   zero.Time   `json:"-"`
 	Lists      []List      `json:"lists" gorm:"many2many:list_reports"`
 }

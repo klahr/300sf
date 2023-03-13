@@ -122,6 +122,13 @@ func SetupRoutes(r *gin.Engine) {
 	r.POST("/v1/list_templates/:uuid/remove_species", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesRemoveSpecies)
 	r.POST("/v1/list_templates/:uuid/rename", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesRename)
 
+	// Tags
+	r.GET("/v1/tags/list", apiKeyMiddleware, basicMiddleware, controllers.TagsList)
+	r.POST("/v1/tags", apiKeyMiddleware, basicMiddleware, controllers.Tags)
+	r.POST("/v1/tags/:uuid/archive", apiKeyMiddleware, basicMiddleware, controllers.TagsArchive)
+	r.POST("/v1/tags/:uuid/rename", apiKeyMiddleware, basicMiddleware, controllers.TagsRename)
+	r.GET("/v1/tags/:uuid", apiKeyMiddleware, basicMiddleware, controllers.TagsDetails)
+
 	// Api keys
 	r.GET("/v1/api_keys/list", basicMiddleware, controllers.ApiKeysList)
 	r.POST("/v1/api_keys", basicMiddleware, controllers.ApiKeys)

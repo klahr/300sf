@@ -6,4 +6,5 @@ type Resource struct {
 	Mimetype string `json:"mimetype"`
 	Filename string `json:"filename"`
 	Url      string `json:"url"`
+	UserId   int64  `json:"-"`
 }

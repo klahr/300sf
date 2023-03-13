@@ -354,3 +354,39 @@ ADD CONSTRAINT `fk_list_templates_3`
   REFERENCES `300sf`.`translations` (`id`)
   ON DELETE NO ACTION
   ON UPDATE NO ACTION;
+
+CREATE TABLE `300sf`.`tags` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `timestamp` DATETIME NOT NULL,
+  `uuid` VARCHAR(32) NOT NULL,
+  `name` VARCHAR(64) NOT NULL,
+  `user_id` INT NOT NULL,
+  `color` VARCHAR(9) NULL,
+  `archived` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) VISIBLE,
+  INDEX `index3` (`uuid` ASC) VISIBLE,
+  INDEX `fk_tags_1_idx` (`user_id` ASC) VISIBLE,
+  CONSTRAINT `fk_tags_1`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `300sf`.`users` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+CREATE TABLE `300sf`.`report_tags` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `report_id` INT NOT NULL,
+  `tag_id` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `index2` (`report_id` ASC, `tag_id` ASC) VISIBLE,
+  INDEX `fk_report_tags_2_idx` (`tag_id` ASC) VISIBLE,
+  CONSTRAINT `fk_report_tags_1`
+    FOREIGN KEY (`report_id`)
+    REFERENCES `300sf`.`reports` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_report_tags_2`
+    FOREIGN KEY (`tag_id`)
+    REFERENCES `300sf`.`tags` (`tags`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
