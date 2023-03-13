@@ -26,6 +26,7 @@ func Reports(c *gin.Context) {
 		MethodUuid   zero.String `json:"method_uuid"`
 		Comment      zero.String `json:"comment"`
 		ListUuids    []string    `json:"list_uuids"`
+		TagUuids     []string    `json:"tag_uuids"`
 	}
 
 	var r request
@@ -135,6 +136,23 @@ func Reports(c *gin.Context) {
 
 	report.Lists = lists
 
+	for i := range r.TagUuids {
+		r.TagUuids[i] = "'" + r.TagUuids[i] + "'"
+	}
+
+	var tags []models.Tag
+	if len(r.TagUuids) > 0 {
+		if err := models.DB.Where("uuid IN (" + strings.Join(r.TagUuids, ",") + ")").Where("archived IS NULL").Find(&tags).Error; err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    -10001,
+				"message": err.Error(),
+			})
+			return
+		}
+	}
+
+	report.Tags = tags
+
 	if err := models.DB.Create(&report).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
@@ -215,4 +233,103 @@ func ReportsDetails(c *gin.Context) {
 	c.JSON(http.StatusOK, response{
 		Result: result,
 	})
+}
+
+func ReportsAddTag(c *gin.Context) {
+	type request struct {
+		TagUuid string `json:"tag_uuid"`
+	}
+
+	var r request
+	if err := c.ShouldBindJSON(&r); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var user models.User
+	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var report models.Report
+	if err := models.DB.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).Preload("Tags").First(&report).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var tag models.Tag
+	if err := models.DB.Where("uuid=?", r.TagUuid).Where("user_id=?", user.Id).First(&tag).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if err := models.DB.Table("report_tags").Create(&models.ReportTags{
+		ReportId: report.Id,
+		TagId:    tag.Id,
+	}).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
+}
+
+func ReportsRemoveTag(c *gin.Context) {
+	type request struct {
+		TagUuid string `json:"tag_uuid"`
+	}
+
+	var r request
+	if err := c.ShouldBindJSON(&r); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var user models.User
+	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var report models.Report
+	if err := models.DB.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).Preload("Tags").First(&report).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var tag models.Tag
+	if err := models.DB.Where("uuid=?", r.TagUuid).Where("user_id=?", user.Id).First(&tag).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if err := models.DB.Where("report_id=?", report.Id).Where("tag_id=?", tag.Id).Delete(&models.ReportTags{}).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
 }

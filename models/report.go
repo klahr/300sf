@@ -24,4 +24,5 @@ type Report struct {
 	Comment    zero.String `json:"comment"`
 	Archived   zero.Time   `json:"-"`
 	Lists      []List      `json:"lists" gorm:"many2many:list_reports"`
+	Tags       []Tag       `json:"tags" gorm:"many2many:report_tags"`
 }
