@@ -54,7 +54,7 @@ def http_get(path, headers):
     access_token = get_access_token()
     if access_token is not None:
         headers['X-Access-Token'] = access_token
-    r = httpx.get(f'{config.get("api-endpoint")}{path}', headers=headers)
+    r = httpx.get(f'{config.get("api-endpoint")}{path}', headers=headers, timeout=30.0)
     return r
 
 
@@ -65,7 +65,7 @@ def http_post(path, headers, body):
     access_token = get_access_token()
     if access_token is not None:
         headers['X-Access-Token'] = access_token
-    r = httpx.post(f'{config.get("api-endpoint")}{path}', headers=headers, content=json.dumps(body))
+    r = httpx.post(f'{config.get("api-endpoint")}{path}', headers=headers, content=json.dumps(body), timeout=30.0)
     return r
 
 
@@ -276,9 +276,12 @@ def species(insert, order, details, lang):
         r = http_get(f'/v1/species/{details}', {})
         if r is not None and r.status_code == 200:
             response = r.json()['result']
-            print(f'id    {response["uuid"]}')
-            print(f'name  {response["name"][lang]}')
-            print(f'order {response["order"]["name"][lang]}')
+            print(f'id         {response["uuid"]}')
+            print(f'name       {response["name"][lang]}')
+            print(f'order      {response["order"]["name"][lang]}')
+            recordings = r.json()['recordings']
+            for rec in recordings:
+                print(f'recording  {rec["url"]}')
         else:
             response = r.json()
             err_print(f'err: {response["message"]}')
