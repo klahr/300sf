@@ -73,6 +73,13 @@ def version():
     print(__version__)
 
 
+def get_date(date):
+    d = datetime.datetime.fromisoformat(date.replace('Z', '+00:00'))
+    if d.year > 1:
+        return d.isoformat()
+    return ''
+
+
 def signup(display_name, password, email, accepted_terms):
     r = http_post('/v1/users', {}, {
         'password': str(password or ''),
@@ -156,10 +163,7 @@ def apikey(create, revoke):
                 data = r.json()
                 t = []
                 for api_key in data['api_keys']:
-                    revoked_at = datetime.datetime.fromisoformat(api_key['revoked_at'].replace('Z', '+00:00'))
-                    api_key_revoked_at = ''
-                    if revoked_at.year > 1:
-                        api_key_revoked_at = revoked_at.isoformat()
+                    api_key_revoked_at = get_date(api_key['revoked_at'])
                     t.append([api_key['name'], api_key['prefix'], api_key['scopes'], api_key['soft_limit'], api_key['hard_limit'], api_key_revoked_at])
                 print(tabulate.tabulate(t, headers=['name', 'prefix', 'scopes', 'soft limit', 'hard limit', 'revoked at'], tablefmt='plain'))
             else:
@@ -351,7 +355,7 @@ def list(create, template, visibility, timespan, archive, rename, lang):
                 err_print(f'err: {r.json()["message"]}')
 
 
-def report(create, species, age, method, gender, activity, quantity, position, comment, lists, _from, until, archive, lang):
+def report(create, species, age, method, gender, activity, quantity, position, comment, lists, _from, until, archive, details, lang):
     if create:
         report = {
             'species_uuid': species,
@@ -380,6 +384,41 @@ def report(create, species, age, method, gender, activity, quantity, position, c
                 err_print(f'err: {r.json()["message"]}')
         else:
             err_print('err: internal error')
+    elif details is not None:
+        r = http_get(f'/v1/reports/{details}', {})
+        if r is not None and r.status_code == 200:
+            response = r.json()['result']
+            print(response)
+            position = ''
+            method = ''
+            activity = ''
+            age = ''
+            gender = ''
+            if response['latitude'] and response['longitude']:
+                position = f'{response["latitude"]},{response["longitude"]}'
+            if response['method']:
+                method = response['method']['name'][lang]
+            if response['activity']:
+                activity = response['activity']['name'][lang]
+            if response['age']:
+                age = response['age']['name'][lang]
+            if response['gender']:
+                gender = response['gender']['name'][lang]
+            print(f'uuid      {response["uuid"]}')
+            print(f'name      {response["species"]["name"][lang]}')
+            print(f'quantity  {response["quantity"]}')
+            print(f'from      {get_date(response["from"])}')
+            print(f'until     {get_date(response["until"])}')
+            print(f'position  {position}')
+            print(f'method    {method}')
+            print(f'activity  {activity}')
+            print(f'age       {age}')
+            print(f'gender    {gender}')
+            print(f'archived  {get_date(response["archived"])}')
+            print(f'comment   {response["comment"]}')
+        else:
+            response = r.json()
+            err_print(f'err: {response["message"]}')
     else:
         r = http_get('/v1/reports/list', {})
         if r is not None:
@@ -396,19 +435,8 @@ def report(create, species, age, method, gender, activity, quantity, position, c
                         activity = list['activity']['name'][lang]
                     if list['method'] is not None:
                         method = list['method']['name'][lang]
-                    _from = datetime.datetime.fromisoformat(list['from'].replace('Z', '+00:00'))
-                    __from = ''
-                    if _from.year > 1:
-                        __from = _from.isoformat()
-                    _until = datetime.datetime.fromisoformat(list['until'].replace('Z', '+00:00'))
-                    __until = ''
-                    if _until.year > 1:
-                        __until = _until.isoformat()
-                    lists = []
-                    for l in list['lists']:
-                        lists.append(l['name'][lang])
-                    t.append([list['uuid'], list['quantity'], list['species']['name'][lang], __from, __until, list['latitude'], list['longitude'], gender, age, method, activity, list['comment'], lists])
-                print(tabulate.tabulate(t, headers=['uuid', 'quantity', f'species({lang})', 'from', 'until', 'latitude', 'longitude', f'gender({lang})', f'age({lang})', f'method({lang})', f'activity({lang})', 'comment', 'lists'], tablefmt='plain'))
+                    t.append([list['uuid'], list['quantity'], list['species']['name'][lang], get_date(list['from']), get_date(list['until'])])
+                print(tabulate.tabulate(t, headers=['uuid', 'quantity', f'species({lang})', 'from', 'until'], tablefmt='plain'))
             else:
                 err_print(f'err: {r.json()["message"]}')
 
@@ -575,6 +603,7 @@ def main():
     reports_parser.add_argument('--from', dest='_from', help='From.')
     reports_parser.add_argument('--until', dest='until', help='Until.')
     reports_parser.add_argument('--archive', dest='archive', help='Archive.')
+    reports_parser.add_argument('--details', dest='details', help='Details.')
     reports_parser.add_argument('--lang', dest='lang', default=lang, help='Language.')
 
     gender_parser = subparsers.add_parser('gender', help='Gender.')
