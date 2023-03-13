@@ -170,7 +170,7 @@ def apikey(create, revoke):
                 err_print(f'err: {r.json()["message"]}')
 
 
-def template(create, visibility, add, remove, archive, rename, lang):
+def template(create, description, visibility, add, remove, archive, rename, lang, details):
     global config
     if create is not None:
         v = 0
@@ -181,6 +181,9 @@ def template(create, visibility, add, remove, archive, rename, lang):
         r = http_post('/v1/list_templates', {}, {
             'name': {
                 lang: create
+            },
+            'description': {
+                lang: description
             },
             'visibility': v
         })
@@ -227,6 +230,14 @@ def template(create, visibility, add, remove, archive, rename, lang):
                 err_print(f'err: {r.json()["message"]}')
         else:
             err_print('err: internal error')
+    elif details:
+        r = http_get(f'/v1/lists_templates/{details}', {})
+        if r is not None:
+            if r.status_code == 200:
+                data = r.json()
+                print(data)
+            else:
+                err_print('err: internal error')
     else:
         r = http_get('/v1/list_templates/list', {})
         if r is not None:
@@ -570,12 +581,14 @@ def main():
 
     template_parser = subparsers.add_parser('template', help='Template.')
     template_parser.add_argument('--create', dest='create', help='Create new template.')
+    template_parser.add_argument('--description', dest='description', help='Create new template.')
     template_parser.add_argument('--visibility', dest='visibility', choices=['private', 'hidden', 'public'], help='Visibility.')
     template_parser.add_argument('--add', dest='add', nargs=2, help='Add species.')
     template_parser.add_argument('--remove', dest='remove', nargs=2, help='Remove species.')
     template_parser.add_argument('--archive', dest='archive', help='Archive.')
     template_parser.add_argument('--rename', dest='rename', nargs=2, help='Rename.')
     template_parser.add_argument('--lang', dest='lang', default=lang, help='Language.')
+    template_parser.add_argument('--details', dest='details', help='Details.')
 
     ## TODO: Add list_parser.
     list_parser = subparsers.add_parser('list', help='List.')
