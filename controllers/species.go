@@ -88,3 +88,22 @@ func SpeciesList(c *gin.Context) {
 		Result: result,
 	})
 }
+
+func SpeciesDetails(c *gin.Context) {
+	var result models.Species
+
+	if err := models.DB.Where("uuid=?", c.Param("uuid")).Preload("Name").Preload("Order.Name").First(&result).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	type response struct {
+		Result models.Species `json:"result"`
+	}
+
+	c.JSON(http.StatusOK, response{
+		Result: result,
+	})
+}

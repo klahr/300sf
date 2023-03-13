@@ -128,30 +128,42 @@ func SetupRoutes(r *gin.Engine) {
 	r.POST("/v1/api_keys/:prefix/revoke", basicMiddleware, controllers.ApiKeysRevoke)
 
 	// Species
-	r.GET("/v1/species/list", apiKeyMiddleware, basicMiddleware, controllers.SpeciesList)
+	r.GET("/v1/species/list", apiKeyMiddleware, controllers.SpeciesList)
+	r.GET("/v1/species/:uuid", apiKeyMiddleware, controllers.SpeciesDetails)
 
 	// Reports
 	r.GET("/v1/reports/list", apiKeyMiddleware, basicMiddleware, controllers.ReportsList)
 	r.POST("/v1/reports", apiKeyMiddleware, basicMiddleware, controllers.Reports)
 	r.POST("/v1/reports/:uuid/archive", apiKeyMiddleware, basicMiddleware, controllers.ReportsArchive)
+	r.GET("/v1/reports/:uuid", apiKeyMiddleware, basicMiddleware, controllers.ReportsDetails)
+
+	// Activities
+	r.GET("/v1/activities/list", apiKeyMiddleware, controllers.NamedRecordList[models.Activity])
+
+	// Methods
+	r.GET("/v1/methods/list", apiKeyMiddleware, controllers.NamedRecordList[models.Method])
+
+	// Genders
+	r.GET("/v1/genders/:uuid", apiKeyMiddleware, controllers.NamedRecordDetails[models.Gender])
+	r.GET("/v1/genders/list", apiKeyMiddleware, controllers.NamedRecordList[models.Gender])
+
+	// Orders
+	r.GET("/v1/orders/list", apiKeyMiddleware, controllers.NamedRecordList[models.Order])
+
+	// Ages
+	r.GET("/v1/ages/list", apiKeyMiddleware, controllers.NamedRecordList[models.Age])
 
 	setupPrivateRoutes(r)
 }
 
 func setupPrivateRoutes(r *gin.Engine) {
 	// Species
-	r.POST("/v1/p/activities", adminMiddleware, controllers.CreateNamedRecord[models.Activity])
-	r.GET("/v1/p/activities/list", adminMiddleware, controllers.NamedRecordList[models.Activity])
-	r.POST("/v1/p/methods", adminMiddleware, controllers.CreateNamedRecord[models.Method])
-	r.GET("/v1/p/methods/list", adminMiddleware, controllers.NamedRecordList[models.Method])
-	r.POST("/v1/p/species", adminMiddleware, controllers.Species)
-	r.GET("/v1/p/species/list", adminMiddleware, controllers.SpeciesList)
-	r.POST("/v1/p/genders", adminMiddleware, controllers.CreateNamedRecord[models.Gender])
-	r.GET("/v1/p/genders/list", adminMiddleware, controllers.NamedRecordList[models.Gender])
-	r.POST("/v1/p/orders", adminMiddleware, controllers.CreateNamedRecord[models.Order])
-	r.GET("/v1/p/orders/list", adminMiddleware, controllers.NamedRecordList[models.Order])
-	r.GET("/v1/p/translations/list", adminMiddleware, controllers.TranslationList)
-	r.POST("/v1/p/translations/update", adminMiddleware, controllers.TranslationUpdate)
-	r.POST("/v1/p/ages", adminMiddleware, controllers.CreateNamedRecord[models.Age])
-	r.GET("/v1/p/ages/list", adminMiddleware, controllers.NamedRecordList[models.Age])
+	r.POST("/v1/activities", adminMiddleware, controllers.CreateNamedRecord[models.Activity])
+	r.POST("/v1/methods", adminMiddleware, controllers.CreateNamedRecord[models.Method])
+	r.POST("/v1/species", adminMiddleware, controllers.Species)
+	r.POST("/v1/genders", adminMiddleware, controllers.CreateNamedRecord[models.Gender])
+	r.POST("/v1/orders", adminMiddleware, controllers.CreateNamedRecord[models.Order])
+	r.GET("/v1/translations/list", adminMiddleware, controllers.TranslationList)
+	r.POST("/v1/translations/update", adminMiddleware, controllers.TranslationUpdate)
+	r.POST("/v1/ages", adminMiddleware, controllers.CreateNamedRecord[models.Age])
 }

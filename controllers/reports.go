@@ -189,3 +189,22 @@ func ReportsArchive(c *gin.Context) {
 
 	c.JSON(http.StatusNoContent, nil)
 }
+
+func ReportsDetails(c *gin.Context) {
+	var result models.Report
+
+	if err := models.DB.Where("uuid=?", c.Param("uuid")).Preload("Species.Name").Preload("Age.Name").Preload("Method.Name").Preload("Activity.Name").Preload("Lists.Name").First(&result).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	type response struct {
+		Result models.Report `json:"result"`
+	}
+
+	c.JSON(http.StatusOK, response{
+		Result: result,
+	})
+}

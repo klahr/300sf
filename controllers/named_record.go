@@ -76,3 +76,22 @@ func NamedRecordList[T models.Age | models.Order | models.Gender | models.Activi
 		Result: result,
 	})
 }
+
+func NamedRecordDetails[T models.Age | models.Order | models.Gender | models.Activity | models.Method](c *gin.Context) {
+	var result T
+
+	if err := models.DB.Where("uuid=?", c.Param("uuid")).Preload("Name").First(&result).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	type response struct {
+		Result T `json:"result"`
+	}
+
+	c.JSON(http.StatusOK, response{
+		Result: result,
+	})
+}

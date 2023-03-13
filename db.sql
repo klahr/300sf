@@ -343,3 +343,14 @@ CREATE TABLE `300sf`.`list_reports` (
     REFERENCES `300sf`.`reports` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
+
+ALTER TABLE `300sf`.`list_templates` 
+ADD COLUMN `description_id` INT NULL AFTER `archived`,
+ADD INDEX `fk_list_templates_3_idx` (`description_id` ASC) VISIBLE;
+;
+ALTER TABLE `300sf`.`list_templates` 
+ADD CONSTRAINT `fk_list_templates_3`
+  FOREIGN KEY (`description_id`)
+  REFERENCES `300sf`.`translations` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;

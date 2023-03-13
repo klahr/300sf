@@ -12,8 +12,9 @@ import (
 
 func ListTemplates(c *gin.Context) {
 	type request struct {
-		Name       models.Translation `json:"name"`
-		Visibility int64              `json:"visibility"`
+		Name        models.Translation `json:"name"`
+		Visibility  int64              `json:"visibility"`
+		Description models.Translation `json:"description"`
 	}
 
 	var r request
@@ -47,14 +48,26 @@ func ListTemplates(c *gin.Context) {
 		return
 	}
 
+	description := r.Description
+	description.Timestamp = time.Now()
+	description.Uuid = utils.GenerateShortUuid()
+	if err := tx.Create(&description).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
 	listTemplate := models.ListTemplate{
 		Model: models.Model{
 			Timestamp: time.Now(),
 			Uuid:      utils.GenerateShortUuid(),
 		},
-		UserId:     user.Id,
-		Visibility: r.Visibility,
-		Name:       name,
+		UserId:      user.Id,
+		Visibility:  r.Visibility,
+		Name:        name,
+		Description: description,
 	}
 
 	if err := tx.Create(&listTemplate).Error; err != nil {
@@ -99,7 +112,7 @@ func ListTemplatesList(c *gin.Context) {
 	}
 
 	var listTemplates []models.ListTemplate
-	if err := models.DB.Table(table.ListTemplates).Where("user_id=? OR visibility=?", user.Id, models.VisibilityPublic).Where("archived IS NULL").Preload("Name").Preload("Species").Find(&listTemplates).Error; err != nil {
+	if err := models.DB.Table(table.ListTemplates).Where("user_id=? OR visibility=?", user.Id, models.VisibilityPublic).Where("archived IS NULL").Preload("Name").Preload("Description").Preload("Species").Find(&listTemplates).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
