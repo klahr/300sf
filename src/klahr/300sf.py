@@ -254,7 +254,7 @@ def template(create, description, visibility, add, remove, archive, rename, lang
                     if template['species'] is not None:
                         species = len(template['species'])
                     t.append([template['uuid'], template['name'][lang], visibility, species])
-                print(tabulate.tabulate(t, headers=['uuid', f'name({lang})', 'visibility', 'species'], tablefmt='plain'))
+                print(tabulate.tabulate(t, headers=['id', f'name({lang})', 'visibility', 'species'], tablefmt='plain'))
             else:
                 err_print(f'err: {r.json()["message"]}')
 
@@ -276,7 +276,7 @@ def species(insert, order, details, lang):
         r = http_get(f'/v1/species/{details}', {})
         if r is not None and r.status_code == 200:
             response = r.json()['result']
-            print(f'uuid  {response["uuid"]}')
+            print(f'id    {response["uuid"]}')
             print(f'name  {response["name"][lang]}')
             print(f'order {response["order"]["name"][lang]}')
         else:
@@ -292,7 +292,7 @@ def species(insert, order, details, lang):
             t = []
             for species in data['result']:
                 t.append([species['uuid'], species['name'][lang], species['order']['name'][lang]])
-            print(tabulate.tabulate(t, headers=['uuid', f'name({lang})', f'order({lang})'], tablefmt='plain'))
+            print(tabulate.tabulate(t, headers=['id', f'name({lang})', f'order({lang})'], tablefmt='plain'))
 
 
 def list(create, template, visibility, timespan, archive, rename, lang):
@@ -361,7 +361,7 @@ def list(create, template, visibility, timespan, archive, rename, lang):
                     if list['species'] is not None:
                         species = len(list['species'])
                     t.append([list['uuid'], list['name'][lang], visibility, species])
-                print(tabulate.tabulate(t, headers=['uuid', f'name({lang})', 'visibility', 'species'], tablefmt='plain'))
+                print(tabulate.tabulate(t, headers=['id', f'name({lang})', 'visibility', 'species'], tablefmt='plain'))
             else:
                 err_print(f'err: {r.json()["message"]}')
 
@@ -418,7 +418,7 @@ def report(create, species, age, method, gender, activity, quantity, position, c
                 age = response['age']['name'][lang]
             if response['gender']:
                 gender = response['gender']['name'][lang]
-            print(f'uuid      {response["uuid"]}')
+            print(f'id        {response["uuid"]}')
             print(f'name      {response["species"]["name"][lang]}')
             print(f'quantity  {response["quantity"]}')
             print(f'from      {get_date(response["from"])}')
@@ -451,7 +451,7 @@ def report(create, species, age, method, gender, activity, quantity, position, c
                     if list['method'] is not None:
                         method = list['method']['name'][lang]
                     t.append([list['uuid'], list['quantity'], list['species']['name'][lang], get_date(list['from']), get_date(list['until'])])
-                print(tabulate.tabulate(t, headers=['uuid', 'quantity', f'species({lang})', 'from', 'until'], tablefmt='plain'))
+                print(tabulate.tabulate(t, headers=['id', 'quantity', f'species({lang})', 'from', 'until'], tablefmt='plain'))
             else:
                 err_print(f'err: {r.json()["message"]}')
 
@@ -464,7 +464,7 @@ def whoami():
             p = 'basic'
             if data['permissions'] & 2 == 2:
                 p = 'admin'
-            print(f'uuid          {data["uuid"]}')
+            print(f'id            {data["uuid"]}')
             print(f'display name  {data["display_name"]}')
             print(f'role          {p}')
             print(f'last login    {data["last_seen_at"]}')
@@ -486,7 +486,7 @@ def named_record(insert, details, endpoint, lang):
         r = http_get(f'{endpoint}/{details}', {})
         if r is not None and r.status_code == 200:
             response = r.json()['result']
-            print(f'uuid  {response["uuid"]}')
+            print(f'id    {response["uuid"]}')
             print(f'name  {response["name"][lang]}')
         else:
             response = r.json()
@@ -501,7 +501,7 @@ def named_record(insert, details, endpoint, lang):
             t = []
             for d in data['result']:
                 t.append([d['uuid'], d['name'][lang]])
-            print(tabulate.tabulate(t, headers=['uuid', 'name'], tablefmt='plain'))
+            print(tabulate.tabulate(t, headers=['id', 'name'], tablefmt='plain'))
 
 
 def gender(insert, details, lang):
@@ -545,7 +545,59 @@ def translation(update, en, la, sv):
             t = []
             for translation in data['translations']:
                 t.append([translation['uuid'], translation['en'], translation['sv'], translation['la']])
-            print(tabulate.tabulate(t, headers=['uuid', 'en', 'sv', 'la'], tablefmt='plain'))
+            print(tabulate.tabulate(t, headers=['id', 'en', 'sv', 'la'], tablefmt='plain'))
+
+
+def tag(create, details, color, rename, archive):
+    if create:
+        c = '#ffffff'
+        if color:
+            c = color
+        r = http_post('/v1/tags', {}, {
+            'name': create,
+            'color': c
+        })
+        if r is not None:
+            if r.status_code == 200:
+                print(r.json()['uuid'])
+            else:
+                err_print(f'err: {r.json()["message"]}')
+        else:
+            err_print('err: internal error')
+        pass
+    elif details:
+        r = http_get(f'/v1/tags/{details}', {})
+        if r:
+            response = r.json()['result']
+            print(f'id     {response["uuid"]}')
+            print(f'name   {response["name"]}')
+            print(f'color  {response["color"]}')
+        else:
+            err_print('err: internal error')
+    elif rename:
+        r = http_post(f'/v1/tags/{rename[0]}/rename', {}, {
+            'name': rename[1]
+        })
+        if r is not None:
+            if r.status_code != 204:
+                err_print(f'err: {r.json()["message"]}')
+        else:
+            err_print('err: internal error')
+    elif archive:
+        r = http_post(f'/v1/tags/{archive}/archive', {}, {})
+        if r is not None:
+            if r.status_code != 204:
+                err_print(f'err: {r.json()["message"]}')
+        else:
+            err_print('err: internal error')
+        pass
+    else:
+        r = http_get('/v1/tags/list', {})
+        response = r.json()
+        t = []
+        for tag in response['result']:
+            t.append([tag['uuid'], tag['name']])
+        print(tabulate.tabulate(t, headers=['id', 'name'], tablefmt='plain'))
 
 
 def main():
@@ -653,6 +705,13 @@ def main():
     translation_parser.add_argument('--en', dest='en', help='English.')
     translation_parser.add_argument('--la', dest='la', help='Swedish.')
     translation_parser.add_argument('--sv', dest='sv', help='Latin.')
+
+    tag_parser = subparsers.add_parser('tag', help='Tag.')
+    tag_parser.add_argument('--create', dest='create', help='Create.')
+    tag_parser.add_argument('--details', dest='details', help='Details.')
+    tag_parser.add_argument('--color', dest='color', help='Color.')
+    tag_parser.add_argument('--rename', dest='rename', nargs=2, help='Rename')
+    tag_parser.add_argument('--archive', dest='archive', help='Archive.')
 
     subparsers.add_parser('whoami', help='Who am I.')
 
