@@ -1,12 +1,16 @@
 package controllers
 
 import (
+	"encoding/json"
 	"net/http"
+	"strings"
 	"time"
 
 	"git.sr.ht/~klahr/300sf/models"
 	"git.sr.ht/~klahr/300sf/utils"
+	"git.sr.ht/~klahr/300sf/xenocanto"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis"
 )
 
 func Species(c *gin.Context) {
@@ -92,6 +96,28 @@ func SpeciesList(c *gin.Context) {
 func SpeciesDetails(c *gin.Context) {
 	var result models.Species
 
+	type response struct {
+		Result     models.Species     `json:"result"`
+		Recordings []models.Recording `json:"recordings"`
+	}
+
+	cacheKey := c.Request.RequestURI
+	cached, err := models.Cache.Get(cacheKey).Result()
+	if err == redis.Nil {
+	} else if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	} else {
+		if cached != "" {
+			var r response
+			json.Unmarshal([]byte(cached), &r)
+			c.JSON(http.StatusOK, r)
+			return
+		}
+	}
+
 	if err := models.DB.Where("uuid=?", c.Param("uuid")).Preload("Name").Preload("Order.Name").First(&result).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
@@ -99,11 +125,29 @@ func SpeciesDetails(c *gin.Context) {
 		return
 	}
 
-	type response struct {
-		Result models.Species `json:"result"`
+	q := result.Name.En.String
+	q = strings.ReplaceAll(q, " ", "%20")
+
+	recordings := xenocanto.Recordings(q).Recordings
+	var recs []models.Recording
+	for i, r := range recordings {
+		if i >= 25 {
+			break
+		}
+		recs = append(recs, models.Recording{
+			Url:      r.File,
+			Filename: r.Filename,
+		})
 	}
 
-	c.JSON(http.StatusOK, response{
-		Result: result,
-	})
+	r := response{
+		Result:     result,
+		Recordings: recs,
+	}
+
+	if cached, err := json.Marshal(r); err == nil {
+		models.Cache.Set(cacheKey, cached, time.Hour*24)
+	}
+
+	c.JSON(http.StatusOK, r)
 }
