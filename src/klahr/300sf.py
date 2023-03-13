@@ -244,7 +244,7 @@ def template(create, visibility, add, remove, archive, rename):
                 err_print(f'err: {r.json()["message"]}')
 
 
-def species(insert, order):
+def species(insert, order, details):
     global config
 
     if insert is not None:
@@ -255,6 +255,16 @@ def species(insert, order):
             'order_uuid': order
         })
         if r is not None and r.status_code != 200:
+            response = r.json()
+            err_print(f'err: {response["message"]}')
+    elif details is not None:
+        r = http_get(f'/v1/species/{details}', {})
+        if r is not None and r.status_code == 200:
+            response = r.json()['result']
+            print(f'uuid  {response["uuid"]}')
+            print(f'name  {response["name"][config.get("language")]}')
+            print(f'order {response["order"]["name"][config.get("language")]}')
+        else:
             response = r.json()
             err_print(f'err: {response["message"]}')
     else:
@@ -419,6 +429,82 @@ def whoami():
             err_print(f'err: {r.json()["message"]}')
 
 
+def named_record(insert, details, endpoint):
+    if insert is not None:
+        r = http_post(endpoint, {}, {
+            'name': {
+                'en': insert
+            }
+        })
+        if r is not None and r.status_code != 200:
+            response = r.json()
+            err_print(f'err: {response["message"]}')
+    elif details is not None: 
+        r = http_get(f'{endpoint}/{details}', {})
+        if r is not None and r.status_code == 200:
+            response = r.json()['result']
+            print(f'uuid  {response["uuid"]}')
+            print(f'name  {response["name"][config.get("language")]}')
+        else:
+            response = r.json()
+            err_print(f'err: {response["message"]}')
+    else:
+        r = http_get(f'{endpoint}/list', {})
+        if r is not None and r.status_code != 200:
+            response = r.json()
+            err_print(f'err: {response["message"]}')
+        else:
+            data = r.json()
+            t = []
+            for d in data['result']:
+                t.append([d['uuid'], d['name'][config.get("language")]])
+            print(tabulate.tabulate(t, headers=['uuid', 'name'], tablefmt='plain'))
+
+
+def gender(insert, details):
+    named_record(insert, details, '/v1/p/genders')
+
+
+def order(insert, details):
+    named_record(insert, details, '/v1/p/orders')
+
+
+def age(insert, details):
+    named_record(insert, details, '/v1/p/ages')
+
+
+def activity(insert, details):
+    named_record(insert, details, '/v1/p/activities')
+
+
+def method(insert, details):
+    named_record(insert, details, '/v1/p/methods')
+
+
+def translation(update, en, la, sv):
+    if update is not None:
+        r = http_post('/v1/p/translations/update', {}, {
+            'uuid': update,
+            'en': en,
+            'sv': sv,
+            'la': la
+        });
+        if r is not None and r.status_code != 204:
+            response = r.json()
+            err_print(f'err: {response["message"]}')
+    else:
+        r = http_get('/v1/p/translations/list', {})
+        if r is not None and r.status_code != 200:
+            response = r.json()
+            err_print(f'err: {response["message"]}')
+        else:
+            data = r.json()
+            t = []
+            for translation in data['translations']:
+                t.append([translation['uuid'], translation['en'], translation['sv'], translation['la']])
+            print(tabulate.tabulate(t, headers=['uuid', 'en', 'sv', 'la'], tablefmt='plain'))
+
+
 def main():
     global config
     config.open(os.path.join(os.path.expanduser('~'), '.config/300sf/config.yml'))
@@ -467,6 +553,7 @@ def main():
     species_parser = subparsers.add_parser('species', help='Species.')
     species_parser.add_argument('--insert', dest='insert', help='Add species.')
     species_parser.add_argument('--order', dest='order', help='Order.')
+    species_parser.add_argument('--details', dest='details', help='Details.')
 
     reports_parser = subparsers.add_parser('report', help='Reports.')
     reports_parser.add_argument('--create', dest='create', action='store_true', help='Create new report.')
@@ -482,6 +569,28 @@ def main():
     reports_parser.add_argument('--from', dest='_from', help='From.')
     reports_parser.add_argument('--until', dest='until', help='Until.')
     reports_parser.add_argument('--archive', dest='archive', help='Archive.')
+
+    gender_parser = subparsers.add_parser('gender', help='Gender.')
+    gender_parser.add_argument('--insert', dest='insert', help='Add gender.')
+    gender_parser.add_argument('--details', dest='details', help='Details.')
+
+    age_parser = subparsers.add_parser('age', help='Gender.')
+    age_parser.add_argument('--insert', dest='insert', help='Add age.')
+
+    order_parser = subparsers.add_parser('order', help='Order.')
+    order_parser.add_argument('--insert', dest='insert', help='Add order.')
+
+    activity_parser = subparsers.add_parser('activity', help='Activity.')
+    activity_parser.add_argument('--insert', dest='insert', help='Add activity.')
+
+    method_parser = subparsers.add_parser('method', help='Method.')
+    method_parser.add_argument('--insert', dest='insert', help='Add method.')
+
+    translation_parser = subparsers.add_parser('translation', help='Translation.')
+    translation_parser.add_argument('--update', dest='update', help='Update translation uuid.')
+    translation_parser.add_argument('--en', dest='en', help='English.')
+    translation_parser.add_argument('--la', dest='la', help='Swedish.')
+    translation_parser.add_argument('--sv', dest='sv', help='Latin.')
 
     subparsers.add_parser('whoami', help='Who am I.')
 
