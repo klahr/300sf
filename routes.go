@@ -103,6 +103,7 @@ func SetupRoutes(r *gin.Engine) {
 
 	// Users
 	r.POST("/v1/users", controllers.Users)
+	r.GET("/v1/users/whoami", apiKeyMiddleware, basicMiddleware, controllers.UsersWhoAmI)
 
 	r.GET("ping", Ping)
 
