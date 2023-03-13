@@ -388,12 +388,15 @@ def report(create, species, age, method, gender, activity, quantity, position, c
         r = http_get(f'/v1/reports/{details}', {})
         if r is not None and r.status_code == 200:
             response = r.json()['result']
-            print(response)
             position = ''
             method = ''
             activity = ''
             age = ''
             gender = ''
+            lists = []
+            if response['lists']:
+                for l in response['lists']:
+                    lists.append(l['name'][lang])
             if response['latitude'] and response['longitude']:
                 position = f'{response["latitude"]},{response["longitude"]}'
             if response['method']:
@@ -414,6 +417,7 @@ def report(create, species, age, method, gender, activity, quantity, position, c
             print(f'activity  {activity}')
             print(f'age       {age}')
             print(f'gender    {gender}')
+            print(f'lists     {";".join(lists)}')
             print(f'archived  {get_date(response["archived"])}')
             print(f'comment   {response["comment"]}')
         else:
