@@ -9,6 +9,7 @@ import os
 import sys
 import tabulate
 import yaml
+from getpass import getpass
 
 __version__ = '0.1.0'
 
@@ -102,8 +103,7 @@ def login(email, password):
         password = sys.stdin.read()
 
     if password == None:
-        err_print('err: no password (--password) provided.')
-        return
+        password = getpass()
 
     r = http_post('/v1/auth', {
         'Authorization': 'Basic ' + base64.b64encode((email + ':' + password).encode()).decode(),
@@ -403,6 +403,22 @@ def report(create, species, age, method, gender, activity, quantity, position, c
                 err_print(f'err: {r.json()["message"]}')
 
 
+def whoami():
+    r = http_get('/v1/users/whoami', {})
+    if r is not None:
+        if r.status_code == 200:
+            data = r.json()
+            p = 'basic'
+            if data['permissions'] & 2 == 2:
+                p = 'admin'
+            print(f'uuid          {data["uuid"]}')
+            print(f'display name  {data["display_name"]}')
+            print(f'role          {p}')
+            print(f'last login    {data["last_seen_at"]}')
+        else:
+            err_print(f'err: {r.json()["message"]}')
+
+
 def main():
     global config
     config.open(os.path.join(os.path.expanduser('~'), '.config/300sf/config.yml'))
@@ -466,6 +482,8 @@ def main():
     reports_parser.add_argument('--from', dest='_from', help='From.')
     reports_parser.add_argument('--until', dest='until', help='Until.')
     reports_parser.add_argument('--archive', dest='archive', help='Archive.')
+
+    subparsers.add_parser('whoami', help='Who am I.')
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
