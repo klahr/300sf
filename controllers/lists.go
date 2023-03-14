@@ -36,35 +36,12 @@ func Lists(c *gin.Context) {
 		return
 	}
 
-	name := r.Name
-	name.Timestamp = time.Now()
-	name.Uuid = utils.GenerateShortUuid()
-	if err := models.DB.Create(&name).Error; err != nil {
+	list, err := CreateList(r.Template, r.Name, r.Visibility, user)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
 		return
-	}
-
-	list := models.List{
-		Model: models.Model{
-			Timestamp: time.Now(),
-			Uuid:      utils.GenerateShortUuid(),
-		},
-		UserId:     user.Id,
-		Visibility: r.Visibility,
-		Name:       name,
-	}
-
-	if r.Template.Valid {
-		var template models.ListTemplate
-		if err := models.DB.Where("uuid=?", r.Template).Preload("Species").First(&template).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": err.Error(),
-			})
-			return
-		}
-		list.Species = template.Species
 	}
 
 	if err := models.DB.Create(&list).Error; err != nil {
@@ -75,6 +52,35 @@ func Lists(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, list)
+}
+
+func CreateList(template zero.String, name models.Translation, visibility int64, user models.User) (*models.List, error) {
+	name.Timestamp = time.Now()
+	name.Uuid = utils.GenerateShortUuid()
+	if err := models.DB.Create(&name).Error; err != nil {
+		return nil, err
+	}
+
+	list := models.List{
+		Model: models.Model{
+			Timestamp: time.Now(),
+			Uuid:      utils.GenerateShortUuid(),
+		},
+		UserId:     user.Id,
+		Visibility: visibility,
+		Name:       name,
+	}
+
+	if template.Valid {
+		var t models.ListTemplate
+		if err := models.DB.Where("uuid=?", template.String).Preload("Species").First(&t).Error; err != nil {
+			return nil, err
+		}
+		list.ListTemplateId = zero.IntFrom(t.Id)
+		list.Species = t.Species
+	}
+
+	return &list, nil
 }
 
 func ListsList(c *gin.Context) {

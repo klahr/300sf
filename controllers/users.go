@@ -1,13 +1,10 @@
 package controllers
 
 import (
-	"encoding/json"
-	"fmt"
-	"io"
 	"net/http"
-	"net/url"
 	"time"
 
+	"git.sr.ht/~klahr/300sf/config"
 	"git.sr.ht/~klahr/300sf/models"
 	"git.sr.ht/~klahr/300sf/utils"
 	"github.com/gin-gonic/gin"
@@ -81,12 +78,50 @@ func Users(c *gin.Context) {
 		AcceptedTermsAt: zero.TimeFrom(time.Now()),
 	}
 
-	if err := models.DB.Omit("icon_id").Create(&user).Error; err != nil {
+	tx := models.DB.Begin()
+
+	if err := tx.Omit("icon_id").Create(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
+		tx.Rollback()
 		return
 	}
+
+	defaultLists := config.AppConfig.DefaultLists
+	for _, uuid := range defaultLists {
+		var listTemplate models.ListTemplate
+		if err := tx.Where("uuid=?", uuid).Preload("Name").First(&listTemplate).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": err.Error(),
+			})
+			tx.Rollback()
+			return
+		}
+
+		list, err := CreateList(zero.StringFrom(uuid), models.Translation{
+			Sv: listTemplate.Name.Sv,
+			En: listTemplate.Name.En,
+			La: listTemplate.Name.La,
+		}, models.VisibilityPrivate, user)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": err.Error(),
+			})
+			tx.Rollback()
+			return
+		}
+
+		if err := tx.Create(&list).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": err.Error(),
+			})
+			tx.Rollback()
+			return
+		}
+	}
+
+	tx.Commit()
 
 	c.JSON(http.StatusOK, user)
 }
@@ -121,34 +156,16 @@ func UsersMigrate(c *gin.Context) {
 		return
 	}
 
-	loginJsonRequest := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"method\":\"SessionManager.create\",\"params\": {\"email\":\"%s\",\"password\":\"%s\"},\"id\":1}", r.OldUsername, r.OldPassword)
-	loginResponse, err := http.PostForm("https://angelsware.com/swedbirds/ajax_api.php", url.Values{
-		"data": {loginJsonRequest},
-	})
-
-	if err == nil {
-		defer loginResponse.Body.Close()
-		body, _ := io.ReadAll(loginResponse.Body)
-
-		type jsonrpc_response struct {
-			Result struct {
-				Token  string `json:"token"`
-				UserId int64  `json:"userid"`
-			}
-		}
-
-		var response jsonrpc_response
-		json.Unmarshal(body, &response)
-
-		dataJsonRequest := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"method\":\"DataManager.get\",\"params\": {\"userid\":%d},\"id\":1}", response.Result.UserId)
-		dataResponse, _ := http.PostForm("https://angelsware.com/swedbirds/ajax_api.php", url.Values{
-			"data": {dataJsonRequest},
+	var user models.User
+	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
 		})
-
-		defer dataResponse.Body.Close()
-		body, _ = io.ReadAll(dataResponse.Body)
-
-		// TODO: All data seems to be available in the "body" variable. Parse and re-create in new database.
-		print(string(body))
+		return
 	}
+
+	res, _ := migrate(user, r.OldUsername, r.OldPassword)
+
+	c.JSON(http.StatusOK, res)
 }

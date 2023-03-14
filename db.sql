@@ -390,3 +390,14 @@ CREATE TABLE `300sf`.`report_tags` (
     REFERENCES `300sf`.`tags` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
+
+ALTER TABLE `300sf`.`lists` 
+ADD COLUMN `list_template_id` INT NULL AFTER `until`,
+ADD INDEX `fk_lists_3_idx` (`list_template_id` ASC) VISIBLE;
+;
+ALTER TABLE `300sf`.`lists` 
+ADD CONSTRAINT `fk_lists_3`
+  FOREIGN KEY (`list_template_id`)
+  REFERENCES `300sf`.`list_templates` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
