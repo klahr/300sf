@@ -219,6 +219,7 @@ func ReportsDetails(c *gin.Context) {
 		return
 	}
 
+	// TODO: Preload("Lists.Name") is not working and returns an empty list.
 	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("user_id=?", user.Id).Preload("Species.Name").Preload("Age.Name").Preload("Method.Name").Preload("Activity.Name").Preload("Lists.Name").Preload("Tags").First(&result).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
