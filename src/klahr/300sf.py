@@ -231,13 +231,25 @@ def template(create, description, visibility, add, remove, archive, rename, lang
         else:
             err_print('err: internal error')
     elif details:
-        r = http_get(f'/v1/lists_templates/{details}', {})
+        r = http_get(f'/v1/list_templates/{details}', {})
         if r is not None:
             if r.status_code == 200:
-                data = r.json()
-                print(data)
+                response = r.json()['result']
+                v = 'private'
+                if visibility == 1:
+                    v = 'hidden'
+                elif visibility == 2:
+                    v = 'public'
+                print(f'id           {response["uuid"]}')
+                print(f'name         {response["name"][lang]}')
+                print(f'visibility   {v}')
+                print(f'description  {response["description"][lang]}')
+                species = response['species']
+                if species:
+                    for spec in species:
+                        print(f'species  {spec["name"][lang]}')
             else:
-                err_print('err: internal error')
+                err_print(f'err: {r.json()["message"]}')
     else:
         r = http_get('/v1/list_templates/list', {})
         if r is not None:
@@ -435,7 +447,6 @@ def report(create, species, age, method, gender, activity, quantity, position, c
             print(f'age       {age}')
             print(f'gender    {gender}')
             print(f'lists     {";".join(lists)}')
-            print(f'archived  {get_date(response["archived"])}')
             print(f'comment   {response["comment"]}')
         else:
             response = r.json()
@@ -622,6 +633,17 @@ def tag(create, details, color, rename, archive):
         print(tabulate.tabulate(t, headers=['id', 'name'], tablefmt='plain'))
 
 
+def migrate(email, password):
+    r = http_post('/v1/users/migrate', {}, {
+        'old_username': email,
+        'old_password': password
+    })
+    if not r:
+        err_print(f'err: {r.json()["message"]}')
+    else:
+        print("yay")
+
+
 def main():
     global config
     config.open(os.path.join(os.path.expanduser('~'), '.config/300sf/config.yml'))
@@ -645,8 +667,6 @@ def main():
     login_parser.add_argument('--password', dest='password', help='Log in password')
 
     subparsers.add_parser('logout', help='Log out.')
-
-    subparsers.add_parser('test')
 
     api_key_parser = subparsers.add_parser('apikey', help='API key.')
     api_key_parser.add_argument('--create', dest='create', help='Create new API key.')
@@ -739,6 +759,10 @@ def main():
     tag_parser.add_argument('--archive', dest='archive', help='Archive.')
 
     subparsers.add_parser('whoami', help='Who am I.')
+
+    data_parser = subparsers.add_parser('migrate', help='Migrate.')
+    data_parser.add_argument('--email', dest='email', help='Email.')
+    data_parser.add_argument('--password', dest='password', help='Password.')
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
