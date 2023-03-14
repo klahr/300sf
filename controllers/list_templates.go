@@ -167,7 +167,6 @@ func ListTemplatesAddSpecies(c *gin.Context) {
 	}
 
 	if err := models.DB.Table("list_template_species").Create(&models.ListTemplateSpecies{
-		Timestamp:      time.Now(),
 		ListTemplateId: listTemplate.Id,
 		SpeciesId:      species.Id,
 	}).Error; err != nil {
@@ -266,4 +265,31 @@ func ListTemplatesRename(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusNoContent, nil)
+}
+
+func ListTemplatesDetails(c *gin.Context) {
+	var result models.ListTemplate
+
+	var user models.User
+	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("user_id=?", user.Id).Preload("Name").Preload("Description").Preload("Species.Name").First(&result).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	type response struct {
+		Result models.ListTemplate `json:"result"`
+	}
+
+	c.JSON(http.StatusOK, response{
+		Result: result,
+	})
 }

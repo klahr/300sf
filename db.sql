@@ -387,6 +387,6 @@ CREATE TABLE `300sf`.`report_tags` (
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_report_tags_2`
     FOREIGN KEY (`tag_id`)
-    REFERENCES `300sf`.`tags` (`tags`)
+    REFERENCES `300sf`.`tags` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
