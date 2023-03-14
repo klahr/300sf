@@ -236,9 +236,9 @@ def template(create, description, visibility, add, remove, archive, rename, lang
             if r.status_code == 200:
                 response = r.json()['result']
                 v = 'private'
-                if visibility == 1:
+                if response['visibility'] == 1:
                     v = 'hidden'
-                elif visibility == 2:
+                elif response['visibility'] == 2:
                     v = 'public'
                 print(f'id           {response["uuid"]}')
                 print(f'name         {response["name"][lang]}')
@@ -247,7 +247,7 @@ def template(create, description, visibility, add, remove, archive, rename, lang
                 species = response['species']
                 if species:
                     for spec in species:
-                        print(f'species  {spec["name"][lang]}')
+                        print(f'species      {spec["name"][lang]}')
             else:
                 err_print(f'err: {r.json()["message"]}')
     else:
@@ -310,7 +310,7 @@ def species(insert, order, details, lang):
             print(tabulate.tabulate(t, headers=['id', f'name({lang})', f'order({lang})'], tablefmt='plain'))
 
 
-def list(create, template, visibility, timespan, archive, rename, lang):
+def list(create, template, visibility, timespan, archive, rename, details, lang):
     global config
     if create is not None:
         v = 0
@@ -360,6 +360,8 @@ def list(create, template, visibility, timespan, archive, rename, lang):
                 err_print(f'err: {r.json()["message"]}')
         else:
             err_print('err: internal error')
+    elif details:
+        print("not yet implemented")
     else:
         r = http_get('/v1/lists/list', {})
         if r is not None:
@@ -423,9 +425,13 @@ def report(create, species, age, method, gender, activity, quantity, position, c
             age = ''
             gender = ''
             lists = []
+            tags = []
             if response['lists']:
                 for l in response['lists']:
                     lists.append(l['name'][lang])
+            if response['tags']:
+                for t in response['tags']:
+                    tags.append(t['name'])
             if response['latitude'] and response['longitude']:
                 position = f'{response["latitude"]},{response["longitude"]}'
             if response['method']:
@@ -447,6 +453,7 @@ def report(create, species, age, method, gender, activity, quantity, position, c
             print(f'age       {age}')
             print(f'gender    {gender}')
             print(f'lists     {";".join(lists)}')
+            print(f'tags      {";".join(tags)}')
             print(f'comment   {response["comment"]}')
         else:
             response = r.json()
@@ -693,6 +700,7 @@ def main():
     list_parser.add_argument('--archive', dest='archive', help='Archive.')
     list_parser.add_argument('--rename', dest='rename', nargs=2, help='Rename.')
     list_parser.add_argument('--lang', dest='lang', default=lang, help='Language.')
+    list_parser.add_argument('--details', dest='details', help='Details.')
 
     species_parser = subparsers.add_parser('species', help='Species.')
     species_parser.add_argument('--insert', dest='insert', help='Add species.')
