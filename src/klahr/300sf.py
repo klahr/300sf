@@ -54,8 +54,12 @@ def http_get(path, headers):
     access_token = get_access_token()
     if access_token is not None:
         headers['X-Access-Token'] = access_token
-    r = httpx.get(f'{config.get("api-endpoint")}{path}', headers=headers, timeout=30.0)
-    return r
+    try:
+        r = httpx.get(f'{config.get("api-endpoint")}{path}', headers=headers, timeout=30.0)
+        return r
+    except:
+        err_print('err: could not connect to server')
+        sys.exit(1)
 
 
 def http_post(path, headers, body):
@@ -65,8 +69,12 @@ def http_post(path, headers, body):
     access_token = get_access_token()
     if access_token is not None:
         headers['X-Access-Token'] = access_token
-    r = httpx.post(f'{config.get("api-endpoint")}{path}', headers=headers, content=json.dumps(body), timeout=30.0)
-    return r
+    try:
+        r = httpx.post(f'{config.get("api-endpoint")}{path}', headers=headers, content=json.dumps(body), timeout=30.0)
+        return r
+    except:
+        err_print('err: could not connect to server')
+        sys.exit(1)
 
 
 def version():
@@ -285,12 +293,16 @@ def species(insert, order, details, lang):
             response = r.json()
             err_print(f'err: {response["message"]}')
     elif details is not None:
-        r = http_get(f'/v1/species/{details}', {})
+        r = http_get(f'/v1/species/{details}', {'X-Language': lang})
         if r is not None and r.status_code == 200:
             response = r.json()['result']
             print(f'id         {response["uuid"]}')
             print(f'name       {response["name"][lang]}')
             print(f'order      {response["order"]["name"][lang]}')
+            wikipedia = r.json()['wikipedia']
+            print(f'url        {wikipedia["url"]}')
+            print(f'thumbnail  {wikipedia["thumbnail"]}')
+            print(f'summary    {wikipedia["summary"]}')
             recordings = r.json()['recordings']
             for rec in recordings:
                 print(f'recording  {rec["url"]}')
@@ -523,6 +535,7 @@ def named_record(insert, details, endpoint, lang):
             response = r.json()
             err_print(f'err: {response["message"]}')
     elif details is not None: 
+        print(f'{endpoint}/{details}')
         r = http_get(f'{endpoint}/{details}', {})
         if r is not None and r.status_code == 200:
             response = r.json()['result']
