@@ -7,10 +7,7 @@ import (
 )
 
 func VerifyDisplayName(displayName string) bool {
-	if len(displayName) < 4 {
-		return false
-	}
-	return true
+	return len(displayName) >= 4
 }
 
 func VerifyEmail(email string) bool {
@@ -20,9 +17,6 @@ func VerifyEmail(email string) bool {
 
 	var count int64
 	models.DB.Table(table.Users).Where("email=?", email).Count(&count)
-	if count > 0 {
-		return false
-	}
 
-	return true
+	return count <= 0
 }

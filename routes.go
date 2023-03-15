@@ -47,6 +47,17 @@ func adminMiddleware(c *gin.Context) {
 	requirePermission(c, auth.AuthPermissionAdmin)
 }
 
+func languageMiddleware(c *gin.Context) {
+	lang := c.Request.Header.Get("X-Language")
+	if lang != "" {
+		c.Set("language", lang)
+	} else {
+		c.Set("language", "en")
+	}
+
+	c.Next()
+}
+
 func apiKeyMiddleware(c *gin.Context) {
 	xApiKey := c.Request.Header.Get("X-Api-Key")
 	if xApiKey == "" {
@@ -139,7 +150,7 @@ func SetupRoutes(r *gin.Engine) {
 
 	// Species
 	r.GET("/v1/species/list", apiKeyMiddleware, controllers.SpeciesList)
-	r.GET("/v1/species/:uuid", apiKeyMiddleware, controllers.SpeciesDetails)
+	r.GET("/v1/species/:uuid", languageMiddleware, apiKeyMiddleware, controllers.SpeciesDetails)
 
 	// Reports
 	r.GET("/v1/reports/list", apiKeyMiddleware, basicMiddleware, controllers.ReportsList)
@@ -161,6 +172,7 @@ func SetupRoutes(r *gin.Engine) {
 
 	// Orders
 	r.GET("/v1/orders/list", apiKeyMiddleware, controllers.NamedRecordList[models.Order])
+	r.GET("/v1/orders/:uuid", apiKeyMiddleware, controllers.NamedRecordDetails[models.Order])
 
 	// Ages
 	r.GET("/v1/ages/list", apiKeyMiddleware, controllers.NamedRecordList[models.Age])

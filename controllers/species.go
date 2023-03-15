@@ -2,12 +2,15 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
+	"git.sr.ht/~klahr/300sf/config"
 	"git.sr.ht/~klahr/300sf/models"
 	"git.sr.ht/~klahr/300sf/utils"
+	"git.sr.ht/~klahr/300sf/wikipedia"
 	"git.sr.ht/~klahr/300sf/xenocanto"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
@@ -21,9 +24,10 @@ func Species(c *gin.Context) {
 
 	var r request
 	if err := c.ShouldBindJSON(&r); err != nil {
+		fmt.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    -10001,
-			"message": err.Error(),
+			"message": "could not parse request",
+			"code":    ErrorParse,
 		})
 		return
 	}
@@ -34,19 +38,22 @@ func Species(c *gin.Context) {
 	name.Timestamp = time.Now()
 	name.Uuid = utils.GenerateShortUuid()
 	if err := tx.Create(&name).Error; err != nil {
+		fmt.Println(err)
 		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err.Error(),
+			"message": "could not insert translation",
+			"code":    ErrorInsert,
 		})
 		return
 	}
 
 	var order models.Order
 	if err := tx.Where("uuid=?", r.OrderUuid).First(&order).Error; err != nil {
+		fmt.Println(err)
 		tx.Rollback()
 		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    -10001,
-			"message": err.Error(),
+			"message": "could not find order",
+			"code":    ErrorRecordNotFound,
 		})
 		return
 	}
@@ -63,8 +70,10 @@ func Species(c *gin.Context) {
 
 	if err := tx.Create(&species).Error; err != nil {
 		tx.Rollback()
+		fmt.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err.Error(),
+			"message": "could not insert species",
+			"code":    ErrorInsert,
 		})
 		return
 	}
@@ -78,8 +87,10 @@ func SpeciesList(c *gin.Context) {
 	var result []models.Species
 
 	if err := models.DB.Preload("Name").Preload("Order.Name").Find(&result).Error; err != nil {
+		fmt.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
+			"message": "species not found",
+			"code":    ErrorRecordNotFound,
 		})
 		return
 	}
@@ -99,14 +110,18 @@ func SpeciesDetails(c *gin.Context) {
 	type response struct {
 		Result     models.Species     `json:"result"`
 		Recordings []models.Recording `json:"recordings"`
+		Wikipedia  wikipedia.Data     `json:"wikipedia"`
 	}
 
-	cacheKey := c.Request.RequestURI
+	lang := c.GetString("language")
+	cacheKey := c.Request.RequestURI + lang
 	cached, err := models.Cache.Get(cacheKey).Result()
 	if err == redis.Nil {
 	} else if err != nil {
+		fmt.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err.Error(),
+			"message": "internal server error",
+			"code":    ErrorInternalServerError,
 		})
 		return
 	} else {
@@ -119,8 +134,10 @@ func SpeciesDetails(c *gin.Context) {
 	}
 
 	if err := models.DB.Where("uuid=?", c.Param("uuid")).Preload("Name").Preload("Order.Name").First(&result).Error; err != nil {
+		fmt.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
+			"message": "species not found",
+			"code":    ErrorRecordNotFound,
 		})
 		return
 	}
@@ -143,10 +160,11 @@ func SpeciesDetails(c *gin.Context) {
 	r := response{
 		Result:     result,
 		Recordings: recs,
+		Wikipedia:  wikipedia.GetData(c.GetString("language"), result),
 	}
 
 	if cached, err := json.Marshal(r); err == nil {
-		models.Cache.Set(cacheKey, cached, time.Hour*24)
+		models.Cache.Set(cacheKey, cached, time.Second*time.Duration(config.AppConfig.CacheDuration))
 	}
 
 	c.JSON(http.StatusOK, r)

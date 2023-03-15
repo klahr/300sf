@@ -8,20 +8,22 @@ import (
 )
 
 type App struct {
-	DataSource           string   `yaml:"data-source"`
-	Address              string   `yaml:"address"`
-	AccessTokenLifetime  int64    `yaml:"access-token-lifetime"`
-	RefreshTokenLifetime int64    `yaml:"refresh-token-lifetime"`
-	PrivateKeyFilename   string   `yaml:"private-key-filename"`
-	PublicKeyFilename    string   `yaml:"public-key-filename"`
-	Domain               string   `yaml:"domain"`
-	ResourcePath         string   `yaml:"resource-path"`
-	RedisHost            string   `yaml:"redis-host"`
-	LogLevel             string   `yaml:"log-level"`
-	DataStorage          string   `yaml:"data-storage"`
-	DefaultApiSoftLimit  int64    `yaml:"default-api-soft-limit"`
-	DefaultApiHardLimit  int64    `yaml:"default-api-hard-limit"`
-	DefaultLists         []string `yaml:"default-lists"`
+	DataSource             string   `yaml:"data-source"`
+	Address                string   `yaml:"address"`
+	AccessTokenLifetime    int64    `yaml:"access-token-lifetime"`
+	RefreshTokenLifetime   int64    `yaml:"refresh-token-lifetime"`
+	PrivateKeyFilename     string   `yaml:"private-key-filename"`
+	PublicKeyFilename      string   `yaml:"public-key-filename"`
+	Domain                 string   `yaml:"domain"`
+	ResourcePath           string   `yaml:"resource-path"`
+	RedisHost              string   `yaml:"redis-host"`
+	LogLevel               string   `yaml:"log-level"`
+	DataStorage            string   `yaml:"data-storage"`
+	DefaultApiSoftLimit    int64    `yaml:"default-api-soft-limit"`
+	DefaultApiHardLimit    int64    `yaml:"default-api-hard-limit"`
+	DefaultLists           []string `yaml:"default-lists"`
+	CacheDuration          int64    `json:"cache-duration"`
+	WikipediaCacheDuration int64    `json:"wikipedia-cache-duration"`
 }
 
 func (c *App) Parse(data []byte) error {
