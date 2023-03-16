@@ -303,9 +303,12 @@ def species(insert, order, details, lang):
             print(f'url        {wikipedia["url"]}')
             print(f'thumbnail  {wikipedia["thumbnail"]}')
             print(f'summary    {wikipedia["summary"]}')
+            for img in wikipedia['images']:
+                print(f'image      {img}')
             recordings = r.json()['recordings']
-            for rec in recordings:
-                print(f'recording  {rec["url"]}')
+            if recordings:
+                for rec in recordings:
+                    print(f'recording  {rec["url"]}')
         else:
             response = r.json()
             err_print(f'err: {response["message"]}')
@@ -399,14 +402,14 @@ def report(create, species, age, method, gender, activity, quantity, position, c
     if create:
         report = {
             'species_uuid': species,
-            'age_uuid': str(age or None),
-            'method_uuid': str(method or None),
-            'gender_uuid': str(gender or None),
-            'activity_uuid': str(activity or None),
-            'comment': str(comment or None),
+            'age_uuid': str(age or ''),
+            'method_uuid': str(method or ''),
+            'gender_uuid': str(gender or ''),
+            'activity_uuid': str(activity or ''),
+            'comment': str(comment or ''),
             'list_uuids': lists,
-            'from': str(_from or None),
-            'until': str(until or None),
+            'from': str(_from or ''),
+            'until': str(until or ''),
             'tag_uuids': tags
         }
         if quantity is not None:
@@ -513,15 +516,50 @@ def whoami():
     if r is not None:
         if r.status_code == 200:
             data = r.json()
+            user = data['user']
             p = 'basic'
-            if data['permissions'] & 2 == 2:
+            if user['permissions'] & 2 == 2:
                 p = 'admin'
-            print(f'id            {data["uuid"]}')
-            print(f'display name  {data["display_name"]}')
-            print(f'role          {p}')
-            print(f'last login    {data["last_seen_at"]}')
+            print(f'id           {user["uuid"]}')
+            print(f'displayname  {user["display_name"]}')
+            print(f'role         {p}')
+            print(f'last login   {user["last_seen_at"]}')
+            print(f'reports      {len(data["reports"])}')
         else:
             err_print(f'err: {r.json()["message"]}')
+
+
+def user(details):
+    if details:
+        r = http_get(f'/v1/users/{details}', {})
+        if r is not None:
+            if r.status_code == 200:
+                data = r.json()
+                user = data['user']
+                p = 'basic'
+                if user['permissions'] & 2 == 2:
+                    p = 'admin'
+                print(f'id           {user["uuid"]}')
+                print(f'displayname  {user["display_name"]}')
+                print(f'role         {p}')
+                print(f'reports      {len(data["reports"])}')
+                print(f'last login   {user["last_seen_at"]}')
+            else:
+                err_print(f'err: {r.json()["message"]}')
+    else:
+        r = http_get('/v1/users', {})
+        if r is not None:
+            if r.status_code == 200:
+                data = r.json()
+                t = []
+                for user in data:
+                    p = 'basic'
+                    if user['permissions'] & 2 == 2:
+                        p = 'admin'
+                    t.append([user['uuid'], user['display_name'], p])
+                print(tabulate.tabulate(t, headers=['id', 'displayname', 'role'], tablefmt='plain'))
+            else:
+                err_print(f'err: {r.json()["message"]}')
 
 
 def named_record(insert, details, endpoint, lang):
@@ -692,6 +730,9 @@ def main():
     api_key_parser.add_argument('--create', dest='create', help='Create new API key.')
     api_key_parser.add_argument('--revoke', dest='revoke', help='Revoke API key.')
 #    api_key_parser.add_argument('--scopes', dest='scopes', help='Scopes')
+
+    user_parser = subparsers.add_parser('user', help='User.')
+    user_parser.add_argument('--details', dest='details', help='Details.')
 
     template_parser = subparsers.add_parser('template', help='Template.')
     template_parser.add_argument('--create', dest='create', help='Create new template.')
