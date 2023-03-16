@@ -192,4 +192,7 @@ func setupPrivateRoutes(r *gin.Engine) {
 	r.GET("/v1/translations/list", adminMiddleware, controllers.TranslationList)
 	r.POST("/v1/translations/update", adminMiddleware, controllers.TranslationUpdate)
 	r.POST("/v1/ages", adminMiddleware, controllers.CreateNamedRecord[models.Age])
+
+	// Zones
+	r.POST("/v1/zones", adminMiddleware, controllers.Zones)
 }
