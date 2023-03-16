@@ -754,6 +754,16 @@ def zone(insert, polygon, type, details, lang):
             print(tabulate.tabulate(t, headers=['id', 'name', 'type'], tablefmt='plain'))
 
 
+def notification(comment, text):
+    r = http_post(f'/v1/notifications/{comment}/comment', {}, {
+        'text': text
+    })
+    if r:
+        print(r.json()["uuid"])
+    else:
+        err_print(f'err: {r.json()["message"]}')
+
+
 def migrate(email, password):
     r = http_post('/v1/users/migrate', {}, {
         'old_username': email,
@@ -846,6 +856,10 @@ def main():
     reports_parser.add_argument('--lang', dest='lang', default=lang, help='Language.')
     reports_parser.add_argument('--notification-comment', dest='notification_comment', help='Notification comment.')
     reports_parser.add_argument('--silent', dest='silent', action='store_true', default=False, help='Silent.')
+
+    notification_parser = subparsers.add_parser('notification', help='Notification')
+    notification_parser.add_argument('--comment', dest='comment', help='Comment.')
+    notification_parser.add_argument('--text', dest='text', help='Text.')
 
     gender_parser = subparsers.add_parser('gender', help='Gender.')
     gender_parser.add_argument('--insert', dest='insert', help='Add gender.')
