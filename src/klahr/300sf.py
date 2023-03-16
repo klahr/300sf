@@ -693,7 +693,7 @@ def tag(create, details, color, rename, archive):
         print(tabulate.tabulate(t, headers=['id', 'name'], tablefmt='plain'))
 
 
-def zone(insert, polygon, type):
+def zone(insert, polygon, type, details, lang):
     if insert:
         t = 4
         if type == 1:
@@ -714,8 +714,44 @@ def zone(insert, polygon, type):
                 print(r.json()['uuid'])
             else:
                 err_print(f'err: {r.json()["message"]}')
+    elif details:
+        r = http_get(f'/v1/zones/{details}', {})
+        if r is not None and r.status_code != 200:
+            response = r.json()
+            err_print(f'err: {response["message"]}')
+        else:
+            data = r.json()
+            d = data['result']
+            type = 'habitat'
+            if d['type'] == 1:
+                type = 'country'
+            elif d['type'] == 2:
+                type = 'county'
+            elif d['type'] == 3:
+                type = 'municipality'
+            print(f'id       {d["uuid"]}')
+            print(f'name     {d["name"][lang]}')
+            print(f'type     {type}')
+            print(f'polygon  {d["polygon"]}')
     else:
-        pass
+        r = http_get('/v1/zones/list', {})
+        if r is not None and r.status_code != 200:
+            response = r.json()
+            err_print(f'err: {response["message"]}')
+        else:
+            data = r.json()
+            t = []
+            for d in data['result']:
+                type = 'habitat'
+                if d['type'] == 1:
+                    type = 'country'
+                elif d['type'] == 2:
+                    type = 'county'
+                elif d['type'] == 3:
+                    type = 'municipality'
+
+                t.append([d['uuid'], d['name'][lang], type])
+            print(tabulate.tabulate(t, headers=['id', 'name', 'type'], tablefmt='plain'))
 
 
 def migrate(email, password):
@@ -840,6 +876,8 @@ def main():
     zone_parser.add_argument('--insert', dest='insert', help='Add zone.')
     zone_parser.add_argument('--polygon', dest='polygon', help='Polygon.')
     zone_parser.add_argument('--type', dest='type', choices=['country', 'county', 'municipality', 'habitat'], help='Type.')
+    zone_parser.add_argument('--details', dest='details', help='Details.')
+    zone_parser.add_argument('--lang', dest='lang', default=lang, help='Language.')
 
     translation_parser = subparsers.add_parser('translation', help='Translation.')
     translation_parser.add_argument('--update', dest='update', help='Update translation uuid.')
