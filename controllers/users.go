@@ -126,7 +126,55 @@ func Users(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+func UsersGetUser(c *gin.Context) {
+	type response struct {
+		User    models.User     `json:"user"`
+		Reports []models.Report `json:"reports"`
+	}
+
+	var user models.User
+	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("deleted_at IS NULL").First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var reports []models.Report
+	if err := models.DB.Where("user_id=?", user.Id).Where("archived IS NULL").Find(&reports).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	for i := range reports {
+		reports[i].Comment = zero.NewString("", false)
+	}
+
+	c.JSON(http.StatusOK, response{
+		User:    user,
+		Reports: reports,
+	})
+}
+
+func UsersGetUsers(c *gin.Context) {
+	var users []models.User
+	if err := models.DB.Where("deleted_at IS NULL").Find(&users).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, users)
+}
+
 func UsersWhoAmI(c *gin.Context) {
+	type response struct {
+		User    models.User     `json:"user"`
+		Reports []models.Report `json:"reports"`
+	}
+
 	var user models.User
 	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -134,7 +182,19 @@ func UsersWhoAmI(c *gin.Context) {
 		})
 		return
 	}
-	c.JSON(http.StatusOK, user)
+
+	var reports []models.Report
+	if err := models.DB.Where("user_id=?", user.Id).Where("archived IS NULL").Find(&reports).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, response{
+		User:    user,
+		Reports: reports,
+	})
 }
 
 func UsersExportData(c *gin.Context) {
