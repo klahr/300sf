@@ -14,19 +14,21 @@ import (
 
 func Reports(c *gin.Context) {
 	type request struct {
-		SpeciesUuid  string      `json:"species_uuid"`
-		From         zero.Time   `json:"from"`
-		Until        zero.Time   `json:"until"`
-		Latitude     zero.Float  `json:"latitude"`
-		Longitude    zero.Float  `json:"longitude"`
-		Quantity     zero.Int    `json:"quantity"`
-		AgeUuid      zero.String `json:"age_uuid"`
-		ActivityUuid zero.String `json:"activity_uuid"`
-		GenderUuid   zero.String `json:"gender_uuid"`
-		MethodUuid   zero.String `json:"method_uuid"`
-		Comment      zero.String `json:"comment"`
-		ListUuids    []string    `json:"list_uuids"`
-		TagUuids     []string    `json:"tag_uuids"`
+		SpeciesUuid         string      `json:"species_uuid"`
+		From                zero.Time   `json:"from"`
+		Until               zero.Time   `json:"until"`
+		Latitude            zero.Float  `json:"latitude"`
+		Longitude           zero.Float  `json:"longitude"`
+		Quantity            zero.Int    `json:"quantity"`
+		AgeUuid             zero.String `json:"age_uuid"`
+		ActivityUuid        zero.String `json:"activity_uuid"`
+		GenderUuid          zero.String `json:"gender_uuid"`
+		MethodUuid          zero.String `json:"method_uuid"`
+		Comment             zero.String `json:"comment"`
+		ListUuids           []string    `json:"list_uuids"`
+		TagUuids            []string    `json:"tag_uuids"`
+		Silent              bool        `json:"silent"`
+		NotificationComment zero.String `json:"notification_comment"`
 	}
 
 	var r request
@@ -38,21 +40,25 @@ func Reports(c *gin.Context) {
 		return
 	}
 
+	tx := models.DB.Begin()
+
 	var user models.User
-	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+	if err := tx.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
 			"message": err.Error(),
 		})
+		tx.Rollback()
 		return
 	}
 
 	var species models.Species
-	if err := models.DB.Where("uuid=?", r.SpeciesUuid).First(&species).Error; err != nil {
+	if err := tx.Where("uuid=?", r.SpeciesUuid).First(&species).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
 			"message": err.Error(),
 		})
+		tx.Rollback()
 		return
 	}
 
@@ -80,11 +86,12 @@ func Reports(c *gin.Context) {
 
 	if r.AgeUuid.Valid {
 		var age models.Age
-		if err := models.DB.Where("uuid=?", r.AgeUuid.String).First(&age).Error; err != nil {
+		if err := tx.Where("uuid=?", r.AgeUuid.String).First(&age).Error; err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"code":    -10001,
 				"message": err.Error(),
 			})
+			tx.Rollback()
 			return
 		}
 		report.AgeId = zero.IntFrom(age.Id)
@@ -92,11 +99,12 @@ func Reports(c *gin.Context) {
 
 	if r.ActivityUuid.Valid {
 		var activity models.Activity
-		if err := models.DB.Where("uuid=?", r.ActivityUuid.String).First(&activity).Error; err != nil {
+		if err := tx.Where("uuid=?", r.ActivityUuid.String).First(&activity).Error; err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"code":    -10001,
 				"message": err.Error(),
 			})
+			tx.Rollback()
 			return
 		}
 		report.ActivityId = zero.IntFrom(activity.Id)
@@ -104,11 +112,12 @@ func Reports(c *gin.Context) {
 
 	if r.GenderUuid.Valid {
 		var gender models.Gender
-		if err := models.DB.Where("uuid=?", r.GenderUuid.String).First(&gender).Error; err != nil {
+		if err := tx.Where("uuid=?", r.GenderUuid.String).First(&gender).Error; err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"code":    -10001,
 				"message": err.Error(),
 			})
+			tx.Rollback()
 			return
 		}
 		report.GenderId = zero.IntFrom(gender.Id)
@@ -116,11 +125,12 @@ func Reports(c *gin.Context) {
 
 	if r.MethodUuid.Valid {
 		var method models.Method
-		if err := models.DB.Where("uuid=?", r.MethodUuid.String).First(&method).Error; err != nil {
+		if err := tx.Where("uuid=?", r.MethodUuid.String).First(&method).Error; err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"code":    -10001,
 				"message": err.Error(),
 			})
+			tx.Rollback()
 			return
 		}
 		report.MethodId = zero.IntFrom(method.Id)
@@ -132,11 +142,12 @@ func Reports(c *gin.Context) {
 
 	var lists []models.List
 	if len(r.ListUuids) > 0 {
-		if err := models.DB.Where("uuid IN (" + strings.Join(r.ListUuids, ",") + ")").Find(&lists).Error; err != nil {
+		if err := tx.Where("uuid IN (" + strings.Join(r.ListUuids, ",") + ")").Find(&lists).Error; err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"code":    -10001,
 				"message": err.Error(),
 			})
+			tx.Rollback()
 			return
 		}
 	}
@@ -149,23 +160,53 @@ func Reports(c *gin.Context) {
 
 	var tags []models.Tag
 	if len(r.TagUuids) > 0 {
-		if err := models.DB.Where("uuid IN (" + strings.Join(r.TagUuids, ",") + ")").Where("archived IS NULL").Find(&tags).Error; err != nil {
+		if err := tx.Where("uuid IN (" + strings.Join(r.TagUuids, ",") + ")").Where("archived IS NULL").Find(&tags).Error; err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"code":    -10001,
 				"message": err.Error(),
 			})
+			tx.Rollback()
 			return
 		}
 	}
 
 	report.Tags = tags
 
-	if err := models.DB.Create(&report).Error; err != nil {
+	if err := tx.Create(&report).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
+		tx.Rollback()
 		return
 	}
+
+	if !r.Silent {
+		notification := models.Notification{
+			Model: models.Model{
+				Timestamp: time.Now(),
+				Uuid:      utils.GenerateShortUuid(),
+			},
+			ReportId: report.Id,
+			Comment: models.Comment{
+				Model: models.Model{
+					Timestamp: time.Now(),
+					Uuid:      utils.GenerateShortUuid(),
+				},
+				UserId: user.Id,
+				Text:   r.NotificationComment.String,
+			},
+		}
+
+		if err := tx.Create(&notification).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": err.Error(),
+			})
+			tx.Rollback()
+			return
+		}
+	}
+
+	tx.Commit()
 
 	c.JSON(http.StatusOK, report)
 }

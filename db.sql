@@ -432,3 +432,46 @@ ADD CONSTRAINT `fk_reports_7`
   REFERENCES `300sf`.`comments` (`id`)
   ON DELETE NO ACTION
   ON UPDATE NO ACTION;
+
+CREATE TABLE `300sf`.`notifications` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `timestamp` DATETIME NOT NULL,
+  `uuid` VARCHAR(32) NOT NULL,
+  `report_id` INT NOT NULL,
+  `comment_id` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) VISIBLE,
+  INDEX `index3` (`uuid` ASC) VISIBLE,
+  UNIQUE INDEX `index4` (`report_id` ASC, `comment_id` ASC) VISIBLE,
+  INDEX `fk_notifications_2_idx` (`comment_id` ASC) VISIBLE,
+  CONSTRAINT `fk_notifications_1`
+    FOREIGN KEY (`report_id`)
+    REFERENCES `300sf`.`reports` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_notifications_2`
+    FOREIGN KEY (`comment_id`)
+    REFERENCES `300sf`.`comments` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+CREATE TABLE `300sf`.`notification_comments` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `notification_id` INT NOT NULL,
+  `comment_id` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `index2` (`notification_id` ASC, `comment_id` ASC) VISIBLE,
+  INDEX `fk_notification_comments_2_idx` (`comment_id` ASC) VISIBLE,
+  CONSTRAINT `fk_notification_comments_1`
+    FOREIGN KEY (`notification_id`)
+    REFERENCES `300sf`.`notifications` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_notification_comments_2`
+    FOREIGN KEY (`comment_id`)
+    REFERENCES `300sf`.`comments` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+ALTER TABLE `300sf`.`notifications` 
+ADD COLUMN `processed` DATETIME NULL AFTER `comment_id`;
