@@ -115,7 +115,14 @@ func migrate(user models.User, username, password string) (interface{}, error) {
 						},
 						SpeciesId: b.Id,
 						UserId:    user.Id,
-						Comment:   zero.StringFrom(dc.Comment),
+						Comment: &models.Comment{
+							Model: models.Model{
+								Timestamp: time.Now(),
+								Uuid:      utils.GenerateShortUuid(),
+							},
+							UserId: user.Id,
+							Text:   dc.Comment,
+						},
 					}
 
 					if dc.DateSeen != "" {

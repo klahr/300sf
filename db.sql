@@ -401,3 +401,34 @@ ADD CONSTRAINT `fk_lists_3`
   REFERENCES `300sf`.`list_templates` (`id`)
   ON DELETE NO ACTION
   ON UPDATE NO ACTION;
+
+-- >
+CREATE TABLE `300sf`.`comments` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `timestamp` DATETIME NOT NULL,
+  `uuid` VARCHAR(32) NOT NULL,
+  `user_id` INT NOT NULL,
+  `text` TEXT NOT NULL,
+  `edited` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) VISIBLE,
+  INDEX `index3` (`uuid` ASC) VISIBLE,
+  INDEX `fk_comment_1_idx` (`user_id` ASC) VISIBLE,
+  CONSTRAINT `fk_comment_1`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `300sf`.`users` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+ALTER TABLE `300sf`.`reports` 
+CHANGE COLUMN `comment` `comment_id` INT NULL DEFAULT NULL ;
+
+ALTER TABLE `300sf`.`reports` 
+ADD INDEX `fk_reports_7_idx` (`comment_id` ASC) VISIBLE;
+;
+ALTER TABLE `300sf`.`reports` 
+ADD CONSTRAINT `fk_reports_7`
+  FOREIGN KEY (`comment_id`)
+  REFERENCES `300sf`.`comments` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;

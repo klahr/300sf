@@ -148,10 +148,6 @@ func UsersGetUser(c *gin.Context) {
 		return
 	}
 
-	for i := range reports {
-		reports[i].Comment = zero.NewString("", false)
-	}
-
 	c.JSON(http.StatusOK, response{
 		User:    user,
 		Reports: reports,

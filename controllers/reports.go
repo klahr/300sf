@@ -68,7 +68,14 @@ func Reports(c *gin.Context) {
 		Latitude:  r.Latitude,
 		Longitude: r.Longitude,
 		Quantity:  r.Quantity,
-		Comment:   r.Comment,
+		Comment: &models.Comment{
+			Model: models.Model{
+				Timestamp: time.Now(),
+				Uuid:      utils.GenerateShortUuid(),
+			},
+			UserId: user.Id,
+			Text:   r.Comment.String,
+		},
 	}
 
 	if r.AgeUuid.Valid {
@@ -220,7 +227,7 @@ func ReportsDetails(c *gin.Context) {
 	}
 
 	// TODO: Preload("Lists.Name") is not working and returns an empty list.
-	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("user_id=?", user.Id).Preload("Species.Name").Preload("Age.Name").Preload("Method.Name").Preload("Activity.Name").Preload("Lists.Name").Preload("Tags").First(&result).Error; err != nil {
+	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("user_id=?", user.Id).Preload("Species.Name").Preload("Age.Name").Preload("Method.Name").Preload("Activity.Name").Preload("Lists.Name").Preload("Tags").Preload("Comment").First(&result).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
