@@ -398,7 +398,7 @@ def list(create, template, visibility, timespan, archive, rename, details, lang)
                 err_print(f'err: {r.json()["message"]}')
 
 
-def report(create, species, age, method, gender, activity, quantity, position, comment, lists, _from, until, archive, details, tags, add_tag, remove_tag, lang):
+def report(create, species, age, method, gender, activity, quantity, position, comment, lists, _from, until, archive, details, tags, add_tag, remove_tag, lang, notification_comment, silent):
     if create:
         report = {
             'species_uuid': species,
@@ -410,6 +410,8 @@ def report(create, species, age, method, gender, activity, quantity, position, c
             'list_uuids': lists,
             'from': str(_from or ''),
             'until': str(until or ''),
+            'notification_comment': str(notification_comment or ''),
+            'silent': silent,
             'tag_uuids': tags
         }
         if quantity is not None:
@@ -691,6 +693,31 @@ def tag(create, details, color, rename, archive):
         print(tabulate.tabulate(t, headers=['id', 'name'], tablefmt='plain'))
 
 
+def zone(insert, polygon, type):
+    if insert:
+        t = 4
+        if type == 1:
+            t = 'country'
+        elif type == 'county':
+            t = 2
+        elif type == 'municipality':
+            t = 3
+        r = http_post(f'/v1/zones', {}, {
+            'name': {
+                'en': insert
+            },
+            'polygon': polygon,
+            'type': t
+        })
+        if r is not None:
+            if r.status_code == 200:
+                print(r.json()['uuid'])
+            else:
+                err_print(f'err: {r.json()["message"]}')
+    else:
+        pass
+
+
 def migrate(email, password):
     r = http_post('/v1/users/migrate', {}, {
         'old_username': email,
@@ -781,6 +808,8 @@ def main():
     reports_parser.add_argument('--add-tag', dest='add_tag', nargs=2, help='Add tag.')
     reports_parser.add_argument('--remove-tag', dest='remove_tag', nargs=2, help='Remove tag.')
     reports_parser.add_argument('--lang', dest='lang', default=lang, help='Language.')
+    reports_parser.add_argument('--notification-comment', dest='notification_comment', help='Notification comment.')
+    reports_parser.add_argument('--silent', dest='silent', action='store_true', default=False, help='Silent.')
 
     gender_parser = subparsers.add_parser('gender', help='Gender.')
     gender_parser.add_argument('--insert', dest='insert', help='Add gender.')
@@ -806,6 +835,11 @@ def main():
     method_parser.add_argument('--insert', dest='insert', help='Add method.')
     method_parser.add_argument('--details', dest='details', help='Details.')
     method_parser.add_argument('--lang', dest='lang', default=lang, help='Language.')
+
+    zone_parser = subparsers.add_parser('zone', help='Zone.')
+    zone_parser.add_argument('--insert', dest='insert', help='Add zone.')
+    zone_parser.add_argument('--polygon', dest='polygon', help='Polygon.')
+    zone_parser.add_argument('--type', dest='type', choices=['country', 'county', 'municipality', 'habitat'], help='Type.')
 
     translation_parser = subparsers.add_parser('translation', help='Translation.')
     translation_parser.add_argument('--update', dest='update', help='Update translation uuid.')
