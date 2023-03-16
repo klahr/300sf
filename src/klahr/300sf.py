@@ -762,7 +762,7 @@ def notification(comment, text):
     r = http_post(f'/v1/notifications/{comment}/comment', {}, {
         'text': text
     })
-    if r:
+    if r and r.status_code == 200:
         print(r.json()["uuid"])
     else:
         err_print(f'err: {r.json()["message"]}')
