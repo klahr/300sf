@@ -183,6 +183,9 @@ func SetupRoutes(r *gin.Engine) {
 	r.GET("/v1/zones/list", apiKeyMiddleware, controllers.NamedRecordList[models.Zone])
 	r.GET("/v1/zones/:uuid", apiKeyMiddleware, controllers.NamedRecordDetails[models.Zone])
 
+	// Notifications
+	r.POST("/v1/notifications/:uuid/comment", apiKeyMiddleware, basicMiddleware, controllers.NotificationsComment)
+
 	setupPrivateRoutes(r)
 }
 
