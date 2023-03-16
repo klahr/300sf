@@ -402,7 +402,6 @@ ADD CONSTRAINT `fk_lists_3`
   ON DELETE NO ACTION
   ON UPDATE NO ACTION;
 
--- >
 CREATE TABLE `300sf`.`comments` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `timestamp` DATETIME NOT NULL,
@@ -492,3 +491,47 @@ CREATE TABLE `300sf`.`zones` (
     REFERENCES `300sf`.`translations` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
+
+CREATE TABLE `300sf`.`subscriptions` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `timestamp` DATETIME NOT NULL,
+  `uuid` VARCHAR(45) NOT NULL,
+  `user_id` INT NOT NULL,
+  `zone_id` INT NOT NULL,
+  `paused` DATETIME NULL,
+  `archived` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) VISIBLE,
+  INDEX `index3` (`uuid` ASC) VISIBLE,
+  INDEX `fk_subscriptions_1_idx` (`user_id` ASC) VISIBLE,
+  INDEX `fk_subscriptions_2_idx` (`zone_id` ASC) VISIBLE,
+  CONSTRAINT `fk_subscriptions_1`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `300sf`.`users` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_subscriptions_2`
+    FOREIGN KEY (`zone_id`)
+    REFERENCES `300sf`.`zones` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+CREATE TABLE `300sf`.`subscription_species` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `subscription_id` INT NOT NULL,
+  `species_id` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `index2` (`subscription_id` ASC, `species_id` ASC) VISIBLE,
+  INDEX `fk_subscription_species_2_idx` (`species_id` ASC) VISIBLE,
+  CONSTRAINT `fk_subscription_species_1`
+    FOREIGN KEY (`subscription_id`)
+    REFERENCES `300sf`.`subscriptions` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_subscription_species_2`
+    FOREIGN KEY (`species_id`)
+    REFERENCES `300sf`.`species` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+-- >
