@@ -9,4 +9,5 @@ type Notification struct {
 	CommentId int64     `json:"-"`
 	Comment   Comment   `json:"comment"`
 	Processed zero.Time `json:"processed"`
+	Comments  []Comment `json:"comments" gorm:"many2many:notification_comments"`
 }
