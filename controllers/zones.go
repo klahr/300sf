@@ -92,7 +92,3 @@ func Zones(c *gin.Context) {
 
 	c.JSON(http.StatusOK, zone)
 }
-
-func ZonesList(c *gin.Context) {
-
-}
