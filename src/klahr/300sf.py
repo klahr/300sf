@@ -469,7 +469,7 @@ def report(create, species, age, method, gender, activity, quantity, position, c
             print(f'gender    {gender}')
             print(f'lists     {";".join(lists)}')
             print(f'tags      {";".join(tags)}')
-            print(f'comment   {response["comment"]}')
+            print(f'comment   {response["comment"]["text"]}')
         else:
             response = r.json()
             err_print(f'err: {response["message"]}')
