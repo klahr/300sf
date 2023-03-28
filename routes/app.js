@@ -4,7 +4,7 @@ const router = express.Router();
 
 module.exports = router;
 
-router.get('/ping', function(req, res) {
-	console.log('ping');
+router.get('/', function(req, res) {
+	res.render('pages/home');
 });
 
