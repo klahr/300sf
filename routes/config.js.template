@@ -1,0 +1,5 @@
+const Config = {
+	ApiKey: '<YOUR_API_KEY>'
+};
+
+module.exports = Config;
