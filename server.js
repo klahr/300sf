@@ -3,6 +3,14 @@ const i18n = require('i18n');
 const app = express();
 const port = 3000;
 
+i18n.configure({
+	locales: ['en', 'sv'],
+	cookie: 'lang',
+	queryParameter: 'lang',
+	updateFiles: false,
+	directory: __dirname + '/locales'
+});
+
 app.set('view engine', 'ejs');
 app.use(i18n.init);
 
