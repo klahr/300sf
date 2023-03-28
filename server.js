@@ -1,0 +1,16 @@
+const express = require('express');
+const i18n = require('i18n');
+const app = express();
+const port = 3000;
+
+app.set('view engine', 'ejs');
+app.use(i18n.init);
+
+const router = require('./routes/app'); 
+app.use('/', router);
+app.use(express.static(__dirname + '/public'));
+
+app.listen(port, function() {
+	console.log(`listening on port ${port}`);
+});
+
