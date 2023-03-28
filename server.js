@@ -18,8 +18,8 @@ app.use(i18n.init);
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(expressLayouts);
 
-const router = require('./routes/app'); 
-app.use('/', router);
+app.use('/', require('./routes/app'));
+app.use('/v1', require('./routes/v1'));
 app.use(express.static(__dirname + '/public'));
 
 app.listen(port, function() {

@@ -1,0 +1,22 @@
+const express = require('express');
+const router = express.Router();
+const nm = require('./network-manager');
+const config = require('./config');
+module.exports = router;
+
+router.post('/auth', function(req, res) {
+	const post = req.body;
+	const email = post.email;
+	const password = post.password;
+	const authorization = 'Basic ' + Buffer.from(email + ':' + password).toString('base64');
+
+	nm.request('POST', '/v1/auth', {'Authorization': authorization}, function(response) {
+		console.log(response);
+	}, function(error) {
+		console.log(error);
+	}, {
+		'refresh-token': ''
+	});
+	res.render('pages/home');
+});
+
