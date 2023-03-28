@@ -1,9 +1,7 @@
 version: '3.5'
-
 networks:
   monitor-net:
     driver: bridge
-
 services:
   # api.300sf.se
   albatross:
@@ -20,7 +18,6 @@ services:
       - "DATA_STORAGE_PATH=/resources/"
     volumes:
       - /home/klarre/logs:/logs
-
   # api.300sf.se
   blackbird:
     container_name: blackbird
@@ -36,13 +33,20 @@ services:
       - "DATA_STORAGE_PATH=/resources/"
     volumes:
       - /home/klarre/logs:/logs
+  # app.300sf.se
+  yellowhammer:
+    container_name: yellowhammer
+    network_mode: host
+    build:
+      context: ../300sf-webapp
+      dockerfile: Dockerfile
+      restart: unless-stopped
 
-  # 300sf.se
-  # woodpecker:
-  #   container_name: woodpecker
-  #   network_mode: host
-  #   build:
-  #     context: ../300sf-web
-  #     dockerfile: Dockerfile
-  #   restart: unless-stopped
-
+# 300sf.se
+# woodpecker:
+#   container_name: woodpecker
+#   network_mode: host
+#   build:
+#     context: ../300sf-web
+#     dockerfile: Dockerfile
+#   restart: unless-stopped
