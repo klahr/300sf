@@ -40,7 +40,7 @@ services:
     build:
       context: ../300sf-webapp
       dockerfile: Dockerfile
-      restart: unless-stopped
+    restart: unless-stopped
 
 # 300sf.se
 # woodpecker:
