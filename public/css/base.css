@@ -1,0 +1,63 @@
+:root {
+	--small-distance: 8px;
+	--medium-distance: 16px;
+	--medium-radius: 8px;
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	font-family: 'Roboto', sans-serif;
+}
+
+*.error {
+	color: var(--error-color);
+}
+
+a {
+	color: var(--primary-color);
+	font-size: 1em;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+p {
+	color: var(--secondary-color);
+	font-size: 1em;
+}
+
+h1 {
+	color: var(--secondary-color);
+	font-size: 3em;
+}
+
+h2 {
+	font-size: 2em;
+}
+
+div.background {
+	background-color: var(--background-color);
+	height: 100vh;
+}
+
+div.surface {
+	background-color: var(--surface-color);
+	border-radius: var(--medium-radius);
+	margin: var(--medium-distance);
+	padding: var(--medium-distance);
+}
+
+input {
+	background-color: transparent;
+	border: none;
+	box-shadow: 0 1px 0 0;
+	color: var(--secondary-color);
+	font-size: 1em;
+	padding: var(--small-distance);
+}
+
+input:focus {
+	outline: none;
+}

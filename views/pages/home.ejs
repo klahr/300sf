@@ -1,11 +1,14 @@
 <%- contentFor('body') %>
 
-<h1>Hello</h1>
+<h1><%= __('title') %></h1>
+<p>All right, let us check some birdies!</p>
 
-<form method="POST" action="/v1/auth">
-	<input name="email" type="email" required></input>
-	<input name="password" type="password" required></input>
-	<input name="stay_logged_in" type="checkbox"></input>
-	<button type="submit">Log In</button>
-</form>
+<div class="surface">
+	<form method="POST" action="/v1/auth">
+		<input name="email" type="email" required></input>
+		<input name="password" type="password" required></input>
+		<input name="stay_logged_in" type="checkbox"></input>
+		<button type="submit">Log In</button>
+	</form>
+</div>
 
