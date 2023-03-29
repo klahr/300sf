@@ -1,10 +1,10 @@
 package models
 
 const (
-	ZoneTypeUnknown = iota
-	ZoneTypeCountry
-	ZoneTypeCounty
-	ZoneMunicipality
-	ZoneHabitat
-	ZoneOutOfRange
+	ZoneTypeUnknown  = 0
+	ZoneTypeCountry  = 2
+	ZoneTypeCounty   = 4
+	ZoneMunicipality = 7
+	ZoneHabitat      = 10
+	ZoneOutOfRange   = ZoneHabitat + 1
 )

@@ -11,6 +11,7 @@ type AuthenticationResponse struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 	ExpiresAt    int64  `json:"expires_at"`
+	MaxAge       int64  `json:"max_age"`
 }
 
 func Authenticate(uuid string, availablePermissions int64, accessTokenLifetime int64, refreshTokenLifetime int64, privateKey []byte) *AuthenticationResponse {
@@ -55,6 +56,7 @@ func Authenticate(uuid string, availablePermissions int64, accessTokenLifetime i
 		RefreshToken: refreshToken,
 		TokenType:    "bearer",
 		ExpiresAt:    expiresAt,
+		MaxAge:       accessTokenLifetime,
 	}
 
 	return &authenticationResponseSuccess
