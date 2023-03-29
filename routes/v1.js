@@ -13,7 +13,13 @@ router.post('/auth', function(req, res) {
 
 	nm.request('POST', '/v1/auth', {'Authorization': authorization}, function(response) {
 		console.log(response);
-		res.cookie('300sf_at', response.access_token);
+		if (stayLoggedIn) {
+			res.cookie('300sf_at', response.access_token, {
+				maxAge: response.max_age
+			});
+		} else {
+			res.cookie('300sf_at', response.access_token);
+		}
 		res.redirect('/');
 	}, function(error) {
 		console.log(error);
