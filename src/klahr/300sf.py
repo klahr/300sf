@@ -442,16 +442,12 @@ def list(create, template, visibility, timespan, archive, rename, details, lang)
             if r.status_code == 200:
                 data = r.json()
                 t = []
-                counter = 1
                 for s in data["list"]["species"]:
-                    t.append(
-                        [counter, s["uuid"], s["name"][lang], s["order"]["name"][lang]]
-                    )
-                    counter += 1
+                    t.append([s["uuid"], s["name"][lang], s["order"]["name"][lang]])
                 print(
                     tabulate.tabulate(
                         t,
-                        headers=["#", "id", f"name({lang})", f"order({lang})"],
+                        headers=["id", f"name({lang})", f"order({lang})"],
                         tablefmt="plain",
                     )
                 )
