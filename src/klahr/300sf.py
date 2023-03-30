@@ -326,7 +326,7 @@ def template(
                     sps = 0
                     if templ["species"] is not None:
                         sps = len(templ["species"])
-                    t.append([templ["uuid"], templ["name"][lang], visibility, species])
+                    t.append([templ["uuid"], templ["name"][lang], visibility, sps])
                 print(
                     tabulate.tabulate(
                         t,
