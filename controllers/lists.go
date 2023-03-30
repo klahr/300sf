@@ -237,3 +237,22 @@ func ListsTimespan(c *gin.Context) {
 
 	c.JSON(http.StatusNoContent, nil)
 }
+
+func ListsDetails(c *gin.Context) {
+	var result models.List
+
+	if err := models.DB.Where("uuid=?", c.Param("uuid")).Preload("Species.Name").Preload("Species.Order.Name").First(&result).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	type response struct {
+		Result models.List `json:"list"`
+	}
+
+	c.JSON(http.StatusOK, response{
+		Result: result,
+	})
+}

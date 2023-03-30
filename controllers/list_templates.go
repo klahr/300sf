@@ -104,12 +104,7 @@ func ListTemplatesArchive(c *gin.Context) {
 
 func ListTemplatesList(c *gin.Context) {
 	var user models.User
-	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
-		})
-		return
-	}
+	models.DB.Where("uuid=?", c.GetString("uuid")).First(&user)
 
 	var listTemplates []models.ListTemplate
 	if err := models.DB.Table(table.ListTemplates).Where("user_id=? OR visibility=?", user.Id, models.VisibilityPublic).Where("archived IS NULL").Preload("Name").Preload("Description").Preload("Species").Find(&listTemplates).Error; err != nil {
@@ -271,14 +266,9 @@ func ListTemplatesDetails(c *gin.Context) {
 	var result models.ListTemplate
 
 	var user models.User
-	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
-		})
-		return
-	}
+	models.DB.Where("uuid=?", c.GetString("uuid")).First(&user)
 
-	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("user_id=? OR visibility=?", user.Id, models.VisibilityPublic).Preload("Name").Preload("Description").Preload("Species.Name").First(&result).Error; err != nil {
+	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("user_id=? OR visibility=?", user.Id, models.VisibilityPublic).Preload("Name").Preload("Description").Preload("Species.Name").Preload("Species.Order.Name").Preload("Description").First(&result).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})

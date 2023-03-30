@@ -20,10 +20,12 @@ func requirePermission(c *gin.Context, requiredPermission int64) {
 
 	xAccessToken := c.Request.Header.Get("X-Access-Token")
 	accessToken := auth.Token{}
-	if err := auth.ParseToken(xAccessToken, &accessToken, publicKey); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error(), "code": 0})
-		c.Abort()
-		return
+	if xAccessToken != "" {
+		if err := auth.ParseToken(xAccessToken, &accessToken, publicKey); err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "logged_out", "code": 0})
+			c.Abort()
+			return
+		}
 	}
 
 	// xAppLanguage := c.Request.Header.Get("X-App-Language")
@@ -37,6 +39,10 @@ func requirePermission(c *gin.Context, requiredPermission int64) {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "missing_permission", "code": 0})
 		c.Abort()
 	}
+}
+
+func noneMiddleware(c *gin.Context) {
+	requirePermission(c, auth.AuthPermissionNone)
 }
 
 func basicMiddleware(c *gin.Context) {
@@ -128,15 +134,16 @@ func SetupRoutes(r *gin.Engine) {
 	r.POST("/v1/lists/:uuid/archive", apiKeyMiddleware, basicMiddleware, controllers.ListsArchive)
 	r.POST("/v1/lists/:uuid/rename", apiKeyMiddleware, basicMiddleware, controllers.ListsRename)
 	r.POST("/v1/lists/:uuid/timespan", apiKeyMiddleware, basicMiddleware, controllers.ListsTimespan)
+	r.GET("/v1/lists/:uuid", apiKeyMiddleware, controllers.ListsDetails)
 
 	// List templates
-	r.GET("/v1/list_templates/list", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesList)
+	r.GET("/v1/list_templates/list", apiKeyMiddleware, noneMiddleware, controllers.ListTemplatesList)
 	r.POST("/v1/list_templates", apiKeyMiddleware, basicMiddleware, controllers.ListTemplates)
 	r.POST("/v1/list_templates/:uuid/archive", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesArchive)
 	r.POST("/v1/list_templates/:uuid/add_species", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesAddSpecies)
 	r.POST("/v1/list_templates/:uuid/remove_species", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesRemoveSpecies)
 	r.POST("/v1/list_templates/:uuid/rename", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesRename)
-	r.GET("/v1/list_templates/:uuid", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesDetails)
+	r.GET("/v1/list_templates/:uuid", apiKeyMiddleware, noneMiddleware, controllers.ListTemplatesDetails)
 
 	// Tags
 	r.GET("/v1/tags/list", apiKeyMiddleware, basicMiddleware, controllers.TagsList)
