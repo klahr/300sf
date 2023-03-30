@@ -25,7 +25,12 @@ const NetworkManager = {
 						success(null, res.statusCode);
 						break;
 					default:
-						failed(JSON.parse(data), res.statusCode);
+						try {
+							d = JSON.parse(data)
+							failed(d, res.statusCode)
+						} catch(error) {
+							console.log(error);
+						}
 						break;
 				}
 			});

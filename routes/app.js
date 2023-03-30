@@ -5,7 +5,7 @@ const config = require('./config');
 module.exports = router;
 
 router.get('/', function(req, res) {
-	nm.request('GET', '/v1/species/list', {'X-Api-Key': config.ApiKey}, function(response) {
+	nm.request('GET', '/v1/list_templates/kjhkf4', {'X-Api-Key': config.ApiKey}, function(response) {
 		console.log(response);
 	}, function(error) {
 		console.log(error);
