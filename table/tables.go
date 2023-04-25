@@ -11,4 +11,5 @@ const (
 	Tags                = "tags"
 	Translations        = "translations"
 	Users               = "users"
+	Zones               = "zones"
 )

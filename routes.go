@@ -209,4 +209,5 @@ func setupPrivateRoutes(r *gin.Engine) {
 
 	// Zones
 	r.POST("/v1/zones", adminMiddleware, controllers.Zones)
+	r.GET("/v1/zones/list", adminMiddleware, controllers.ZonesList)
 }

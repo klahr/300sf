@@ -6,16 +6,19 @@ import (
 	"time"
 
 	"git.sr.ht/~klahr/300sf/models"
+	"git.sr.ht/~klahr/300sf/table"
 	"git.sr.ht/~klahr/300sf/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/tidwall/geojson"
+	"gopkg.in/guregu/null.v4/zero"
 )
 
 func Zones(c *gin.Context) {
 	type request struct {
-		Name    models.Translation `json:"name"`
-		Polygon string             `json:"polygon"`
-		Type    int64              `json:"type"`
+		Name           models.Translation `json:"name"`
+		Polygon        string             `json:"polygon"`
+		AdminLevel     int64              `json:"admin_level"`
+		ParentZoneUuid string             `json:"parent_zone_uuid"`
 	}
 
 	var r request
@@ -28,7 +31,7 @@ func Zones(c *gin.Context) {
 		return
 	}
 
-	if r.Type >= models.ZoneOutOfRange || r.Type <= models.ZoneTypeUnknown {
+	if r.AdminLevel >= models.ZoneOutOfRange || r.AdminLevel <= models.ZoneTypeUnknown {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "zone type is out of range",
 		})
@@ -74,9 +77,16 @@ func Zones(c *gin.Context) {
 			Timestamp: time.Now(),
 			Uuid:      utils.GenerateShortUuid(),
 		},
-		NameId:  name.Id,
-		Polygon: r.Polygon,
-		Type:    r.Type,
+		NameId:     name.Id,
+		Polygon:    []byte(r.Polygon),
+		AdminLevel: r.AdminLevel,
+	}
+
+	if r.ParentZoneUuid != "" {
+		var parentZone models.Zone
+		if err := tx.Where("uuid=?", r.ParentZoneUuid).First(&parentZone).Error; err == nil {
+			zone.ParentZoneId = zero.IntFrom(parentZone.Id)
+		}
 	}
 
 	if err := tx.Create(&zone).Error; err != nil {
@@ -91,4 +101,22 @@ func Zones(c *gin.Context) {
 	tx.Commit()
 
 	c.JSON(http.StatusOK, zone)
+}
+
+func ZonesList(c *gin.Context) {
+	var zones []models.Zone
+	if err := models.DB.Table(table.Zones).Preload("Name").Preload("ParentZone").Find(&zones).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	type response struct {
+		Zones []models.Zone `json:"zones"`
+	}
+
+	c.JSON(http.StatusOK, response{
+		Zones: zones,
+	})
 }
