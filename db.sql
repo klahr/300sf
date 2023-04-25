@@ -481,7 +481,7 @@ CREATE TABLE `300sf`.`zones` (
   `uuid` VARCHAR(32) NOT NULL,
   `name_id` INT NOT NULL,
   `polygon` TEXT NOT NULL,
-  `type` INT NOT NULL,
+  `admin_level` INT NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) VISIBLE,
   INDEX `index3` (`uuid` ASC) VISIBLE,
@@ -535,3 +535,18 @@ CREATE TABLE `300sf`.`subscription_species` (
     ON UPDATE NO ACTION);
 
 -- >
+
+ALTER TABLE `300sf`.`zones` 
+ADD COLUMN `parent_zone_id` INT NULL AFTER `admin_level`,
+ADD INDEX `fk_zones_2_idx` (`parent_zone_id` ASC) VISIBLE;
+;
+ALTER TABLE `300sf`.`zones` 
+ADD CONSTRAINT `fk_zones_2`
+  FOREIGN KEY (`parent_zone_id`)
+  REFERENCES `300sf`.`zones` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+
+  ALTER TABLE `300sf`.`zones` 
+CHANGE COLUMN `polygon` `polygon` MEDIUMBLOB NOT NULL ;
+
