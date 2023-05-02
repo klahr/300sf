@@ -10,6 +10,7 @@ from getpass import getpass
 import httpx
 import tabulate
 import yaml
+import base64
 
 __version__ = "0.1.0"
 
@@ -813,17 +814,21 @@ def tag(create, details, color, rename, archive):
         print(tabulate.tabulate(t, headers=["id", "name"], tablefmt="plain"))
 
 
-def zone(insert, polygon, type, details, lang):
+def zone(insert, polygon, admin_level, details, lang, parent_zone_id):
     if insert:
         t = 4
-        if type == 1:
-            t = "country"
-        elif type == "county":
+        if admin_level == "country":
             t = 2
-        elif type == "municipality":
-            t = 3
+        elif admin_level == "county":
+            t = 4
+        elif admin_level == "municipality":
+            t = 7
+        polygon_data = ''
+        with open(polygon, 'r') as file:
+            polygon_data = file.read()
+
         r = http_post(
-            "/v1/zones", {}, {"name": {"en": insert}, "polygon": polygon, "type": t}
+            "/v1/zones", {}, {"name": {"en": insert}, "polygon": polygon_data, "admin_level": t, "parent_zone_uuid": parent_zone_id}
         )
         if r is not None:
             if r.status_code == 200:
@@ -839,16 +844,15 @@ def zone(insert, polygon, type, details, lang):
             data = r.json()
             d = data["result"]
             type = "habitat"
-            if d["type"] == 1:
+            if d["admin_level"] == 2:
                 type = "country"
-            elif d["type"] == 2:
+            elif d["admin_level"] == 4:
                 type = "county"
-            elif d["type"] == 3:
+            elif d["admin_level"] == 7:
                 type = "municipality"
-            print(f'id       {d["uuid"]}')
-            print(f'name     {d["name"][lang]}')
-            print(f"type     {type}")
-            print(f'polygon  {d["polygon"]}')
+            print(f'id           {d["uuid"]}')
+            print(f'name         {d["name"][lang]}')
+            print(f"admin_level  {type}")
     else:
         r = http_get("/v1/zones/list", {})
         if r is not None and r.status_code != 200:
@@ -859,16 +863,16 @@ def zone(insert, polygon, type, details, lang):
             t = []
             for d in data["result"]:
                 type = "habitat"
-                if d["type"] == 1:
+                if d["admin_level"] == 2:
                     type = "country"
-                elif d["type"] == 2:
+                elif d["admin_level"] == 4:
                     type = "county"
-                elif d["type"] == 3:
+                elif d["admin_level"] == 7:
                     type = "municipality"
 
                 t.append([d["uuid"], d["name"][lang], type])
             print(
-                tabulate.tabulate(t, headers=["id", "name", "type"], tablefmt="plain")
+                tabulate.tabulate(t, headers=["id", "name", "admin_level"], tablefmt="plain")
             )
 
 
@@ -1055,11 +1059,12 @@ def main():
     zone_parser = subparsers.add_parser("zone", help="Zone.")
     zone_parser.add_argument("--insert", dest="insert", help="Add zone.")
     zone_parser.add_argument("--polygon", dest="polygon", help="Polygon.")
+    zone_parser.add_argument("--parent_zone_id", dest="parent_zone_id", help="Parent zone id.")
     zone_parser.add_argument(
-        "--type",
-        dest="type",
-        choices=["country", "county", "municipality", "habitat"],
-        help="Type.",
+        "--admin_level",
+        dest="admin_level",
+        choices=["country", "county", "municipality"],
+        help="Admin level.",
     )
     zone_parser.add_argument("--details", dest="details", help="Details.")
     zone_parser.add_argument("--lang", dest="lang", default=lang, help="Language.")
