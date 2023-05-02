@@ -113,10 +113,10 @@ func ZonesList(c *gin.Context) {
 	}
 
 	type response struct {
-		Zones []models.Zone `json:"zones"`
+		Result []models.Zone `json:"result"`
 	}
 
 	c.JSON(http.StatusOK, response{
-		Zones: zones,
+		Result: zones,
 	})
 }

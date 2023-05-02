@@ -32,15 +32,21 @@ func main() {
 		os.Exit(0)
 	}()
 
-	if configFilename := flag.String("config", "", "config filename"); configFilename != nil {
-		flag.Parse()
-		if err := config.SetupAppConfig(*configFilename); err != nil {
-			log.Error(ctx, 0, err.Error())
-			panic(err)
-		}
-	} else {
-		log.Error(ctx, 0, "no config file provided")
-		panic("config file is required")
+	configFilename := flag.String("config", "", "config filename")
+	flag.Parse()
+	if err := config.SetupAppConfig(*configFilename); err != nil {
+		log.Error(ctx, 0, err.Error())
+		panic(err)
+	}
+
+	if err := models.SetupDB(ctx, config.AppConfig.DataSource, config.GetLogLevelAsInt()); err != nil {
+		log.Error(ctx, 0, err.Error())
+		panic(err)
+	}
+
+	if err := models.SetupCache(ctx, config.AppConfig.RedisHost); err != nil {
+		log.Error(ctx, 0, err.Error())
+		panic(err)
 	}
 
 	r := gin.New()
@@ -57,16 +63,6 @@ func main() {
 
 		c.Next()
 	})
-
-	if err := models.SetupDB(ctx, config.AppConfig.DataSource, config.GetLogLevelAsInt()); err != nil {
-		log.Error(ctx, 0, err.Error())
-		panic(err)
-	}
-
-	if err := models.SetupCache(ctx, config.AppConfig.RedisHost); err != nil {
-		log.Error(ctx, 0, err.Error())
-		panic(err)
-	}
 
 	SetupRoutes(r)
 

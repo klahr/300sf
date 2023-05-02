@@ -8,6 +8,7 @@ require (
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/google/uuid v1.3.0
+	github.com/paulmach/go.geojson v1.4.0
 	github.com/tidwall/geojson v1.4.3
 	github.com/trietmn/go-wiki v1.0.0
 	gopkg.in/guregu/null.v4 v4.0.0

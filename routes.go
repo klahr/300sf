@@ -6,12 +6,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin"
+
 	"git.sr.ht/~klahr/300sf/auth"
 	"git.sr.ht/~klahr/300sf/config"
 	"git.sr.ht/~klahr/300sf/controllers"
 	"git.sr.ht/~klahr/300sf/models"
 	"git.sr.ht/~klahr/300sf/utils"
-	"github.com/gin-gonic/gin"
 )
 
 func requirePermission(c *gin.Context, requiredPermission int64) {
@@ -187,7 +188,7 @@ func SetupRoutes(r *gin.Engine) {
 	r.GET("/v1/ages/list", apiKeyMiddleware, controllers.NamedRecordList[models.Age])
 
 	// Zones
-	r.GET("/v1/zones/list", apiKeyMiddleware, controllers.NamedRecordList[models.Zone])
+	r.GET("/v1/zones/list", adminMiddleware, controllers.ZonesList)
 	r.GET("/v1/zones/:uuid", apiKeyMiddleware, controllers.NamedRecordDetails[models.Zone])
 
 	// Notifications
@@ -209,5 +210,4 @@ func setupPrivateRoutes(r *gin.Engine) {
 
 	// Zones
 	r.POST("/v1/zones", adminMiddleware, controllers.Zones)
-	r.GET("/v1/zones/list", adminMiddleware, controllers.ZonesList)
 }
