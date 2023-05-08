@@ -18,7 +18,7 @@ ID=$(300sf zone --insert "Värmland County" --admin_level county --polygon /home
 300sf zone --insert "Hammarö Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/varmland/hammaro.geojson --parent_zone_id="$ID"
 300sf zone --insert "Karlstads Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/varmland/karlstad.geojson --parent_zone_id="$ID"
 300sf zone --insert "Kils Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/varmland/kil.geojson --parent_zone_id="$ID"
-300sf zone --insert "Kristinehamns Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/varmland/kristiehamn.geojson --parent_zone_id="$ID"
+300sf zone --insert "Kristinehamns Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/varmland/kristinehamn.geojson --parent_zone_id="$ID"
 300sf zone --insert "Munkfors Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/varmland/munkfors.geojson --parent_zone_id="$ID"
 300sf zone --insert "Storfors Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/varmland/storfors.geojson --parent_zone_id="$ID"
 300sf zone --insert "Sunne Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/varmland/sunne.geojson --parent_zone_id="$ID"
@@ -59,7 +59,7 @@ ID=$(300sf zone --insert "Västra Götaland County" --admin_level county --polyg
 300sf zone --insert "Åmåls Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/vastra-gotaland/amal.geojson --parent_zone_id="$ID"
 300sf zone --insert "Öckerö Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/vastra-gotaland/ockero.geojson --parent_zone_id="$ID"
 300sf zone --insert "Ale Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/vastra-gotaland/ale.geojson --parent_zone_id="$ID"
-300sf zone --insert "Alingsås Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/vastra-gotaland/allingsas.geojson --parent_zone_id="$ID"
+300sf zone --insert "Alingsås Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/vastra-gotaland/alingsas.geojson --parent_zone_id="$ID"
 300sf zone --insert "Bengtsfors Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/vastra-gotaland/bengtsfors.geojson --parent_zone_id="$ID"
 300sf zone --insert "Bollebygds Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/vastra-gotaland/bollebygd.geojson --parent_zone_id="$ID"
 300sf zone --insert "Borås Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/vastra-gotaland/boras.geojson --parent_zone_id="$ID"
@@ -108,7 +108,7 @@ ID=$(300sf zone --insert "Västra Götaland County" --admin_level county --polyg
 
 # Västmanland
 ID=$(300sf zone --insert "Västmanland County" --admin_level county --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/lan/vastmanland.geojson --parent_zone_id="$ID")
-300sf zone --insert "Västerås Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/vastmanland/ .geojson --parent_zone_id="$ID"
+300sf zone --insert "Västerås Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/vastmanland/vasteras.geojson --parent_zone_id="$ID"
 300sf zone --insert "Surahammars Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/vastmanland/surahammar.geojson --parent_zone_id="$ID"
 300sf zone --insert "Sala Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/vastmanland/sala.geojson --parent_zone_id="$ID"
 300sf zone --insert "Skinnskattebergs Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/vastmanland/skinnskatteberg.geojson --parent_zone_id="$ID"
@@ -136,7 +136,7 @@ ID=$(300sf zone --insert "Västerbotten County" --admin_level county --polygon /
 300sf zone --insert "Dorotea Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/vasterbotten/dorotea.geojson --parent_zone_id="$ID"
 300sf zone --insert "Lycksele Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/vasterbotten/lycksele.geojson --parent_zone_id="$ID"
 300sf zone --insert "Malå Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/vasterbotten/mala.geojson --parent_zone_id="$ID"
-300sf zone --insert "Nordmalings Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/vasterbotten/nordmalings.geojson --parent_zone_id="$ID"
+300sf zone --insert "Nordmalings Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/vasterbotten/nordmaling.geojson --parent_zone_id="$ID"
 300sf zone --insert "Norsjö Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/vasterbotten/norsjo.geojson --parent_zone_id="$ID"
 300sf zone --insert "Robertsfors Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/vasterbotten/robertsfors.geojson --parent_zone_id="$ID"
 300sf zone --insert "Skellefteå Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/vasterbotten/skelleftea.geojson --parent_zone_id="$ID"
@@ -154,9 +154,9 @@ ID=$(300sf zone --insert "Uppsala County" --admin_level county --polygon /home/k
 300sf zone --insert "Heby Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/uppsala/heby.geojson --parent_zone_id="$ID"
 300sf zone --insert "Håbo Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/uppsala/habo.geojson --parent_zone_id="$ID"
 300sf zone --insert "Knivsta Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/uppsala/knivsta.geojson --parent_zone_id="$ID"
-300sf zone --insert "Tierps Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/uppsala/terp.geojson --parent_zone_id="$ID"
-300sf zone --insert "Uppsala Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/uppsalauppsala/uppsalas.geojson --parent_zone_id="$ID"
-300sf zone --insert "Älvkarleby Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/sodermanland/alvkarleby.geojson --parent_zone_id="$ID"
+300sf zone --insert "Tierps Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/uppsala/tierp.geojson --parent_zone_id="$ID"
+300sf zone --insert "Uppsala Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/uppsala/uppsalas.geojson --parent_zone_id="$ID"
+300sf zone --insert "Älvkarleby Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/uppsala/alvkarleby.geojson --parent_zone_id="$ID"
 
 # Södermanland
 ID=$(300sf zone --insert "Södermanland County" --admin_level county --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/lan/sodermanland.geojson --parent_zone_id="$ID")
@@ -204,7 +204,7 @@ ID=$(300sf zone --insert "Skåne County" --admin_level county --polygon /home/kl
 300sf zone --insert "Östra Göinge Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/skane/ostra-goinge.geojson --parent_zone_id="$ID"
 300sf zone --insert "Bjuvs Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/skane/bjuv.geojson --parent_zone_id="$ID"
 300sf zone --insert "Bromölla Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/skane/bromolla.geojson --parent_zone_id="$ID"
-300sf zone --insert "Burlövs Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/skane/bulov.geojson --parent_zone_id="$ID"
+300sf zone --insert "Burlövs Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/skane/burlov.geojson --parent_zone_id="$ID"
 300sf zone --insert "Båstads Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/skane/bastad.geojson --parent_zone_id="$ID"
 300sf zone --insert "Eslövs Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/skane/eslov.geojson --parent_zone_id="$ID"
 300sf zone --insert "Helsingborgs Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/skane/helsingborg.geojson --parent_zone_id="$ID"
@@ -265,7 +265,7 @@ ID=$(300sf zone --insert "Kronoberg County" --admin_level county --polygon /home
 
 # Kalmar
 ID=$(300sf zone --insert "Kalmar County" --admin_level county --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/lan/kalmar.geojson --parent_zone_id="$ID")
-300sf zone --insert "Västerviks Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/kalmar/vasterviks.geojson --parent_zone_id="$ID"
+300sf zone --insert "Västerviks Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/kalmar/vastervik.geojson --parent_zone_id="$ID"
 300sf zone --insert "Borgholms Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/kalmar/borgholm.geojson --parent_zone_id="$ID"
 300sf zone --insert "Emmaboda Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/kalmar/emmaboda.geojson --parent_zone_id="$ID"
 300sf zone --insert "Hultsfreds Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/kalmar/hultsfred.geojson --parent_zone_id="$ID"
@@ -289,7 +289,7 @@ ID=$(300sf zone --insert "Jönköping County" --admin_level county --polygon /ho
 300sf zone --insert "Mullsjö Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/jonkoping/mullsjo.geojson --parent_zone_id="$ID"
 300sf zone --insert "Jönköpings Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/jonkoping/jonkopings.geojson --parent_zone_id="$ID"
 300sf zone --insert "Aneby Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/jonkoping/aneby.geojson --parent_zone_id="$ID"
-300sf zone --insert "Eksjö Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/jonkoping/eksjö.geojson --parent_zone_id="$ID"
+300sf zone --insert "Eksjö Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/jonkoping/eksjo.geojson --parent_zone_id="$ID"
 300sf zone --insert "Gislaveds Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/jonkoping/gislaved.geojson --parent_zone_id="$ID"
 300sf zone --insert "Gnosjö Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/jonkoping/gnosjo.geojson --parent_zone_id="$ID"
 300sf zone --insert "Habo Municipality" --admin_level municipality --polygon /home/klarre/dev/sourcehut/~klahr/300sf/boundries/sverige/jonkoping/habo.geojson --parent_zone_id="$ID"
