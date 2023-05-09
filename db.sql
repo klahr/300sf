@@ -534,8 +534,6 @@ CREATE TABLE `300sf`.`subscription_species` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
 
--- >
-
 ALTER TABLE `300sf`.`zones` 
 ADD COLUMN `parent_zone_id` INT NULL AFTER `admin_level`,
 ADD INDEX `fk_zones_2_idx` (`parent_zone_id` ASC) VISIBLE;
@@ -550,3 +548,5 @@ ADD CONSTRAINT `fk_zones_2`
   ALTER TABLE `300sf`.`zones` 
 CHANGE COLUMN `polygon` `polygon` MEDIUMBLOB NOT NULL ;
 
+
+-- >
