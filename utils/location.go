@@ -11,11 +11,15 @@ import (
 func GetZonesFromPosition(position types.LatLon) []models.Zone {
 	tx := models.DB.Begin()
 	var zones []models.Zone
-	getZonesFromPosition(tx, position, &zones, types.AdminLevelCountry, nil)
+	p := geojson.NewPoint(geometry.Point{
+		X: position.Longitude,
+		Y: position.Latitude,
+	})
+	getZonesFromPosition(tx, p, &zones, types.AdminLevelCountry, nil)
 	return zones
 }
 
-func getZonesFromPosition(tx *gorm.DB, position types.LatLon, zones *[]models.Zone, level int, parentZone *models.Zone) error {
+func getZonesFromPosition(tx *gorm.DB, position *geojson.Point, zones *[]models.Zone, level int, parentZone *models.Zone) error {
 	q := tx.Where("admin_level=?", level)
 
 	if parentZone != nil {
@@ -29,10 +33,6 @@ func getZonesFromPosition(tx *gorm.DB, position types.LatLon, zones *[]models.Zo
 		return err
 	}
 
-	pos := geojson.NewPoint(geometry.Point{
-		Y: position.Latitude,
-		X: position.Longitude,
-	})
 	var newParentZone *models.Zone
 	for _, zone := range z {
 		fc, _ := geojson.Parse(string(zone.Polygon), geojson.DefaultParseOptions)
@@ -42,7 +42,7 @@ func getZonesFromPosition(tx *gorm.DB, position types.LatLon, zones *[]models.Zo
 			if mp, ok := realFeature.Base().(*geojson.MultiPolygon); ok {
 				for _, polygon := range mp.Children() {
 					p := polygon.(*geojson.Polygon)
-					if p.Contains(pos) {
+					if p.Contains(position) {
 						newParentZone = &zone
 						*zones = append(*zones, zone)
 						break
@@ -52,7 +52,7 @@ func getZonesFromPosition(tx *gorm.DB, position types.LatLon, zones *[]models.Zo
 					break
 				}
 			} else if p, ok := realFeature.Base().(*geojson.Polygon); ok {
-				if p.Contains(pos) {
+				if p.Contains(position) {
 					newParentZone = &zone
 					*zones = append(*zones, zone)
 					break
