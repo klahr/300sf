@@ -550,3 +550,14 @@ CHANGE COLUMN `polygon` `polygon` MEDIUMBLOB NOT NULL ;
 
 
 -- >
+
+ALTER TABLE `300sf`.`reports` 
+ADD COLUMN `zone_id` INT NULL AFTER `longitude`,
+ADD INDEX `fk_reports_8_idx` (`zone_id` ASC) VISIBLE;
+;
+ALTER TABLE `300sf`.`reports` 
+ADD CONSTRAINT `fk_reports_8`
+  FOREIGN KEY (`zone_id`)
+  REFERENCES `300sf`.`zones` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
