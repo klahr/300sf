@@ -553,6 +553,8 @@ def report(
                     tags.append(t["name"])
             if response["latitude"] and response["longitude"]:
                 position = f'{response["latitude"]},{response["longitude"]}'
+            if response["zone"]:
+                where = f'{response["zone"]["name"][lang]}'
             if response["method"]:
                 method = response["method"]["name"][lang]
             if response["activity"]:
@@ -567,6 +569,7 @@ def report(
             print(f'from          {get_date(response["from"])}')
             print(f'until         {get_date(response["until"])}')
             print(f"position      {position}")
+            print(f"where         {where}")
             print(f"method        {method}")
             print(f"activity      {activity}")
             print(f"age           {age}")
@@ -605,14 +608,9 @@ def report(
                 # print(data)
                 t = []
                 for lst in data["result"]:
-                    if lst["gender"] is not None:
-                        gender = lst["gender"]["name"][lang]
-                    if lst["age"] is not None:
-                        age = lst["age"]["name"][lang]
-                    if lst["activity"] is not None:
-                        activity = lst["activity"]["name"][lang]
-                    if lst["method"] is not None:
-                        method = lst["method"]["name"][lang]
+                    where = ''
+                    if lst["zone"] is not None:
+                        where = lst["zone"]["name"][lang]
                     t.append(
                         [
                             lst["uuid"],
@@ -620,12 +618,13 @@ def report(
                             lst["species"]["name"][lang],
                             get_date(lst["from"]),
                             get_date(lst["until"]),
+                            where,
                         ]
                     )
                 print(
                     tabulate.tabulate(
                         t,
-                        headers=["id", "quantity", f"species({lang})", "from", "until"],
+                        headers=["id", "quantity", f"species({lang})", "from", "until", "where"],
                         tablefmt="plain",
                     )
                 )
