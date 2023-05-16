@@ -12,6 +12,8 @@ type Report struct {
 	Until        zero.Time     `json:"until"`
 	Latitude     zero.Float    `json:"latitude"`
 	Longitude    zero.Float    `json:"longitude"`
+	ZoneId       zero.Int      `json:"-"`
+	Zone         *Zone         `json:"zone"`
 	Quantity     zero.Int      `json:"quantity"`
 	AgeId        zero.Int      `json:"-"`
 	Age          *Age          `json:"age"`

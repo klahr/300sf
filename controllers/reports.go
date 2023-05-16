@@ -7,6 +7,7 @@ import (
 
 	"git.sr.ht/~klahr/300sf/models"
 	"git.sr.ht/~klahr/300sf/table"
+	"git.sr.ht/~klahr/300sf/types"
 	"git.sr.ht/~klahr/300sf/utils"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/guregu/null.v4/zero"
@@ -82,6 +83,13 @@ func Reports(c *gin.Context) {
 			UserId: user.Id,
 			Text:   r.Comment.String,
 		},
+	}
+
+	if zones := utils.GetZonesFromPosition(types.LatLon{
+		Latitude:  r.Latitude.Float64,
+		Longitude: r.Longitude.Float64,
+	}); len(zones) > 0 {
+		report.ZoneId = zero.IntFrom(zones[len(zones)-1].Id)
 	}
 
 	if r.AgeUuid.Valid {
@@ -221,7 +229,7 @@ func ReportsList(c *gin.Context) {
 	}
 
 	var reports []models.Report
-	if err := models.DB.Table(table.Reports).Where("user_id=?", user.Id).Where("archived IS NULL").Preload("Lists").Preload("Species.Name").Preload("Age.Name").Preload("Gender.Name").Preload("Activity.Name").Preload("Method.Name").Preload("Lists.Name").Find(&reports).Error; err != nil {
+	if err := models.DB.Table(table.Reports).Where("user_id=?", user.Id).Where("archived IS NULL").Preload("Zone.Name").Preload("Lists").Preload("Species.Name").Preload("Age.Name").Preload("Gender.Name").Preload("Activity.Name").Preload("Method.Name").Preload("Lists.Name").Find(&reports).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -268,7 +276,7 @@ func ReportsDetails(c *gin.Context) {
 	}
 
 	// TODO: Preload("Lists.Name") is not working and returns an empty list.
-	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("user_id=?", user.Id).Preload("Species.Name").Preload("Age.Name").Preload("Method.Name").Preload("Activity.Name").Preload("Lists.Name").Preload("Tags").Preload("Comment").Preload("Notification.Comment").Preload("Notification.Comments.User").First(&result).Error; err != nil {
+	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("user_id=?", user.Id).Preload("Zone.Name").Preload("Species.Name").Preload("Age.Name").Preload("Method.Name").Preload("Activity.Name").Preload("Lists.Name").Preload("Tags").Preload("Comment").Preload("Notification.Comment").Preload("Notification.Comments.User").First(&result).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
