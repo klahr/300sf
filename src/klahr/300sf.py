@@ -125,6 +125,8 @@ def signup(display_name, password, email, accepted_terms):
             err_print("err: password is invalid.")
         else:
             err_print(f'err: unknown error {response["message"]}')
+    else:
+        print(r.json()["uuid"])
 
 
 def login(email, password):
@@ -439,19 +441,21 @@ def list(create, template, visibility, timespan, archive, rename, details, lang)
             err_print("err: internal error")
     elif details:
         r = http_get(f"/v1/lists/{details}", {})
-        if r is not None:
-            if r.status_code == 200:
-                data = r.json()
-                t = []
-                for s in data["list"]["species"]:
-                    t.append([s["uuid"], s["name"][lang], s["order"]["name"][lang]])
-                print(
-                    tabulate.tabulate(
-                        t,
-                        headers=["id", f"name({lang})", f"order({lang})"],
-                        tablefmt="plain",
-                    )
-                )
+        if r is not None and r.status_code == 200:
+            response = r.json()["result"]
+            print(f'id          {response["uuid"]}')
+            print(f'name        {response["name"][lang]}')
+            print(f'from        {get_date(response["from"])}')
+            print(f'until       {get_date(response["until"])}')
+            visibility = "public"
+            if response["visibility"] == 0:
+                visibility = "private"
+            elif response["visibility"] == 1:
+                visibility = "hidden"
+            print(f'visibility  {visibility}')
+        else:
+            response = r.json()
+            err_print(f'err: {response["message"]}')
     else:
         r = http_get("/v1/lists/list", {})
         if r is not None:
@@ -641,11 +645,11 @@ def whoami():
             p = "basic"
             if user["permissions"] & 2 == 2:
                 p = "admin"
-            print(f'id           {user["uuid"]}')
-            print(f'displayname  {user["display_name"]}')
-            print(f"role         {p}")
-            print(f'last login   {user["last_seen_at"]}')
-            print(f'reports      {len(data["reports"])}')
+            print(f'id            {user["uuid"]}')
+            print(f'display name  {user["display_name"]}')
+            print(f"role          {p}")
+            print(f'last login    {user["last_seen_at"]}')
+            print(f'reports       {len(data["reports"])}')
         else:
             err_print(f'err: {r.json()["message"]}')
 
@@ -668,7 +672,7 @@ def user(details):
             else:
                 err_print(f'err: {r.json()["message"]}')
     else:
-        r = http_get("/v1/users", {})
+        r = http_get("/v1/users/list", {})
         if r is not None:
             if r.status_code == 200:
                 data = r.json()
@@ -910,10 +914,11 @@ def main():
         "--display-name",
         dest="display_name",
         required=True,
+        metavar="DISPLAY NAME",
         help="Public display name.",
     )
     signup_parser.add_argument(
-        "--password", dest="password", required=True, help="Log in password."
+        "--password", dest="password", required=True, help="User password."
     )
     signup_parser.add_argument(
         "--email", dest="email", required=True, help="Email address."
@@ -923,66 +928,67 @@ def main():
         action="store_true",
         dest="accepted_terms",
         required=True,
-        help="Terms accepted.",
+        help="Read the terms and set this.",
     )
 
-    login_parser = subparsers.add_parser("login", help="Log in.")
+    login_parser = subparsers.add_parser("login", help="Log in user.")
     login_parser.add_argument(
         "--email", dest="email", required=True, help="Email address."
     )
     login_parser.add_argument("--password", dest="password", help="Log in password")
 
-    subparsers.add_parser("logout", help="Log out.")
+    subparsers.add_parser("logout", help="Log out currently logged in user.")
 
-    api_key_parser = subparsers.add_parser("apikey", help="API key.")
-    api_key_parser.add_argument("--create", dest="create", help="Create new API key.")
-    api_key_parser.add_argument("--revoke", dest="revoke", help="Revoke API key.")
+    api_key_parser = subparsers.add_parser("apikey", help="API key management.")
+    api_key_parser.add_argument("--create", dest="create", metavar="NAME", help="Create new API key with NAME.")
+    api_key_parser.add_argument("--revoke", dest="revoke", metavar="NAME", help="Revoke API key with NAME.")
     #    api_key_parser.add_argument('--scopes', dest='scopes', help='Scopes')
 
-    user_parser = subparsers.add_parser("user", help="User.")
-    user_parser.add_argument("--details", dest="details", help="Details.")
+    user_parser = subparsers.add_parser("user", help="(admin) User management.")
+    user_parser.add_argument("--details", dest="details", metavar="ID", help="Details about the user with ID.")
 
-    template_parser = subparsers.add_parser("template", help="Template.")
-    template_parser.add_argument("--create", dest="create", help="Create new template.")
+    template_parser = subparsers.add_parser("template", help="List template management.")
+    template_parser.add_argument("--create", dest="create", metavar="NAME", help="Create a new template with NAME.")
     template_parser.add_argument(
-        "--description", dest="description", help="Create new template."
+        "--description", dest="description", help="Short description of the template."
     )
     template_parser.add_argument(
         "--visibility",
         dest="visibility",
         choices=["private", "hidden", "public"],
-        help="Visibility.",
+        help="private: Only you can see and use it. hidden: Anyone with its ID can use it. public: Anyone can see and use it.",
     )
-    template_parser.add_argument("--add", dest="add", nargs=2, help="Add species.")
+    template_parser.add_argument("--add", dest="add", nargs=2, metavar=("ID", "SPECIES_ID"), help="Add species to template.")
     template_parser.add_argument(
-        "--remove", dest="remove", nargs=2, help="Remove species."
+        "--remove", dest="remove", nargs=2, metavar=("ID", "SPECIES_ID"), help="Remove species from template."
     )
-    template_parser.add_argument("--archive", dest="archive", help="Archive.")
-    template_parser.add_argument("--rename", dest="rename", nargs=2, help="Rename.")
-    template_parser.add_argument("--lang", dest="lang", default=lang, help="Language.")
-    template_parser.add_argument("--details", dest="details", help="Details.")
+    template_parser.add_argument("--archive", dest="archive", metavar="ID", help="Archive the template.")
+    template_parser.add_argument("--rename", dest="rename", nargs=2, metavar=("ID", "NAME"), help="Rename the template.")
+    template_parser.add_argument("--lang", dest="lang", default=lang, help="Override language setting.")
+    template_parser.add_argument("--details", dest="details", metavar="ID", help="Get detailed information about template with ID.")
 
-    list_parser = subparsers.add_parser("list", help="List.")
-    list_parser.add_argument("--create", dest="create", help="Create new list.")
+    list_parser = subparsers.add_parser("list", help="List management.")
+    list_parser.add_argument("--create", dest="create", metavar="NAME", help="Create a new list.")
     list_parser.add_argument(
-        "--template", dest="template", help="Base list on this template."
+        "--template", dest="template", metavar="TEMPLATE_ID", help="Base list on this template."
     )
     list_parser.add_argument(
         "--visibility",
         dest="visibility",
         choices=["private", "hidden", "public"],
-        help="Visibility.",
+        help="private: Only you can see it. hidden: Anyone with its ID can see it. public: Anyone can see it.",
     )
     list_parser.add_argument(
         "--timespan",
         dest="timespan",
         nargs=3,
+        metavar=("ID", "FROM", "UNTIL"),
         help="Timespan when the list can be reported to.",
     )
-    list_parser.add_argument("--archive", dest="archive", help="Archive.")
-    list_parser.add_argument("--rename", dest="rename", nargs=2, help="Rename.")
-    list_parser.add_argument("--lang", dest="lang", default=lang, help="Language.")
-    list_parser.add_argument("--details", dest="details", help="Details.")
+    list_parser.add_argument("--archive", dest="archive", metavar="ID", help="Archive this list.")
+    list_parser.add_argument("--rename", dest="rename", nargs=2, metavar=("ID", "NAME"), help="Rename the list.")
+    list_parser.add_argument("--lang", dest="lang", default=lang, help="Override language setting.")
+    list_parser.add_argument("--details", dest="details", metavar="ID", help="See detailed information.")
 
     species_parser = subparsers.add_parser("species", help="Species.")
     species_parser.add_argument("--insert", dest="insert", help="Add species.")
