@@ -221,7 +221,14 @@ func UsersMigrate(c *gin.Context) {
 		return
 	}
 
-	res, _ := migrate(user, r.OldUsername, r.OldPassword)
+	res, err := migrate(user, r.OldUsername, r.OldPassword)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		return
+	}
 
 	c.JSON(http.StatusOK, res)
 }

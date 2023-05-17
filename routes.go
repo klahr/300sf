@@ -193,7 +193,7 @@ func SetupRoutes(r *gin.Engine) {
 
 	// Zones
 	r.GET("/v1/zones/list", adminMiddleware, controllers.ZonesList)
-	r.GET("/v1/zones/:uuid", apiKeyMiddleware, controllers.NamedRecordDetails[models.Zone])
+	r.GET("/v1/zones/:uuid", adminMiddleware, controllers.NamedRecordDetails[models.Zone])
 
 	// Notifications
 	r.POST("/v1/notifications/:uuid/comment", apiKeyMiddleware, basicMiddleware, controllers.NotificationsComment)

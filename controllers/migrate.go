@@ -69,6 +69,10 @@ func migrate(user models.User, username, password string) (interface{}, error) {
 		var response jsonrpc_response
 		json.Unmarshal(body, &response)
 
+		if response.Result.UserId == 0 {
+			return nil, fmt.Errorf("invalid username or password")
+		}
+
 		dataJsonRequest := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"method\":\"DataManager.sync\",\"params\": {\"userid\":%d},\"id\":1}", response.Result.UserId)
 		dataResponse, err := http.PostForm("https://angelsware.com/swedbirds/ajax_api.php", url.Values{
 			"data": {dataJsonRequest},
@@ -115,6 +119,7 @@ func migrate(user models.User, username, password string) (interface{}, error) {
 						},
 						SpeciesId: b.Id,
 						UserId:    user.Id,
+						Quantity:  zero.IntFrom(1),
 						Comment: &models.Comment{
 							Model: models.Model{
 								Timestamp: time.Now(),
