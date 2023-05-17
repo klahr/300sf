@@ -559,6 +559,8 @@ def report(
                 position = f'{response["latitude"]},{response["longitude"]}'
             if response["zone"]:
                 where = f'{response["zone"]["name"][lang]}'
+            else:
+                where = ''
             if response["method"]:
                 method = response["method"]["name"][lang]
             if response["activity"]:
@@ -698,7 +700,6 @@ def named_record(insert, details, endpoint, lang):
             response = r.json()
             err_print(f'err: {response["message"]}')
     elif details is not None:
-        print(f"{endpoint}/{details}")
         r = http_get(f"{endpoint}/{details}", {})
         if r is not None and r.status_code == 200:
             response = r.json()["result"]
@@ -879,8 +880,8 @@ def zone(insert, polygon, admin_level, details, lang, parent_zone_id):
             )
 
 
-def notification(comment, text):
-    r = http_post(f"/v1/notifications/{comment}/comment", {}, {"text": text})
+def notification(comment):
+    r = http_post(f"/v1/notifications/{comment[0]}/comment", {}, {"text": comment[1]})
     if r and r.status_code == 200:
         print(r.json()["uuid"])
     else:
@@ -891,10 +892,8 @@ def migrate(email, password):
     r = http_post(
         "/v1/users/migrate", {}, {"old_username": email, "old_password": password}
     )
-    if not r:
+    if not r or r.status_code != 200:
         err_print(f'err: {r.json()["message"]}')
-    else:
-        print("yay")
 
 
 def main():
@@ -903,6 +902,8 @@ def main():
     lang = config.get("language")
     if not lang:
         lang = "en"
+
+    lang_choices=["en", "sv"]
 
     parser = argparse.ArgumentParser(description="300sf arguments and options")
     subparsers = parser.add_subparsers(dest="subparser")
@@ -964,7 +965,7 @@ def main():
     )
     template_parser.add_argument("--archive", dest="archive", metavar="ID", help="Archive the template.")
     template_parser.add_argument("--rename", dest="rename", nargs=2, metavar=("ID", "NAME"), help="Rename the template.")
-    template_parser.add_argument("--lang", dest="lang", default=lang, help="Override language setting.")
+    template_parser.add_argument("--lang", dest="lang", choices=lang_choices, default=lang, help="Override language setting.")
     template_parser.add_argument("--details", dest="details", metavar="ID", help="Get detailed information about template with ID.")
 
     list_parser = subparsers.add_parser("list", help="List management.")
@@ -987,113 +988,113 @@ def main():
     )
     list_parser.add_argument("--archive", dest="archive", metavar="ID", help="Archive this list.")
     list_parser.add_argument("--rename", dest="rename", nargs=2, metavar=("ID", "NAME"), help="Rename the list.")
-    list_parser.add_argument("--lang", dest="lang", default=lang, help="Override language setting.")
+    list_parser.add_argument("--lang", dest="lang", choices=lang_choices, default=lang, help="Override language setting.")
     list_parser.add_argument("--details", dest="details", metavar="ID", help="See detailed information.")
 
-    species_parser = subparsers.add_parser("species", help="Species.")
-    species_parser.add_argument("--insert", dest="insert", help="Add species.")
-    species_parser.add_argument("--order", dest="order", help="Order.")
-    species_parser.add_argument("--details", dest="details", help="Details.")
-    species_parser.add_argument("--lang", dest="lang", default=lang, help="Language.")
+    species_parser = subparsers.add_parser("species", help="Species management.")
+    species_parser.add_argument("--insert", dest="insert", metavar="NAME", help="Insert a new species.")
+    species_parser.add_argument("--order", dest="order", metavar="ORDER_ID", help="The order that species adheres to.")
+    species_parser.add_argument("--details", dest="details", metavar="ID", help="See detailed information.")
+    species_parser.add_argument("--lang", dest="lang", choices=lang_choices, default=lang, help="Override language setting.")
 
-    reports_parser = subparsers.add_parser("report", help="Reports.")
+    reports_parser = subparsers.add_parser("report", help="Report management.")
     reports_parser.add_argument(
-        "--create", dest="create", action="store_true", help="Create new report."
+        "--create", dest="create", action="store_true", help="Create a new report."
     )
-    reports_parser.add_argument("--species", dest="species", help="Species.")
-    reports_parser.add_argument("--age", dest="age", help="Age.")
-    reports_parser.add_argument("--method", dest="method", help="Method.")
-    reports_parser.add_argument("--gender", dest="gender", help="Gender.")
-    reports_parser.add_argument("--activity", dest="activity", help="Activity.")
-    reports_parser.add_argument("--quantity", dest="quantity", help="Quantity.")
+    reports_parser.add_argument("--species", dest="species", metavar="SPECIES_ID", help="What species has been seen.")
+    reports_parser.add_argument("--age", dest="age", metavar="AGE_ID", help="What age is it at.")
+    reports_parser.add_argument("--method", dest="method", metavar="METHOD_ID", help="What method was used.")
+    reports_parser.add_argument("--gender", dest="gender", metavar="GENDER_ID", help="What gender did it had.")
+    reports_parser.add_argument("--activity", dest="activity", metavar="ACTIVITY_ID", help="What was its current activity.")
+    reports_parser.add_argument("--quantity", dest="quantity", help="How many was observed.")
     reports_parser.add_argument(
-        "--position", dest="position", nargs=2, help="Position WGS84."
+        "--position", dest="position", nargs=2, metavar=("LATITUDE", "LONGITUDE"), help="What was the position, WGS84 decimal degrees."
     )
     reports_parser.add_argument("--comment", dest="comment", help="Comment.")
-    reports_parser.add_argument("--lists", dest="lists", nargs="*", help="Comment.")
-    reports_parser.add_argument("--from", dest="_from", help="From.")
-    reports_parser.add_argument("--until", dest="until", help="Until.")
-    reports_parser.add_argument("--archive", dest="archive", help="Archive.")
-    reports_parser.add_argument("--details", dest="details", help="Details.")
+    reports_parser.add_argument("--list", dest="lists", nargs="*", metavar="LIST_ID", help="Add to list(s).")
+    reports_parser.add_argument("--from", dest="_from", metavar="DATE", help="Observed from.")
+    reports_parser.add_argument("--until", dest="until", metavar="DATE", help="Observed until.")
+    reports_parser.add_argument("--archive", dest="archive", metavar="ID", help="Archive this report.")
+    reports_parser.add_argument("--details", dest="details", metavar="ID", help="See details of the report.")
     reports_parser.add_argument(
-        "--tags", dest="tags", nargs="*", default=[], help="Tags."
+        "--tags", dest="tags", nargs="*", default=[], metavar="TAG_ID", help="Tag the observation."
     )
-    reports_parser.add_argument("--add-tag", dest="add_tag", nargs=2, help="Add tag.")
+    reports_parser.add_argument("--add-tag", dest="add_tag", nargs=2, metavar=("ID", "TAG_ID"), help="Add tag.")
     reports_parser.add_argument(
-        "--remove-tag", dest="remove_tag", nargs=2, help="Remove tag."
+        "--remove-tag", dest="remove_tag", nargs=2, metavar=("ID", "TAG_ID"), help="Remove tag."
     )
-    reports_parser.add_argument("--lang", dest="lang", default=lang, help="Language.")
+    reports_parser.add_argument("--lang", dest="lang", choices=lang_choices, default=lang, help="Override language setting.")
     reports_parser.add_argument(
         "--notification-comment",
         dest="notification_comment",
-        help="Notification comment.",
+        metavar="COMMENT",
+        help="This comment appears in the notification.",
     )
     reports_parser.add_argument(
-        "--silent", dest="silent", action="store_true", default=False, help="Silent."
+        "--silent", dest="silent", action="store_true", default=False, help="If silent, no-one will be notified about your observation."
     )
 
-    notification_parser = subparsers.add_parser("notification", help="Notification")
-    notification_parser.add_argument("--comment", dest="comment", help="Comment.")
-    notification_parser.add_argument("--text", dest="text", help="Text.")
+    notification_parser = subparsers.add_parser("notification", help="Add notification comment.")
+    notification_parser.add_argument("--comment", required=True, nargs=2, dest="comment", metavar=("ID", "COMMENT"), help="Add a comment to notification.")
 
-    gender_parser = subparsers.add_parser("gender", help="Gender.")
-    gender_parser.add_argument("--insert", dest="insert", help="Add gender.")
-    gender_parser.add_argument("--details", dest="details", help="Details.")
-    gender_parser.add_argument("--lang", dest="lang", default=lang, help="Language.")
+    gender_parser = subparsers.add_parser("gender", help="Gender management.")
+    gender_parser.add_argument("--insert", dest="insert", metavar="NAME", help="(admin) Add new gender.")
+    gender_parser.add_argument("--details", dest="details", metavar="ID", help="See detailed information.")
+    gender_parser.add_argument("--lang", dest="lang", choices=lang_choices,  default=lang, help="Override language setting.")
 
-    age_parser = subparsers.add_parser("age", help="Gender.")
-    age_parser.add_argument("--insert", dest="insert", help="Add age.")
-    age_parser.add_argument("--details", dest="details", help="Details.")
-    age_parser.add_argument("--lang", dest="lang", default=lang, help="Language.")
+    age_parser = subparsers.add_parser("age", help="Age management.")
+    age_parser.add_argument("--insert", dest="insert", metavar="NAME", help="(admin) Add new age.")
+    age_parser.add_argument("--details", dest="details", metavar="ID", help="See detailed information.")
+    age_parser.add_argument("--lang", dest="lang", choices=lang_choices, default=lang, help="Override language setting.")
 
-    order_parser = subparsers.add_parser("order", help="Order.")
-    order_parser.add_argument("--insert", dest="insert", help="Add order.")
-    order_parser.add_argument("--details", dest="details", help="Details.")
-    order_parser.add_argument("--lang", dest="lang", default=lang, help="Language.")
+    order_parser = subparsers.add_parser("order", help="Order management.")
+    order_parser.add_argument("--insert", dest="insert", metavar="NAME", help="(admin) Add new order.")
+    order_parser.add_argument("--details", dest="details", metavar="ID", help="See detailed information.")
+    order_parser.add_argument("--lang", dest="lang", choices=lang_choices, default=lang, help="Override language setting.")
 
-    activity_parser = subparsers.add_parser("activity", help="Activity.")
-    activity_parser.add_argument("--insert", dest="insert", help="Add activity.")
-    activity_parser.add_argument("--details", dest="details", help="Details.")
-    activity_parser.add_argument("--lang", dest="lang", default=lang, help="Language.")
+    activity_parser = subparsers.add_parser("activity", help="Activity management.")
+    activity_parser.add_argument("--insert", dest="insert", metavar="NAME", help="(admin) Add new activity.")
+    activity_parser.add_argument("--details", dest="details", metavar="ID", help="See detailed information.")
+    activity_parser.add_argument("--lang", dest="lang", choices=lang_choices, default=lang, help="Override language setting.")
 
-    method_parser = subparsers.add_parser("method", help="Method.")
-    method_parser.add_argument("--insert", dest="insert", help="Add method.")
-    method_parser.add_argument("--details", dest="details", help="Details.")
-    method_parser.add_argument("--lang", dest="lang", default=lang, help="Language.")
+    method_parser = subparsers.add_parser("method", help="Method management.")
+    method_parser.add_argument("--insert", dest="insert", help="(admin) Add new method.")
+    method_parser.add_argument("--details", dest="details", help="See detailed information.")
+    method_parser.add_argument("--lang", dest="lang", choices=lang_choices, default=lang, help="Override language setting.")
 
-    zone_parser = subparsers.add_parser("zone", help="Zone.")
-    zone_parser.add_argument("--insert", dest="insert", help="Add zone.")
-    zone_parser.add_argument("--polygon", dest="polygon", help="Polygon.")
-    zone_parser.add_argument("--parent_zone_id", dest="parent_zone_id", help="Parent zone id.")
+    zone_parser = subparsers.add_parser("zone", help="(admin) Zone management.")
+    zone_parser.add_argument("--insert", dest="insert", metavar="NAME", help="Add a new zone.")
+    zone_parser.add_argument("--polygon", dest="polygon", metavar="FILENAME", help="Filepath to .geojson file.")
+    zone_parser.add_argument("--parent_zone_id", dest="parent_zone_id", help="ID of its parent zone.")
     zone_parser.add_argument(
         "--admin_level",
         dest="admin_level",
         choices=["country", "county", "municipality"],
-        help="Admin level.",
+        help="Administration level.",
     )
-    zone_parser.add_argument("--details", dest="details", help="Details.")
-    zone_parser.add_argument("--lang", dest="lang", default=lang, help="Language.")
+    zone_parser.add_argument("--details", dest="details", metavar="ID", help="See detailed information.")
+    zone_parser.add_argument("--lang", dest="lang", choices=lang_choices, default=lang, help="Override language setting.")
 
-    translation_parser = subparsers.add_parser("translation", help="Translation.")
+    translation_parser = subparsers.add_parser("translation", help="(admin) Translation management.")
     translation_parser.add_argument(
-        "--update", dest="update", help="Update translation uuid."
+        "--update", dest="update", help="Update translation with ID."
     )
     translation_parser.add_argument("--en", dest="en", help="English.")
     translation_parser.add_argument("--la", dest="la", help="Swedish.")
     translation_parser.add_argument("--sv", dest="sv", help="Latin.")
 
-    tag_parser = subparsers.add_parser("tag", help="Tag.")
-    tag_parser.add_argument("--create", dest="create", help="Create.")
-    tag_parser.add_argument("--details", dest="details", help="Details.")
-    tag_parser.add_argument("--color", dest="color", help="Color.")
-    tag_parser.add_argument("--rename", dest="rename", nargs=2, help="Rename")
-    tag_parser.add_argument("--archive", dest="archive", help="Archive.")
+    tag_parser = subparsers.add_parser("tag", help="Tag management.")
+    tag_parser.add_argument("--create", dest="create", metavar="NAME", help="Create a new tag.")
+    tag_parser.add_argument("--details", dest="details", metavar="ID", help="See detailed information.")
+    tag_parser.add_argument("--color", dest="color", metavar="HEX_VALUE", help="Set color, e.g. #ff00ff.")
+    tag_parser.add_argument("--rename", dest="rename", nargs=2, metavar=("ID", "NAME"), help="Rename the tag.")
+    tag_parser.add_argument("--archive", dest="archive", metavar="ID", help="Archive the tag.")
 
-    subparsers.add_parser("whoami", help="Who am I.")
+    subparsers.add_parser("whoami", help="See detailed information about the logged in user.")
 
-    data_parser = subparsers.add_parser("migrate", help="Migrate.")
-    data_parser.add_argument("--email", dest="email", help="Email.")
-    data_parser.add_argument("--password", dest="password", help="Password.")
+    data_parser = subparsers.add_parser("migrate", help="Migrate from legacy 300 Svenska Fåglar.")
+    data_parser.add_argument("--email", dest="email", help="The email address.")
+    data_parser.add_argument("--password", dest="password", help="The password.")
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
