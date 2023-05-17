@@ -148,7 +148,7 @@ func ListTemplatesAddSpecies(c *gin.Context) {
 	var listTemplate models.ListTemplate
 	if err := models.DB.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).Preload("Species").First(&listTemplate).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
+			"message": "template not found",
 		})
 		return
 	}
@@ -166,7 +166,7 @@ func ListTemplatesAddSpecies(c *gin.Context) {
 		SpeciesId:      species.Id,
 	}).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
+			"message": "already added",
 		})
 		return
 	}
@@ -199,7 +199,7 @@ func ListTemplatesRemoveSpecies(c *gin.Context) {
 	var listTemplate models.ListTemplate
 	if err := models.DB.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).Preload("Species").First(&listTemplate).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
+			"message": "template not found",
 		})
 		return
 	}
@@ -207,7 +207,7 @@ func ListTemplatesRemoveSpecies(c *gin.Context) {
 	var species models.Species
 	if err := models.DB.Where("uuid=?", r.SpeciesUuid).First(&species).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
+			"message": "species not found",
 		})
 		return
 	}

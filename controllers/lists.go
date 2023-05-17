@@ -241,7 +241,7 @@ func ListsTimespan(c *gin.Context) {
 func ListsDetails(c *gin.Context) {
 	var result models.List
 
-	if err := models.DB.Where("uuid=?", c.Param("uuid")).Preload("Species.Name").Preload("Species.Order.Name").First(&result).Error; err != nil {
+	if err := models.DB.Where("uuid=?", c.Param("uuid")).Preload("Name").First(&result).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -249,7 +249,7 @@ func ListsDetails(c *gin.Context) {
 	}
 
 	type response struct {
-		Result models.List `json:"list"`
+		Result models.List `json:"result"`
 	}
 
 	c.JSON(http.StatusOK, response{

@@ -57,7 +57,7 @@ func Reports(c *gin.Context) {
 	if err := tx.Where("uuid=?", r.SpeciesUuid).First(&species).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
-			"message": err.Error(),
+			"message": "species not found",
 		})
 		tx.Rollback()
 		return
@@ -278,7 +278,7 @@ func ReportsDetails(c *gin.Context) {
 	// TODO: Preload("Lists.Name") is not working and returns an empty list.
 	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("user_id=?", user.Id).Preload("Zone.Name").Preload("Species.Name").Preload("Age.Name").Preload("Method.Name").Preload("Activity.Name").Preload("Lists.Name").Preload("Tags").Preload("Comment").Preload("Notification.Comment").Preload("Notification.Comments.User").First(&result).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
+			"message": "report not found",
 		})
 		return
 	}

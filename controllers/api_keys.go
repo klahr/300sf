@@ -103,7 +103,7 @@ func ApiKeysRevoke(c *gin.Context) {
 	}
 
 	var apiKey models.ApiKey
-	if err := models.DB.Where("prefix=?", c.Param("prefix")).Where("user_id=?", user.Id).First(&apiKey).Error; err != nil {
+	if err := models.DB.Where("name=?", c.Param("name")).Where("user_id=?", user.Id).First(&apiKey).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
