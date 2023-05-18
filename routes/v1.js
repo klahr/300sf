@@ -14,13 +14,13 @@ router.post('/auth', function(req, res) {
 	nm.request('POST', '/v1/auth', {'Authorization': authorization}, function(response) {
 		console.log(response);
 		if (stayLoggedIn) {
-			res.cookie('300sf_at', response.access_token, {
+			res.cookie('x300sf_at', response.access_token, {
 				maxAge: response.max_age
 			});
 		} else {
-			res.cookie('300sf_at', response.access_token);
+			res.cookie('x300sf_at', response.access_token);
 		}
-		res.redirect('/');
+		res.redirect(post.success);
 	}, function(error) {
 		console.log(error);
 	}, {

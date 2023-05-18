@@ -28,10 +28,10 @@ app.use(expressSession({
 }));
 
 app.use('/', require('./routes/app'));
+app.use('/lite', require('./routes/lite-app'));
 app.use('/v1', require('./routes/v1'));
 app.use(express.static(__dirname + '/public'));
 
 app.listen(port, function() {
 	console.log(`listening on port ${port}`);
 });
-
