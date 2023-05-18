@@ -256,3 +256,43 @@ func ListsDetails(c *gin.Context) {
 		Result: result,
 	})
 }
+
+func ListsReports(c *gin.Context) {
+	var result []models.Report
+
+	tx := models.DB.Begin()
+
+	var user models.User
+	if err := tx.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var list models.List
+	if err := tx.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).First(&list).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if err := tx.Table("list_reports").Select("reports.*").Where("list_id=?", list.Id).Joins("JOIN reports ON reports.id=report_id").Preload("Species.Name").Preload("Zone.Name").Preload("Age.Name").Preload("Gender.Name").Preload("Method.Name").Preload("Tags").Find(&result).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	tx.Commit()
+
+	type response struct {
+		Result []models.Report `json:"result"`
+	}
+
+	c.JSON(http.StatusOK, response{
+		Result: result,
+	})
+}
