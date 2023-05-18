@@ -394,7 +394,7 @@ def species(insert, order, details, lang):
             )
 
 
-def list(create, template, visibility, timespan, archive, rename, details, lang):
+def list(create, template, visibility, timespan, archive, rename, details, reports, lang):
     global config
     if create is not None:
         v = 0
@@ -453,6 +453,47 @@ def list(create, template, visibility, timespan, archive, rename, details, lang)
             elif response["visibility"] == 1:
                 visibility = "hidden"
             print(f'visibility  {visibility}')
+        else:
+            response = r.json()
+            err_print(f'err: {response["message"]}')
+    elif reports:
+        r = http_get(f'/v1/lists/{reports}/reports', {})
+        if r is not None and r.status_code == 200:
+            response = r.json()["result"]
+            t = []
+            for rep in response:
+                where = ""
+                if rep["zone"]:
+                    where = rep["zone"]["name"][lang]
+                age = ""
+                if rep["age"]:
+                    age = rep["age"]["name"][lang]
+                activity = ""
+                if rep["activity"]:
+                    activity = rep["activity"]["name"][lang]
+                gender = ""
+                if rep["gender"]:
+                    gender = rep["gender"]["name"][lang]
+                method = ""
+                if rep["method"]:
+                    method = rep["method"]["name"][lang]
+                comment = ""
+                if rep["comment"]:
+                    comment = rep["comment"]["text"]
+                tags = ""
+                for tag in rep["tags"]:
+                    if tags != "":
+                        tags += ","
+                    tags += tag["name"]
+                t.append([rep["uuid"], get_date(rep["from"]), get_date(rep["until"]), rep["quantity"], rep["species"]["name"][lang], where, age, activity, gender, method, comment, tags])
+                print(rep)
+            print(
+                tabulate.tabulate(
+                    t,
+                    headers=["id", "from", "until", "quantity", "species", "where", "age", "activity", "gender", "method", "comment", "tags"],
+                    tablefmt="plain"
+                )
+            )
         else:
             response = r.json()
             err_print(f'err: {response["message"]}')
@@ -990,6 +1031,7 @@ def main():
     list_parser.add_argument("--rename", dest="rename", nargs=2, metavar=("ID", "NAME"), help="Rename the list.")
     list_parser.add_argument("--lang", dest="lang", choices=lang_choices, default=lang, help="Override language setting.")
     list_parser.add_argument("--details", dest="details", metavar="ID", help="See detailed information.")
+    list_parser.add_argument("--reports", dest="reports", metavar="ID", help="See reports on list.")
 
     species_parser = subparsers.add_parser("species", help="Species management.")
     species_parser.add_argument("--insert", dest="insert", metavar="NAME", help="Insert a new species.")
