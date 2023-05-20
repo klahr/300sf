@@ -983,7 +983,7 @@ def main():
 
     api_key_parser = subparsers.add_parser("apikey", help="API key management.")
     api_key_parser.add_argument("--create", dest="create", metavar="NAME", help="Create new API key with NAME.")
-    api_key_parser.add_argument("--revoke", dest="revoke", metavar="NAME", help="Revoke API key with NAME.")
+    api_key_parser.add_argument("--revoke", dest="revoke", metavar="PREFIX", help="Revoke API key with PREFIX.")
     #    api_key_parser.add_argument('--scopes', dest='scopes', help='Scopes')
 
     user_parser = subparsers.add_parser("user", help="(admin) User management.")
