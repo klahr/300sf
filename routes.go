@@ -161,7 +161,7 @@ func SetupRoutes(r *gin.Engine) {
 	// Api keys
 	r.GET("/v1/api_keys/list", basicMiddleware, controllers.ApiKeysList)
 	r.POST("/v1/api_keys", basicMiddleware, controllers.ApiKeys)
-	r.POST("/v1/api_keys/:name/revoke", basicMiddleware, controllers.ApiKeysRevoke)
+	r.POST("/v1/api_keys/:prefix/revoke", basicMiddleware, controllers.ApiKeysRevoke)
 
 	// Species
 	r.GET("/v1/species/list", apiKeyMiddleware, controllers.SpeciesList)
