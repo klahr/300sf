@@ -1,16 +1,27 @@
 <%- contentFor('body') %>
 
 <h1><%= __('title') %></h1>
-<p>Welcome to the official <%= __('title') %> website. Log in with your credentials.</p>
+<p>Welcome to the official website of <%= __('title') %>. Please proceed to log in using your designated credentials.</p>
 <form method="POST" action="/v1/auth">
-	<label for="name">Email</label>
-	<input id="name" name="email" type="email" required></input>
-	<label for="password">Password</label>
-	<input id="password" name="password" type="password" required></input>
-	<br/>
-	<input id="stay_logged_in" name="stay_logged_in" type="checkbox"></input>
-	<label for="stay_logged_in">Stay logged in</label>
+	<table>
+		<tr>
+			<td>Email</td>
+			<td><input id="name" name="email" type="email" required></input></td>
+		</tr>
+		<tr>
+			<td>Password</td>
+			<td><input id="password" name="password" type="password" required></input></td>
+		</tr>
+		<tr>
+			<td>Stay logged in</td>
+			<td><input id="stay_logged_in" name="stay_logged_in" type="checkbox"></input></td>
+		</tr>
+		<tr>
+			<td><button type="submit">Log In</button></td>
+			<td></td>
+		</tr>
+	</table>
 	<input name="success" type="hidden" value="/lite"></input>
-	<br/>
-	<button type="submit">Log In</button>
 </form>
+
+<a href="/lite/reset-password">Reset Password</a>

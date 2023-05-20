@@ -18,6 +18,19 @@ router.post('/logout', function(req, res) {
 	res.redirect('/lite');
 });
 
+router.get('/account', function(req, res) {
+	const accessToken = req.cookies.x300sf_at;
+	if (accessToken != null) {
+        nm.request('GET', '/v1/users/whoami', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
+            res.render('lite/pages/account', { layout: 'lite-layout', data: response});
+        }, function(error) {
+            console.log(error);
+        });
+    } else {
+        res.redirect('/lite');
+    }
+});
+
 router.get('/api', function(req, res) {
 	const accessToken = req.cookies.x300sf_at;
 	if (accessToken != null) {

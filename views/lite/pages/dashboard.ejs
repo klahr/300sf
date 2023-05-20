@@ -1,8 +1,10 @@
 <%- contentFor('body') %>
 
 <h1><%= __('title') %></h1>
-<p>You are logged in.</p>
-<a href="lite/api">API</a>
+<ul>
+	<li><a href="lite/api">API</a></li>
+	<li><a href="lite/account">Account</a></li>
+</ul>
 
 <form method="POST" action="/lite/logout">
 	<button type="submit">Log Out</button>
