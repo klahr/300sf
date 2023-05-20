@@ -18,10 +18,12 @@ router.post('/auth', function(req, res) {
 		console.log(response);
 		if (stayLoggedIn) {
 			res.cookie('x300sf_at', response.access_token, {
-				maxAge: response.max_age
+				maxAge: response.max_age * 1000
 			});
 		} else {
-			res.cookie('x300sf_at', response.access_token);
+			res.cookie('x300sf_at', response.access_token, {
+				maxAge: 3600000
+			});
 		}
 		res.redirect(post.success);
 	}, function(error) {

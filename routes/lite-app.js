@@ -7,22 +7,27 @@ module.exports = router;
 router.get('/', function(req, res) {
 	const accessToken = req.cookies.x300sf_at;
 	if (accessToken != null) {
-        res.render('lite/pages/dashboard', { layout: false});
+        res.render('lite/pages/dashboard', { layout: 'lite-layout'});
     } else {
-        res.render('lite/pages/home', { layout: false});
+        res.render('lite/pages/home', { layout: 'lite-layout'});
     }
+});
+
+router.post('/logout', function(req, res) {
+	res.clearCookie("x300sf_at");
+	res.redirect('/lite');
 });
 
 router.get('/api', function(req, res) {
 	const accessToken = req.cookies.x300sf_at;
 	if (accessToken != null) {
         nm.request('GET', '/v1/api_keys/list', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
-            res.render('lite/pages/api', { layout: false, data: response});
+            res.render('lite/pages/api', { layout: 'lite-layout', data: response});
         }, function(error) {
             console.log(error);
         });
     } else {
-        res.redirect('/');
+        res.redirect('/lite');
     }
 });
 
@@ -35,7 +40,7 @@ router.post('/api/create', function(req, res) {
         nm.request('POST', '/v1/api_keys', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
             const api_key = response.api_key;
             nm.request('GET', '/v1/api_keys/list', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
-                res.render('lite/pages/api', { layout: false, data: response, new_api_key: api_key});
+                res.render('lite/pages/api', { layout: 'lite-layout', data: response, new_api_key: api_key});
             }, function(error) {
                 console.log(error);
             });
@@ -43,7 +48,7 @@ router.post('/api/create', function(req, res) {
             console.log(error);
         }, JSON.stringify(body));
     } else {
-        res.redirect('/');
+        res.redirect('/lite');
     }
 });
 
@@ -56,6 +61,6 @@ router.post('/api/revoke', function(req, res) {
             console.log(error);
         });
     } else {
-        res.redirect('/');
+        res.redirect('/lite');
     }
 });

@@ -1,15 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
+<%- contentFor('body') %>
 
-<head>
-	<meta charset="UTF-8">
-	<title>300sf lite</title>
-</head>
+<h1><%= __('title') %></h1>
+<p>You are logged in.</p>
+<a href="lite/api">API</a>
 
-<body>
-	<h1><%= __('title') %></h1>
-	<p>You are logged in.</p>
-	<a href="lite/api">API</a>
-</body>
-
-</html>
+<form method="POST" action="/lite/logout">
+	<button type="submit">Log Out</button>
+</form>
