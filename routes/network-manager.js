@@ -4,7 +4,7 @@ const NetworkManager = {
 	request(method, path, headers, success, failed, body = "") {
 		const options = {
 			hostname: '127.0.0.1',
-			port: '8080',
+			port: '8090',
 			path: encodeURI(path),
 			method: method,
 			headers: headers
