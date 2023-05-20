@@ -23,7 +23,16 @@
             <td><%- api_key.prefix %></td>
             <td><%- api_key.scopes %></td>
             <td><%- api_key.soft_limit %></td>
-            <td><%- api_key.revoked_at %></td>
+            <% if (api_key.revoked_at.startsWith('0')) { %>
+                <td>
+                    <form method="POST" action="/lite/api/revoke">
+                        <input type="hidden" name="prefix" value="<%- api_key.prefix %>"></input>
+                        <button type="submit">Revoke</button>
+                    </form>
+                </td>
+            <% } else { %>
+                <td><%- api_key.revoked_at %></td>
+            <% } %>
         </tr>
     <% } %>
     </table>

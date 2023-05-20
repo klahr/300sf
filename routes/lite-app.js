@@ -46,3 +46,16 @@ router.post('/api/create', function(req, res) {
         res.redirect('/');
     }
 });
+
+router.post('/api/revoke', function(req, res) {
+    const accessToken = req.cookies.x300sf_at;
+    if (accessToken != null) {
+        nm.request('POST', '/v1/api_keys/' + req.body.prefix + '/revoke', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
+            res.redirect('/lite/api');
+        }, function(error) {
+            console.log(error);
+        });
+    } else {
+        res.redirect('/');
+    }
+});
