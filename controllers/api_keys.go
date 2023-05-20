@@ -60,7 +60,7 @@ func ApiKeys(c *gin.Context) {
 	}
 
 	type response struct {
-		ApiKey string `json:"api-key"`
+		ApiKey string `json:"api_key"`
 	}
 	c.JSON(http.StatusOK, response{
 		ApiKey: prefix + "." + originalKey,
