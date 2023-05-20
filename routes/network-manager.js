@@ -40,7 +40,7 @@ const NetworkManager = {
 			console.error(`problem with request: ${e.message}`);
 		});
 
-		req.write(JSON.stringify(body));
+		req.write(body);
 		req.end();
 	}
 }
