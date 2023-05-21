@@ -45,6 +45,30 @@ router.get('/templates', function(req, res) {
     }
 });
 
+router.get('/templates/:uuid', function(req, res) {
+	const accessToken = req.cookies.x300sf_at;
+	if (accessToken != null) {
+        const data = {
+            list: null,
+            species: null
+        };
+        nm.request('GET', '/v1/list_templates/' + req.params.uuid, {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
+            data.list = response;
+            nm.request('GET', '/v1/species/list', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
+                data.species = response;
+                console.log(data);
+                res.render('lite/pages/template-edit', { layout: 'lite-layout', data: data, lang: i18n.getLocale(req)});
+            }, function(error) {
+                console.log(error);
+            });
+        }, function(error) {
+            console.log(error);
+        });
+    } else {
+        res.redirect('/lite');
+    }
+});
+
 router.post('/list_template/create', function(req, res) {
     const accessToken = req.cookies.x300sf_at;
     const lang = i18n.getLocale(req)

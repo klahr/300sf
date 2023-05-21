@@ -12,9 +12,9 @@
         <tr>
             <td>
                 <% if (lang == 'sv') { %>
-                    <%- template.name.sv %>
+                    <a href="/lite/templates/<%- template.uuid %>"><%- template.name.sv %></a>
                 <% } else { %>
-                    <%- template.name.en %>
+                    <a href="/lite/templates/<%- template.uuid %>"><%- template.name.en %></a>
                 <% } %>
             </td>
             <td>
