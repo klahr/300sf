@@ -222,7 +222,7 @@ func ListTemplatesRemoveSpecies(c *gin.Context) {
 	c.JSON(http.StatusNoContent, nil)
 }
 
-func ListTemplatesRename(c *gin.Context) {
+func ListTemplatesName(c *gin.Context) {
 	type request struct {
 		Name models.Translation `json:"name"`
 	}
@@ -262,13 +262,53 @@ func ListTemplatesRename(c *gin.Context) {
 	c.JSON(http.StatusNoContent, nil)
 }
 
+func ListTemplatesDescription(c *gin.Context) {
+	type request struct {
+		Description models.Translation `json:"description"`
+	}
+
+	var r request
+	if err := c.ShouldBindJSON(&r); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var user models.User
+	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var listTemplate models.ListTemplate
+	if err := models.DB.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).First(&listTemplate).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if err := models.DB.Where("id=?", listTemplate.DescriptionId).Updates(&r.Description).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
+}
+
 func ListTemplatesDetails(c *gin.Context) {
 	var result models.ListTemplate
 
 	var user models.User
 	models.DB.Where("uuid=?", c.GetString("uuid")).First(&user)
 
-	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("user_id=? OR visibility=?", user.Id, models.VisibilityPublic).Preload("Name").Preload("Description").Preload("Species.Name").Preload("Species.Order.Name").Preload("Description").First(&result).Error; err != nil {
+	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("user_id=? OR visibility=?", user.Id, models.VisibilityPublic).Preload("Name").Preload("Description").Preload("Species.Name").Preload("Species.Order.Name").First(&result).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
