@@ -11,3 +11,97 @@
 <form method="POST" action="/lite/logout">
 	<button type="submit">Log Out</button>
 </form>
+
+<h2>Report</h2>
+<form>
+	<table border="1">
+		<tr>
+			<td>Species</td>
+			<td>
+				<select name="species_id">
+					<option></option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>Age</td>
+			<td>
+				<select name="age_id">
+					<option></option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>Gender</td>
+			<td>
+				<select name="gender_id">
+					<option></option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>Method</td>
+			<td>
+				<select name="method_id">
+					<option></option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>Activity</td>
+			<td>
+				<select name="activity_id">
+					<option></option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>Quantity</td>
+			<td>
+				<input name="quantity" type="number" value="1" step="1" min="1"/>
+			</td>
+		</tr>
+		<tr>
+			<td>Position</td>
+			<td>
+				<input name="latitude" type="number"/><input name="longitude" type="number"/>
+			</td>
+		</tr>
+		<tr>
+			<td>From/until</td>
+			<td>
+				<input name="from" type="date"/><input name="until" type="date"/>
+			</td>
+		</tr>
+		<tr>
+			<td>Private Comment</td>
+			<td>
+				<textarea name="comment"></textarea>
+			</td>
+		</tr>
+		<tr>
+			<td>Notification Comment</td>
+			<td>
+				<textarea name="notification_comment"></textarea>
+			</td>
+		</tr>
+		<tr>
+			<td>Silent</td>
+			<td>
+				<input type="checkbox" name="silent"/>
+			</td>
+		</tr>
+		<tr>
+			<td>Lists</td>
+			<td>
+			</td>
+		</tr>
+		<tr>
+			<td>Tags</td>
+			<td>
+			</td>
+		</tr>
+	</table>
+	<br/>
+	<button type="submit">Report Now</button>
+</form>
