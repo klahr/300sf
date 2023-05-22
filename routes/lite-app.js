@@ -69,6 +69,24 @@ router.get('/templates/:uuid', function(req, res) {
     }
 });
 
+router.get('/species/:uuid', function(req, res) {
+	const accessToken = req.cookies.x300sf_at;
+	if (accessToken != null) {
+        const data = {
+            list: null,
+            species: null
+        };
+        nm.request('GET', '/v1/species/' + req.params.uuid, {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
+            console.log(response);
+            res.render('lite/pages/species', { layout: 'lite-layout', data: response, lang: i18n.getLocale(req)});
+        }, function(error) {
+            console.log(error);
+        });
+    } else {
+        res.redirect('/lite');
+    }
+});
+
 router.post('/list_template/create', function(req, res) {
     const accessToken = req.cookies.x300sf_at;
     const lang = i18n.getLocale(req)
