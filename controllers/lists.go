@@ -16,6 +16,8 @@ func Lists(c *gin.Context) {
 		Name       models.Translation `json:"name"`
 		Visibility int64              `json:"visibility"`
 		Template   zero.String        `json:"template"`
+		From       zero.String        `json:"from"`
+		Until      zero.String        `json:"until"`
 	}
 
 	var r request
@@ -42,6 +44,13 @@ func Lists(c *gin.Context) {
 			"message": err.Error(),
 		})
 		return
+	}
+
+	if r.From.Valid {
+		list.From = zero.TimeFrom(utils.Str2Time(r.From.String))
+	}
+	if r.Until.Valid {
+		list.Until = zero.TimeFrom(utils.Str2Time(r.Until.String))
 	}
 
 	if err := models.DB.Create(&list).Error; err != nil {
