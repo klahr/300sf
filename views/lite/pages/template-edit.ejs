@@ -16,20 +16,22 @@
 
 <h2>Species (<%- data.list.result.species.length %>)</h2>
 <table border="1">
-    <tr>
-        <td>
-            <select>
-                <% for (species of data.species.result) { %>
-                    <% if (lang == 'sv') { %>
-                        <option value="<%- species.name.uuid %>"><%- species.name.sv %></option>
-                    <% } else { %>
-                        <option value="<%- species.name.uuid %>"><%- species.name.en %></option>
+    <form method="POST" action="/lite/list_template/<%- data.list.result.uuid %>/add_species">
+        <tr>
+            <td>
+                <select name="species_id">
+                    <% for (species of data.species.result) { %>
+                        <% if (lang == 'sv') { %>
+                            <option value="<%- species.uuid %>"><%- species.name.sv %></option>
+                        <% } else { %>
+                            <option value="<%- species.uuid %>"><%- species.name.en %></option>
+                        <% } %>
                     <% } %>
-                <% } %>
-            </select>
-        </td>
-        <td><button type="submit">Add</button></td>
-    </tr>
+                </select>
+            </td>
+            <td colspan="2"><button type="submit">Add</button></td>
+        </tr>
+    </form>
     <% for (species of data.list.result.species) { %>
         <tr>
             <td>
@@ -37,6 +39,13 @@
                     <a href="/lite/species/<%- species.uuid %>"><%- species.name.sv %></a>
                 <% } else { %>
                     <a href="/lite/species/<%- species.uuid %>"><%- species.name.en %></a>
+                <% } %>
+            </td>
+            <td>
+                <% if (lang == 'sv') { %>
+                    <%- species.order.name.sv %>
+                <% } else { %>
+                    <%- species.order.name.en %>
                 <% } %>
             </td>
             <td><button type="submit">Remove</button></td>
