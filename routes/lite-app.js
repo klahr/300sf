@@ -26,6 +26,7 @@ router.get('/account', function(req, res) {
             res.render('lite/pages/account', { layout: 'lite-layout', data: response});
         }, function(error) {
             console.log(error);
+            res.redirect('/lite');
         });
     } else {
         res.redirect('/lite');
@@ -39,6 +40,7 @@ router.get('/templates', function(req, res) {
             res.render('lite/pages/templates', { layout: 'lite-layout', data: response, lang: i18n.getLocale(req)});
         }, function(error) {
             console.log(error);
+            res.redirect('/lite');
         });
     } else {
         res.redirect('/lite');
@@ -56,13 +58,14 @@ router.get('/templates/:uuid', function(req, res) {
             data.list = response;
             nm.request('GET', '/v1/species/list', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
                 data.species = response;
-                console.log(data);
                 res.render('lite/pages/template-edit', { layout: 'lite-layout', data: data, lang: i18n.getLocale(req)});
             }, function(error) {
                 console.log(error);
+                res.redirect('/lite');
             });
         }, function(error) {
             console.log(error);
+            res.redirect('/lite');
         });
     } else {
         res.redirect('/lite');
@@ -77,17 +80,17 @@ router.get('/species/:uuid', function(req, res) {
             species: null
         };
         nm.request('GET', '/v1/species/' + req.params.uuid, {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
-            console.log(response);
             res.render('lite/pages/species', { layout: 'lite-layout', data: response, lang: i18n.getLocale(req)});
         }, function(error) {
             console.log(error);
+            res.redirect('/lite');
         });
     } else {
         res.redirect('/lite');
     }
 });
 
-router.post('/list_template/:uuid/rename', function(req, res) {
+router.post('/list_template/:uuid/name', function(req, res) {
 	const accessToken = req.cookies.x300sf_at;
 	if (accessToken != null) {
         const body = {
@@ -96,15 +99,37 @@ router.post('/list_template/:uuid/rename', function(req, res) {
                 'sv': req.body.name_sv
             }
         };
-        nm.request('POST', '/v1/list_templates/' + req.params.uuid + '/rename', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
+        nm.request('POST', '/v1/list_templates/' + req.params.uuid + '/name', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
             res.redirect('/lite/templates/' + req.params.uuid);
         }, function(error) {
             console.log(error);
+            res.redirect('/lite/templates/' + req.params.uuid);
         }, JSON.stringify(body));
     } else {
         res.redirect('/lite');
     }
 });
+
+router.post('/list_template/:uuid/description', function(req, res) {
+	const accessToken = req.cookies.x300sf_at;
+	if (accessToken != null) {
+        const body = {
+            'description': {
+                'en': req.body.description_en,
+                'sv': req.body.description_sv
+            }
+        };
+        nm.request('POST', '/v1/list_templates/' + req.params.uuid + '/description', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
+            res.redirect('/lite/templates/' + req.params.uuid);
+        }, function(error) {
+            console.log(error);
+            res.redirect('/lite/templates/' + req.params.uuid);
+        }, JSON.stringify(body));
+    } else {
+        res.redirect('/lite');
+    }
+});
+
 
 router.post('/list_template/:uuid/add_species', function(req, res) {
 	const accessToken = req.cookies.x300sf_at;
@@ -116,6 +141,7 @@ router.post('/list_template/:uuid/add_species', function(req, res) {
             res.redirect('/lite/templates/' + req.params.uuid);
         }, function(error) {
             console.log(error);
+            res.redirect('/lite/templates/' + req.params.uuid);
         }, JSON.stringify(body));
     } else {
         res.redirect('/lite');
@@ -132,6 +158,7 @@ router.post('/list_template/:uuid/remove_species', function(req, res) {
             res.redirect('/lite/templates/' + req.params.uuid);
         }, function(error) {
             console.log(error);
+            res.redirect('/lite/templates/' + req.params.uuid);
         }, JSON.stringify(body));
     } else {
         res.redirect('/lite');
@@ -153,6 +180,7 @@ router.post('/list_template/create', function(req, res) {
             res.redirect('/lite/templates');
         }, function(error) {
             console.log(error);
+            res.redirect('/lite/templates');
         }, JSON.stringify(body));
     } else {
         res.redirect('/lite');
@@ -166,6 +194,7 @@ router.get('/api', function(req, res) {
             res.render('lite/pages/api', { layout: 'lite-layout', data: response});
         }, function(error) {
             console.log(error);
+            res.redirect('/api');
         });
     } else {
         res.redirect('/lite');
@@ -184,6 +213,7 @@ router.post('/api/create', function(req, res) {
                 res.render('lite/pages/api', { layout: 'lite-layout', data: response, new_api_key: api_key});
             }, function(error) {
                 console.log(error);
+                res.redirect('/api');
             });
         }, function(error) {
             console.log(error);
@@ -200,6 +230,7 @@ router.post('/api/revoke', function(req, res) {
             res.redirect('/lite/api');
         }, function(error) {
             console.log(error);
+            res.redirect('/api');
         });
     } else {
         res.redirect('/lite');

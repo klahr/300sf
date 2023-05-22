@@ -7,14 +7,16 @@
         <th>Name</th>
         <th>Visibility</th>
         <th>Species</th>
+        <th>Description</th>
+        <th></th>
     </tr>
     <% for (template of data.result) { %>
         <tr>
             <td>
                 <% if (lang == 'sv') { %>
-                    <a href="/lite/templates/<%- template.uuid %>"><%- template.name.sv %></a>
+                    <%- template.name.sv %>
                 <% } else { %>
-                    <a href="/lite/templates/<%- template.uuid %>"><%- template.name.en %></a>
+                    <%- template.name.en %>
                 <% } %>
             </td>
             <td>
@@ -27,6 +29,16 @@
                 <% } %>
             </td>
             <td><%- template.species.length %></td>
+            <td>
+                <% if (lang == 'sv') { %>
+                    <%- template.description.sv %>
+                <% } else { %>
+                    <%- template.description.en %>
+                <% } %>
+            </td>
+            <td>
+                <a href="/lite/templates/<%- template.uuid %>">Edit</a>
+            </td>
         </tr>
     <% } %>
 </table>
