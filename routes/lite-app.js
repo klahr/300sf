@@ -130,6 +130,19 @@ router.post('/list_template/:uuid/description', function(req, res) {
     }
 });
 
+router.post('/list_template/:uuid/archive', function(req, res) {
+	const accessToken = req.cookies.x300sf_at;
+	if (accessToken != null) {
+        nm.request('POST', '/v1/list_templates/' + req.params.uuid + '/archive', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
+            res.redirect('/lite/templates');
+        }, function(error) {
+            console.log(error);
+            res.redirect('/lite/templates');
+        });
+    } else {
+        res.redirect('/lite');
+    }
+});
 
 router.post('/list_template/:uuid/add_species', function(req, res) {
 	const accessToken = req.cookies.x300sf_at;
