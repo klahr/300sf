@@ -87,6 +87,24 @@ router.get('/species/:uuid', function(req, res) {
     }
 });
 
+router.post('/list_template/:uuid/rename', function(req, res) {
+	const accessToken = req.cookies.x300sf_at;
+	if (accessToken != null) {
+        const body = {
+            'name': {
+                'en': req.body.name_en,
+                'sv': req.body.name_sv
+            }
+        };
+        nm.request('POST', '/v1/list_templates/' + req.params.uuid + '/rename', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
+            res.redirect('/lite/templates/' + req.params.uuid);
+        }, function(error) {
+            console.log(error);
+        }, JSON.stringify(body));
+    } else {
+        res.redirect('/lite');
+    }
+});
 
 router.post('/list_template/:uuid/add_species', function(req, res) {
 	const accessToken = req.cookies.x300sf_at;

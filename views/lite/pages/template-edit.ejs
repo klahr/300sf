@@ -3,15 +3,17 @@
 <h1>Edit Template</h1>
 <h2>Name</h2>
 <table border="1">
-    <tr>
-        <td>Swedish</td>
-        <td><input name="name_sv" value="<%- data.list.result.name.sv %>"></td>
-    </tr>
-    <tr>
-        <td>English</td>
-        <td><input name="name_sv" value="<%- data.list.result.name.en %>"></td>
-        <td rowspan="2"><button type="submit">Save</td>
-    </tr>
+    <form method="POST" action="/lite/list_template/<%- data.list.result.uuid %>/rename">
+        <tr>
+            <td>Swedish</td>
+            <td><input name="name_sv" value="<%- data.list.result.name.sv %>"></td>
+        </tr>
+        <tr>
+            <td>English</td>
+            <td><input name="name_en" value="<%- data.list.result.name.en %>"></td>
+            <td rowspan="2"><button type="submit">Save</td>
+        </tr>
+    </form>
 </table>
 
 <h2>Species (<%- data.list.result.species.length %>)</h2>
