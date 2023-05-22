@@ -33,6 +33,32 @@ router.get('/account', function(req, res) {
     }
 });
 
+router.get('/lists', function(req, res) {
+	const accessToken = req.cookies.x300sf_at;
+	if (accessToken != null) {
+        const data = {
+            lists: null,
+            templates: null
+        }
+        nm.request('GET', '/v1/lists/list', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
+            data.lists = response;
+            nm.request('GET', '/v1/list_templates/list', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
+                data.templates = response;
+                console.log(data);
+                res.render('lite/pages/lists', { layout: 'lite-layout', data: data, lang: i18n.getLocale(req)});
+            }, function(error) {
+                console.log(error);
+                res.redirect('/lite');
+            });
+        }, function(error) {
+            console.log(error);
+            res.redirect('/lite');
+        });
+    } else {
+        res.redirect('/lite');
+    }
+});
+
 router.get('/templates', function(req, res) {
 	const accessToken = req.cookies.x300sf_at;
 	if (accessToken != null) {
@@ -194,6 +220,36 @@ router.post('/list_template/create', function(req, res) {
         }, function(error) {
             console.log(error);
             res.redirect('/lite/templates');
+        }, JSON.stringify(body));
+    } else {
+        res.redirect('/lite');
+    }
+});
+
+router.post('/list/create', function(req, res) {
+    const accessToken = req.cookies.x300sf_at;
+    const lang = i18n.getLocale(req)
+	const body = {
+        'name': {},
+        'visibility': parseInt(req.body.visibility),
+        'template': req.body.template,
+        'from': null,
+        'until': null
+    }
+    body['name'][lang] = req.body.name;
+    if (req.body.from != null) {
+        body['from'] = req.body.from;
+    }
+    if (req.body.until != null) {
+        body['until'] = req.body.until;
+    }
+    console.log(body);
+    if (accessToken != null) {
+        nm.request('POST', '/v1/lists', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
+            res.redirect('/lite/lists');
+        }, function(error) {
+            console.log(error);
+            res.redirect('/lite/lists');
         }, JSON.stringify(body));
     } else {
         res.redirect('/lite');
