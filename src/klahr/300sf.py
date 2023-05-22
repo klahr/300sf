@@ -280,7 +280,7 @@ def template(
             err_print("err: internal error")
     elif rename is not None:
         r = http_post(
-            f"/v1/list_templates/{rename[0]}/rename", {}, {"name": {lang: rename[1]}}
+            f"/v1/list_templates/{rename[0]}/name", {}, {"name": {lang: rename[1]}}
         )
         if r is not None:
             if r.status_code != 204:
