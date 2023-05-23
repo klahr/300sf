@@ -8,7 +8,12 @@ module.exports = router;
 router.get('/', function(req, res) {
 	const accessToken = req.cookies.x300sf_at;
 	if (accessToken != null) {
-        res.render('lite/pages/dashboard', { layout: 'lite-layout'});
+        nm.request('GET', '/v1/reports/basis', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
+            res.render('lite/pages/dashboard', { layout: 'lite-layout', data: response, lang: i18n.getLocale(req)});
+        }, function(error) {
+            console.log(error);
+            res.redirect('/lite');
+        });
     } else {
         res.render('lite/pages/home', { layout: 'lite-layout'});
     }
@@ -44,7 +49,6 @@ router.get('/lists', function(req, res) {
             data.lists = response;
             nm.request('GET', '/v1/list_templates/list', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
                 data.templates = response;
-                console.log(data);
                 res.render('lite/pages/lists', { layout: 'lite-layout', data: data, lang: i18n.getLocale(req)});
             }, function(error) {
                 console.log(error);
@@ -204,6 +208,36 @@ router.post('/list_template/:uuid/remove_species', function(req, res) {
     }
 });
 
+router.post('/report/create', function(req, res) {
+	const accessToken = req.cookies.x300sf_at;
+	if (accessToken != null) {
+        const body = {
+            'species_uuid': req.body.species_id,
+            'age_uuid': req.body.age_id,
+            'gender_uuid': req.body.gender_id,
+            'activity_uuid': req.body.activity_id,
+            'method_uuid': req.body.method_id,
+            'quantity': parseInt(req.body.quantity),
+            'latitude': parseFloat(req.body.latitude),
+            'longitude': parseFloat(req.body.longitude),
+            'from': req.body.from,
+            'until': req.body.until,
+            'comment': req.body.comment,
+            'notification_comment': req.body.notification_comment,
+            'silent': false
+        };
+
+        nm.request('POST', '/v1/reports', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
+            res.redirect('/lite');
+        }, function(error) {
+            console.log(error);
+            res.redirect('/lite');
+        }, JSON.stringify(body));
+    } else {
+        res.redirect('/lite');
+    }
+});
+
 router.post('/list_template/create', function(req, res) {
     const accessToken = req.cookies.x300sf_at;
     const lang = i18n.getLocale(req)
@@ -243,7 +277,7 @@ router.post('/list/create', function(req, res) {
     if (req.body.until != null) {
         body['until'] = req.body.until;
     }
-    console.log(body);
+
     if (accessToken != null) {
         nm.request('POST', '/v1/lists', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
             res.redirect('/lite/lists');

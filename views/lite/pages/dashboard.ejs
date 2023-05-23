@@ -13,13 +13,20 @@
 </form>
 
 <h2>Report</h2>
-<form>
+<form method="POST" action="/lite/report/create">
 	<table border="1">
 		<tr>
 			<td>Species</td>
 			<td>
-				<select name="species_id">
+				<select name="species_id" required>
 					<option></option>
+					<% for (species of data.species) { %>
+						<% if (lang == 'sv') { %>
+                            <option value="<%- species.uuid %>"><%- species.name.sv %></option>
+                        <% } else { %>
+                            <option value="<%- species.uuid %>"><%- species.name.en %></option>
+                        <% } %>
+					<% } %>
 				</select>
 			</td>
 		</tr>
@@ -28,6 +35,13 @@
 			<td>
 				<select name="age_id">
 					<option></option>
+					<% for (age of data.ages) { %>
+						<% if (lang == 'sv') { %>
+                            <option value="<%- age.uuid %>"><%- age.name.sv %></option>
+                        <% } else { %>
+                            <option value="<%- age.uuid %>"><%- age.name.en %></option>
+                        <% } %>
+					<% } %>
 				</select>
 			</td>
 		</tr>
@@ -36,6 +50,13 @@
 			<td>
 				<select name="gender_id">
 					<option></option>
+					<% for (gender of data.genders) { %>
+						<% if (lang == 'sv') { %>
+                            <option value="<%- gender.uuid %>"><%- gender.name.sv %></option>
+                        <% } else { %>
+                            <option value="<%- gender.uuid %>"><%- gender.name.en %></option>
+                        <% } %>
+					<% } %>
 				</select>
 			</td>
 		</tr>
@@ -44,6 +65,13 @@
 			<td>
 				<select name="method_id">
 					<option></option>
+					<% for (method of data.methods) { %>
+						<% if (lang == 'sv') { %>
+                            <option value="<%- method.uuid %>"><%- method.name.sv %></option>
+                        <% } else { %>
+                            <option value="<%- method.uuid %>"><%- method.name.en %></option>
+                        <% } %>
+					<% } %>
 				</select>
 			</td>
 		</tr>
@@ -52,19 +80,26 @@
 			<td>
 				<select name="activity_id">
 					<option></option>
+					<% for (activity of data.activities) { %>
+						<% if (lang == 'sv') { %>
+                            <option value="<%- activity.uuid %>"><%- activity.name.sv %></option>
+                        <% } else { %>
+                            <option value="<%- activity.uuid %>"><%- activity.name.en %></option>
+                        <% } %>
+					<% } %>
 				</select>
 			</td>
 		</tr>
 		<tr>
 			<td>Quantity</td>
 			<td>
-				<input name="quantity" type="number" value="1" step="1" min="1"/>
+				<input name="quantity" type="number" value="1" step="1" min="1" required/>
 			</td>
 		</tr>
 		<tr>
 			<td>Position</td>
 			<td>
-				<input name="latitude" type="number"/><input name="longitude" type="number"/>
+				<input name="latitude" type="number" step="any"/><input name="longitude" type="number" step="any"/>
 			</td>
 		</tr>
 		<tr>
