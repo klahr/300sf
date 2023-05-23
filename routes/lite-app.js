@@ -235,7 +235,9 @@ router.post('/report/create', function(req, res) {
             'until': req.body.until,
             'comment': req.body.comment,
             'notification_comment': req.body.notification_comment,
-            'silent': false
+            'silent': false,
+            'list_uuids': req.body.lists,
+            'tag_uuids': req.body.tags
         };
 
         nm.request('POST', '/v1/reports', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {

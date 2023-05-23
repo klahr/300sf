@@ -129,11 +129,29 @@
 		<tr>
 			<td>Lists</td>
 			<td>
+				<select name="lists" multiple>
+					<% for (list of data.report_basis.lists) { %>
+						<% if (lang == 'sv') { %>
+							<option value="<%- list.uuid %>"><%- list.name.sv %></option>
+						<% } else { %>
+							<option value="<%- list.uuid %>"><%- list.name.en %></option>
+						<% } %>
+					<% } %>
+				</select>
 			</td>
 		</tr>
 		<tr>
 			<td>Tags</td>
 			<td>
+				<select name="tags" multiple>
+					<% for (list of data.report_basis.tags) { %>
+						<% if (lang == 'sv') { %>
+							<option value="<%- tag.uuid %>"><%- tag.name.sv %></option>
+						<% } else { %>
+							<option value="<%- tag.uuid %>"><%- tag.name.en %></option>
+						<% } %>
+					<% } %>
+				</select>
 			</td>
 		</tr>
 	</table>
