@@ -8,8 +8,19 @@ module.exports = router;
 router.get('/', function(req, res) {
 	const accessToken = req.cookies.x300sf_at;
 	if (accessToken != null) {
+        const data = {
+            report_basis: null,
+            reports: null
+        }
         nm.request('GET', '/v1/reports/basis', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
-            res.render('lite/pages/dashboard', { layout: 'lite-layout', data: response, lang: i18n.getLocale(req)});
+            data.report_basis = response;
+            nm.request('GET', '/v1/reports/list', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
+                data.reports = response;
+                res.render('lite/pages/dashboard', { layout: 'lite-layout', data: data, lang: i18n.getLocale(req)});
+            }, function(error) {
+                console.log(error);
+                res.redirect('/lite');
+            });
         }, function(error) {
             console.log(error);
             res.redirect('/lite');
