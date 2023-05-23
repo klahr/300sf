@@ -16,8 +16,8 @@ import (
 func Reports(c *gin.Context) {
 	type request struct {
 		SpeciesUuid         string      `json:"species_uuid"`
-		From                zero.Time   `json:"from"`
-		Until               zero.Time   `json:"until"`
+		From                zero.String `json:"from"`
+		Until               zero.String `json:"until"`
 		Latitude            zero.Float  `json:"latitude"`
 		Longitude           zero.Float  `json:"longitude"`
 		Quantity            zero.Int    `json:"quantity"`
@@ -70,8 +70,8 @@ func Reports(c *gin.Context) {
 		},
 		UserId:    user.Id,
 		SpeciesId: species.Id,
-		From:      r.From,
-		Until:     r.Until,
+		From:      zero.TimeFrom(utils.Str2Time(r.From.String)),
+		Until:     zero.TimeFrom(utils.Str2Time(r.Until.String)),
 		Latitude:  r.Latitude,
 		Longitude: r.Longitude,
 		Quantity:  r.Quantity,
@@ -389,4 +389,71 @@ func ReportsRemoveTag(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusNoContent, nil)
+}
+
+func ReportsBasis(c *gin.Context) {
+	type response struct {
+		Species    []models.Species  `json:"species"`
+		Ages       []models.Age      `json:"ages"`
+		Genders    []models.Gender   `json:"genders"`
+		Methods    []models.Method   `json:"methods"`
+		Activities []models.Activity `json:"activities"`
+		Lists      []models.List     `json:"lists"`
+		Tags       []models.Tag      `json:"tags"`
+	}
+
+	var user models.User
+	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var resp response
+
+	if err := models.DB.Preload("Name").Find(&resp.Species).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+	}
+
+	if err := models.DB.Preload("Name").Find(&resp.Ages).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+	}
+
+	if err := models.DB.Preload("Name").Find(&resp.Genders).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+	}
+
+	if err := models.DB.Preload("Name").Find(&resp.Methods).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+	}
+
+	if err := models.DB.Preload("Name").Find(&resp.Activities).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+	}
+
+	if err := models.DB.Preload("Name").Where("user_id=?", user.Id).Find(&resp.Lists).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+	}
+
+	if err := models.DB.Where("user_id=?", user.Id).Find(&resp.Tags).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+	}
+
+	c.JSON(http.StatusOK, resp)
 }
