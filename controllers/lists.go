@@ -250,7 +250,7 @@ func ListsTimespan(c *gin.Context) {
 func ListsDetails(c *gin.Context) {
 	var result models.List
 
-	if err := models.DB.Where("uuid=?", c.Param("uuid")).Preload("Name").First(&result).Error; err != nil {
+	if err := models.DB.Where("uuid=?", c.Param("uuid")).Preload("Name").Preload("Species.Name").Preload("Species.Order.Name").First(&result).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})

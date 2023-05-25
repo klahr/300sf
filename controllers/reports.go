@@ -245,6 +245,44 @@ func ReportsList(c *gin.Context) {
 	})
 }
 
+func ReportsListByList(c *gin.Context) {
+	type request struct {
+		ListUuid string `json:"list_uuid"`
+	}
+
+	var r request
+	if err := c.ShouldBindJSON(&r); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var user models.User
+	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var reports []models.Report
+	if err := models.DB.Table(table.ListReports).Select("reports.*").Where("list_reports.list_id=?", "1").Joins("JOIN reports ON list_reports.report_id=reports.id").Preload("Species.Name").Preload("Zone.Name").Find(&reports).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	type response struct {
+		Result []models.Report `json:"result"`
+	}
+
+	c.JSON(http.StatusOK, response{
+		Result: reports,
+	})
+}
+
 func ReportsArchive(c *gin.Context) {
 	var user models.User
 	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {

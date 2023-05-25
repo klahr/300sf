@@ -170,6 +170,7 @@ func SetupRoutes(r *gin.Engine) {
 
 	// Reports
 	r.GET("/v1/reports/list", apiKeyMiddleware, basicMiddleware, controllers.ReportsList)
+	r.POST("/v1/reports/list", apiKeyMiddleware, basicMiddleware, controllers.ReportsListByList)
 	r.POST("/v1/reports", apiKeyMiddleware, basicMiddleware, controllers.Reports)
 	r.POST("/v1/reports/:uuid/archive", apiKeyMiddleware, basicMiddleware, controllers.ReportsArchive)
 	r.GET("/v1/reports/:uuid", apiKeyMiddleware, basicMiddleware, controllers.ReportsDetails)

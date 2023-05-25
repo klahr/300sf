@@ -5,6 +5,7 @@ const (
 	Genders             = "genders"
 	Lists               = "lists"
 	ListTemplates       = "list_templates"
+	ListReports         = "list_reports"
 	ListTemplateSpecies = "list_template_species"
 	Reports             = "reports"
 	Species             = "species"
