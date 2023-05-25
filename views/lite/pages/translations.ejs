@@ -1,0 +1,24 @@
+<%- contentFor('body') %>
+
+<h1>Translations</h1>
+<table border="1">
+    <tr>
+        <th>uuid</th>
+        <th>en</th>
+        <th>sv</th>
+        <th>la</th>
+        <th></th>
+        <% for (translation of data.translations) { %>
+            <form method="POST" action="/lite/translation/update">
+                <tr>
+                    <td><%- translation.uuid %></td>
+                    <input type="hidden" name="uuid" value="<%- translation.uuid %>"></input>
+                    <td><input name="en" value="<%- translation.en %>"></input></td>
+                    <td><input name="sv" value="<%- translation.sv %>"></input></td>
+                    <td><input name="la" value="<%- translation.la %>"></input></td>
+                    <td><button type="submit">Save</button></td>
+                </tr>
+            </form>
+        <% } %>
+    </tr>
+</table>

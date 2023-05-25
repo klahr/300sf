@@ -6,11 +6,22 @@
 	<li><a href="lite/account">Account</a></li>
 	<li><a href="lite/templates">Templates</a></li>
 	<li><a href="lite/lists">Lists</a></li>
+	<li><a href="lite/translations">Translations</a></li>
 </ul>
 
 <form method="POST" action="/lite/logout">
 	<button type="submit">Log Out</button>
 </form>
+
+<h2>Lists</h2>
+<% for (list of data.report_basis.lists) { %>
+	<% if (lang == 'sv') { %>
+		<a href="/lite/list/<%- list.uuid %>"><%- list.name.sv %></a>
+	<% } else { %>
+		<a href="/lite/list/<%- list.uuid %>"><%- list.name.en %></a>
+	<% } %>
+	<br/>
+<% } %>
 
 <h2>Report</h2>
 <form method="POST" action="/lite/report/create">

@@ -131,6 +131,76 @@ router.get('/species/:uuid', function(req, res) {
     }
 });
 
+router.get('/translations', function(req, res) {
+	const accessToken = req.cookies.x300sf_at;
+	if (accessToken != null) {
+        nm.request('GET', '/v1/translations/list', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
+            res.render('lite/pages/translations', { layout: 'lite-layout', data: response, lang: i18n.getLocale(req)});
+        }, function(error) {
+            console.log(error);
+            res.redirect('/lite');
+        });
+    } else {
+        res.redirect('/lite');
+    }
+});
+
+router.post('/translation/update', function(req, res) {
+	const accessToken = req.cookies.x300sf_at;
+	if (accessToken != null) {
+        const body = {
+            'uuid': req.body.uuid,
+            'en': req.body.en,
+            'sv': req.body.sv,
+            'la': req.body.la
+        };
+        nm.request('POST', '/v1/translations/update', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
+            res.redirect('/lite/translations/');
+        }, function(error) {
+            console.log(error);
+            res.redirect('/lite/translations/');
+        }, JSON.stringify(body));
+    } else {
+        res.redirect('/lite');
+    }
+});
+
+router.get('/list/:uuid', function(req, res) {
+	const accessToken = req.cookies.x300sf_at;
+	if (accessToken != null) {
+        const data = {
+            list: null,
+            reports: null
+        };
+        nm.request('GET', '/v1/lists/' + req.params.uuid, {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
+            data.list = response;
+            const body = {
+                'list_uuid': req.params.uuid
+            }
+            nm.request('POST', '/v1/reports/list', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
+                data.reports = response;
+                for (species of data.list.result.species) {
+                    species.reports = [];
+                    for (report of data.reports.result) {
+                        if (report.species.uuid === species.uuid) {
+                            species.reports.push(report);
+                        }
+                    }
+                }
+                res.render('lite/pages/list', { layout: 'lite-layout', data: data, lang: i18n.getLocale(req)});
+            }, function(error) {
+                console.log(error);
+                res.redirect('/lite'); 
+            }, JSON.stringify(body));
+        }, function(error) {
+            console.log(error);
+            res.redirect('/lite');
+        });
+    } else {
+        res.redirect('/lite');
+    }
+});
+
 router.post('/list_template/:uuid/name', function(req, res) {
 	const accessToken = req.cookies.x300sf_at;
 	if (accessToken != null) {

@@ -1,0 +1,21 @@
+<%- contentFor('body') %>
+
+<% if (lang == 'sv') { %>
+    <h1><%- data.list.result.name.sv %></h1>
+<% } else { %>
+    <h1><%- data.list.result.name.en %></h1>
+<% } %>
+
+<h2>Species</h2>
+<table border="1">
+<% for (species of data.list.result.species) { %>
+    <tr>
+        <td><a href="/lite/species/<%- species.uuid %>"><%- species.name.en %></a></td>
+        <td>
+            <% for (report of species.reports) { %>
+                <a href="/lite/report/<%- report.uuid %>"><%- report.from %></a>
+            <% } %>
+        </td>
+    </td></tr>
+<% } %>
+</table>
