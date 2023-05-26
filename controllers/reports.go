@@ -266,8 +266,16 @@ func ReportsListByList(c *gin.Context) {
 		return
 	}
 
+	var list models.List
+	if err := models.DB.Where("uuid=?", r.ListUuid).First(&list).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
 	var reports []models.Report
-	if err := models.DB.Table(table.ListReports).Select("reports.*").Where("list_reports.list_id=?", "1").Joins("JOIN reports ON list_reports.report_id=reports.id").Preload("Species.Name").Preload("Zone.Name").Find(&reports).Error; err != nil {
+	if err := models.DB.Table(table.ListReports).Select("reports.*").Where("list_reports.list_id=?", list.Id).Joins("JOIN reports ON list_reports.report_id=reports.id").Preload("Species.Name").Preload("Zone.Name").Find(&reports).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
