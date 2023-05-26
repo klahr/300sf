@@ -305,10 +305,20 @@ router.post('/report/create', function(req, res) {
             'until': req.body.until,
             'comment': req.body.comment,
             'notification_comment': req.body.notification_comment,
-            'silent': false,
-            'list_uuids': req.body.lists,
-            'tag_uuids': req.body.tags
+            'silent': false
         };
+
+        if (req.body.lists) {
+            body.list_uuids = Array.isArray(req.body.lists) ? req.body.lists : [req.body.lists];
+        } else {
+            body.list_uuids = [];
+        }
+
+        if (req.body.tags) {
+            body.tag_uuids = Array.isArray(req.body.tags) ? req.body.tags : [req.body.tags];
+        } else {
+            body.tag_uuids = [];
+        }
 
         nm.request('POST', '/v1/reports', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {
             res.redirect('/lite');
