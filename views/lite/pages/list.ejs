@@ -10,7 +10,13 @@
 <table border="1">
 <% for (species of data.list.result.species) { %>
     <tr>
-        <td><a href="/lite/species/<%- species.uuid %>"><%- species.name.en %></a></td>
+        <td>
+            <% if (lang == 'sv') { %>
+                <a href="/lite/species/<%- species.uuid %>"><%- species.name.sv %></a>
+            <% } else { %>
+                <a href="/lite/species/<%- species.uuid %>"><%- species.name.en %></a>
+            <% } %>
+        </td>
         <td>
             <% for (report of species.reports) { %>
                 <a href="/lite/report/<%- report.uuid %>"><%- report.from %></a>
