@@ -1,8 +1,10 @@
 # API-Referens
 
 ## POST /v1/users
+
 Skapa en ny användare.
-```
+
+```json
 // Request
 {
     "display_name": "<public_display_name>",
@@ -15,4 +17,3 @@ Skapa en ny användare.
 // Response
 Returnerar ett User-objekt.
 ```
-
