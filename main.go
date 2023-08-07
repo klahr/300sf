@@ -37,17 +37,17 @@ func main() {
 	flag.Parse()
 	if err := config.SetupAppConfig(*configFilename); err != nil {
 		log.Error(ctx, 0, err.Error())
-		panic(err)
+		os.Exit(1)
 	}
 
 	if err := models.SetupDB(ctx, config.AppConfig.DataSource, config.GetLogLevelAsInt()); err != nil {
 		log.Error(ctx, 0, err.Error())
-		panic(err)
+		os.Exit(1)
 	}
 
 	if err := models.SetupCache(ctx, config.AppConfig.RedisHost); err != nil {
 		log.Error(ctx, 0, err.Error())
-		panic(err)
+		os.Exit(1)
 	}
 
 	r := gin.New()
