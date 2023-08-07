@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
 package utils
 
 import "git.sr.ht/~klahr/300sf/models"
