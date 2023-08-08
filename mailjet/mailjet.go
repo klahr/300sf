@@ -5,8 +5,8 @@ import (
   "github.com/mailjet/mailjet-apiv3-go"
 )
 
-func SendEmails(messagesInfo []mailjet.InfoMessagesV31) error {
-  c := mailjet.NewMailjetClient("", "")
+func SendEmails(messagesInfo []mailjet.InfoMessagesV31, publicKey, secretKey string) error {
+  c := mailjet.NewMailjetClient(publicKey, secretKey)
   messages := mailjet.MessagesV31 {
     Info: messagesInfo,
   }
