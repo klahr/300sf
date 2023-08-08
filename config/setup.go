@@ -23,8 +23,10 @@ type App struct {
 	DefaultApiSoftLimit    int64    `yaml:"default-api-soft-limit"`
 	DefaultApiHardLimit    int64    `yaml:"default-api-hard-limit"`
 	DefaultLists           []string `yaml:"default-lists"`
-	CacheDuration          int64    `json:"cache-duration"`
-	WikipediaCacheDuration int64    `json:"wikipedia-cache-duration"`
+	CacheDuration          int64    `yaml:"cache-duration"`
+	WikipediaCacheDuration int64    `yaml:"wikipedia-cache-duration"`
+	MailjetPublicKey       string   `yaml:"mailjet-public-key"`
+	MailjetSecretKey       string   `yaml:"mailjet-secret-key"`
 }
 
 func (c *App) Parse(data []byte) error {
