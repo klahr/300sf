@@ -13,3 +13,6 @@ router.get('/', function(req, res) {
 	res.render('pages/home');
 });
 
+router.get('/login', function(req, res) {
+	res.render('pages/login');
+});

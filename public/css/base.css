@@ -1,4 +1,5 @@
 :root {
+	--tiny-distance: 2px;
 	--small-distance: 8px;
 	--medium-distance: 16px;
 	--medium-radius: 8px;
@@ -23,14 +24,20 @@ a:hover {
 	text-decoration: underline;
 }
 
-p {
+p,label {
 	color: var(--secondary-color);
 	font-size: 1em;
 }
 
+p.details {
+	font-size: 0.7em;
+	font-style: italic;
+}
+
 h1 {
-	color: var(--secondary-color);
+	color: var(--black-or-white-color);
 	font-size: 3em;
+	font-weight: bold;
 }
 
 h2 {
@@ -39,25 +46,59 @@ h2 {
 
 div.background {
 	background-color: var(--background-color);
-	height: 100vh;
+	padding: var(--medium-distance);
 }
 
 div.surface {
 	background-color: var(--surface-color);
 	border-radius: var(--medium-radius);
-	margin: var(--medium-distance);
 	padding: var(--medium-distance);
+	max-width: 480px;
+	margin: 0 auto;
+}
+
+div.surface > p,h1 {
+	margin: var(--small-distance);
+	color: var(--black-or-white-color);
 }
 
 input {
-	background-color: transparent;
+	background-color: var(--widget-color);
 	border: none;
-	box-shadow: 0 1px 0 0;
-	color: var(--secondary-color);
+	border-radius: var(--small-distance);
+	outline: none;
+	color: var(--black-or-white-color);
 	font-size: 1em;
-	padding: var(--small-distance);
+	width: 100%;
+	height: 48px;
+	padding: 0 24px;
+	box-sizing: border-box;
+	margin: var(--small-distance);
 }
 
 input:focus {
 	outline: none;
+}
+
+input[type=checkbox] {
+	width: 24px;
+	height: 24px;
+}
+
+button {
+	background-color: var(--primary-color);
+	outline: none;
+	border: none;
+	border-radius: 24px;
+	padding: 16px;
+	color:  white;
+	font-weight: bold;
+	font-size: 1em;
+	width: 100%;
+	height: 48px;
+	margin: var(--small-distance);
+}
+
+hr {
+	margin: var(--medium-distance) 0;
 }
