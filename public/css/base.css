@@ -2,6 +2,7 @@
 	--tiny-distance: 2px;
 	--small-distance: 8px;
 	--medium-distance: 16px;
+	--large-distance: 32px;
 	--medium-radius: 8px;
 }
 
@@ -53,7 +54,7 @@ h2 {
 div.background {
 	background-color: var(--background-color);
 	padding: var(--medium-distance);
-	height: calc(100vh - var(--medium-distance)*2);
+	height: calc(100% - var(--medium-distance)*2);
 }
 
 div.footer {

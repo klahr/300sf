@@ -1,14 +1,15 @@
 <%- contentFor('body') %>
 
-<h1><%= __('title') %></h1>
-<p>All right, let us check some birdies!</p>
-
 <div class="surface">
-	<form method="POST" action="/v1/auth">
-		<input name="email" type="email" required></input>
-		<input name="password" type="password" required></input>
-		<input name="stay_logged_in" type="checkbox"></input>
-		<button type="submit">Log In</button>
-	</form>
+  <center><img src="img/logo-256x256.png" alt="300sf Welcome" style="width: 50%; border-radius: 50%;"/></center>
+  <img src="img/300sf.svg" width="128"/>
+  <br/>
+  <p>Welcome to 300sf - the most convenient platform for maintaining your bird checklists. The project is currently in development, but please revisit at a later time.</p>
+  <p>Sign in <a href="login">here</a> if you have an account.</p>
+  <h1 style="margin-top: 32px;">Frequently Asked Questions</h1>
+  <p>Q: What does 300sf mean?</p>
+  <p>A: <i>It means "300 Svenska Fåglar" which translates to "300 Swedish Birds".</i></p>
+  <br/>
+  <p>Q: When will it be released?</p>
+  <p>A: <i>Probably during 2024.</i></p>
 </div>
-
