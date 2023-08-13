@@ -16,6 +16,10 @@
 	color: var(--error-color);
 }
 
+body {
+		background-color: var(--background-color);
+}
+
 a {
 	color: var(--primary-color);
 	font-size: 1em;

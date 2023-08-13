@@ -16,3 +16,7 @@ router.get('/', function(req, res) {
 router.get('/login', function(req, res) {
 	res.render('pages/login');
 });
+
+router.get('/dashboard', function(req, res) {
+	res.render('pages/dashboard');
+});
