@@ -66,6 +66,7 @@ h3 {
 div.background {
 	background-color: var(--background-color);
 	padding: var(--medium-distance);
+	padding-bottom: 80px;
 	height: calc(100% - var(--medium-distance)*2);
 }
 
