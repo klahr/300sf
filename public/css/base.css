@@ -115,6 +115,14 @@ div.card > div > div > div {
 	border-radius: inherit;
 }
 
+div.list-entry {
+	width: 100%;
+	background-color: var(--secondary-variant-color);
+	padding: var(--medium-distance);
+	box-sizing: border-box;
+	border-bottom: 1px inset var(--primary-color);
+}
+
 div.surface {
 	background-color: var(--surface-color);
 	border-radius: var(--medium-radius);

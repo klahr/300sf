@@ -20,3 +20,7 @@ router.get('/login', function(req, res) {
 router.get('/dashboard', function(req, res) {
 	res.render('pages/dashboard');
 });
+
+router.get('/list', function(req, res) {
+	res.render('pages/list');
+});
