@@ -52,7 +52,15 @@ h1 {
 }
 
 h2 {
-	font-size: 2em;
+	color: var(--black-or-white-color);
+	font-size: 1.5em;
+	font-weight: bold;
+}
+
+h3 {
+	color: var(--black-or-white-color);
+	font-size: 1.0em;
+	font-weight: bold;
 }
 
 div.background {
@@ -64,6 +72,13 @@ div.background {
 div.footer {
 	max-width: 480px;
 	margin: 0 auto;
+}
+
+div.card {
+	background-color: var(--secondary-variant-color);
+	border-radius: var(--medium-radius);
+	padding: var(--medium-distance);
+	margin-top: var(--medium-distance);
 }
 
 div.surface {
