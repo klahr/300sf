@@ -81,6 +81,39 @@ div.card {
 	margin-top: var(--medium-distance);
 }
 
+div.card > div {
+	width: 100%;
+	height: 36px;
+	position: relative;
+}
+
+div.card > div > p {
+	text-align: right;
+	position: absolute;
+	right: 0;
+	padding: 8px;
+	border-radius: 16px;
+	color: white;
+	font-size: 16px;
+	font-weight: bold;
+}
+
+div.card > div > div {
+	height: 8px;
+	background-color: #7f7f7f;
+	width: 65%;
+	float: left;
+	border-radius: 4px;
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+div.card > div > div > div {
+	height: 100%;
+	border-radius: inherit;
+}
+
 div.surface {
 	background-color: var(--surface-color);
 	border-radius: var(--medium-radius);
