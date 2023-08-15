@@ -34,7 +34,7 @@ class Config:
     def get(self, key):
         try:
             return self.data[key]
-        except:
+        except: # pylint: disable=bare-except
             err_print(f'config key "{key}" not found')
             return None
 
@@ -65,7 +65,7 @@ def http_get(path, headers):
             f'{config.get("api-endpoint")}{path}', headers=headers, timeout=30.0
         )
         return r
-    except:
+    except: # pylint: disable=bare-except
         err_print("err: could not connect to server")
         sys.exit(1)
 
@@ -85,7 +85,7 @@ def http_post(path, headers, body):
             timeout=30.0,
         )
         return r
-    except:
+    except: # pylint: disable=bare-except
         err_print("err: could not connect to server")
         sys.exit(1)
 
@@ -341,7 +341,7 @@ def template(
                 err_print(f'err: {r.json()["message"]}')
 
 
-def species(insert, order, details, lang):
+def species(insert, order, details, rarity, lang):
     global config
 
     if insert is not None:
@@ -367,6 +367,11 @@ def species(insert, order, details, lang):
                 for rec in recordings:
                     print(f'recording  {rec["url"]}')
         else:
+            response = r.json()
+            err_print(f'err: {response["message"]}')
+    elif rarity is not None:
+        r = http_post(f"/v1/species/{rarity[0]}/set_rarity", {}, {"zone_uuid": rarity[1], "category": rarity[2]})
+        if r is not None and r.status_code != 204:
             response = r.json()
             err_print(f'err: {response["message"]}')
     else:
@@ -1037,6 +1042,7 @@ def main():
     species_parser.add_argument("--insert", dest="insert", metavar="NAME", help="Insert a new species.")
     species_parser.add_argument("--order", dest="order", metavar="ORDER_ID", help="The order that species adheres to.")
     species_parser.add_argument("--details", dest="details", metavar="ID", help="See detailed information.")
+    species_parser.add_argument("--set-rarity", dest="rarity", nargs=3, metavar=("ID", "ZONE_ID", "CATEGORY"), help="Set rarity on species.")
     species_parser.add_argument("--lang", dest="lang", choices=lang_choices, default=lang, help="Override language setting.")
 
     reports_parser = subparsers.add_parser("report", help="Report management.")
