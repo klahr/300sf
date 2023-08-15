@@ -8,6 +8,7 @@ const (
 	ListTemplates       = "list_templates"
 	ListReports         = "list_reports"
 	ListTemplateSpecies = "list_template_species"
+	Rarities            = "rarities"
 	Reports             = "reports"
 	Species             = "species"
 	Tags                = "tags"

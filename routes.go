@@ -168,6 +168,7 @@ func SetupRoutes(r *gin.Engine) {
 	// Species
 	r.GET("/v1/species/list", apiKeyMiddleware, controllers.SpeciesList)
 	r.GET("/v1/species/:uuid", languageMiddleware, apiKeyMiddleware, controllers.SpeciesDetails)
+	r.POST("/v1/species/:uuid/set_rarity", adminMiddleware, controllers.SpeciesSetRarity)
 
 	// Reports
 	r.GET("/v1/reports/list", apiKeyMiddleware, basicMiddleware, controllers.ReportsList)
