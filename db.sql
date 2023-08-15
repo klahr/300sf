@@ -560,7 +560,6 @@ ADD CONSTRAINT `fk_reports_8`
   ON UPDATE NO ACTION;
 
   
--->
 CREATE TABLE `300sf`.`rarities` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `species_id` INT NOT NULL,
@@ -579,3 +578,4 @@ CREATE TABLE `300sf`.`rarities` (
     REFERENCES `300sf`.`zones` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
+-->
