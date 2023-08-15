@@ -156,7 +156,7 @@ func SpeciesSetRarity(c *gin.Context) {
 	}
 
 	var rarity models.Rarity
-	if err := tx.Where("zone_id=?", zone.Id).Where("species_id=?", species.Id).First(&rarity).Error; err != nil {
+	if err := tx.Where("zone_id=?", zone.Id).Where("species_id=?", species.Id).First(&rarity).Error; err == nil {
 		if r.Category == "-" {
 			if err := tx.Delete(&rarity).Error; err != nil {
 				tx.Rollback()
@@ -168,7 +168,7 @@ func SpeciesSetRarity(c *gin.Context) {
 				return
 			}
 		} else {
-			if err := models.DB.Table(table.Rarities).Where("rarity_id=?", rarity.Id).UpdateColumn("category", r.Category).Error; err != nil {
+			if err := models.DB.Table(table.Rarities).Where("id=?", rarity.Id).UpdateColumn("category", string(strings.ToUpper(r.Category)[0])).Error; err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{
 					"message": err.Error(),
 				})
@@ -179,7 +179,7 @@ func SpeciesSetRarity(c *gin.Context) {
 		rarity = models.Rarity{
 			SpeciesId: species.Id,
 			ZoneId:    zone.Id,
-			Category:  r.Category,
+			Category:  strings.ToUpper(r.Category),
 		}
 		if err := tx.Create(&rarity).Error; err != nil {
 			tx.Rollback()

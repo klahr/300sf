@@ -548,9 +548,6 @@ ADD CONSTRAINT `fk_zones_2`
   ALTER TABLE `300sf`.`zones` 
 CHANGE COLUMN `polygon` `polygon` MEDIUMBLOB NOT NULL ;
 
-
--- >
-
 ALTER TABLE `300sf`.`reports` 
 ADD COLUMN `zone_id` INT NULL AFTER `longitude`,
 ADD INDEX `fk_reports_8_idx` (`zone_id` ASC) VISIBLE;
@@ -561,3 +558,24 @@ ADD CONSTRAINT `fk_reports_8`
   REFERENCES `300sf`.`zones` (`id`)
   ON DELETE NO ACTION
   ON UPDATE NO ACTION;
+
+  
+-->
+CREATE TABLE `300sf`.`rarities` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `species_id` INT NOT NULL,
+  `zone_id` INT NOT NULL,
+  `category` CHAR NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `index2` (`species_id` ASC, `zone_id` ASC) VISIBLE,
+  INDEX `fk_rarities_2_idx` (`species_id` ASC) VISIBLE,
+  CONSTRAINT `fk_rarities_1`
+    FOREIGN KEY (`species_id`)
+    REFERENCES `300sf`.`species` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_rarities_2`
+    FOREIGN KEY (`zone_id`)
+    REFERENCES `300sf`.`zones` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
