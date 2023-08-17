@@ -5,8 +5,8 @@
     <p class="success">The account has been successfully created!</p>
   <% } %>
   <h1>Sign in</h1>
-  <input type="email" placeholder="Email" value="<%- data.email %>"/>
-  <input type="password" placeholder="Password"/>
+  <input type="email" placeholder="Email" value="<%- data.email %>" required/>
+  <input type="password" placeholder="Password" required/>
   <br/>
   <input name="stay-signed-in" type="checkbox"/>
   <label for="stay-signed-in">Stay signed in</label>

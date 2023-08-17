@@ -3,12 +3,12 @@
 	<center><img src="img/logo-256x256.png" alt="300sf Sign in" style="width: 50%; border-radius: 50%;"/></center>
 	<h1>Create a new account</h1>
 	<form method="POST" action="/signup">
-		<input type="display-name" name="display_name" placeholder="Display name" required/>
-		<input type="email" name="email" placeholder="Email" required/>
-		<input type="password" name="password" placeholder="Password" required/>
+		<input type="display-name" name="display_name" placeholder="Display name" required disabled/>
+		<input type="email" name="email" placeholder="Email" required disabled/>
+		<input type="password" name="password" placeholder="Password" required disabled/>
 		<br/>
 		<p class="details">By clicking Sign up you agree to our <a href="terms">Terms of Service</a>.</p>
-		<button type="submit">Sign up</button>
+		<button type="submit" disabled>Sign up (disabled)</button>
 	</form>
 	<hr/>
 	<p>Already have an account yet? <a href="login">Log in here</a>.</p>
