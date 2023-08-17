@@ -1,8 +1,11 @@
 <%- contentFor('body') %>
 <div class="surface">
   <center><img src="img/logo-256x256.png" alt="300sf Sign in" style="width: 50%; border-radius: 50%;"/></center>
+  <% if (data.email) { %>
+    <p class="success">The account has been successfully created!</p>
+  <% } %>
   <h1>Sign in</h1>
-  <input type="text" placeholder="Email"/>
+  <input type="email" placeholder="Email" value="<%- data.email %>"/>
   <input type="password" placeholder="Password"/>
   <br/>
   <input name="stay-signed-in" type="checkbox"/>
@@ -10,6 +13,6 @@
   <p class="details">Please mark the checkbox if you prefer not to sign in during each visit.</p>
   <button>Sign in</button>
   <hr/>
-  <p>Don't have an account yet? <a href="">Register here</a></p>
+  <p>Don't have an account yet? <a href="signup">Sign up here</a>.</p>
   <a href="">Forgot your password?</a>
 </div>

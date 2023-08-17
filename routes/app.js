@@ -13,8 +13,16 @@ router.get('/', function(req, res) {
 	res.render('pages/home');
 });
 
+router.get('/terms', function(req, res) {
+	res.render('pages/terms', { data: {} });
+});
+
 router.get('/login', function(req, res) {
-	res.render('pages/login');
+	res.render('pages/login', { data: {} });
+});
+
+router.get('/signup', function(req, res) {
+	res.render('pages/signup');
 });
 
 router.get('/dashboard', function(req, res) {
@@ -23,4 +31,21 @@ router.get('/dashboard', function(req, res) {
 
 router.get('/list', function(req, res) {
 	res.render('pages/list');
+});
+
+router.post('/signup', function(req, res) {
+	const body = {
+		email: req.body.email,
+		display_name: req.body.display_name,
+		password: req.body.password,
+		icon_uuid: req.body.icon_uuid,
+		accepted_terms: true,
+	};
+
+	nm.request('POST', '/v1/users', {}, function(response) {
+		res.render('pages/login', { data: {'email': body.email} });
+	}, function(error) {
+		console.log(error);
+		res.redirect('/');
+	}, JSON.stringify(body));
 });
