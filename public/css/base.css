@@ -17,7 +17,7 @@
 }
 
 body {
-		background-color: var(--background-color);
+	background-color: var(--background-color);
 }
 
 a {
@@ -190,6 +190,10 @@ button {
 	width: calc(100% - var(--small-distance)*2);
 	height: 48px;
 	margin: var(--small-distance);
+}
+
+button:hover {
+	cursor: pointer;
 }
 
 button:disabled {
