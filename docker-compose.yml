@@ -41,12 +41,11 @@ services:
       context: ../300sf-webapp
       dockerfile: Dockerfile
     restart: unless-stopped
-
-# 300sf.se
-# woodpecker:
-#   container_name: woodpecker
-#   network_mode: host
-#   build:
-#     context: ../300sf-web
-#     dockerfile: Dockerfile
-#   restart: unless-stopped
+  # 300sf.se
+  woodpecker:
+    container_name: woodpecker
+    network_mode: host
+    build:
+      context: ../300sf-web
+      dockerfile: Dockerfile
+    restart: unless-stopped
