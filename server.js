@@ -1,5 +1,4 @@
 var express        = require('express');
-var cookieParser   = require('cookie-parser')
 var session        = require('express-session');
 var expressLayouts = require('express-ejs-layouts');
 var bodyParser     = require('body-parser');
@@ -17,15 +16,11 @@ i18n.configure({
 
 app.set('view engine', 'ejs');
 app.use(expressLayouts);
-app.use(cookieParser());
 app.use(i18n.init);
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(session({ secret: 'keyboard cat', cookie: { maxAge: 60000 * 60 * 48 }}))
 
 var index = require('./routes/index');
-var account = require('./routes/account');
 app.use('/', index);
-app.use('/account', account);
 
 app.use(express.static(__dirname + '/public'));
 
