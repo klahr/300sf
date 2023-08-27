@@ -220,4 +220,7 @@ func setupPrivateRoutes(r *gin.Engine) {
 
 	// Zones
 	r.POST("/v1/zones", adminMiddleware, controllers.Zones)
+
+	// Emails
+	r.GET("/v1/emails/send_all", adminMiddleware, controllers.EmailsSendAll)
 }
