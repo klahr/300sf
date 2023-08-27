@@ -3,6 +3,7 @@ package table
 
 const (
 	ApiKeys             = "api_keys"
+	Emails              = "emails"
 	Genders             = "genders"
 	Lists               = "lists"
 	ListTemplates       = "list_templates"

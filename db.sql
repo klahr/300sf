@@ -578,4 +578,52 @@ CREATE TABLE `300sf`.`rarities` (
     REFERENCES `300sf`.`zones` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
+
+CREATE TABLE `300sf`.`emails` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `timestamp` DATETIME NOT NULL,
+  `uuid` VARCHAR(32) NOT NULL,
+  `from_email` VARCHAR(254) NOT NULL,
+  `from_name` VARCHAR(128) NOT NULL,
+  `to_email` VARCHAR(254) NOT NULL,
+  `to_name` VARCHAR(128) NOT NULL,
+  `subject` VARCHAR(128) NOT NULL,
+  `text_part` TEXT NOT NULL,
+  `html_part` TEXT NOT NULL,
+  `send_at` DATETIME NOT NULL,
+  `sent_at` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) VISIBLE,
+  INDEX `index3` (`uuid` ASC) VISIBLE);
+
+CREATE TABLE `300sf`.`email_templates` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `timestamp` DATETIME NOT NULL,
+  `uuid` VARCHAR(32) NOT NULL,
+  `from_email` VARCHAR(254) NOT NULL,
+  `from_name` VARCHAR(128) NOT NULL,
+  `subject_id` INT NOT NULL,
+  `text_part_id` INT NOT NULL,
+  `html_part_id` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) VISIBLE,
+  INDEX `index3` (`uuid` ASC) VISIBLE,
+  INDEX `fk_email_templates_1_idx` (`subject_id` ASC) VISIBLE,
+  INDEX `fk_email_templates_2_idx` (`text_part_id` ASC) VISIBLE,
+  INDEX `fk_email_templates_3_idx` (`html_part_id` ASC) VISIBLE,
+  CONSTRAINT `fk_email_templates_1`
+    FOREIGN KEY (`subject_id`)
+    REFERENCES `300sf`.`translations` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_email_templates_2`
+    FOREIGN KEY (`text_part_id`)
+    REFERENCES `300sf`.`translations` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_email_templates_3`
+    FOREIGN KEY (`html_part_id`)
+    REFERENCES `300sf`.`translations` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
 -->
