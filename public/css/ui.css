@@ -1,0 +1,113 @@
+div#root {
+	position: relative;
+	width: 100vw;
+	height: 100vh;
+	overflow: hidden;
+}
+
+div.uix-div {
+	display: inline-block;
+	position: absolute;
+	left: 0;
+	top: 0;
+}
+
+div.uix-img {
+	display: inline-block;
+	position: absolute;
+	background-size: cover;
+	left: 0;
+	top: 0;
+}
+
+div.uix-progress-bar {
+	width: 100%;
+	height: 2vw;
+	border-radius: 1vw;
+	border: 1px solid var(--second-color);
+}
+
+input.uix-input {
+	display: inline-block;
+	position: absolute;
+	left: 0;
+	top: 0;
+	padding: 3vw;
+	border: none;
+	border-bottom: 1px solid var(--main-color);
+}
+
+div.uix-popup {
+	width: 75vw;
+	background-color: white;
+	margin-left: 12.5vw;
+	margin-top: 30vh;
+	box-shadow: 1px 1px 4px 0px #00000038;
+	border-radius: 2vw;
+	text-align: center;
+}
+
+div.uix-popup-base {
+	background-color: #00000000;
+	transition: background-color 250ms;
+	width: 100%;
+	height: 100%;
+}
+
+div.uix-popup-background {
+	transition: background-color 250ms;
+	background-color: #0000007d;
+}
+
+div.uix-button {
+	position: absolute;
+	left: 0;
+	top: 0;
+	background-color: var(--main-color);
+	color: white;
+	padding: 4vw;
+	border-radius: 2vw;
+	min-width: 20vw;
+	transition: all 250ms;
+	cursor: pointer;
+}
+
+div.uix-button.disabled {
+	background-color: var(--gray)!important;
+	pointer-events: none;
+	transition: all 250ms;
+}
+
+div.uix-button > p {
+	font-size: 4vw;
+}
+
+div.uix-button:active {
+	background-color: var(--fifth-color);
+}
+
+table.uix-table {
+	width: 100%;
+}
+
+div.uix-layer {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	transition: all 500ms;
+	opacity: 1.0;
+	transform: scale3d(1.0, 1.0, 1.0);
+}
+
+div.uix-layer.hide-scale {
+	transition: all 500ms;
+	opacity: 0.5;
+	transform: scale3d(0.7, 0.7, 1.0);
+}
+
+div.uix-layer.hide-side {
+	transition: all 500ms;
+	transform: translateX(100%);
+}

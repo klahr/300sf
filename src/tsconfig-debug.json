@@ -1,0 +1,11 @@
+{
+	"compilerOptions": {
+		"target": "es6",
+		"module": "system",
+		"outFile": "../public/js/app.js",
+		"sourceMap": true,
+		"mapRoot": "../public/js",
+		"watch": true
+	},
+	"include": ["**/*"]
+}

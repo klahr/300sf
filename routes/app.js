@@ -13,6 +13,10 @@ router.get('/', function(req, res) {
 	res.render('pages/home');
 });
 
+router.get('/app', function(req, res) {
+	res.render('pages/app');
+});
+
 router.get('/terms', function(req, res) {
 	res.render('pages/terms', { data: {} });
 });
