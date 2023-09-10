@@ -1,3 +1,6 @@
+/// <reference path="Div.ts"/>
+/// <reference path="Button.ts"/>
+
 namespace Ui {
 	export class PopUp extends Div {
 		private mRoot: HTMLDivElement;
