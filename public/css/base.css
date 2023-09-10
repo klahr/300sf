@@ -147,7 +147,7 @@ div.surface {
 	background-color: var(--surface-color);
 	border-radius: var(--medium-radius);
 	padding: var(--medium-distance);
-	max-width: 480px;
+	max-width: 535px;
 	width: calc(100% - var(--medium-distance) * 4);
 	margin: var(--medium-distance);
 	transition: all 250ms;
@@ -238,6 +238,7 @@ hr {
 	div.main-menu {
 		transform: unset;
 		width: 200px;
+		pointer-events: none;
 	}
 
 	div.surface {
