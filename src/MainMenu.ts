@@ -20,18 +20,44 @@ class MainMenu extends Ui.Widget {
 		});
 		this.attach(this.mContent);
 
-		const header = document.createElement("p");
-		header.innerHTML = "300sf";
-		this.mContent.container.appendChild(header);
+		const logo = document.createElement("img");
+		logo.src = "img/300sf.svg";
+		logo.style.width = "100%";
+		logo.style.marginTop = "29px";
+		logo.setAttribute("height", "36");
+		this.mContent.container.appendChild(logo);
 
-		this.addEntry("Log out", function() {
+		this.addSection("Checklists");
+		this.addEntry("300 Svenska Fåglar", function() {
+		});
+		this.addEntry("Tävling 2023", function() {
+		});
+
+		this.addSection("Account");
+		this.addEntry("Profile", function() {
+			console.log("Profile");
+		});
+
+		this.addEntry("Log Out", function() {
 			console.log("Log out");
 		});
+	}
+
+	private addSection(name: string): void {
+		const header = document.createElement("p");
+		header.innerHTML = name.toUpperCase();
+		header.style.fontSize = "0.7rem";
+		header.style.fontWeight = "bold";
+		header.style.padding = "16px";
+		header.style.opacity = "0.5";
+		this.mContent.container.appendChild(header);
 	}
 
 	private addEntry(name: string, callback: Function): void {
 		const entry = document.createElement("p");
 		entry.innerHTML = name;
+		entry.style.padding = "0 0 8px 16px";
+		entry.style.color = "#2782ac";
 		entry.addEventListener("click", function() {
 			callback();
 		});
