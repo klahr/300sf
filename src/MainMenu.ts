@@ -32,6 +32,8 @@ class MainMenu extends Ui.Widget {
 		});
 		this.addEntry("Tävling 2023", function() {
 		});
+		this.addEntry("+ New List", function() {
+		}).style.color = "#2782ac";
 
 		this.addSection("Account");
 		this.addEntry("Profile", function() {
@@ -43,7 +45,7 @@ class MainMenu extends Ui.Widget {
 		});
 	}
 
-	private addSection(name: string): void {
+	private addSection(name: string): HTMLParagraphElement {
 		const header = document.createElement("p");
 		header.innerHTML = name.toUpperCase();
 		header.style.fontSize = "0.7rem";
@@ -51,16 +53,18 @@ class MainMenu extends Ui.Widget {
 		header.style.padding = "16px";
 		header.style.opacity = "0.5";
 		this.mContent.container.appendChild(header);
+		return header;
 	}
 
-	private addEntry(name: string, callback: Function): void {
+	private addEntry(name: string, callback: Function): HTMLParagraphElement {
 		const entry = document.createElement("p");
 		entry.innerHTML = name;
 		entry.style.padding = "0 0 8px 16px";
-		entry.style.color = "#2782ac";
+		entry.style.color = "white";
 		entry.addEventListener("click", function() {
 			callback();
 		});
 		this.mContent.container.appendChild(entry);
+		return entry;
 	}
 }
