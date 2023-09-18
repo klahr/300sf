@@ -59,20 +59,16 @@ class MainMenu extends Ui.Widget {
 
 	private addSection(name: string): HTMLParagraphElement {
 		const header = document.createElement("p");
+		header.className = "section";
 		header.innerHTML = name.toUpperCase();
-		header.style.fontSize = "0.7rem";
-		header.style.fontWeight = "bold";
-		header.style.padding = "16px";
-		header.style.opacity = "0.5";
 		this.mContent.container.appendChild(header);
 		return header;
 	}
 
 	private addEntry(name: string, callback: Function): HTMLParagraphElement {
 		const entry = document.createElement("p");
+		entry.className = "entry";
 		entry.innerHTML = name;
-		entry.style.padding = "0 0 8px 16px";
-		entry.style.color = "white";
 		entry.addEventListener("click", function() {
 			callback();
 		});

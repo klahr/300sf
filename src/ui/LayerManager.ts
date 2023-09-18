@@ -1,3 +1,5 @@
+/// <reference path="Layer.ts"/>
+
 namespace Ui {
 	export class LayerManager {
 		private mLayers: Array<Layer> = Array();
@@ -44,8 +46,8 @@ namespace Ui {
 		}
 
 		public showLayer(id: string): void {
-			var found = false;
-			for (var i = 0; i < this.mLayers.length; ++i) {
+			let found = false;
+			for (let i = 0; i < this.mLayers.length; ++i) {
 				if (this.mLayers[i].id === id) {
 					this.mLayers[i].show();
 					found = true;
@@ -60,7 +62,7 @@ namespace Ui {
 		}
 
 		private getIndexOfLayer(id: string): number {
-			for (var i = 0; i < this.mLayers.length; ++i) {
+			for (let i = 0; i < this.mLayers.length; ++i) {
 				if (this.mLayers[i].id === id) {
 					return i;
 				}
@@ -68,8 +70,8 @@ namespace Ui {
 			return -1;
 		}
 
-		private getLayer(id: string): Layer {
-			for (var i = 0; i < this.mLayers.length; ++i) {
+		private getLayer(id: string): Layer | null {
+			for (let i = 0; i < this.mLayers.length; ++i) {
 				if (this.mLayers[i].id === id) {
 					return this.mLayers[i];
 				}
