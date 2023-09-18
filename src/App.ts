@@ -20,7 +20,7 @@ class App implements IAppListener {
 	}
 
 	public static isLoggedIn(): boolean {
-		return true;
+		return false;
 	}
 
 	openMainMenu(): void {

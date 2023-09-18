@@ -10,10 +10,12 @@ class Page extends Ui.Widget {
 
 		this.mContainer = document.createElement("div");
         this.mContainer.className = "uix-div surface";
-        this.mContainer.style.height = "32px";
+        this.mContainer.style.minHeight = "32px";
 
         const menu =  document.createElement("span");
         menu.className = "material-symbols-outlined menu";
+        menu.style.cssFloat = "left";
+        menu.style.cursor = "pointer";
         menu.innerHTML = "menu";
         this.mContainer.appendChild(menu);
         const self = this;
