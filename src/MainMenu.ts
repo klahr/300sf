@@ -27,6 +27,14 @@ class MainMenu extends Ui.Widget {
 		logo.setAttribute("height", "36");
 		this.mContent.container.appendChild(logo);
 
+		if (App.isLoggedIn()) {
+			this.createLoggedIn();
+		} else {
+			this.createLoggedOut();
+		}
+	}
+
+	private createLoggedIn(): void  {
 		this.addSection("Checklists");
 		this.addEntry("300 Svenska Fåglar", function() {
 		});
@@ -43,6 +51,10 @@ class MainMenu extends Ui.Widget {
 		this.addEntry("Log Out", function() {
 			console.log("Log out");
 		});
+	}
+
+	private createLoggedOut(): void {
+
 	}
 
 	private addSection(name: string): HTMLParagraphElement {
