@@ -3,8 +3,7 @@
 		"target": "es6",
 		"module": "system",
 		"outFile": "../public/js/app.js",
-		"sourceMap": false,
-		"watch": false
+		"sourceMap": false
 	},
 	"include": ["**/*"]
 }
