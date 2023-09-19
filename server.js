@@ -12,7 +12,7 @@ i18n.configure({
 	cookie: 'lang',
 	queryParameter: 'lang',
 	updateFiles: false,
-	directory: __dirname + '/locales'
+	directory: __dirname + '/translations/locale'
 });
 
 app.set('view engine', 'ejs');
