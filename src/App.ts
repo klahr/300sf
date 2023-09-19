@@ -19,6 +19,10 @@ class App implements IAppListener {
 		this.mLayerManager.addToLayer("base", this.mMainMenu);
 	}
 
+	public static isLoggedIn(): boolean {
+		return false;
+	}
+
 	openMainMenu(): void {
 		this.mMainMenu.addClass("open");
 	}

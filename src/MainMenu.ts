@@ -20,21 +20,59 @@ class MainMenu extends Ui.Widget {
 		});
 		this.attach(this.mContent);
 
-		const header = document.createElement("p");
-		header.innerHTML = "300sf";
-		this.mContent.container.appendChild(header);
+		const logo = document.createElement("img");
+		logo.src = "img/300sf.svg";
+		logo.style.width = "100%";
+		logo.style.marginTop = "29px";
+		logo.setAttribute("height", "36");
+		this.mContent.container.appendChild(logo);
 
-		this.addEntry("Log out", function() {
+		if (App.isLoggedIn()) {
+			this.createLoggedIn();
+		} else {
+			this.createLoggedOut();
+		}
+	}
+
+	private createLoggedIn(): void  {
+		this.addSection("Checklists");
+		this.addEntry("300 Svenska Fåglar", function() {
+		});
+		this.addEntry("Tävling 2023", function() {
+		});
+		this.addEntry("+ New List", function() {
+		}).style.color = "#2782ac";
+
+		this.addSection("Account");
+		this.addEntry("Profile", function() {
+			console.log("Profile");
+		});
+
+		this.addEntry("Log Out", function() {
 			console.log("Log out");
 		});
 	}
 
-	private addEntry(name: string, callback: Function): void {
+	private createLoggedOut(): void {
+
+	}
+
+	private addSection(name: string): HTMLParagraphElement {
+		const header = document.createElement("p");
+		header.className = "section";
+		header.innerHTML = name.toUpperCase();
+		this.mContent.container.appendChild(header);
+		return header;
+	}
+
+	private addEntry(name: string, callback: Function): HTMLParagraphElement {
 		const entry = document.createElement("p");
+		entry.className = "entry";
 		entry.innerHTML = name;
 		entry.addEventListener("click", function() {
 			callback();
 		});
 		this.mContent.container.appendChild(entry);
+		return entry;
 	}
 }
