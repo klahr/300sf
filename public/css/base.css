@@ -10,7 +10,6 @@
 	font-family: 'Roboto', sans-serif;
 	margin: 0;
 	padding: 0;
-	white-space: pre-line;
 }
 
 body {
@@ -89,6 +88,7 @@ div.card {
 	border-radius: var(--medium-radius);
 	padding: var(--medium-distance);
 	margin-top: var(--medium-distance);
+	white-space: pre-line;
 }
 
 div.card > div {
