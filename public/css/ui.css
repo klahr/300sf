@@ -2,7 +2,7 @@ div#root {
 	position: relative;
 	width: 100vw;
 	height: 100vh;
-	overflow: hidden;
+	overflow: auto;
 }
 
 div.uix-div {

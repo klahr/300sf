@@ -6,16 +6,16 @@ const i18n = require('i18n');
 module.exports = router;
 
 router.get('/', function(req, res) {
+	res.render('pages/app', { data: { language: i18n.getLocale(req), api_key: config.ApiKey }});
+});
+
+router.get('/old', function(req, res) {
 	nm.request('GET', '/v1/list_templates/kjhkf4', {'X-Api-Key': config.ApiKey}, function(response) {
 		console.log(response);
 	}, function(error) {
 		console.log(error);
 	});
 	res.render('pages/home');
-});
-
-router.get('/app', function(req, res) {
-	res.render('pages/app', { data: { language: i18n.getLocale(req), api_key: config.ApiKey }});
 });
 
 router.get('/terms', function(req, res) {
