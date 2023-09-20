@@ -19,7 +19,6 @@ class ListPage extends Page {
 			}, null);
 		});
 		this.attach(profile);
-
 	}
 
 	public get id(): string {
