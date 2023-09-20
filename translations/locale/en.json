@@ -1,3 +1,10 @@
 {
-	"Name": "300 Swedish Birds"
+	"Name": "300 Swedish Birds",
+	"SignIn": "Sign in",
+	"Email": "Email",
+	"Password": "Password",
+	"StaySignedIn": "Stay signed in",
+	"MarkSignInCheckbox": "Please mark the checkbox if you prefer not to sign in during each visit.",
+	"NoAccountYet": "Don't have an account yet? <a href=\"/signup\">Sign up here.</a>",
+	"ForgotPassword": "Forgot your password?"
 }

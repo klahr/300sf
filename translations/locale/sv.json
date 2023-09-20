@@ -1,3 +1,10 @@
 {
-	"Name": "300 Svenska Fåglar"
+	"Name": "300 Svenska Fåglar",
+	"SignIn": "Logga in",
+	"Email": "Epost",
+	"Password": "Lösenord",
+	"StaySignedIn": "Förbli inloggad",
+	"MarkSignInCheckbox": "Kryssa i rutan om du föredrar att inte logga in vid varje besök.",
+	"NoAccountYet": "Har du inget konto ännu? <a href=\"/signup\">Skapa ett här.</a>",
+	"ForgotPassword": "Har du glömt ditt lösenord?"
 }
