@@ -276,4 +276,8 @@ hr {
 	span.menu {
 		display: none;
 	}
+
+	div.main-menu-background {
+		pointer-events: all;
+	}
 }
