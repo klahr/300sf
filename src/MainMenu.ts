@@ -2,21 +2,28 @@
 
 class MainMenu extends Ui.Widget {
 	private mContent = new Ui.Div();
+	private mMainMenu: HTMLDivElement;
 
 	constructor() {
 		super();
 
+		const self = this;
+
 		this.mContainer = document.createElement("div");
-		this.mContainer.className = "uix-div main-menu";
+		this.mContainer.className = "uix-div main-menu-background";
 		this.mContainer.addEventListener("click", function() {
-			this.classList.remove("open");
+			self.close();
 		});
+
+		this.mMainMenu = document.createElement("div");
+		this.mMainMenu.className = "uix-div main-menu";
+		this.mContainer.appendChild(this.mMainMenu);
 
 		this.mContent.addClass("content");
 		this.mContent.container.addEventListener("click", function(event) {
 			event.stopPropagation();
 		});
-		this.attach(this.mContent);
+		this.mMainMenu.appendChild(this.mContent.container);
 
 		const logo = document.createElement("img");
 		logo.src = "img/300sf.svg";
@@ -32,6 +39,16 @@ class MainMenu extends Ui.Widget {
 		} else {
 			this.createLoggedOut();
 		}
+	}
+
+	public open(): void {
+		this.mMainMenu.classList.add("open");
+		this.mContainer.classList.add("open");
+	}
+
+	public close(): void {
+		this.mContainer.classList.remove("open");
+		this.mMainMenu.classList.remove("open");
 	}
 
 	private createLoggedIn(): void  {

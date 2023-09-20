@@ -60,6 +60,6 @@ class App implements IAppListener {
 	}
 
 	openMainMenu(): void {
-		this.mMainMenu.addClass("open");
+		this.mMainMenu.open();;
 	}
 }
