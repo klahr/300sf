@@ -3,6 +3,7 @@
 /// <reference path="ui/Input.ts"/>
 /// <reference path="Page.ts"/>
 /// <reference path="App.ts"/>
+/// <reference path="HttpRequest.ts"/>
 
 class HomePage extends Page {
 	constructor(appListener: IAppListener) {
@@ -68,6 +69,23 @@ class HomePage extends Page {
 
 		const signIn = document.createElement("button");
 		signIn.innerHTML = App.translations.SignIn;
+		signIn.addEventListener("click", function() {
+			const authorization = 'Basic ' + btoa(email.value + ':' + password.value);
+			const stayLoggedIn = (staySignedIn.container as HTMLInputElement).checked;
+			const content = {
+				'refresh-token': ''
+			};
+
+			const r = new HttpRequest("POST", "/v1/auth/", JSON.stringify(content));
+			r.setHeader("Authorization", authorization);
+			r.process(function(status: any, data: any) {
+				// TODO:
+				setCookie("x300sf_at", data.access_token, stayLoggedIn ? null : data.expires_at);
+				//setCookie("x300sf_rt", data.refresh_token, 3600 * 24 * 60); // 60 days.
+				location.reload();
+			});
+		});
+
 		this.container.appendChild(signIn);
 
 		const hr = document.createElement("hr");

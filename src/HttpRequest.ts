@@ -17,7 +17,7 @@ class HttpRequest {
     }
 
     public setHeader(key: string, value: string): void {
-        this.mHeaders[key] = value;
+        this.mHeaders.set(key, value);
     }
 
     public process(success: (status: any, data: any) => void = function() {}, fail: (status: any, data: any, error: any) => void = function() {}, complete: () => void = function() {}): void {

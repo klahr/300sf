@@ -170,6 +170,7 @@ div.main-menu > div.content > p.section {
 div.main-menu > div.content > p.entry {
 	padding: 0 0 8px 16px;
 	color: white;
+	cursor: pointer;
 }
 
 div.main-menu > div.content {
@@ -250,7 +251,6 @@ hr {
 	div.main-menu {
 		transform: unset;
 		width: 200px;
-		pointer-events: none;
 	}
 
 	div.surface {

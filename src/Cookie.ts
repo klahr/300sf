@@ -13,3 +13,13 @@ function getCookie(cname: string): string {
 	}
 	return "";
 }
+
+function setCookie(cname: string, value: string, expiresAt: number | null = null) {
+	let expires = "";
+	if (expiresAt) {
+	  let date = new Date();
+	  date.setTime(expiresAt * 1000);
+	  expires = "; expires=" + date.toUTCString();
+	}
+	document.cookie = cname + "=" + (value || "") + expires + "; path=/; SameSite=Lax";
+}

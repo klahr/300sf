@@ -26,7 +26,7 @@ class App implements IAppListener {
 	}
 
 	public static isLoggedIn(): boolean {
-		return false;
+		return getCookie("x300sf_at") !== "";
 	}
 
 	public static setLanguage(language: string): void {
