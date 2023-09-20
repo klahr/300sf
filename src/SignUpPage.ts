@@ -77,7 +77,7 @@ class SignUpPage extends Page {
 		const alreadyHaveAccount = document.createElement("p");
 		alreadyHaveAccount.innerHTML = App.translations.AlreadyHaveAnAccount;
 		alreadyHaveAccount.addEventListener("click", function() {
-			self.appListener.showPage("home-page");
+			self.appListener.showPage("home-page", null);
 		});
 		this.container.appendChild(alreadyHaveAccount);
     }
