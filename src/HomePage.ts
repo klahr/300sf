@@ -76,7 +76,7 @@ class HomePage extends Page {
 				'refresh-token': ''
 			};
 
-			const r = new HttpRequest("POST", "/v1/auth/", JSON.stringify(content));
+			const r = new HttpRequest("POST", "/v1/auth", JSON.stringify(content));
 			r.setHeader("Authorization", authorization);
 			r.process(function(status: any, data: any) {
 				// TODO:
