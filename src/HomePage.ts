@@ -10,6 +10,10 @@ class HomePage extends Page {
 		super(appListener);
 	}
 
+	public get id(): string {
+		return "home-page";
+	}
+
 	protected onCreateLoggedIn(): void {
 		const self = this;
 
@@ -91,13 +95,19 @@ class HomePage extends Page {
 		const hr = document.createElement("hr");
 		this.container.appendChild(hr);
 
+		const self = this;
 		const noAccountYet = document.createElement("p");
 		noAccountYet.innerHTML = App.translations.NoAccountYet;
+		noAccountYet.addEventListener("click", function() {
+			self.appListener.showPage("sign-up-page");
+		});
 		this.container.appendChild(noAccountYet);
 
 		const forgot = document.createElement("a");
-		forgot.href = "/forgot";
-		forgot.innerHTML = App.translations.ForgotPassword;
+		forgot.innerHTML = App.translations.ForgotYourPassword;
+		forgot.addEventListener("click", function() {
+			self.appListener.showPage("forgot-page");
+		});
 		this.container.appendChild(forgot);
 	}
 }

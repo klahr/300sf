@@ -1,19 +1,22 @@
 /// <reference path="ui/LayerManager.ts"/>
 /// <reference path="HomePage.ts"/>
+/// <reference path="SignUpPage.ts"/>
 /// <reference path="MainMenu.ts"/>
 /// <reference path="Translations.ts"/>
 /// <reference path="models/Translation.ts"/>
 
 interface IAppListener {
 	openMainMenu(): void;
+	showPage(id: string): void;
 }
 
 class App implements IAppListener {
 	private mLayerManager = new Ui.LayerManager();
-	private mMainMenu = new MainMenu();
+	private mMainMenu = new MainMenu(this);
 	private static sLanguage: string = "en";
 	public static translations = Translations.en;
 	public static apiKey: string;
+	private mPages = new Array<Page>();
 
 	constructor(language: string, apiKey: string) {
 		App.setLanguage(language);
@@ -23,7 +26,18 @@ class App implements IAppListener {
 		this.mLayerManager.showLayer("base");
 
 		const homePage = new HomePage(this);
+		this.mPages.push(homePage);
 		this.mLayerManager.addToLayer("base", homePage);
+
+		const signUpPage = new SignUpPage(this);
+		this.mPages.push(signUpPage);
+		this.mLayerManager.addToLayer("base", signUpPage);
+
+		const forgotPage = new ForgotPage(this);
+		this.mPages.push(forgotPage);
+		this.mLayerManager.addToLayer("base", forgotPage);
+
+		this.showPage("home-page");
 
 		this.mLayerManager.addToLayer("base", this.mMainMenu);
 	}
@@ -39,7 +53,6 @@ class App implements IAppListener {
 			default:
 				return translation.en;
 		}
-		return "ERR_LANG";
 	}
 
 	public static setLanguage(language: string): void {
@@ -61,5 +74,11 @@ class App implements IAppListener {
 
 	openMainMenu(): void {
 		this.mMainMenu.open();;
+	}
+
+	showPage(id: string): void {
+		this.mPages.forEach(e => {
+			e.setVisible(e.id === id);
+		});
 	}
 }

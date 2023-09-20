@@ -10,12 +10,15 @@
 	margin: 0;
 	padding: 0;
 	font-family: 'Roboto', sans-serif;
-	user-select: none;
 	-webkit-tap-highlight-color: transparent;
 }
 
 :focus {
 	outline: none;
+}
+
+:disabled:hover {
+	cursor: default;
 }
 
 *.error {
@@ -33,6 +36,7 @@ a {
 
 a:hover {
 	text-decoration: underline;
+	cursor: pointer;
 }
 
 p,label {
@@ -279,5 +283,6 @@ hr {
 
 	div.main-menu-background {
 		pointer-events: all;
+		width: 200px;
 	}
 }

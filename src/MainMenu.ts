@@ -1,11 +1,15 @@
 /// <reference path="ui/Div.ts"/>
+/// <reference path="App.ts"/>
 
 class MainMenu extends Ui.Widget {
 	private mContent = new Ui.Div();
 	private mMainMenu: HTMLDivElement;
+	private mAppListener: IAppListener;
 
-	constructor() {
+	constructor(appListener: IAppListener) {
 		super();
+
+		this.mAppListener = appListener;
 
 		const self = this;
 
@@ -30,6 +34,9 @@ class MainMenu extends Ui.Widget {
 		logo.style.width = "100%";
 		logo.style.marginTop = "29px";
 		logo.setAttribute("height", "36");
+		logo.addEventListener("click", function() {
+			self.mAppListener.showPage("home-page");
+		});
 		this.mContent.container.appendChild(logo);
 	}
 
