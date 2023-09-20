@@ -10,6 +10,7 @@ interface IAppListener {
 class App implements IAppListener {
 	private mLayerManager = new Ui.LayerManager();
 	private mMainMenu = new MainMenu();
+	private static sLanguage: string = "en";
 	public static translations = Translations.en;
 
 	constructor(language: string) {
@@ -32,11 +33,17 @@ class App implements IAppListener {
 		switch (language) {
 			case "sv":
 				App.translations = Translations.sv;
+				App.sLanguage = "sv";
 				break;
 			default:
 				App.translations = Translations.en;
+				App.sLanguage = "en";
 				break;
 		}
+	}
+
+	public static getLanguage(): string {
+		return App.sLanguage;
 	}
 
 	openMainMenu(): void {
