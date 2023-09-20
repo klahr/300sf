@@ -7,5 +7,10 @@
 	"MarkSignInCheckbox": "Please mark the checkbox if you prefer not to sign in during each visit.",
 	"NoAccountYet": "Don't have an account yet? <a href='/signup'>Sign up here.</a>",
 	"ForgotPassword": "Forgot your password?",
-	"Poem": "Bird watching, what a blast!\nPigeons perched on my head so fast,\nA crow stole my sandwich, oh woe!\nSparrows mistook my hair for a cozy château.\n\nA duck landed on my shoe with a quack,\nCreating a scene, what a makeshift track!\nAmidst the chaos, an eagle soared high,\nNature's wonder in the sky.\n\nBird watching full of laughter and fun,\nEven with mishaps, it can't be undone.\nSo grab your binoculars, come with glee.\nAnd join the adventure, let's bird watch with glee!"
+	"Poem": "Bird watching, what a blast!\nPigeons perched on my head so fast,\nA crow stole my sandwich, oh woe!\nSparrows mistook my hair for a cozy château.\n\nA duck landed on my shoe with a quack,\nCreating a scene, what a makeshift track!\nAmidst the chaos, an eagle soared high,\nNature's wonder in the sky.\n\nBird watching full of laughter and fun,\nEven with mishaps, it can't be undone.\nSo grab your binoculars, come with glee,\nAnd join the adventure, let's bird watch with glee!",
+	"Checklists": "Checklists",
+	"NewChecklist": "New checklist",
+	"Account": "Account",
+	"Profile": "Profile",
+	"LogOut": "Log out"
 }

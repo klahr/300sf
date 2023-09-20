@@ -2,6 +2,7 @@
 /// <reference path="HomePage.ts"/>
 /// <reference path="MainMenu.ts"/>
 /// <reference path="Translations.ts"/>
+/// <reference path="models/Translation.ts"/>
 
 interface IAppListener {
 	openMainMenu(): void;
@@ -12,9 +13,11 @@ class App implements IAppListener {
 	private mMainMenu = new MainMenu();
 	private static sLanguage: string = "en";
 	public static translations = Translations.en;
+	public static apiKey: string;
 
-	constructor(language: string) {
+	constructor(language: string, apiKey: string) {
 		App.setLanguage(language);
+		App.apiKey = apiKey;
 
 		this.mLayerManager.addLayer("base");
 		this.mLayerManager.showLayer("base");
@@ -27,6 +30,16 @@ class App implements IAppListener {
 
 	public static isLoggedIn(): boolean {
 		return getCookie("x300sf_at") !== "";
+	}
+
+	public static getTranslation(translation: Models.Translation): string {
+		switch (App.sLanguage) {
+			case "sv":
+				return translation.sv;
+			default:
+				return translation.en;
+		}
+		return "ERR_LANG";
 	}
 
 	public static setLanguage(language: string): void {

@@ -15,7 +15,7 @@ router.get('/', function(req, res) {
 });
 
 router.get('/app', function(req, res) {
-	res.render('pages/app', { data: { language: i18n.getLocale(req) }});
+	res.render('pages/app', { data: { language: i18n.getLocale(req), api_key: config.ApiKey }});
 });
 
 router.get('/terms', function(req, res) {

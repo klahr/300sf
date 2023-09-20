@@ -24,7 +24,9 @@ class MainMenu extends Ui.Widget {
 		logo.style.marginTop = "29px";
 		logo.setAttribute("height", "36");
 		this.mContent.container.appendChild(logo);
+	}
 
+	protected onAttachedToParent(_parent: Ui.Widget): void {
 		if (App.isLoggedIn()) {
 			this.createLoggedIn();
 		} else {
@@ -33,20 +35,32 @@ class MainMenu extends Ui.Widget {
 	}
 
 	private createLoggedIn(): void  {
-		this.addSection("Checklists");
-		this.addEntry("300 Svenska Fåglar", function() {
+		const self = this;
+		this.addSection(App.translations.Checklists);
+		const checklists = document.createElement("div");
+		checklists.style.padding = "0";
+		this.mContent.container.appendChild(checklists);
+
+		const r = new HttpRequest("GET", "/v1/lists/list");
+		r.process(function(status: any, data: any) {
+			console.log(data);
+			data.result.forEach(e => {
+				const c = document.createElement("p");
+				c.className = "entry";
+				c.innerHTML = App.getTranslation(e.name);	
+				checklists.appendChild(c);
+			});
 		});
-		this.addEntry("Tävling 2023", function() {
-		});
-		this.addEntry("+ New List", function() {
+
+		this.addEntry("+ " + App.translations.NewChecklist, function() {
 		}).style.color = "#2782ac";
 
-		this.addSection("Account");
-		this.addEntry("Profile", function() {
+		this.addSection(App.translations.Account);
+		this.addEntry(App.translations.Profile, function() {
 			console.log("Profile");
 		});
 
-		this.addEntry("Log Out", function() {
+		this.addEntry(App.translations.LogOut, function() {
 			setCookie("x300sf_at", "", 0);
 			location.reload();
 		});
