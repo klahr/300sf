@@ -49,6 +49,9 @@ class MainMenu extends Ui.Widget {
 				c.className = "entry";
 				c.innerHTML = App.getTranslation(e.name);	
 				checklists.appendChild(c);
+				c.addEventListener("click", function() {
+					console.log(c.innerHTML);
+				});
 			});
 		});
 

@@ -163,15 +163,15 @@ div.main-menu {
 div.main-menu > div.content > p.section {
 	font-size: 0.7rem;
 	font-weight: bold;
-	padding: 16px;
+	padding: 8px 16px;
 	opacity: 0.5;
 }
 
 div.main-menu > div.content > div,* > p.entry {
-	padding: 0 0 8px 16px;
+	padding: 8px 16px;
 	color: white;
 	cursor: pointer;
-	font-size: 0.8rem;
+	font-size: 1rem;
 }
 
 div.main-menu > div.content {
