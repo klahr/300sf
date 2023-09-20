@@ -50,13 +50,19 @@ class MainMenu extends Ui.Widget {
 				c.innerHTML = App.getTranslation(e.name);	
 				checklists.appendChild(c);
 				c.addEventListener("click", function() {
-					console.log(c.innerHTML);
+					new Ui.PopUp("img/300sf.svg", c.innerHTML, function() {
+					}, null);
 				});
 			});
 		});
 
-		this.addEntry("+ " + App.translations.NewChecklist, function() {
-		}).style.color = "#2782ac";
+		const newChecklist = this.addEntry("+ " + App.translations.NewChecklist, function() {
+		});
+		newChecklist.style.color = "#2782ac";
+		newChecklist.addEventListener("click", function() {
+			new Ui.PopUp("img/300sf.svg", "New Checklist", function() {
+			}, null);
+		});
 
 		this.addSection(App.translations.Account);
 		this.addEntry(App.translations.Profile, function() {

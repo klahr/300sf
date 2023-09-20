@@ -38,7 +38,7 @@ input.uix-input {
 
 div.uix-popup {
 	width: 75vw;
-	background-color: white;
+	background-color: var(--secondary-variant-color);
 	margin-left: 12.5vw;
 	margin-top: 30vh;
 	box-shadow: 1px 1px 4px 0px #00000038;
