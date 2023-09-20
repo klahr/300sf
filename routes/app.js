@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const nm = require('./network-manager');
 const config = require('./config');
+const i18n = require('i18n');
 module.exports = router;
 
 router.get('/', function(req, res) {
@@ -14,7 +15,7 @@ router.get('/', function(req, res) {
 });
 
 router.get('/app', function(req, res) {
-	res.render('pages/app');
+	res.render('pages/app', { data: { language: i18n.getLocale(req) }});
 });
 
 router.get('/terms', function(req, res) {

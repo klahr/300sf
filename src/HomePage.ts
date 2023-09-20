@@ -38,17 +38,17 @@ class HomePage extends Page {
 		content.container.appendChild(logo);
 
 		const title = document.createElement("h1");
-		title.innerHTML = "Sign in";
+		title.innerHTML = App.translations.SignIn;
 		this.container.appendChild(title);
 
 		const email = new Ui.Input("email");
 		email.style.position = "relative";
-		email.setPlaceHolder("Email");
+		email.setPlaceHolder(App.translations.Email);
 		this.attach(email);
 
 		const password = new Ui.Input("password");
 		password.style.position = "relative";
-		password.setPlaceHolder("Password");
+		password.setPlaceHolder(App.translations.Password);
 		this.attach(password);
 
 		const staySignedIn = new Ui.Input("checkbox");
@@ -58,28 +58,28 @@ class HomePage extends Page {
 
 		const staySignedInLbl = document.createElement("label");
 		staySignedInLbl.setAttribute("for", staySignedIn.container.getAttribute("name")!);
-		staySignedInLbl.innerHTML = "Stay signed in";
+		staySignedInLbl.innerHTML = App.translations.StaySignedIn;
 		this.container.appendChild(staySignedInLbl);
 
 		const help = document.createElement("p");
 		help.className = "details";
-		help.innerHTML = "Please mark the checkbox if you prefer not to sign in during each visit.";
+		help.innerHTML = App.translations.MarkSignInCheckbox;
 		this.container.appendChild(help);
 
 		const signIn = document.createElement("button");
-		signIn.innerHTML = "Sign in";
+		signIn.innerHTML = App.translations.SignIn;
 		this.container.appendChild(signIn);
 
 		const hr = document.createElement("hr");
 		this.container.appendChild(hr);
 
 		const noAccountYet = document.createElement("p");
-		noAccountYet.innerHTML = "Don't have an account yet? <a href=\"signup\">Sign up here</a>.";
+		noAccountYet.innerHTML = App.translations.NoAccountYet;
 		this.container.appendChild(noAccountYet);
 
 		const forgot = document.createElement("a");
 		forgot.href = "/forgot";
-		forgot.innerHTML = "Forgot you password?";
+		forgot.innerHTML = App.translations.ForgotPassword;
 		this.container.appendChild(forgot);
 	}
 }

@@ -12,7 +12,9 @@ class App implements IAppListener {
 	private mMainMenu = new MainMenu();
 	public static translations = Translations.en;
 
-	constructor() {
+	constructor(language: string) {
+		App.setLanguage(language);
+
 		this.mLayerManager.addLayer("base");
 		this.mLayerManager.showLayer("base");
 

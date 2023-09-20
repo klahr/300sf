@@ -6,7 +6,7 @@ class Translations {
 		Password: "Password",
 		StaySignedIn: "Stay signed in",
 		MarkSignInCheckbox: "Please mark the checkbox if you prefer not to sign in during each visit.",
-		NoAccountYet: "Don't have an account yet? <a href="/signup">Sign up here.</a>",
+		NoAccountYet: "Don't have an account yet? <a href='/signup'>Sign up here.</a>",
 		ForgotPassword: "Forgot your password?",
 	}
 	static sv = {
@@ -16,7 +16,7 @@ class Translations {
 		Password: "Lösenord",
 		StaySignedIn: "Förbli inloggad",
 		MarkSignInCheckbox: "Kryssa i rutan om du föredrar att inte logga in vid varje besök.",
-		NoAccountYet: "Har du inget konto ännu? <a href="/signup">Skapa ett här.</a>",
+		NoAccountYet: "Har du inget konto ännu? <a href='/signup'>Skapa ett här.</a>",
 		ForgotPassword: "Har du glömt ditt lösenord?",
 	}
 }
