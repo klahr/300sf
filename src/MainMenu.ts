@@ -47,12 +47,18 @@ class MainMenu extends Ui.Widget {
 		});
 
 		this.addEntry("Log Out", function() {
-			console.log("Log out");
+			setCookie("x300sf_at", "", 0);
+			location.reload();
 		});
 	}
 
 	private createLoggedOut(): void {
-
+		this.addSection("A Poem");
+		const poem = document.createElement("p");
+		poem.style.padding = "0 16px";
+		poem.style.fontStyle = "italic";
+		poem.innerHTML = App.translations.Poem;
+		this.mContent.container.appendChild(poem);
 	}
 
 	private addSection(name: string): HTMLParagraphElement {

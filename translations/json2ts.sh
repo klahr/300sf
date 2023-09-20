@@ -4,19 +4,15 @@
 echo "class Translations {"
 
 for arg in "$@"; do
-	echo "	static $arg = {"
+    echo "    static $arg = {"
 
-	key_value_pairs=()
-	while IFS="=" read -r key value; do
-		key_value_pairs+=("$key: \"$value\"")
-	done < <(jq -r 'to_entries[] | "\(.key)=\(.value)"' "./locale/$arg.json")
+    mapfile -t key_value_pairs < <(jq -j 'to_entries[] | "\(.key): \"\( .value | gsub("\\n"; "<br/>") | gsub("\\r"; "") )\"\n"' "./locale/$arg.json")
 
+    for pair in "${key_value_pairs[@]}"; do
+        echo "        $pair,"
+    done
 
-	for pair in "${key_value_pairs[@]}"; do
-		echo "		$pair,"
-	done
-
-	echo "	}"
+    echo "    }"
 done
 
 echo "}"
