@@ -99,14 +99,14 @@ class HomePage extends Page {
 		const noAccountYet = document.createElement("p");
 		noAccountYet.innerHTML = App.translations.NoAccountYet;
 		noAccountYet.addEventListener("click", function() {
-			self.appListener.showPage("sign-up-page");
+			self.appListener.showPage("sign-up-page", null);
 		});
 		this.container.appendChild(noAccountYet);
 
 		const forgot = document.createElement("a");
 		forgot.innerHTML = App.translations.ForgotYourPassword;
 		forgot.addEventListener("click", function() {
-			self.appListener.showPage("forgot-page");
+			self.appListener.showPage("forgot-page", null);
 		});
 		this.container.appendChild(forgot);
 	}

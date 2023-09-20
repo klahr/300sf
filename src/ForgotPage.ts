@@ -1,8 +1,8 @@
 class ForgotPage extends Page {
-    constructor(appListener: IAppListener) {
-        super(appListener);
+	constructor(appListener: IAppListener) {
+		super(appListener);
 
-        const content = new Ui.Div();
+		const content = new Ui.Div();
 		content.style.position = "relative";
 		content.style.width = "100%";
 		content.style.textAlign = "center";
@@ -33,7 +33,7 @@ class ForgotPage extends Page {
 		});
 
 		this.container.appendChild(reset);
-    }
+	}
 
 	public get id(): string {
 		return "forgot-page";

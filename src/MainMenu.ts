@@ -33,9 +33,10 @@ class MainMenu extends Ui.Widget {
 		logo.src = "img/300sf.svg";
 		logo.style.width = "100%";
 		logo.style.marginTop = "29px";
+		logo.style.cursor = "pointer";
 		logo.setAttribute("height", "36");
 		logo.addEventListener("click", function() {
-			self.mAppListener.showPage("home-page");
+			self.mAppListener.showPage("home-page", null);
 		});
 		this.mContent.container.appendChild(logo);
 	}
@@ -67,15 +68,13 @@ class MainMenu extends Ui.Widget {
 
 		const r = new HttpRequest("GET", "/v1/lists/list");
 		r.process(function(status: any, data: any) {
-			console.log(data);
 			data.result.forEach(e => {
 				const c = document.createElement("p");
 				c.className = "entry";
 				c.innerHTML = App.getTranslation(e.name);	
 				checklists.appendChild(c);
 				c.addEventListener("click", function() {
-					new Ui.PopUp("img/300sf.svg", c.innerHTML, function() {
-					}, null);
+					self.mAppListener.showPage("list-page", e);
 				});
 			});
 		});

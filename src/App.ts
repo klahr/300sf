@@ -1,13 +1,15 @@
 /// <reference path="ui/LayerManager.ts"/>
 /// <reference path="HomePage.ts"/>
 /// <reference path="SignUpPage.ts"/>
+/// <reference path="ListPage.ts"/>
+/// <reference path="ForgotPage.ts"/>
 /// <reference path="MainMenu.ts"/>
 /// <reference path="Translations.ts"/>
 /// <reference path="models/Translation.ts"/>
 
 interface IAppListener {
 	openMainMenu(): void;
-	showPage(id: string): void;
+	showPage(id: string, data: any): void;
 }
 
 class App implements IAppListener {
@@ -37,7 +39,11 @@ class App implements IAppListener {
 		this.mPages.push(forgotPage);
 		this.mLayerManager.addToLayer("base", forgotPage);
 
-		this.showPage("home-page");
+		const listPage = new ListPage(this);
+		this.mPages.push(listPage);
+		this.mLayerManager.addToLayer("base", listPage);
+
+		this.showPage("home-page", null);
 
 		this.mLayerManager.addToLayer("base", this.mMainMenu);
 	}
@@ -76,9 +82,15 @@ class App implements IAppListener {
 		this.mMainMenu.open();;
 	}
 
-	showPage(id: string): void {
+	showPage(id: string, data: any): void {
 		this.mPages.forEach(e => {
-			e.setVisible(e.id === id);
+			if (e.id === id) {
+				e.setVisible(true);
+				e.setData(data);
+			} else {
+				e.setVisible(false);
+			}
 		});
+		this.mMainMenu.close();
 	}
 }
