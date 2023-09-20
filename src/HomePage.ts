@@ -2,6 +2,7 @@
 /// <reference path="ui/Image.ts"/>
 /// <reference path="ui/Input.ts"/>
 /// <reference path="Page.ts"/>
+/// <reference path="App.ts"/>
 
 class HomePage extends Page {
 	constructor(appListener: IAppListener) {
