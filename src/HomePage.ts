@@ -31,7 +31,7 @@ class HomePage extends Page {
 		this.attach(profile);
 
 		const title = document.createElement("h1");
-		title.innerHTML = "Hello!";
+		title.innerHTML = App.translations.WelcomeMessage;
 		this.container.appendChild(title);
 
 		const table = new Ui.Table();

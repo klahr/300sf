@@ -25,6 +25,7 @@ class Translations {
         Settings: "Settings",
         ManageChecklists: "Manage checklists",
         Dashboard: "Dashboard",
+        WelcomeMessage: "Hello!",
     }
     static sv = {
         Name: "300 Svenska Fåglar",
@@ -52,5 +53,6 @@ class Translations {
         Settings: "Inställningar",
         ManageChecklists: "Hantera krysslistor",
         Dashboard: "Dashboard",
+        WelcomeMessage: "Hej!",
     }
 }

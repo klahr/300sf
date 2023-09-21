@@ -23,5 +23,6 @@
 	"GoToWebsite": "Gå till webbsidan",
 	"Settings": "Inställningar",
 	"ManageChecklists": "Hantera krysslistor",
-	"Dashboard": "Dashboard"
+	"Dashboard": "Dashboard",
+	"WelcomeMessage": "Hej!"
 }

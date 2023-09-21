@@ -23,5 +23,6 @@
 	"GoToWebsite": "Go to website",
 	"Settings": "Settings",
 	"ManageChecklists": "Manage checklists",
-	"Dashboard": "Dashboard"
+	"Dashboard": "Dashboard",
+	"WelcomeMessage": "Hello!"
 }
