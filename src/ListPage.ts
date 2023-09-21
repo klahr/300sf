@@ -38,6 +38,7 @@ class ListPage extends Page {
 		this.mProgressLbl.style.margin = "0";
 		this.mProgressLbl.style.fontWeight = "bold";
 		this.mProgressLbl.style.cssFloat = "right";
+		this.mProgressLbl.style.color = "var(--success-color)";
 		this.container.appendChild(this.mProgressLbl);
 
 		this.mProgress = new Ui.ProgressBar();

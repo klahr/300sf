@@ -159,9 +159,11 @@ div.surface {
 	border-radius: var(--medium-radius);
 	padding: var(--medium-distance);
 	max-width: 735px;
+	max-height: calc(100% - var(--medium-distance) * 4);
 	width: calc(100% - var(--medium-distance) * 4);
 	margin: var(--medium-distance);
 	transition: all 250ms;
+	overflow: auto;
 }
 
 div.main-menu {
@@ -202,6 +204,7 @@ div.main-menu > div.content {
 	width: 100%;
 	background-color: var(--surface-color);
 	height: 100%;
+	overflow-y: auto;
 }
 
 div.main-menu.open {
@@ -275,9 +278,9 @@ hr {
 	}
 
 	div.surface {
-		left: 200px;
+		left: 256px;
 		max-width: calc(800px - var(--medium-distance) * 4);
-		width: calc(100% - 200px - var(--medium-distance) * 4);
+		width: calc(100% - 256px - var(--medium-distance) * 4);
 	}
 
 	span.menu {

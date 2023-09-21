@@ -43,6 +43,7 @@ namespace Ui {
 			close.style.cssFloat = "right";
 			close.style.cursor = "pointer";
 			close.style.fontSize = "48px";
+			close.style.color = "var(--secondary-color)";
 			close.innerHTML = "close";
 			close.addEventListener("click", function() {
 				self.close();
