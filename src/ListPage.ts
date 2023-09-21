@@ -64,7 +64,34 @@ class ListPage extends Page {
 		r.process(function(status: any, data: any) {
 			self.mTitle.innerHTML = App.getTranslation((self.data as Models.List).name);
 			const reports = data.result as Models.Report[];
+			let lastOrder: Models.Order;
 			self.data.species.forEach(e => {
+				if (!lastOrder || lastOrder.uuid !== e.order.uuid) {
+					console.log(e.order.name.sv);
+					lastOrder = e.order;
+
+					const entry = document.createElement("div");
+					entry.style.textAlign = "center";
+					entry.style.backgroundColor = "var(--background-color)";
+					entry.className = "list-entry";
+	
+					const name = document.createElement("p");
+					name.innerHTML = App.getTranslation(e.order.name).toUpperCase();
+					name.style.cursor = "pointer";
+					name.style.fontWeight = "bold";
+					name.style.fontStyle = "initial";
+					name.style.color = "var(--primary-variant-color)";
+					entry.appendChild(name);
+					name.addEventListener("click", function() {
+						new Ui.PopUp("img/300sf.svg", e.order.name.sv, function() {
+						}, null);
+					});
+
+					const subName = document.createElement("p");
+					subName.innerHTML = e.order.name.la;
+					entry.appendChild(subName);
+					self.mTable.addRow([entry]);
+				}
 				const entry = document.createElement("div");
 				entry.className = "list-entry";
 
