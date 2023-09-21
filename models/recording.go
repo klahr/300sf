@@ -4,4 +4,9 @@ package models
 type Recording struct {
 	Url      string `json:"url"`
 	Filename string `json:"filename"`
+	Type     string `json:"type"`
+	Sex      string `json:"sex"`
+	Stage    string `json:"stage"`
+	Method   string `json:"method"`
+	Sono     string `json:"sono"`
 }

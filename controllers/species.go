@@ -247,6 +247,11 @@ func SpeciesDetails(c *gin.Context) {
 		recs = append(recs, models.Recording{
 			Url:      r.File,
 			Filename: r.Filename,
+			Type:     r.Type,
+			Sex:      r.Sex,
+			Stage:    r.Stage,
+			Method:   r.Method,
+			Sono:     r.Sono.Small,
 		})
 	}
 
