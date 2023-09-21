@@ -22,6 +22,9 @@ class Translations {
         AlreadyHaveAnAccount: "Already have an account? <a>Sign in here.</a>",
         GoToArticle: "Go to article",
         GoToWebsite: "Go to website",
+        Settings: "Settings",
+        ManageChecklists: "Manage checklists",
+        Dashboard: "Dashboard",
     }
     static sv = {
         Name: "300 Svenska Fåglar",
@@ -46,5 +49,8 @@ class Translations {
         AlreadyHaveAnAccount: "Har du redan ett konto? <a>Logga in här.</a>",
         GoToArticle: "Gå till artikeln",
         GoToWebsite: "Gå till webbsidan",
+        Settings: "Inställningar",
+        ManageChecklists: "Hantera krysslistor",
+        Dashboard: "Dashboard",
     }
 }

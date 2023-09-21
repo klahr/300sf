@@ -20,5 +20,8 @@
 	"SignUp": "Sign up",
 	"AlreadyHaveAnAccount": "Already have an account? <a>Sign in here.</a>",
 	"GoToArticle": "Go to article",
-	"GoToWebsite": "Go to website"
+	"GoToWebsite": "Go to website",
+	"Settings": "Settings",
+	"ManageChecklists": "Manage checklists",
+	"Dashboard": "Dashboard"
 }

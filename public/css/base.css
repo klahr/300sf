@@ -200,6 +200,10 @@ div.main-menu > div.content > div,* > p.entry {
 	font-size: 1rem;
 }
 
+div.main-menu > div.content > div,* > p.entry:hover {
+	color: var(--primary-variant-color);
+}
+
 div.main-menu > div.content {
 	width: 100%;
 	background-color: var(--surface-color);

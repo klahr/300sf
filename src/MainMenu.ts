@@ -61,6 +61,17 @@ class MainMenu extends Ui.Widget {
 
 	private createLoggedIn(): void  {
 		const self = this;
+
+		this.addSection("300sf");
+		this.addEntry("<span style='font-size: 1rem; color: #2782ac;' class='material-symbols-outlined'>home</span> " + App.translations.Dashboard, function() {
+			self.mAppListener.showPage("home-page", null);
+		});
+
+		const manageChecklists = this.addEntry("<span style='font-size: 1rem; color: #2782ac;' class='material-symbols-outlined'>edit_note</span>  " + App.translations.ManageChecklists, function() {
+		});
+		manageChecklists.addEventListener("click", function() {
+		});
+
 		this.addSection(App.translations.Checklists);
 		const checklists = document.createElement("div");
 		checklists.style.padding = "0";
@@ -79,14 +90,8 @@ class MainMenu extends Ui.Widget {
 			});
 		});
 
-		const newChecklist = this.addEntry("+ " + App.translations.NewChecklist, function() {
-		});
-		newChecklist.style.color = "#2782ac";
-		newChecklist.addEventListener("click", function() {
-		});
-
 		this.addSection(App.translations.Account);
-		this.addEntry("<span style='font-size: 1rem; color: #2782ac;' class='material-symbols-outlined'>person</span> " + App.translations.Profile, function() {
+		this.addEntry("<span style='font-size: 1rem; color: #2782ac;' class='material-symbols-outlined'>settings</span> " + App.translations.Settings, function() {
 			console.log("Profile");
 		});
 

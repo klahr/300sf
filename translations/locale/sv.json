@@ -20,5 +20,8 @@
 	"SignUp": "Skapa konto",
 	"AlreadyHaveAnAccount": "Har du redan ett konto? <a>Logga in här.</a>",
 	"GoToArticle": "Gå till artikeln",
-	"GoToWebsite": "Gå till webbsidan"
+	"GoToWebsite": "Gå till webbsidan",
+	"Settings": "Inställningar",
+	"ManageChecklists": "Hantera krysslistor",
+	"Dashboard": "Dashboard"
 }
