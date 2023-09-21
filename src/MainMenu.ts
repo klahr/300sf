@@ -83,8 +83,6 @@ class MainMenu extends Ui.Widget {
 		});
 		newChecklist.style.color = "#2782ac";
 		newChecklist.addEventListener("click", function() {
-			new Ui.PopUp("img/300sf.svg", "New Checklist", function() {
-			}, null);
 		});
 
 		this.addSection(App.translations.Account);
