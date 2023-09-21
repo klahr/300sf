@@ -58,7 +58,6 @@ func Auth(c *gin.Context) {
 				"code":    -30002,
 				"message": "invalid email or password",
 			})
-
 			return
 		}
 
