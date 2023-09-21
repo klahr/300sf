@@ -23,10 +23,8 @@ function openSpeciesPopUp(species: Models.Species) {
 	const recordings = document.createElement("div");
 	content.container.appendChild(recordings);
 
-	console.log(species);
 	const r = new HttpRequest("GET", "/v1/species/" + species.uuid);
 	r.process(function(status: any, data: any) {
-		console.log(data);
 		summary.innerHTML = data.wikipedia.summary;
 
 		const p = document.createElement("p");

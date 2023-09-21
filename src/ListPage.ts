@@ -6,6 +6,7 @@
 /// <reference path="models/Order.ts"/>
 /// <reference path="models/Report.ts"/>
 /// <reference path="models/List.ts"/>
+/// <reference path="SpeciesPopUp.ts"/>
 
 class ListPage extends Page {
 	private mContent: Ui.Div;
