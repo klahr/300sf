@@ -29,6 +29,42 @@ class HomePage extends Page {
 			});
 		});
 		this.attach(profile);
+
+		const title = document.createElement("h1");
+		title.innerHTML = "Hello!";
+		this.container.appendChild(title);
+
+		const table = new Ui.Table();
+		this.attach(table);
+
+		const r = new HttpRequest("GET", "/v1/reports/list");
+		r.process(function(status: any, data: any) {
+			console.log(data);
+
+			data.result.forEach(e => {
+				const d = e as Models.Report;
+				const species = e.species as Models.Species;
+				const entry = document.createElement("div");
+				entry.className = "list-entry";
+	
+				const name = document.createElement("h3");
+				name.innerHTML = App.getTranslation(species.name);
+				name.style.cursor = "pointer";
+				entry.appendChild(name);
+				name.addEventListener("click", function() {
+				});
+	
+				const subName = document.createElement("p");
+				subName.innerHTML = species.name.la;
+				entry.appendChild(subName);
+
+				const observationDate = document.createElement("p");
+				observationDate.innerHTML = new Date(d.from).toLocaleString();
+				entry.appendChild(observationDate);
+
+				table.addRow([entry]);
+			});
+		});
 	}
 	
 	protected onCreateLoggedOut(): void {

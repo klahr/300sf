@@ -11,8 +11,8 @@ namespace Models {
 	export class Report {
 		uuid: string;
 		species: Species;
-		from: Date;
-		until: Date;
+		from: string;
+		until: string;
 		latitude: number;
 		longitude: number;
 		zone: Zone;

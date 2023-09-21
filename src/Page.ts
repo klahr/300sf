@@ -14,7 +14,6 @@ class Page extends Ui.Widget {
 
 		const menu =  document.createElement("span");
 		menu.className = "material-symbols-outlined menu";
-		menu.style.cssFloat = "left";
 		menu.style.cursor = "pointer";
 		menu.innerHTML = "menu";
 		this.mContainer.appendChild(menu);
