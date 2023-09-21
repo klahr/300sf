@@ -28,8 +28,6 @@ class ListPage extends Page {
 		profile.style.top = "var(--small-distance)";
 		profile.style.borderRadius = "100%";
 		profile.container.addEventListener("click", function() {
-			new Ui.PopUp("img/300sf.svg", "Sidan finns ännu inte.", function() {
-			}, null);
 		});
 
 		this.mTitle = document.createElement("h1");
@@ -90,8 +88,6 @@ class ListPage extends Page {
 					name.addEventListener("click", function() {
 						const r = new HttpRequest("GET", "/v1/orders/" + e.order.uuid);
 						r.process(function(status: any, data: any) {
-							new Ui.PopUp("img/300sf.svg", data.wikipedia.summary, function() {
-							}, null);
 						});
 					});
 
@@ -110,8 +106,6 @@ class ListPage extends Page {
 				name.addEventListener("click", function() {
 					const r = new HttpRequest("GET", "/v1/species/" + e.uuid);
 					r.process(function(status: any, data: any) {
-						new Ui.PopUp("img/300sf.svg", data.wikipedia.summary, function() {
-						}, null);
 					});
 				});
 

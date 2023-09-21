@@ -2,7 +2,7 @@
 
 namespace Ui {
 	export class Button extends Widget {
-		constructor(text: string, icon: string) {
+		constructor(text: string, icon: string | null) {
 			super();
 
 			this.mContainer = document.createElement("div");

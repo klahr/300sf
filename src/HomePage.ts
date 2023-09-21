@@ -23,8 +23,10 @@ class HomePage extends Page {
 		profile.style.top = "var(--small-distance)";
 		profile.style.borderRadius = "100%";
 		profile.container.addEventListener("click", function() {
-			new Ui.PopUp("img/300sf.svg", "Sidan finns ännu inte.", function() {
-			}, null);
+			const p = document.createElement("p");
+			p.innerHTML = "hej";
+			new Ui.PopUp(p, function() {
+			});
 		});
 		this.attach(profile);
 	}

@@ -6,7 +6,7 @@ namespace Ui {
 		private mRoot: HTMLDivElement;
 		private mPopup: Ui.Div;
 
-		constructor(icon: string, text: string, okCallback: any, cancelCallback: any) {
+		constructor(content: HTMLElement, closeCallback: () => void) {
 			super();
 
 			this.addClass("uix-popup-base");
@@ -24,58 +24,37 @@ namespace Ui {
 			this.mPopup.addClass("uix-popup");
 			this.mPopup.addClass("animate__animated");
 			this.mPopup.addClass("animate__bounceIn");
+			this.mPopup.style.setProperty("--animate-duration", "1000ms");
 			this.attach(this.mPopup);
 
-			if (icon) {
-				const i = document.createElement("img");
-				i.src = icon;
-				i.style.width = "30%";
-				i.style.margin = "5vw";
-				this.mPopup.container.appendChild(i);
-			}
+			const c = new Ui.Div();
+			c.container.style.padding = "16px";
+			c.container.style.boxSizing = "border-box";
+			c.container.style.width = "100%";
+			c.container.style.height = "100%";
+			c.container.style.overflow = "auto";
+			c.container.style.color = "white";
+			c.container.addEventListener("click", function() {
+				self.close();
+			});
+			this.mPopup.attach(c);
 
-			if (text) {
-				const t = document.createElement("p");
-				t.innerHTML = text;
-				t.style.fontSize = "calc(12px + 2vw)";
-				t.style.padding = "0 4vw 4vw 4vw";
-				this.mPopup.container.appendChild(t);
-			}
+			const close =  document.createElement("span");
+			close.className = "material-symbols-outlined close";
+			close.style.cssFloat = "right";
+			close.style.cursor = "pointer";
+			close.style.fontSize = "48px";
+			close.innerHTML = "close";
+			c.container.appendChild(close);
 
-			if (okCallback) {
-				const okButton = new Ui.Button("OK", null);
-				okButton.style.position = "relative";
-				okButton.style.width = "20vw";
-				okButton.style.marginBottom = "4vw";
-				okButton.style.display = "inline-block";
-				this.mPopup.attach(okButton);
-				okButton.container.addEventListener("click", function() {
-					self.close();
-					okCallback();
-				});
-			}
-
-			if (cancelCallback) {
-				const cancelButton = new Ui.Button("Avbryt", null);
-				cancelButton.style.position = "relative";
-				cancelButton.style.width = "20vw";
-				cancelButton.style.marginLeft = "4vw";
-				cancelButton.style.marginBottom = "4vw";
-				cancelButton.style.backgroundColor = "var(--second-color)";
-				cancelButton.style.display = "inline-block";
-				this.mPopup.attach(cancelButton);
-				cancelButton.container.addEventListener("click", function() {
-					self.close();
-					cancelCallback();
-				});
-			}
+			c.container.appendChild(content);
 		}
 
 		public close(): void {
 			const self = this;
 			this.mPopup.removeClass("animate__bounceIn");
 			this.mPopup.addClass("animate__bounceOut");
-			this.mPopup.style.setProperty('--animate-duration', '0.5s');
+			this.mPopup.style.setProperty('--animate-duration', '1000ms');
 
 			setTimeout(function() {
 				self.removeClass("uix-popup-background");
