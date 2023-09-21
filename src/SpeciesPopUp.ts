@@ -14,11 +14,13 @@ function openSpeciesPopUp(species: Models.Species) {
 	content.container.appendChild(subName);
 
 	const summary = document.createElement("p");
-	summary.style.margin = "16px";
 	content.container.appendChild(summary);
 
 	const images = document.createElement("div");
 	content.container.appendChild(images);
+
+	const recordings = document.createElement("div");
+	content.container.appendChild(recordings);
 
 	console.log(species);
 	const r = new HttpRequest("GET", "/v1/species/" + species.uuid);
@@ -26,18 +28,59 @@ function openSpeciesPopUp(species: Models.Species) {
 		console.log(data);
 		summary.innerHTML = data.wikipedia.summary;
 
+		const p = document.createElement("p");
+		p.innerHTML = "Wikipedia - <a target='_blank' href='" + data.wikipedia.url + "'>Go to article</a>";
+		p.style.fontSize = "0.8rem";
+		p.style.fontWeight = "bold";
+		p.style.textAlign = "right";
+		p.style.marginBottom = "16px";
+		images.appendChild(p);
+
 		if (data.wikipedia.images) {
 			data.wikipedia.images.forEach(e => {
-				const img = document.createElement("div");
-				img.style.background = "url(" + e + ")";
-				img.style.width = "123px";
-				img.style.height = "69px";
-				img.style.backgroundSize = "cover";
-				img.style.display = "inline-block";
-				img.style.margin = "8px";
-				img.style.borderRadius = "8px";
-				images.appendChild(img);
+				const img = new Image();
+				img.onload = function() {
+					const i = document.createElement("div");
+					i.style.background = "url(" + e + ")";
+					i.style.width = "123px";
+					i.style.height = "69px";
+					i.style.backgroundSize = "cover";
+					i.style.display = "inline-block";
+					i.style.margin = "8px";
+					i.style.borderRadius = "8px";
+					images.appendChild(i);
+				}
+				img.onerror = function() {
+					console.warn("could not load: " + img.src);
+				}
+				img.src = e;
 			});
+		}
+
+		if (data.recordings) {
+			data.recordings.forEach(e => {
+				const p = document.createElement("p");
+				p.style.fontStyle = "italic";
+				p.innerHTML = e.type.charAt(0).toUpperCase() + e.type.slice(1);
+				recordings.appendChild(p);
+				const a = document.createElement("audio");
+				a.style.width = "100%";
+				a.style.height = "32px";
+				a.style.marginBottom = "8px";
+				a.setAttribute("controls", "");
+				const source = document.createElement("source");
+				source.src = e.url;
+				source.type = "audio/mpeg";
+				a.appendChild(source);
+				recordings.appendChild(a);
+			});
+
+			const p = document.createElement("p");
+			p.innerHTML = "xeno-canto - <a target='_blank' href='https://xeno-canto.org/'>Go to source</a>";
+			p.style.fontSize = "0.8rem";
+			p.style.fontWeight = "bold";
+			p.style.textAlign = "right";
+			recordings.appendChild(p);	
 		}
 	});
 
