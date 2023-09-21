@@ -1,3 +1,5 @@
+/// <reference path="HttpRequest.ts"/>
+
 class SignUpPage extends Page {
     constructor(appListener: IAppListener) {
         super(appListener);
