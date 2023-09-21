@@ -34,11 +34,11 @@ func requirePermission(c *gin.Context, requiredPermission int64) {
 		return
 	}
 
-	// xAppLanguage := c.Request.Header.Get("X-App-Language")
+	xAppLanguage := c.Request.Header.Get("X-App-Language")
+	c.Set("app_language", xAppLanguage)
 
 	if accessToken.Permissions&requiredPermission == requiredPermission {
 		c.Set("uuid", accessToken.Uuid)
-		// c.Set("app_language", xAppLanguage)
 		c.Set("permissions", accessToken.Permissions)
 		c.Next()
 	} else {
@@ -57,17 +57,6 @@ func basicMiddleware(c *gin.Context) {
 
 func adminMiddleware(c *gin.Context) {
 	requirePermission(c, auth.AuthPermissionAdmin)
-}
-
-func languageMiddleware(c *gin.Context) {
-	lang := c.Request.Header.Get("X-Language")
-	if lang != "" {
-		c.Set("language", lang)
-	} else {
-		c.Set("language", "en")
-	}
-
-	c.Next()
 }
 
 func apiKeyMiddleware(c *gin.Context) {
@@ -167,7 +156,7 @@ func SetupRoutes(r *gin.Engine) {
 
 	// Species
 	r.GET("/v1/species/list", apiKeyMiddleware, controllers.SpeciesList)
-	r.GET("/v1/species/:uuid", languageMiddleware, apiKeyMiddleware, controllers.SpeciesDetails)
+	r.GET("/v1/species/:uuid", apiKeyMiddleware, noneMiddleware, controllers.SpeciesDetails)
 	r.POST("/v1/species/:uuid/set_rarity", adminMiddleware, controllers.SpeciesSetRarity)
 
 	// Reports
@@ -192,7 +181,7 @@ func SetupRoutes(r *gin.Engine) {
 
 	// Orders
 	r.GET("/v1/orders/list", apiKeyMiddleware, controllers.NamedRecordList[models.Order])
-	r.GET("/v1/orders/:uuid", apiKeyMiddleware, controllers.NamedRecordDetails[models.Order])
+	r.GET("/v1/orders/:uuid", apiKeyMiddleware, noneMiddleware, controllers.OrderDetails)
 
 	// Ages
 	r.GET("/v1/ages/list", apiKeyMiddleware, controllers.NamedRecordList[models.Age])

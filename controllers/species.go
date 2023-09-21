@@ -206,7 +206,7 @@ func SpeciesDetails(c *gin.Context) {
 		Wikipedia  wikipedia.Data     `json:"wikipedia"`
 	}
 
-	lang := c.GetString("language")
+	lang := c.GetString("app_language")
 	cacheKey := c.Request.RequestURI + lang
 	cached, err := models.Cache.Get(cacheKey).Result()
 	if err == redis.Nil {
@@ -253,7 +253,7 @@ func SpeciesDetails(c *gin.Context) {
 	r := response{
 		Result:     result,
 		Recordings: recs,
-		Wikipedia:  wikipedia.GetData(c.GetString("language"), result),
+		Wikipedia:  wikipedia.GetData(lang, result.Name),
 	}
 
 	if cached, err := json.Marshal(r); err == nil {

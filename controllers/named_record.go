@@ -78,7 +78,7 @@ func NamedRecordList[T models.Age | models.Order | models.Gender | models.Activi
 	})
 }
 
-func NamedRecordDetails[T models.Age | models.Order | models.Gender | models.Activity | models.Method | models.Zone](c *gin.Context) {
+func NamedRecordDetails[T models.Age | models.Gender | models.Activity | models.Method | models.Zone](c *gin.Context) {
 	var result T
 
 	if err := models.DB.Where("uuid=?", c.Param("uuid")).Preload("Name").First(&result).Error; err != nil {

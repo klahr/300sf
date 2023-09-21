@@ -22,13 +22,13 @@ type Data struct {
 	Images    []string `json:"images"`
 }
 
-func GetData(lang string, species models.Species) Data {
+func GetData(lang string, pageName models.Translation) Data {
 	var data Data
 
 	gowiki.SetLanguage(lang)
 	gowiki.SetCacheDuration(time.Second * time.Duration(config.AppConfig.WikipediaCacheDuration))
 
-	name := utils.Translation2Value(species.Name, lang)
+	name := utils.Translation2Value(pageName, lang)
 	var format string
 	if strings.ContainsAny(name, " ") {
 		format = "\"%s\""
@@ -50,7 +50,7 @@ func GetData(lang string, species models.Species) Data {
 		}
 	}
 
-	q := fmt.Sprintf("https://%s.wikipedia.org/w/api.php?action=query&titles=%s&prop=pageimages&format=json&pithumbsize=200", lang, url.QueryEscape(utils.Translation2Value(species.Name, lang)))
+	q := fmt.Sprintf("https://%s.wikipedia.org/w/api.php?action=query&titles=%s&prop=pageimages&format=json&pithumbsize=200", lang, url.QueryEscape(utils.Translation2Value(pageName, lang)))
 
 	r, err := http.Get(q)
 	if err == nil {
