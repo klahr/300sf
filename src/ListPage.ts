@@ -1,5 +1,9 @@
+/// <reference path="ui/Table.ts"/>
+
 class ListPage extends Page {
 	private mContent: Ui.Div;
+	private mTitle: HTMLHeadingElement;
+	private mTable: Ui.Table;
 
 	constructor(appListener: IAppListener) {
 		super(appListener);
@@ -18,6 +22,13 @@ class ListPage extends Page {
 			new Ui.PopUp("img/300sf.svg", "Sidan finns ännu inte.", function() {
 			}, null);
 		});
+
+		this.mTitle = document.createElement("h1");
+		this.container.appendChild(this.mTitle);
+
+		this.mTable = new Ui.Table();
+		this.attach(this.mTable);
+
 		this.attach(profile);
 	}
 
@@ -28,15 +39,55 @@ class ListPage extends Page {
 	public setData(data: any): void {
 		super.setData(data);
 
+		this.mTitle.innerHTML = "";
+		this.mTable.clear();
+
 		const self = this;
 
-		self.mContent.container.innerHTML = "";
+		const r = new HttpRequest("GET", "/v1/lists/" + (data as Models.List).uuid + "/reports");
+		r.process(function(status: any, data: any) {
+			self.mTitle.innerHTML = App.getTranslation((self.data as Models.List).name);
+			const reports = data.result as Models.Report[];
+			self.data.species.forEach(e => {
+				const entry = document.createElement("div");
+				entry.className = "list-entry";
 
-		let d = data as Models.List;
-		d.species.forEach(e => {
-			const name = document.createElement("p");
-			name.innerHTML = App.getTranslation(e.name);
-			self.mContent.container.appendChild(name);
+				const name = document.createElement("h3");
+				name.innerHTML = App.getTranslation(e.name);
+				name.style.cursor = "pointer";
+				entry.appendChild(name);
+				name.addEventListener("click", function() {
+					new Ui.PopUp("img/300sf.svg", e.name.sv, function() {
+					}, null);
+				});
+
+				const subName = document.createElement("p");
+				subName.innerHTML = e.name.la;
+				entry.appendChild(subName);
+
+				const check = document.createElement("span");
+				check.className = "material-symbols-outlined";
+				check.innerHTML = "check_circle";
+				check.style.color = "#333";
+				entry.appendChild(check);
+
+				let found = false;
+				reports.forEach(r => {
+					if (r.species.uuid === e.uuid) {
+						found = true;
+						return;
+					}
+				});
+
+				if (found) {
+					name.style.color = "#75b946";
+					check.style.color = "#75b946";
+				}
+
+				self.mTable.addRow([entry]);
+			});
+		}, function(status: any, data: any) {
+			console.log(data);
 		});
 	}
 }

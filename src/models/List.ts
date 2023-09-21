@@ -2,6 +2,8 @@
 
 namespace Models {
     export class List {
+        uuid: string;
+        name: Translation;
         species: Array<Species>;
     }
 }
