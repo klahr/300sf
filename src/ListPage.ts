@@ -73,7 +73,6 @@ class ListPage extends Page {
 			let lastOrder: Models.Order;
 			self.data.species.forEach(e => {
 				if (!lastOrder || lastOrder.uuid !== e.order.uuid) {
-					console.log(e.order.name.sv);
 					lastOrder = e.order;
 
 					const entry = document.createElement("div");
@@ -89,8 +88,11 @@ class ListPage extends Page {
 					name.style.color = "var(--primary-variant-color)";
 					entry.appendChild(name);
 					name.addEventListener("click", function() {
-						new Ui.PopUp("img/300sf.svg", e.order.name.sv, function() {
-						}, null);
+						const r = new HttpRequest("GET", "/v1/orders/" + e.order.uuid);
+						r.process(function(status: any, data: any) {
+							new Ui.PopUp("img/300sf.svg", data.wikipedia.summary, function() {
+							}, null);
+						});
 					});
 
 					const subName = document.createElement("p");
@@ -106,8 +108,11 @@ class ListPage extends Page {
 				name.style.cursor = "pointer";
 				entry.appendChild(name);
 				name.addEventListener("click", function() {
-					new Ui.PopUp("img/300sf.svg", e.name.sv, function() {
-					}, null);
+					const r = new HttpRequest("GET", "/v1/species/" + e.uuid);
+					r.process(function(status: any, data: any) {
+						new Ui.PopUp("img/300sf.svg", data.wikipedia.summary, function() {
+						}, null);
+					});
 				});
 
 				self.mProgress.setProgress(reports.length / self.data.species.length * 100);
@@ -132,7 +137,7 @@ class ListPage extends Page {
 				});
 
 				if (found) {
-					name.style.color = "var(-success-color)";
+					name.style.color = "var(--success-color)";
 					check.style.color = "var(--success-color)";
 				}
 

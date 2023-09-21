@@ -47,13 +47,27 @@ class HomePage extends Page {
 		this.container.appendChild(title);
 
 		const email = new Ui.Input("email");
+		const password = new Ui.Input("password");
+		const signIn = document.createElement("button");
+
 		email.style.position = "relative";
 		email.setPlaceHolder(App.translations.Email);
+		email.container.addEventListener("keydown", function(e) {
+			if (e.key == "Enter") {
+				e.preventDefault();
+				password.select();
+			}
+		});
 		this.attach(email);
 
-		const password = new Ui.Input("password");
 		password.style.position = "relative";
 		password.setPlaceHolder(App.translations.Password);
+		password.container.addEventListener("keydown", function(e) {
+			if (e.key == "Enter") {
+				e.preventDefault();
+				signIn.click();
+			}
+		});
 		this.attach(password);
 
 		const staySignedIn = new Ui.Input("checkbox");
@@ -71,7 +85,6 @@ class HomePage extends Page {
 		help.innerHTML = App.translations.MarkSignInCheckbox;
 		this.container.appendChild(help);
 
-		const signIn = document.createElement("button");
 		signIn.innerHTML = App.translations.SignIn;
 		signIn.addEventListener("click", function() {
 			const authorization = 'Basic ' + btoa(email.value + ':' + password.value);
