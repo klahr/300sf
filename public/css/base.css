@@ -165,7 +165,7 @@ div.surface {
 }
 
 div.main-menu {
-	width: 200px;
+	width: 256px;
 	height: 100%;
 	transform: translateX(-100%);
 	transition: transform 250ms;
@@ -271,7 +271,7 @@ hr {
 @media screen and (min-width: 800px) {
 	div.main-menu {
 		transform: unset;
-		width: 200px;
+		width: 256px;
 	}
 
 	div.surface {
@@ -286,6 +286,6 @@ hr {
 
 	div.main-menu-background {
 		pointer-events: all;
-		width: 200px;
+		width: 256px;
 	}
 }

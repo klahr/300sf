@@ -23,7 +23,7 @@ namespace Ui {
 			this.mPopup = new Ui.Div();
 			this.mPopup.addClass("uix-popup");
 			this.mPopup.addClass("animate__animated");
-			this.mPopup.addClass("animate__bounceIn");
+			this.mPopup.addClass("animate__zoomIn");
 			this.mPopup.style.setProperty("--animate-duration", "500ms");
 			this.attach(this.mPopup);
 
@@ -57,7 +57,7 @@ namespace Ui {
 
 		public close(): void {
 			const self = this;
-			this.mPopup.removeClass("animate__bounceIn");
+			this.mPopup.removeClass("animate__zoomIn");
 			this.mPopup.addClass("animate__bounceOut");
 			this.mPopup.style.setProperty('--animate-duration', '500ms');
 

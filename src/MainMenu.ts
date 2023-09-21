@@ -71,7 +71,7 @@ class MainMenu extends Ui.Widget {
 			data.result.forEach(e => {
 				const c = document.createElement("p");
 				c.className = "entry";
-				c.innerHTML = App.getTranslation(e.name);	
+				c.innerHTML = "<span style='font-size: 1rem; color: #2782ac;' class='material-symbols-outlined'>checklist_rtl</span> " + App.getTranslation(e.name);
 				checklists.appendChild(c);
 				c.addEventListener("click", function() {
 					self.mAppListener.showPage("list-page", e);
@@ -86,11 +86,11 @@ class MainMenu extends Ui.Widget {
 		});
 
 		this.addSection(App.translations.Account);
-		this.addEntry(App.translations.Profile, function() {
+		this.addEntry("<span style='font-size: 1rem; color: #2782ac;' class='material-symbols-outlined'>person</span> " + App.translations.Profile, function() {
 			console.log("Profile");
 		});
 
-		this.addEntry(App.translations.LogOut, function() {
+		this.addEntry("<span style='font-size: 1rem; color: #2782ac;' class='material-symbols-outlined'>logout</span> " + App.translations.LogOut, function() {
 			setCookie("x300sf_at", "", 0);
 			location.reload();
 		});
