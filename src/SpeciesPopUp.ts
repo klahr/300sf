@@ -14,6 +14,7 @@ function openSpeciesPopUp(species: Models.Species) {
 	content.container.appendChild(subName);
 
 	const summary = document.createElement("p");
+	summary.style.margin = "16px 16px 0 16px";
 	content.container.appendChild(summary);
 
 	const images = document.createElement("div");
@@ -34,17 +35,20 @@ function openSpeciesPopUp(species: Models.Species) {
 		p.style.fontWeight = "bold";
 		p.style.textAlign = "right";
 		p.style.marginBottom = "16px";
+		p.style.marginRight = "16px";
 		images.appendChild(p);
 
 		if (data.wikipedia.images) {
 			data.wikipedia.images.forEach(e => {
+				const url = getThumbnailFromUrl(e, "190px");
 				const img = new Image();
 				img.onload = function() {
 					const i = document.createElement("div");
-					i.style.background = "url(" + e + ")";
+					i.style.background = "url(" + url + ")";
 					i.style.width = "123px";
 					i.style.height = "69px";
 					i.style.backgroundSize = "cover";
+					i.style.backgroundPosition = "center";
 					i.style.display = "inline-block";
 					i.style.margin = "8px";
 					i.style.borderRadius = "8px";
@@ -53,7 +57,8 @@ function openSpeciesPopUp(species: Models.Species) {
 				img.onerror = function() {
 					console.warn("could not load: " + img.src);
 				}
-				img.src = e;
+
+				img.src = url
 			});
 		}
 
@@ -87,4 +92,13 @@ function openSpeciesPopUp(species: Models.Species) {
 	new Ui.PopUp(content.container, function() {
 		console.log("closed");
 	});
+}
+
+function getThumbnailFromUrl(url: string, width: string): string {
+	const parts = url.split("/");
+	const filename = parts.pop();
+	const lastHash = parts.pop();
+	const secondLastHash = parts.pop();
+	const newUrl = `${parts.join('/')}/thumb/${secondLastHash}/${lastHash}/${filename}/${width}-${filename}`
+	return newUrl;
 }
