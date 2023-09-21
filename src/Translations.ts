@@ -20,6 +20,8 @@ class Translations {
         AcceptTerms: "Accept terms",
         SignUp: "Sign up",
         AlreadyHaveAnAccount: "Already have an account? <a>Sign in here.</a>",
+        GoToArticle: "Go to article",
+        GoToWebsite: "Go to website",
     }
     static sv = {
         Name: "300 Svenska Fåglar",
@@ -42,5 +44,7 @@ class Translations {
         AcceptTerms: "Acceptera villkor",
         SignUp: "Skapa konto",
         AlreadyHaveAnAccount: "Har du redan ett konto? <a>Logga in här.</a>",
+        GoToArticle: "Gå till artikeln",
+        GoToWebsite: "Gå till webbsidan",
     }
 }

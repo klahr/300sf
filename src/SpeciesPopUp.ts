@@ -30,7 +30,7 @@ function openSpeciesPopUp(species: Models.Species) {
 		summary.innerHTML = data.wikipedia.summary;
 
 		const p = document.createElement("p");
-		p.innerHTML = "Wikipedia - <a target='_blank' href='" + data.wikipedia.url + "'>Go to article</a>";
+		p.innerHTML = "Wikipedia - <a target='_blank' href='" + data.wikipedia.url + "'>" + App.translations.GoToArticle + "</a>";
 		p.style.fontSize = "0.8rem";
 		p.style.fontWeight = "bold";
 		p.style.textAlign = "right";
@@ -81,7 +81,7 @@ function openSpeciesPopUp(species: Models.Species) {
 			});
 
 			const p = document.createElement("p");
-			p.innerHTML = "xeno-canto - <a target='_blank' href='https://xeno-canto.org/'>Go to source</a>";
+			p.innerHTML = "xeno-canto - <a target='_blank' href='https://xeno-canto.org/'>" + App.translations.GoToWebsite + "</a>";
 			p.style.fontSize = "0.8rem";
 			p.style.fontWeight = "bold";
 			p.style.textAlign = "right";

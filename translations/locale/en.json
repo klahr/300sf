@@ -18,5 +18,7 @@
 	"DisplayName": "Display name",
 	"AcceptTerms": "Accept terms",
 	"SignUp": "Sign up",
-	"AlreadyHaveAnAccount": "Already have an account? <a>Sign in here.</a>"
+	"AlreadyHaveAnAccount": "Already have an account? <a>Sign in here.</a>",
+	"GoToArticle": "Go to article",
+	"GoToWebsite": "Go to website"
 }
