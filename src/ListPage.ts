@@ -1,9 +1,12 @@
 /// <reference path="ui/Table.ts"/>
+/// <reference path="ui/ProgressBar.ts"/>
 
 class ListPage extends Page {
 	private mContent: Ui.Div;
 	private mTitle: HTMLHeadingElement;
 	private mTable: Ui.Table;
+	private mProgress: Ui.ProgressBar;
+	private mProgressLbl: HTMLParagraphElement;
 
 	constructor(appListener: IAppListener) {
 		super(appListener);
@@ -26,6 +29,17 @@ class ListPage extends Page {
 		this.mTitle = document.createElement("h1");
 		this.container.appendChild(this.mTitle);
 
+		this.mProgressLbl = document.createElement("p");
+		this.mProgressLbl.innerHTML = "4/300";
+		this.mProgressLbl.style.margin = "0";
+		this.mProgressLbl.style.fontWeight = "bold";
+		this.mProgressLbl.style.cssFloat = "right";
+		this.container.appendChild(this.mProgressLbl);
+
+		this.mProgress = new Ui.ProgressBar();
+		this.mProgress.container.style.position = "relative";
+		this.attach(this.mProgress);
+
 		this.mTable = new Ui.Table();
 		this.attach(this.mTable);
 
@@ -41,6 +55,8 @@ class ListPage extends Page {
 
 		this.mTitle.innerHTML = "";
 		this.mTable.clear();
+		this.mProgress.setProgress(0);
+		this.mProgressLbl.innerHTML = "";
 
 		const self = this;
 
@@ -61,6 +77,9 @@ class ListPage extends Page {
 					}, null);
 				});
 
+				self.mProgress.setProgress(reports.length / self.data.species.length * 100);
+				self.mProgressLbl.innerHTML = reports.length + "/" + self.data.species.length;
+
 				const subName = document.createElement("p");
 				subName.innerHTML = e.name.la;
 				entry.appendChild(subName);
@@ -68,7 +87,7 @@ class ListPage extends Page {
 				const check = document.createElement("span");
 				check.className = "material-symbols-outlined";
 				check.innerHTML = "check_circle";
-				check.style.color = "#333";
+				check.style.color = "var(--secondary-color)";
 				entry.appendChild(check);
 
 				let found = false;
@@ -80,8 +99,8 @@ class ListPage extends Page {
 				});
 
 				if (found) {
-					name.style.color = "#75b946";
-					check.style.color = "#75b946";
+					name.style.color = "var(-success-color)";
+					check.style.color = "var(--success-color)";
 				}
 
 				self.mTable.addRow([entry]);

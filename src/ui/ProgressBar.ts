@@ -9,8 +9,8 @@ namespace Ui {
 			this.mProgression = new Div();
 			this.mProgression.style.width = "0%";
 			this.mProgression.style.height = "100%";
-			this.mProgression.style.backgroundColor = "var(--second-color)";
-			this.mProgression.style.borderRadius = "1vw";
+			this.mProgression.style.backgroundColor = "var(--success-color)";
+			this.mProgression.style.borderRadius = "3px";
 			this.mProgression.style.transitionDuration = "1s";
 
 			this.attach(this.mProgression);
