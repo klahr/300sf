@@ -24,7 +24,7 @@ namespace Ui {
 			this.mPopup.addClass("uix-popup");
 			this.mPopup.addClass("animate__animated");
 			this.mPopup.addClass("animate__bounceIn");
-			this.mPopup.style.setProperty("--animate-duration", "1000ms");
+			this.mPopup.style.setProperty("--animate-duration", "500ms");
 			this.attach(this.mPopup);
 
 			const c = new Ui.Div();
@@ -34,9 +34,8 @@ namespace Ui {
 			c.container.style.height = "100%";
 			c.container.style.overflow = "auto";
 			c.container.style.color = "white";
-			c.container.addEventListener("click", function() {
-				self.close();
-			});
+			c.container.style.position = "relative";
+			c.container.style.textAlign = "left";
 			this.mPopup.attach(c);
 
 			const close =  document.createElement("span");
@@ -45,6 +44,12 @@ namespace Ui {
 			close.style.cursor = "pointer";
 			close.style.fontSize = "48px";
 			close.innerHTML = "close";
+			close.addEventListener("click", function() {
+				self.close();
+				if (closeCallback) {
+					closeCallback();
+				}
+			});
 			c.container.appendChild(close);
 
 			c.container.appendChild(content);
@@ -54,7 +59,7 @@ namespace Ui {
 			const self = this;
 			this.mPopup.removeClass("animate__bounceIn");
 			this.mPopup.addClass("animate__bounceOut");
-			this.mPopup.style.setProperty('--animate-duration', '1000ms');
+			this.mPopup.style.setProperty('--animate-duration', '500ms');
 
 			setTimeout(function() {
 				self.removeClass("uix-popup-background");

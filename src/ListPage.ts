@@ -104,9 +104,7 @@ class ListPage extends Page {
 				name.style.cursor = "pointer";
 				entry.appendChild(name);
 				name.addEventListener("click", function() {
-					const r = new HttpRequest("GET", "/v1/species/" + e.uuid);
-					r.process(function(status: any, data: any) {
-					});
+					openSpeciesPopUp(e);
 				});
 
 				self.mProgress.setProgress(reports.length / self.data.species.length * 100);

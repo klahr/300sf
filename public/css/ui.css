@@ -29,9 +29,6 @@ div.uix-progress-bar {
 
 input.uix-input {
 	display: inline-block;
-	/*position: absolute;
-	left: 0;
-	top: 0;*/
 	border: none;
 	border-bottom: 1px solid var(--main-color);
 }
