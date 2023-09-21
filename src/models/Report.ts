@@ -4,6 +4,8 @@
 /// <reference path="Gender.ts"/>
 /// <reference path="Method.ts"/>
 /// <reference path="Tag.ts"/>
+/// <reference path="Species.ts"/>
+/// <reference path="List.ts"/>
 
 namespace Models {
 	export class Report {

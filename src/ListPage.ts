@@ -1,5 +1,11 @@
 /// <reference path="ui/Table.ts"/>
 /// <reference path="ui/ProgressBar.ts"/>
+/// <reference path="ui/Image.ts"/>
+/// <reference path="HttpRequest.ts"/>
+/// <reference path="Page.ts"/>
+/// <reference path="models/Order.ts"/>
+/// <reference path="models/Report.ts"/>
+/// <reference path="models/List.ts"/>
 
 class ListPage extends Page {
 	private mContent: Ui.Div;

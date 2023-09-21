@@ -1,3 +1,5 @@
+/// <reference path="Div.ts"/>
+
 namespace Ui {
 	export class ProgressBar extends Div {
 		private mProgression: Div;
