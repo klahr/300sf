@@ -42,10 +42,6 @@ input.uix-input {
 	border-bottom: 1px solid var(--main-color);
 }
 
-select.uix-select {
-
-}
-
 div.uix-popup {
 	width: calc(100% - var(--large-distance) * 2);
 	height: calc(100% - var(--large-distance) * 2);

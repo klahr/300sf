@@ -1,4 +1,5 @@
 /// <reference path="Widget.ts"/>
+/// <reference path="Input.ts"/>
 
 namespace Ui {
     export class Select extends Widget {
