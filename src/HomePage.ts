@@ -4,6 +4,7 @@
 /// <reference path="Page.ts"/>
 /// <reference path="App.ts"/>
 /// <reference path="HttpRequest.ts"/>
+/// <reference path="SpeciesPopUp.ts"/>
 
 class HomePage extends Page {
 	constructor(appListener: IAppListener) {
