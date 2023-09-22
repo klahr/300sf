@@ -34,13 +34,22 @@ class HomePage extends Page {
 		title.innerHTML = App.translations.WelcomeMessage;
 		this.container.appendChild(title);
 
+		const reportButton = document.createElement("button");
+		reportButton.innerHTML = "Submit";
+		reportButton.style.width = "auto";
+		reportButton.style.cssFloat = "right";
+		reportButton.style.borderRadius = "inherit";
+		reportButton.style.backgroundColor = "var(--success-color)";
+		reportButton.addEventListener("click", function() {
+			openReportPopup(null, null);
+		});
+		this.container.appendChild(reportButton);
+
 		const table = new Ui.Table();
 		this.attach(table);
 
 		const r = new HttpRequest("GET", "/v1/reports/list");
 		r.process(function(status: any, data: any) {
-			console.log(data);
-
 			data.result.forEach(e => {
 				const d = e as Models.Report;
 				const species = e.species as Models.Species;

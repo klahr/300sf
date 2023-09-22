@@ -20,6 +20,15 @@ div.uix-img {
 	top: 0;
 }
 
+p.uix-option {
+	color: white;
+	cursor: pointer;
+}
+
+p.uix-option:hover {
+	color: var(--primary-variant-color);
+}
+
 div.uix-progress-bar {
 	width: 100%;
 	height: 6px;
@@ -31,6 +40,10 @@ input.uix-input {
 	display: inline-block;
 	border: none;
 	border-bottom: 1px solid var(--main-color);
+}
+
+select.uix-select {
+
 }
 
 div.uix-popup {

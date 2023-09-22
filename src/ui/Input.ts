@@ -14,6 +14,10 @@ namespace Ui {
 			this.mContainer.setAttribute("placeholder", str);
 		}
 
+		public set value(v: string) {
+			(this.mContainer as HTMLInputElement).value = v;
+		}
+
 		public get value(): string {
 			return (this.mContainer as HTMLInputElement).value;
 		}
