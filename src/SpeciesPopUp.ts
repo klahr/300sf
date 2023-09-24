@@ -1,4 +1,6 @@
 /// <reference path="ui/Select.ts"/>
+/// <reference path="ui/Div.ts"/>
+/// <reference path="App.ts"/>
 
 function openSpeciesPopUp(species: Models.Species) {
 	const content = new Ui.Div();
@@ -101,28 +103,4 @@ function getThumbnailFromUrl(url: string, width: string): string {
 	const secondLastHash = parts.pop();
 	const newUrl = `${parts.join('/')}/thumb/${secondLastHash}/${lastHash}/${filename}/${width}-${filename}`
 	return newUrl;
-}
-
-function openReportPopup(species: Models.Species | null, list: Models.List | null): void {
-	const content = new Ui.Div();
-	content.style.textAlign = "left";
-	content.style.position = "relative";
-
-	const name = document.createElement("h1");
-	name.innerHTML = "Submit";
-	name.style.margin = "unset";
-	content.container.appendChild(name);
-
-	const speciesList = new Ui.Select();
-	speciesList.addOption("", "");
-	speciesList.addOption("Alpha", "alpha");
-	speciesList.addOption("Bravo", "bravo");
-	speciesList.addOption("Charlie", "charlie");
-	speciesList.addOption("Delta", "delta");
-	speciesList.addOption("Echo", "echo");
-	content.attach(speciesList);
-
-	new Ui.PopUp(content.container, function() {
-		console.log("closed");
-	});
 }

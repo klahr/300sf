@@ -99,5 +99,19 @@ namespace Ui {
 				child.onEnterBackground();
 			});
 		}
+
+		public setVisible(visible: boolean): void {
+			if (visible) {
+				this.removeClass("hidden");
+				this.addClass("visible");
+			} else {
+				this.removeClass("visible");
+				this.addClass("hidden");
+			}
+		}
+
+		public isVisible(): boolean {
+			return !this.hasClass("hidden");
+		}
 	}
 }

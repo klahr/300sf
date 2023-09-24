@@ -5,6 +5,7 @@
 /// <reference path="App.ts"/>
 /// <reference path="HttpRequest.ts"/>
 /// <reference path="SpeciesPopUp.ts"/>
+/// <reference path="ReportPopUp.ts"/>
 
 class HomePage extends Page {
 	constructor(appListener: IAppListener) {
@@ -42,7 +43,7 @@ class HomePage extends Page {
 		reportButton.style.borderRadius = "inherit";
 		reportButton.style.backgroundColor = "var(--success-color)";
 		reportButton.addEventListener("click", function() {
-			openReportPopup(null, null);
+			openReportPopUp(null, null);
 		});
 		this.container.appendChild(reportButton);
 
