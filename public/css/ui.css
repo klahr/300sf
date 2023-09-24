@@ -5,6 +5,14 @@ div#root {
 	overflow: auto;
 }
 
+*.visible {
+	display: inline-block;
+}
+
+*.hidden {
+	display: none;
+}
+
 div.uix-div {
 	display: inline-block;
 	position: absolute;
@@ -20,13 +28,26 @@ div.uix-img {
 	top: 0;
 }
 
+div.uix-select {
+	position: relative;
+	width: 100%;
+	background-color: var(--widget-color);
+	border-radius: var(--small-distance);
+}
+
 p.uix-option {
 	color: white;
 	cursor: pointer;
+	padding: 4px;
+	border-radius: 4px;
 }
 
 p.uix-option:hover {
 	color: var(--primary-variant-color);
+}
+
+p.uix-option.selected {
+	background-color: var(--primary-color);
 }
 
 div.uix-progress-bar {
