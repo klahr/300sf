@@ -100,6 +100,7 @@ function openReportPopUp(species: Models.Species | null, list: Models.List | nul
 	const quantity = new Ui.Input("number");
 	quantity.container.setAttribute("min", "1");
 	quantity.container.setAttribute("step", "1");
+	quantity.value = "1";
 	content.attach(quantity);
 
 	const fromLbl = document.createElement("h3");
