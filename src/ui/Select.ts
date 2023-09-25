@@ -7,6 +7,7 @@ namespace Ui {
 		private mResult: HTMLParagraphElement;
 		private mSearch: Ui.Input;
 		private mExpandable: Ui.Div;
+		private mOpenArrow: HTMLSpanElement;
 
 		constructor(placeholder: string) {
 			super();
@@ -24,6 +25,14 @@ namespace Ui {
 				self.toggleVisible();
 			})
 			this.mContainer.appendChild(this.mResult);
+
+			this.mOpenArrow = document.createElement("span");
+			this.mOpenArrow.className = "material-symbols-outlined menu";
+			this.mOpenArrow.style.position = "absolute";
+			this.mOpenArrow.style.right = "var(--medium-distance)";
+			this.mOpenArrow.style.top = "12px";
+			this.mOpenArrow.innerHTML = "expand_more";
+			this.mResult.appendChild(this.mOpenArrow);
 
 			this.mExpandable = new Ui.Div();
 			this.mExpandable.style.backgroundColor = "var(--widget-color)";
@@ -130,10 +139,12 @@ namespace Ui {
 				this.mExpandable.setVisible(false);
 				this.style.borderBottomLeftRadius = "";
 				this.style.borderBottomRightRadius = "";
+				this.mOpenArrow.innerHTML = "expand_more";
 			} else {
 				this.mExpandable.setVisible(true);
 				this.style.borderBottomLeftRadius = "0";
 				this.style.borderBottomRightRadius = "0";
+				this.mOpenArrow.innerHTML = "expand_less";
 				this.mSearch.select();
 			}
  		}
