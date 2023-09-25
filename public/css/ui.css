@@ -43,7 +43,7 @@ p.uix-option {
 }
 
 p.uix-option:hover {
-	color: var(--primary-variant-color);
+	background-color: var(--primary-color);
 }
 
 p.uix-option.selected {
