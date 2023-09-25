@@ -37,7 +37,7 @@ class HomePage extends Page {
 		this.container.appendChild(title);
 
 		const reportButton = document.createElement("button");
-		reportButton.innerHTML = "Submit";
+		reportButton.innerHTML = App.translations.Submit;
 		reportButton.style.width = "auto";
 		reportButton.style.cssFloat = "right";
 		reportButton.style.borderRadius = "inherit";

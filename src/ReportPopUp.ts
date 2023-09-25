@@ -13,13 +13,13 @@ function openReportPopUp(species: Models.Species | null, list: Models.List | nul
 	content.style.position = "relative";
 
 	const name = document.createElement("h1");
-	name.innerHTML = "Submit";
+	name.innerHTML = App.translations.Submit;
 	name.style.margin = "unset";
 	content.container.appendChild(name);
 
 	const locationLbl = document.createElement("h3");
 	locationLbl.className = "title";
-	locationLbl.innerHTML = "Observation location";
+	locationLbl.innerHTML = App.translations.ObservationLocation;
 	content.container.appendChild(locationLbl);
 	const mapDiv = new Ui.Div();
 	mapDiv.container.id = "map";
@@ -30,7 +30,7 @@ function openReportPopUp(species: Models.Species | null, list: Models.List | nul
 	content.attach(mapDiv);
 
 	const locateButton = document.createElement("button");
-	locateButton.innerHTML = "Locate me";
+	locateButton.innerHTML = App.translations.FindMyLocation;
 	locateButton.style.borderRadius = "8px";
 	locateButton.style.backgroundColor = "var(--success-color)";
 	content.container.appendChild(locateButton);
@@ -60,42 +60,42 @@ function openReportPopUp(species: Models.Species | null, list: Models.List | nul
 
     const speciesListLbl = document.createElement("h3");
     speciesListLbl.className = "title";
-    speciesListLbl.innerHTML = "Species";
+    speciesListLbl.innerHTML = App.translations.Species;
     content.container.appendChild(speciesListLbl);
-	const speciesList = new Ui.Select("Select species...");
+	const speciesList = new Ui.Select(App.translations.SelectSpecies + "...");
 	content.attach(speciesList);
 
 	const ageListLbl = document.createElement("h3");
     ageListLbl.className = "title";
-    ageListLbl.innerHTML = "Age";
+    ageListLbl.innerHTML = App.translations.Age;
     content.container.appendChild(ageListLbl);
-	const ageList = new Ui.Select("Select age...");
+	const ageList = new Ui.Select(App.translations.SelectAge + "...");
 	content.attach(ageList);
 
 	const genderListLbl = document.createElement("h3");
     genderListLbl.className = "title";
-    genderListLbl.innerHTML = "Gender";
+    genderListLbl.innerHTML = App.translations.Gender;
     content.container.appendChild(genderListLbl);
-	const genderList = new Ui.Select("Select gender...");
+	const genderList = new Ui.Select(App.translations.SelectGender + "...");
 	content.attach(genderList);
 
 	const methodListLbl = document.createElement("h3");
     methodListLbl.className = "title";
-    methodListLbl.innerHTML = "Method";
+    methodListLbl.innerHTML = App.translations.Method;
     content.container.appendChild(methodListLbl);
-	const methodList = new Ui.Select("Select method...");
+	const methodList = new Ui.Select(App.translations.SelectMethod + "...");
 	content.attach(methodList);
 
 	const activityListLbl = document.createElement("h3");
     activityListLbl.className = "title";
     activityListLbl.innerHTML = "Activity";
     content.container.appendChild(activityListLbl);
-	const activityList = new Ui.Select("Select activity...");
+	const activityList = new Ui.Select(App.translations.SelectActivity + "...");
 	content.attach(activityList);
 
 	const quantityLbl = document.createElement("h3");
 	quantityLbl.className = "title";
-	quantityLbl.innerHTML = "Quantity";
+	quantityLbl.innerHTML = App.translations.Quantity;
 	content.container.appendChild(quantityLbl);
 	const quantity = new Ui.Input("number");
 	quantity.container.setAttribute("min", "1");
@@ -105,21 +105,21 @@ function openReportPopUp(species: Models.Species | null, list: Models.List | nul
 
 	const fromLbl = document.createElement("h3");
 	fromLbl.className = "title";
-	fromLbl.innerHTML = "Observed from";
+	fromLbl.innerHTML = App.translations.ObservedFrom;
 	content.container.appendChild(fromLbl);
-	const from = new Ui.Input("date");
+	const from = new Ui.Input("datetime-local");
 	content.attach(from);
 
 	const untilLbl = document.createElement("h3");
 	untilLbl.className = "title";
-	untilLbl.innerHTML = "Observed until";
+	untilLbl.innerHTML = App.translations.ObservedUntil;
 	content.container.appendChild(untilLbl);
-	const until = new Ui.Input("date");
+	const until = new Ui.Input("datetime-local");
 	content.attach(until);
 
 	const privateCommentLbl = document.createElement("h3");
 	privateCommentLbl.className = "title";
-	privateCommentLbl.innerHTML = "Private comment";
+	privateCommentLbl.innerHTML = App.translations.PrivateComment;
 	content.container.appendChild(privateCommentLbl);
 	const privateComment = document.createElement("textarea");
 	privateComment.style.width = "100%";
@@ -150,7 +150,7 @@ function openReportPopUp(species: Models.Species | null, list: Models.List | nul
     });
 
 	const reportButton = document.createElement("button");
-	reportButton.innerHTML = "Submit";
+	reportButton.innerHTML = App.translations.Submit;
 	reportButton.style.width = "auto";
 	reportButton.style.cssFloat = "right";
 	reportButton.style.borderRadius = "8px";

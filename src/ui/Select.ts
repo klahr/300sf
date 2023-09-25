@@ -27,10 +27,11 @@ namespace Ui {
 			this.mContainer.appendChild(this.mResult);
 
 			this.mOpenArrow = document.createElement("span");
-			this.mOpenArrow.className = "material-symbols-outlined menu";
+			this.mOpenArrow.className = "material-symbols-outlined";
 			this.mOpenArrow.style.position = "absolute";
 			this.mOpenArrow.style.right = "var(--medium-distance)";
 			this.mOpenArrow.style.top = "12px";
+			this.mOpenArrow.style.fontSize = "32px";
 			this.mOpenArrow.innerHTML = "expand_more";
 			this.mOpenArrow.style.pointerEvents = "none";
 			this.mContainer.appendChild(this.mOpenArrow);
@@ -50,7 +51,7 @@ namespace Ui {
 
 			this.mSearch = new Ui.Input("text");
 			this.mSearch.style.margin = "0";
-			this.mSearch.setPlaceHolder("Search...");
+			this.mSearch.setPlaceHolder(App.translations.Search + "...");
 			this.mSearch.style.borderBottomLeftRadius = "0";
 			this.mSearch.style.borderBottomRightRadius = "0";
 
