@@ -32,7 +32,8 @@ namespace Ui {
 			this.mOpenArrow.style.right = "var(--medium-distance)";
 			this.mOpenArrow.style.top = "12px";
 			this.mOpenArrow.innerHTML = "expand_more";
-			this.mResult.appendChild(this.mOpenArrow);
+			this.mOpenArrow.style.pointerEvents = "none";
+			this.mContainer.appendChild(this.mOpenArrow);
 
 			this.mExpandable = new Ui.Div();
 			this.mExpandable.style.backgroundColor = "var(--widget-color)";
