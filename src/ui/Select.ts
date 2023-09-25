@@ -8,9 +8,12 @@ namespace Ui {
 		private mSearch: Ui.Input;
 		private mExpandable: Ui.Div;
 		private mOpenArrow: HTMLSpanElement;
+		private mSelectCallback: (value: string | null) => void | null;
 
-		constructor(placeholder: string) {
+		constructor(placeholder: string, selectCallback: (value: string | null) => void = function() {}) {
 			super();
+
+			this.mSelectCallback = selectCallback;
 
 			const self = this;
 
@@ -20,6 +23,7 @@ namespace Ui {
 			this.mResult = document.createElement("p");
 			this.mResult.style.padding = "var(--medium-distance)";
 			this.mResult.style.cursor = "pointer";
+			this.mResult.style.color = "var(--black-or-white)";
 			this.mResult.innerHTML = placeholder;
 			this.mResult.addEventListener("click", function() {
 				self.toggleVisible();
@@ -103,6 +107,7 @@ namespace Ui {
 					}
 					if (selected) {
 						self.updateScroll(selected);
+						self.mSelectCallback(selected.getAttribute("value"));
 					}
 				} else if (e.key == "Enter") {
 					for (let i = 0; i < allOptions.length; ++i) {
@@ -178,6 +183,7 @@ namespace Ui {
 				option.classList.add("selected");
 				self.updateScroll(this);
 				self.toggleVisible();
+				self.mSelectCallback(option.getAttribute("value"));
 			});
 			this.mDropDown.appendChild(option);
 		}

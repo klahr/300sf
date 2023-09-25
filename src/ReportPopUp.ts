@@ -58,11 +58,28 @@ function openReportPopUp(species: Models.Species | null, list: Models.List | nul
 		});
 	}, 10);
 
+	const speciesThumbnail = document.createElement("div");
+	speciesThumbnail.style.width = "128px";
+	speciesThumbnail.style.height = "78px";
+	speciesThumbnail.style.backgroundSize = "cover"; // TODO: Why not working?
+	speciesThumbnail.style.backgroundColor = "red";
+	speciesThumbnail.style.borderRadius = "var(--small-distance)";
+	content.container.appendChild(speciesThumbnail);
+
+	const speciesSummary = document.createElement("p");
+	content.container.appendChild(speciesSummary);
+
     const speciesListLbl = document.createElement("h3");
     speciesListLbl.className = "title";
     speciesListLbl.innerHTML = App.translations.Species;
     content.container.appendChild(speciesListLbl);
-	const speciesList = new Ui.Select(App.translations.SelectSpecies + "...");
+	const speciesList = new Ui.Select(App.translations.SelectSpecies + "...", function(species: string | null) {
+		const r = new HttpRequest("GET", "/v1/species/" + species);
+		r.process(function(status: any, data: any) {
+			speciesThumbnail.style.background = "url(" + data.wikipedia.thumbnail + ")";
+			speciesSummary.innerHTML = data.wikipedia.summary;
+		});
+	});
 	content.attach(speciesList);
 
 	const ageListLbl = document.createElement("h3");
@@ -132,18 +149,28 @@ function openReportPopUp(species: Models.Species | null, list: Models.List | nul
     const r = new HttpRequest("GET", "/v1/reports/basis");
 	r.process(function(status: any, data: any) {
         const d = data as Responses.ReportsBasis;
+
+		d.species.sort(Utils.sortByNameOnCurrentLanguage);
         d.species.forEach(e => {
             speciesList.addOption(App.getTranslation(e.name), e.uuid);
         });
+
+		d.ages.sort(Utils.sortByNameOnCurrentLanguage);
 		d.ages.forEach(e => {
 			ageList.addOption(App.getTranslation(e.name), e.uuid);
 		});
+
+		d.genders.sort(Utils.sortByNameOnCurrentLanguage);
 		d.genders.forEach(e => {
 			genderList.addOption(App.getTranslation(e.name), e.uuid);
 		});
+
+		d.methods.sort(Utils.sortByNameOnCurrentLanguage);
 		d.methods.forEach(e => {
 			methodList.addOption(App.getTranslation(e.name), e.uuid);
 		});
+
+		d.activities.sort(Utils.sortByNameOnCurrentLanguage);
 		d.activities.forEach(e => {
 			activityList.addOption(App.getTranslation(e.name), e.uuid);
 		});
