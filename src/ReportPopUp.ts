@@ -88,7 +88,6 @@ function openReportPopUp(species: Models.Species | null, list: Models.List | nul
     const r = new HttpRequest("GET", "/v1/reports/basis");
 	r.process(function(status: any, data: any) {
         const d = data as Responses.ReportsBasis;
-        console.log(d);
         d.species.forEach(e => {
             speciesList.addOption(App.getTranslation(e.name), e.uuid);
         });
@@ -103,7 +102,7 @@ function openReportPopUp(species: Models.Species | null, list: Models.List | nul
 		});
 		d.activities.forEach(e => {
 			activityList.addOption(App.getTranslation(e.name), e.uuid);
-		}
+		});
     });
 
 	new Ui.PopUp(content.container, function() {
