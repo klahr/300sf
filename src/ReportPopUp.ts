@@ -1,4 +1,8 @@
 /// <reference path="responses/ReportsBasis.ts"/>
+/// <reference path="models/Species.ts"/>
+/// <reference path="models/List.ts"/>
+/// <reference path="ui/Div.ts"/>
+/// <reference path="HttpRequest.ts"/>
 
 function openReportPopUp(species: Models.Species | null, list: Models.List | null): void {
 	const content = new Ui.Div();
@@ -16,9 +20,13 @@ function openReportPopUp(species: Models.Species | null, list: Models.List | nul
     speciesListLbl.innerHTML = "Species";
     content.container.appendChild(speciesListLbl);
 
-	const speciesList = new Ui.Select();
-	speciesList.addOption("", "");
+	const speciesList = new Ui.Select("Select species...");
 	content.attach(speciesList);
+
+	const asdf = document.createElement("h3");
+    asdf.className = "title";
+    asdf.innerHTML = "Species ok!";
+    content.container.appendChild(asdf);
 
     const r = new HttpRequest("GET", "/v1/reports/basis");
 	r.process(function(status: any, data: any) {

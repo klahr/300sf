@@ -6,8 +6,9 @@ namespace Ui {
 		private mDropDown: HTMLDivElement;
 		private mResult: HTMLParagraphElement;
 		private mSearch: Ui.Input;
+		private mExpandable: Ui.Div;
 
-		constructor() {
+		constructor(placeholder: string) {
 			super();
 
 			const self = this;
@@ -18,18 +19,29 @@ namespace Ui {
 			this.mResult = document.createElement("p");
 			this.mResult.style.padding = "var(--medium-distance)";
 			this.mResult.style.cursor = "pointer";
-			this.mResult.innerHTML = "Tufted duck";
+			this.mResult.innerHTML = placeholder;
 			this.mResult.addEventListener("click", function() {
 				self.toggleVisible();
 			})
 			this.mContainer.appendChild(this.mResult);
+
+			this.mExpandable = new Ui.Div();
+			this.mExpandable.style.backgroundColor = "var(--widget-color)";
+			this.mExpandable.style.position = "absolute";
+			this.mExpandable.style.left = "0";
+			this.mExpandable.style.top = "56px";
+			this.mExpandable.style.width = "100%";
+			this.mExpandable.style.height = "256px";
+			this.mExpandable.style.borderBottomLeftRadius = "var(--small-distance)";
+			this.mExpandable.style.borderBottomRightRadius = "var(--small-distance)";
+			this.mExpandable.setVisible(false);
+			this.attach(this.mExpandable);
 
 			this.mSearch = new Ui.Input("text");
 			this.mSearch.style.margin = "0";
 			this.mSearch.setPlaceHolder("Search...");
 			this.mSearch.style.borderBottomLeftRadius = "0";
 			this.mSearch.style.borderBottomRightRadius = "0";
-			this.mSearch.style.display = "none";
 
 			this.mSearch.container.addEventListener("keydown", function(e) {
 				const allOptionsSource = self.mDropDown.getElementsByTagName("p");
@@ -85,6 +97,7 @@ namespace Ui {
 						if (allOptions[i].classList.contains("selected")) {
 							self.mResult.innerHTML = allOptions[i].innerHTML;
 							self.mResult.setAttribute("value", allOptions[i].getAttribute("value")!);
+							self.toggleVisible();
 							break;
 						}
 					}
@@ -102,24 +115,25 @@ namespace Ui {
 					}
 				}
 			});
-			this.attach(this.mSearch);
+			this.mExpandable.attach(this.mSearch);
 
 			this.mDropDown = document.createElement("div");
 			this.mDropDown.style.margin = "0 24px var(--small-distance) 24px";
 			this.mDropDown.style.overflowY = "auto";
-			this.mDropDown.style.height = "256px";
-			this.mDropDown.style.display = "none";
+			this.mDropDown.style.height = "calc(100% - 56px)";
 			this.mDropDown.style.width = "calc(100% - 48px)";
-			this.mContainer.appendChild(this.mDropDown);
+			this.mExpandable.container.appendChild(this.mDropDown);
 	}
 
 		public toggleVisible(): void {
-			if (this.mSearch.style.display === "inline-block") {
-				this.mSearch.style.display = "none";
-				this.mDropDown.style.display = "none";
+			if (this.mExpandable.isVisible()) {
+				this.mExpandable.setVisible(false);
+				this.style.borderBottomLeftRadius = "";
+				this.style.borderBottomRightRadius = "";
 			} else {
-				this.mSearch.style.display = "inline-block";
-				this.mDropDown.style.display = "inline-block";
+				this.mExpandable.setVisible(true);
+				this.style.borderBottomLeftRadius = "0";
+				this.style.borderBottomRightRadius = "0";
 				this.mSearch.select();
 			}
  		}
@@ -149,6 +163,7 @@ namespace Ui {
 				}
 				option.classList.add("selected");
 				self.updateScroll(this);
+				self.toggleVisible();
 			});
 			this.mDropDown.appendChild(option);
 		}
