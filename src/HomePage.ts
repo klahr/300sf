@@ -41,7 +41,7 @@ class HomePage extends Page {
 		reportButton.style.width = "auto";
 		reportButton.style.cssFloat = "right";
 		reportButton.style.borderRadius = "inherit";
-		reportButton.style.backgroundColor = "var(--success-color)";
+		reportButton.style.backgroundColor = "var(--primary-color)";
 		reportButton.addEventListener("click", function() {
 			openReportPopUp(null, null);
 		});

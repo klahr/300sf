@@ -4,6 +4,8 @@
 /// <reference path="ui/Div.ts"/>
 /// <reference path="HttpRequest.ts"/>
 
+declare const L;
+
 function openReportPopUp(species: Models.Species | null, list: Models.List | null): void {
 	const content = new Ui.Div();
 	content.style.textAlign = "left";
@@ -14,6 +16,47 @@ function openReportPopUp(species: Models.Species | null, list: Models.List | nul
 	name.innerHTML = "Submit";
 	name.style.margin = "unset";
 	content.container.appendChild(name);
+
+	const locationLbl = document.createElement("h3");
+	locationLbl.className = "title";
+	locationLbl.innerHTML = "Observation location";
+	content.container.appendChild(locationLbl);
+	const mapDiv = new Ui.Div();
+	mapDiv.container.id = "map";
+	mapDiv.style.height = "300px";
+	mapDiv.style.width = "100%";
+	mapDiv.style.position = "relative";
+	mapDiv.style.borderRadius = "var(--small-distance)";
+	content.attach(mapDiv);
+
+	const locateButton = document.createElement("button");
+	locateButton.innerHTML = "Locate me";
+	locateButton.style.borderRadius = "8px";
+	locateButton.style.backgroundColor = "var(--success-color)";
+	content.container.appendChild(locateButton);
+
+	setTimeout(function() {
+		const map = L.map('map').setView([58.1801188016368, 13.959220108737176], 13);
+		L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			maxZoom: 19,
+			attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+		}).addTo(map);
+		map.locate({setView: true, maxZoom: 19});
+		const markerGroup = L.layerGroup().addTo(map);
+		map.on("click", function(e) {
+			markerGroup.clearLayers();
+			L.marker(e.latlng).addTo(markerGroup);
+		});
+		map.on('locationfound', function(e) {
+			markerGroup.clearLayers();
+			L.marker(e.latlng).addTo(markerGroup);
+			map.setZoom(16);
+		});
+
+		locateButton.addEventListener("click", function() {
+			map.locate({setView: true, maxZoom: 19});
+		});
+	}, 10);
 
     const speciesListLbl = document.createElement("h3");
     speciesListLbl.className = "title";
@@ -104,6 +147,17 @@ function openReportPopUp(species: Models.Species | null, list: Models.List | nul
 			activityList.addOption(App.getTranslation(e.name), e.uuid);
 		});
     });
+
+	const reportButton = document.createElement("button");
+	reportButton.innerHTML = "Submit";
+	reportButton.style.width = "auto";
+	reportButton.style.cssFloat = "right";
+	reportButton.style.borderRadius = "8px";
+	reportButton.style.backgroundColor = "var(--success-color)";
+	reportButton.addEventListener("click", function() {
+		console.log("Submit report");
+	});
+	content.container.appendChild(reportButton);
 
 	new Ui.PopUp(content.container, function() {
 		console.log("closed");
