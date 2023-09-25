@@ -79,6 +79,10 @@ h3 {
 	font-weight: bold;
 }
 
+h3.title {
+	margin: 16px 0 8px 0;
+}
+
 div.background {
 	background-color: var(--background-color);
 	padding: var(--medium-distance);

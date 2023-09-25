@@ -44,6 +44,7 @@ namespace Ui {
 			this.mExpandable.style.height = "256px";
 			this.mExpandable.style.borderBottomLeftRadius = "var(--small-distance)";
 			this.mExpandable.style.borderBottomRightRadius = "var(--small-distance)";
+			this.mExpandable.style.zIndex = "1";
 			this.mExpandable.setVisible(false);
 			this.attach(this.mExpandable);
 
