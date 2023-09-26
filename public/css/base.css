@@ -40,7 +40,7 @@ a:hover {
 }
 
 p,label {
-	color: var(--secondary-color);
+	color: var(--black-or-white-color);
 	font-size: 1rem;
 	line-height: 1.5rem;
 }
@@ -269,7 +269,7 @@ button {
 }
 
 button:disabled {
-	background-color: var(--secondary-color);
+	background-color: var(--secondary-color)!important;
 }
 
 hr {
