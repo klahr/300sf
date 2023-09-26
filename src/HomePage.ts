@@ -63,9 +63,7 @@ class HomePage extends Page {
 	private refresh(): void {
 		const self = this;
 		const r = new HttpRequest("GET", "/v1/reports/list");
-		console.log("get");
 		r.process(function(status: any, data: any) {
-			console.log(data);
 			self.mTable.clear();
 			data.result.forEach(e => {
 				const d = e as Models.Report;
