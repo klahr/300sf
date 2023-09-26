@@ -144,24 +144,32 @@ namespace Ui {
 
 		public toggleVisible(): void {
 			if (this.mExpandable.isVisible()) {
-				this.mExpandable.setVisible(false);
-				this.style.borderBottomLeftRadius = "";
-				this.style.borderBottomRightRadius = "";
-				this.mOpenArrow.innerHTML = "expand_more";
+				this.hide();
 			} else {
-				this.mExpandable.setVisible(true);
-				this.style.borderBottomLeftRadius = "0";
-				this.style.borderBottomRightRadius = "0";
-				this.mOpenArrow.innerHTML = "expand_less";
-				this.mSearch.select();
+				this.show();
 			}
  		}
+
+		public show(): void {
+			this.mExpandable.setVisible(true);
+			this.style.borderBottomLeftRadius = "0";
+			this.style.borderBottomRightRadius = "0";
+			this.mOpenArrow.innerHTML = "expand_less";
+			this.mSearch.select();
+		}
+
+		public hide(): void {
+			this.mExpandable.setVisible(false);
+			this.style.borderBottomLeftRadius = "";
+			this.style.borderBottomRightRadius = "";
+			this.mOpenArrow.innerHTML = "expand_more";
+		}
 
 		public get value(): string | null {
 			return this.mResult.getAttribute("value");
 		}
 
-		public addOption(name: string, value: string): void {
+		public addOption(name: string, value: string): HTMLParagraphElement {
 			const self = this;
 			const option = document.createElement("p");
 			option.className = "uix-option";
@@ -180,6 +188,7 @@ namespace Ui {
 				self.mSelectCallback(option.getAttribute("value"));
 			});
 			this.mDropDown.appendChild(option);
+			return option;
 		}
 
 		private updateScroll(selectedP: HTMLParagraphElement): void {

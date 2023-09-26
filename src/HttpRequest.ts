@@ -44,7 +44,7 @@ class HttpRequest {
 					case Responses.ErrorCode.ErrorLoggedOut:
 					default:
 						// TODO: Refresh session instead of accept logged out.
-						location.reload();
+						//location.reload();
 					break;
 				}
 				fail(xhr.status, xhr.responseJSON, errorThrown);

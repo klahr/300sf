@@ -99,8 +99,11 @@ class ReportPopup {
 					c.container.addEventListener("click", function() {
 						self.validate();
 					});
+
 					if (!e.available) {
 						c.container.setAttribute("disabled", "");
+					} else if (list && e.list.uuid === list.uuid) {
+						(c.container as HTMLInputElement).checked = true;
 					}
 					dd.attach(c);
 					const cLbl = document.createElement("label");
@@ -195,7 +198,11 @@ class ReportPopup {
 	
 			d.species.sort(Utils.sortByNameOnCurrentLanguage);
 			d.species.forEach(e => {
-				self.mSpeciesList.addOption(App.getTranslation(e.name), e.uuid);
+				const option = self.mSpeciesList.addOption(App.getTranslation(e.name), e.uuid);
+				if (species && species.uuid === e.uuid) {
+					option.click();
+					self.mSpeciesList.hide();
+				}
 			});
 	
 			d.ages.sort(Utils.sortByNameOnCurrentLanguage);
