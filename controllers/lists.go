@@ -306,3 +306,41 @@ func ListsReports(c *gin.Context) {
 		Result: result,
 	})
 }
+
+func ListsForSpecies(c *gin.Context) {
+	var result []models.List
+
+	type response struct {
+		Result []models.List `json:"result"`
+	}
+
+	var user models.User
+	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var species models.Species
+	if err := models.DB.Where("uuid=?", c.Param("species_uuid")).First(&species).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if err := models.DB.Table("lists").Preload("Name").Joins("JOIN list_species ON list_species.list_id=lists.id AND list_species.species_id=?", species.Id).Where("user_id=?", user.Id).Find(&result).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, response{
+		Result: result,
+	})
+}

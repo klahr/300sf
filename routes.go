@@ -131,6 +131,7 @@ func SetupRoutes(r *gin.Engine) {
 	r.POST("/v1/lists/:uuid/timespan", apiKeyMiddleware, basicMiddleware, controllers.ListsTimespan)
 	r.GET("/v1/lists/:uuid", apiKeyMiddleware, controllers.ListsDetails)
 	r.GET("/v1/lists/:uuid/reports", apiKeyMiddleware, basicMiddleware, controllers.ListsReports)
+	r.GET("/v1/lists/species/:species_uuid", apiKeyMiddleware, basicMiddleware, controllers.ListsForSpecies)
 
 	// List templates
 	r.GET("/v1/list_templates/list", apiKeyMiddleware, noneMiddleware, controllers.ListTemplatesList)
