@@ -28,7 +28,7 @@ class HomePage extends Page {
 		profile.style.borderRadius = "100%";
 		profile.style.cursor = "pointer";
 		profile.container.addEventListener("click", function() {
-			new Ui.MessageBox("Success", "Here you will change your <b>Profile</b> in the future!", "var(--success-color)", function() {});
+			new Ui.MessageBox("Profile", "This is the section where you will be able to update your <b>Profile</b> in the future, once this feature has been fully implemented.", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
 		});
 		this.attach(profile);
 
@@ -163,7 +163,7 @@ class HomePage extends Page {
 				//setCookie("x300sf_rt", data.refresh_token, 3600 * 24 * 60); // 60 days.
 				location.reload();
 			}, function() {
-				new Ui.MessageBox("Oh, no!", "It appears that the <b>email</b> or <b>password</b> you entered is invalid.", "var(--error-color)", function() {});
+				new Ui.MessageBox("Oh, no!", "It appears that the <b>email</b> or <b>password</b> you entered is invalid.", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
 			});
 		});
 

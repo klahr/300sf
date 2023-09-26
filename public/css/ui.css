@@ -71,6 +71,7 @@ div.uix-messagebox {
 	margin: var(--large-distance);
 	border-radius: 16px;
 	text-align: center;
+	position: relative;
 }
 
 div.uix-popup {
@@ -82,6 +83,7 @@ div.uix-popup {
 	margin: var(--large-distance);
 	border-radius: 16px;
 	text-align: center;
+	position: relative;
 }
 
 div.uix-popup-base {
@@ -90,6 +92,7 @@ div.uix-popup-base {
 	width: 100%;
 	height: 100%;
 	position: fixed;
+	text-align: center;
 }
 
 div.uix-popup-background {

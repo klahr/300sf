@@ -7,7 +7,7 @@ namespace Ui {
 		private mPopup: Ui.Div;
 		private mCloseCallback: () => void;
 
-		constructor(title: string, message: string, color: string, closeCallback: () => void) {
+		constructor(title: string, message: string, image: string | null, color: string, closeCallback: () => void) {
 			super();
 
 			const self = this;
@@ -27,7 +27,7 @@ namespace Ui {
 			this.mPopup.addClass("uix-messagebox");
 			this.mPopup.addClass("animate__animated");
 			this.mPopup.addClass("animate__backInDown");
-			this.mPopup.style.setProperty("--animate-duration", "500ms");
+			this.mPopup.style.setProperty("--animate-duration", "750ms");
 			this.mPopup.style.padding = "8px";
 			this.attach(this.mPopup);
 
@@ -42,7 +42,17 @@ namespace Ui {
 			c.container.style.textAlign = "left";
 			c.container.style.border = "2px solid " + color;
 			c.container.style.borderRadius = "16px";
+			c.container.style.textAlign = "center";
 			this.mPopup.attach(c);
+
+			if (image) {
+				const img = document.createElement("img");
+				img.src = image;
+				img.style.width = "75%";
+				img.style.maxWidth = "128px";
+				img.style.borderRadius = "50%";
+				c.container.appendChild(img);
+			}
 
 			const t = document.createElement("h2");
 			t.innerHTML = title;
