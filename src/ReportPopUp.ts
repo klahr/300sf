@@ -1,5 +1,6 @@
 /// <reference path="responses/Reports.ts"/>
 /// <reference path="responses/Lists.ts"/>
+/// <reference path="requests/Reports.ts"/>
 /// <reference path="models/Species.ts"/>
 /// <reference path="models/List.ts"/>
 /// <reference path="ui/Div.ts"/>
