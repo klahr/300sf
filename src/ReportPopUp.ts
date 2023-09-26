@@ -97,16 +97,18 @@ class ReportPopup {
 						self.validate();
 					});
 
-					if (!e.available) {
-						c.container.setAttribute("disabled", "");
-					} else if (list && e.list.uuid === list.uuid) {
-						(c.container as HTMLInputElement).checked = true;
-					}
 					dd.attach(c);
 					const cLbl = document.createElement("label");
 					cLbl.setAttribute("for", c.container.getAttribute("name")!);
 					cLbl.innerHTML = App.getTranslation(e.list.name);
 					dd.container.appendChild(cLbl);
+
+					if (!e.available) {
+						c.container.setAttribute("disabled", "");
+						cLbl.style.color = "var(--secondary-color)";
+					} else if (list && e.list.uuid === list.uuid) {
+						(c.container as HTMLInputElement).checked = true;
+					}
 				});
 
 				self.validate();
