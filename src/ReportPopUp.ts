@@ -15,12 +15,9 @@ class ReportPopup {
 	private mChecklistContainer: Ui.Div;
 	private mLocation = L.latLng;
 	private mPopUp: Ui.PopUp;
-	private mAppListener: IAppListener;
 
-	constructor(species: Models.Species | null, list: Models.List | null, appListener: IAppListener) {
+	constructor(species: Models.Species | null, list: Models.List | null, closeCallback: () => void) {
 		const self = this;
-
-		this.mAppListener = appListener;
 
 		const content = new Ui.Div();
 		content.style.textAlign = "left";
@@ -281,7 +278,7 @@ class ReportPopup {
 		content.container.appendChild(this.mReportButton);
 
 		this.mPopUp = new Ui.PopUp(content.container, function() {
-			self.mAppListener.showPage("home-page", null);
+			closeCallback();
 		});
 	}
 
@@ -308,6 +305,6 @@ class ReportPopup {
 	}
 }
 
-function openReportPopUp(species: Models.Species | null, list: Models.List | null, appListener: IAppListener): void {
-	new ReportPopup(species, list, appListener);
+function openReportPopUp(species: Models.Species | null, list: Models.List | null, closeCallback: () => void = function() {}): void {
+	new ReportPopup(species, list, closeCallback);
 }

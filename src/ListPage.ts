@@ -122,7 +122,9 @@ class ListPage extends Page {
 				check.style.color = "var(--secondary-color)";
 				check.style.cursor = "pointer";
 				check.addEventListener("click", function() {
-					openReportPopUp(e, self.data, self.appListener);
+					openReportPopUp(e, self.data, function() {
+						self.setData(self.data);
+					});
 				});
 				entry.appendChild(check);
 

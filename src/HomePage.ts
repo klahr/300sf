@@ -45,7 +45,9 @@ class HomePage extends Page {
 		reportButton.style.borderRadius = "inherit";
 		reportButton.style.backgroundColor = "var(--primary-color)";
 		reportButton.addEventListener("click", function() {
-			openReportPopUp(null, null, self.appListener);
+			openReportPopUp(null, null, function() {
+				self.refresh();
+			});
 		});
 		this.container.appendChild(reportButton);
 
