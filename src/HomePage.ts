@@ -8,6 +8,8 @@
 /// <reference path="ReportPopUp.ts"/>
 
 class HomePage extends Page {
+	private mTable: Ui.Table;
+
 	constructor(appListener: IAppListener) {
 		super(appListener);
 	}
@@ -43,15 +45,28 @@ class HomePage extends Page {
 		reportButton.style.borderRadius = "inherit";
 		reportButton.style.backgroundColor = "var(--primary-color)";
 		reportButton.addEventListener("click", function() {
-			openReportPopUp(null, null);
+			openReportPopUp(null, null, self.appListener);
 		});
 		this.container.appendChild(reportButton);
 
-		const table = new Ui.Table();
-		this.attach(table);
+		this.mTable = new Ui.Table();
+		this.attach(this.mTable);
 
+		this.refresh();
+	}
+
+	public setVisible(visible: boolean): void {
+		super.setVisible(visible);
+		this.refresh();
+	}
+
+	private refresh(): void {
+		const self = this;
 		const r = new HttpRequest("GET", "/v1/reports/list");
+		console.log("get");
 		r.process(function(status: any, data: any) {
+			console.log(data);
+			self.mTable.clear();
 			data.result.forEach(e => {
 				const d = e as Models.Report;
 				const species = e.species as Models.Species;
@@ -73,11 +88,11 @@ class HomePage extends Page {
 				observationDate.innerHTML = new Date(d.from).toLocaleString();
 				entry.appendChild(observationDate);
 
-				table.addRow([entry]);
+				self.mTable.addRow([entry]);
 			});
 		});
 	}
-	
+
 	protected onCreateLoggedOut(): void {
 		const content = new Ui.Div();
 		content.style.position = "relative";

@@ -12,9 +12,14 @@ class ReportPopup {
 	private mReportButton: HTMLButtonElement;
 	private mSpeciesList: Ui.Select;
 	private mChecklistContainer: Ui.Div;
+	private mLocation = L.latLng;
+	private mPopUp: Ui.PopUp;
+	private mAppListener: IAppListener;
 
-	constructor(species: Models.Species | null, list: Models.List | null) {
+	constructor(species: Models.Species | null, list: Models.List | null, appListener: IAppListener) {
 		const self = this;
+
+		this.mAppListener = appListener;
 
 		const content = new Ui.Div();
 		content.style.textAlign = "left";
@@ -58,10 +63,12 @@ class ReportPopup {
 			map.on("click", function(e) {
 				markerGroup.clearLayers();
 				L.marker(e.latlng).addTo(markerGroup);
+				self.mLocation = e.latlng;
 			});
 			map.on('locationfound', function(e) {
 				markerGroup.clearLayers();
 				L.marker(e.latlng).addTo(markerGroup);
+				self.mLocation = e.latlng;
 				map.setZoom(16);
 			});
 	
@@ -154,7 +161,6 @@ class ReportPopup {
 		const now = new Date();
 		now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
 		now.setSeconds(now.getMinutes());
-		console.log(now.toISOString());
 		from.value = now.toISOString().slice(0, -8);
 
 		const untilLbl = document.createElement("h3");
@@ -220,12 +226,54 @@ class ReportPopup {
 		this.mReportButton.style.backgroundColor = "var(--success-color)";
 		this.mReportButton.disabled = true;
 		this.mReportButton.addEventListener("click", function() {
-			console.log("Submit report");
+			const r = new Requests.Reports();
+			r.species_uuid = self.mSpeciesList.value!;
+			if (from.value !== "") {
+				const localFromDate = new Date(from.value);
+				r.from = new Date(localFromDate.getTime()).toISOString();
+				r.from = r.from.slice(0, r.from.lastIndexOf(".")) + 'Z';
+			}
+			if (until.value !== "") {
+				const localUntilData = new Date(until.value);
+				r.until = new Date(localUntilData.getTime()).toISOString();	
+				r.until = r.until.slice(0, r.until.lastIndexOf(".")) + 'Z';
+			}
+
+			r.latitude = self.mLocation.lat;
+			r.longitude = self.mLocation.lng;
+			r.quantity = parseInt(quantity.value);
+			if (ageList.value) {
+				r.age_uuid = ageList.value;
+			}
+			if (activityList.value) {
+				r.activity_uuid = activityList.value;
+			}
+			if (genderList.value) {
+				r.gender_uuid = genderList.value;
+			}
+			if (methodList.value) {
+				r.method_uuid = methodList.value;
+			}
+			r.comment = privateComment.value;
+			r.silent = true;
+			const checklists = self.mChecklistContainer.container.getElementsByTagName("input");
+			r.list_uuids = Array();
+			for (let i = 0; i < checklists.length; ++i) {
+				if (checklists[i].checked) {
+					r.list_uuids.push(checklists[i].name);
+				}
+			}
+			// TODO: Tags and notifications.
+
+			const rr = new HttpRequest("POST", "/v1/reports", JSON.stringify(r));
+			rr.process(function(status: any, data: any) {
+				self.mPopUp.close();
+			});
 		});
 		content.container.appendChild(this.mReportButton);
 
-		new Ui.PopUp(content.container, function() {
-			console.log("closed");
+		this.mPopUp = new Ui.PopUp(content.container, function() {
+			self.mAppListener.showPage("home-page", null);
 		});
 	}
 
@@ -252,6 +300,6 @@ class ReportPopup {
 	}
 }
 
-function openReportPopUp(species: Models.Species | null, list: Models.List | null): void {
-	new ReportPopup(species, list);
+function openReportPopUp(species: Models.Species | null, list: Models.List | null, appListener: IAppListener): void {
+	new ReportPopup(species, list, appListener);
 }

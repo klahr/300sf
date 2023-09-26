@@ -158,13 +158,7 @@ namespace Ui {
  		}
 
 		public get value(): string | null {
-			const options = this.mDropDown.getElementsByTagName("p");
-			for (let i = 0; i < options.length; ++i) {
-				if (options[i].innerHTML === this.mSearch.value) {
-					return options[i].getAttribute("value");
-				}
-			}
-			return null;
+			return this.mResult.getAttribute("value");
 		}
 
 		public addOption(name: string, value: string): void {

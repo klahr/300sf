@@ -5,9 +5,12 @@ namespace Ui {
 	export class PopUp extends Div {
 		private mRoot: HTMLDivElement;
 		private mPopup: Ui.Div;
+		private mCloseCallback: () => void;
 
 		constructor(content: HTMLElement, closeCallback: () => void) {
 			super();
+
+			this.mCloseCallback = closeCallback;
 
 			this.addClass("uix-popup-base");
 
@@ -47,9 +50,6 @@ namespace Ui {
 			close.innerHTML = "close";
 			close.addEventListener("click", function() {
 				self.close();
-				if (closeCallback) {
-					closeCallback();
-				}
 			});
 			c.container.appendChild(close);
 
@@ -69,6 +69,10 @@ namespace Ui {
 			setTimeout(function() {
 				self.mRoot.removeChild(self.mContainer);
 			}, 500);
+
+			if (this.mCloseCallback) {
+				this.mCloseCallback();
+			}
 		}
 	}
 }
