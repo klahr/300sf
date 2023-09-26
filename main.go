@@ -51,6 +51,7 @@ func main() {
 	}
 
 	r := gin.New()
+	r.SetTrustedProxies([]string{})
 	r.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Authorization,Content-Type,X-Access-Token,X-Refresh-Token,X-App-Version,X-App-Language,X-Api-Key")
