@@ -120,6 +120,7 @@ class ListPage extends Page {
 				check.className = "material-symbols-outlined";
 				check.innerHTML = "check_circle";
 				check.style.color = "var(--secondary-color)";
+				check.style.cursor = "pointer";
 				check.addEventListener("click", function() {
 					openReportPopUp(e, self.data, self.appListener);
 				});
