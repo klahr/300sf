@@ -26,11 +26,9 @@ class HomePage extends Page {
 		profile.style.right = "var(--medium-distance)";
 		profile.style.top = "var(--small-distance)";
 		profile.style.borderRadius = "100%";
+		profile.style.cursor = "pointer";
 		profile.container.addEventListener("click", function() {
-			const p = document.createElement("p");
-			p.innerHTML = "hej";
-			new Ui.PopUp(p, function() {
-			});
+			new Ui.MessageBox("Success", "Here you will change your <b>Profile</b> in the future!", "var(--success-color)", function() {});
 		});
 		this.attach(profile);
 
