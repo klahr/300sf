@@ -162,6 +162,8 @@ class HomePage extends Page {
 				setCookie("x300sf_at", data.access_token, stayLoggedIn ? null : data.expires_at);
 				//setCookie("x300sf_rt", data.refresh_token, 3600 * 24 * 60); // 60 days.
 				location.reload();
+			}, function() {
+				new Ui.MessageBox("Oh, no!", "It appears that the <b>email</b> or <b>password</b> you entered is invalid.", "var(--error-color)", function() {});
 			});
 		});
 
