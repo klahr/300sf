@@ -92,7 +92,6 @@ function openSpeciesPopUp(species: Models.Species) {
 	});
 
 	new Ui.PopUp(content.container, function() {
-		console.log("closed");
 	});
 }
 
