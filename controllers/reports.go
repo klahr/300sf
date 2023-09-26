@@ -17,8 +17,8 @@ import (
 func Reports(c *gin.Context) {
 	type request struct {
 		SpeciesUuid         string      `json:"species_uuid"`
-		From                zero.String `json:"from"`
-		Until               zero.String `json:"until"`
+		From                zero.Time   `json:"from" time_format:"2006-01-02T15:04Z"`
+		Until               zero.Time   `json:"until" time_format:"2006-01-02T15:04Z"`
 		Latitude            zero.Float  `json:"latitude"`
 		Longitude           zero.Float  `json:"longitude"`
 		Quantity            zero.Int    `json:"quantity"`
@@ -71,8 +71,8 @@ func Reports(c *gin.Context) {
 		},
 		UserId:    user.Id,
 		SpeciesId: species.Id,
-		From:      zero.TimeFrom(utils.Str2Time(r.From.String)),
-		Until:     zero.TimeFrom(utils.Str2Time(r.Until.String)),
+		From:      r.From,
+		Until:     r.Until,
 		Latitude:  r.Latitude,
 		Longitude: r.Longitude,
 		Quantity:  r.Quantity,
