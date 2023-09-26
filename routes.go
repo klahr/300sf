@@ -24,12 +24,12 @@ func requirePermission(c *gin.Context, requiredPermission int64) {
 	accessToken := auth.Token{}
 	if xAccessToken != "" {
 		if err := auth.ParseToken(xAccessToken, &accessToken, publicKey); err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "logged out", "code": 0})
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "logged out", "code": controllers.ErrorLoggedOut})
 			c.Abort()
 			return
 		}
 	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "logged out", "code": 0})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "logged out", "code": controllers.ErrorLoggedOut})
 		c.Abort()
 		return
 	}
@@ -42,7 +42,7 @@ func requirePermission(c *gin.Context, requiredPermission int64) {
 		c.Set("permissions", accessToken.Permissions)
 		c.Next()
 	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "missing permission", "code": 0})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "missing permission", "code": controllers.ErrorMissingPermission})
 		c.Abort()
 	}
 }
@@ -62,13 +62,13 @@ func adminMiddleware(c *gin.Context) {
 func apiKeyMiddleware(c *gin.Context) {
 	xApiKey := c.Request.Header.Get("X-Api-Key")
 	if xApiKey == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "missing api key", "code": 0})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "missing api key", "code": controllers.ErrorMissingApiKey})
 		c.Abort()
 		return
 	}
 	v := strings.Split(xApiKey, ".")
 	if len(v) != 2 {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid api key", "code": 1})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid api key", "code": controllers.ErrorInvalidApiKey})
 		c.Abort()
 		return
 	}
@@ -76,13 +76,13 @@ func apiKeyMiddleware(c *gin.Context) {
 	var apiKey models.ApiKey
 	hashedOrignalKey := utils.ComputeHmac256(v[1], "0b8879c940c5af8076712b19cc614f732086ad822d41572e39f93be31ef7f550")
 	if err := models.DB.Where("hash=?", hashedOrignalKey).Where("prefix=?", v[0]).First(&apiKey).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid api key", "code": 2})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid api key", "code": controllers.ErrorInvalidApiKey})
 		c.Abort()
 		return
 	}
 
 	if apiKey.RevokedAt.Valid {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid api key", "code": 3})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid api key", "code": controllers.ErrorInvalidApiKey})
 		c.Abort()
 		return
 	}
@@ -90,7 +90,7 @@ func apiKeyMiddleware(c *gin.Context) {
 	callCounter, _ := models.Cache.Get(v[0]).Result()
 	iCallCounter := utils.Str2Int(callCounter)
 	if iCallCounter >= apiKey.HardLimit {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "too many calls on api key", "code": 4})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "too many calls on api key", "code": controllers.ErrorTooManyApiCalls})
 		c.Abort()
 		return
 	}

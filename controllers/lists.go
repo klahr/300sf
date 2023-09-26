@@ -308,11 +308,16 @@ func ListsReports(c *gin.Context) {
 }
 
 func ListsForSpecies(c *gin.Context) {
-	var result []models.List
+	type listAvailable struct {
+		List      models.List `json:"list"`
+		Available bool        `json:"available"`
+	}
 
 	type response struct {
-		Result []models.List `json:"result"`
+		Result []listAvailable `json:"result"`
 	}
+
+	var result response
 
 	var user models.User
 	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
@@ -332,7 +337,8 @@ func ListsForSpecies(c *gin.Context) {
 		return
 	}
 
-	if err := models.DB.Table("lists").Preload("Name").Joins("JOIN list_species ON list_species.list_id=lists.id AND list_species.species_id=?", species.Id).Where("user_id=?", user.Id).Find(&result).Error; err != nil {
+	var availableLists []models.List
+	if err := models.DB.Table("lists").Joins("JOIN list_species ON list_species.list_id=lists.id AND list_species.species_id=?", species.Id).Where("user_id=?", user.Id).Where("archived IS NULL").Find(&availableLists).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
 			"message": err.Error(),
@@ -340,7 +346,28 @@ func ListsForSpecies(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response{
-		Result: result,
-	})
+	var allLists []models.List
+	if err := models.DB.Preload("Name").Where("user_id=?", user.Id).Where("archived IS NULL").Find(&allLists).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	for _, list := range allLists {
+		found := false
+		for _, a := range availableLists {
+			if a.Uuid == list.Uuid {
+				found = true
+				break
+			}
+		}
+		result.Result = append(result.Result, listAvailable{
+			List:      list,
+			Available: found,
+		})
+	}
+
+	c.JSON(http.StatusOK, result)
 }

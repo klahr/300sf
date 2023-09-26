@@ -8,4 +8,10 @@ const (
 	ErrorDelete              = 1003
 
 	ErrorParse = 2001
+
+	ErrorLoggedOut         = 3001
+	ErrorMissingApiKey     = 3002
+	ErrorInvalidApiKey     = 3003
+	ErrorTooManyApiCalls   = 3004
+	ErrorMissingPermission = 3005
 )
