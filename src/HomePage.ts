@@ -9,6 +9,8 @@
 
 class HomePage extends Page {
 	private mTable: Ui.Table;
+	private mEmail: Ui.Input;
+	private mPassword: Ui.Input;
 
 	constructor(appListener: IAppListener) {
 		super(appListener);
@@ -91,6 +93,17 @@ class HomePage extends Page {
 		});
 	}
 
+	public setData(data: any): void {
+		super.setData(data);
+
+		if (data.email) {
+			if (this.mEmail) {
+				this.mEmail.value = data.email;
+				new Ui.MessageBox("Welcome " + data.display_name, "Your account has been successfully created, and you can now proceed to sign in!", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
+			}
+		}
+	}
+
 	protected onCreateLoggedOut(): void {
 		const content = new Ui.Div();
 		content.style.position = "relative";
@@ -108,29 +121,29 @@ class HomePage extends Page {
 		title.innerHTML = App.translations.SignIn;
 		this.container.appendChild(title);
 
-		const email = new Ui.Input("email");
-		const password = new Ui.Input("password");
+		this.mEmail = new Ui.Input("email");
+		this.mPassword = new Ui.Input("password");
 		const signIn = document.createElement("button");
 
-		email.style.position = "relative";
-		email.setPlaceHolder(App.translations.Email);
-		email.container.addEventListener("keydown", function(e) {
+		this.mEmail.style.position = "relative";
+		this.mEmail.setPlaceHolder(App.translations.Email);
+		this.mEmail.container.addEventListener("keydown", function(e) {
 			if (e.key == "Enter") {
 				e.preventDefault();
-				password.select();
+				self.mPassword.select();
 			}
 		});
-		this.attach(email);
+		this.attach(this.mEmail);
 
-		password.style.position = "relative";
-		password.setPlaceHolder(App.translations.Password);
-		password.container.addEventListener("keydown", function(e) {
+		this.mPassword.style.position = "relative";
+		this.mPassword.setPlaceHolder(App.translations.Password);
+		this.mPassword.container.addEventListener("keydown", function(e) {
 			if (e.key == "Enter") {
 				e.preventDefault();
 				signIn.click();
 			}
 		});
-		this.attach(password);
+		this.attach(this.mPassword);
 
 		const staySignedIn = new Ui.Input("checkbox");
 		staySignedIn.style.position = "relative";
@@ -149,7 +162,7 @@ class HomePage extends Page {
 
 		signIn.innerHTML = App.translations.SignIn;
 		signIn.addEventListener("click", function() {
-			const authorization = 'Basic ' + btoa(email.value + ':' + password.value);
+			const authorization = 'Basic ' + btoa(self.mEmail.value + ':' + self.mPassword.value);
 			const stayLoggedIn = (staySignedIn.container as HTMLInputElement).checked;
 			const content = {
 				'refresh-token': ''
