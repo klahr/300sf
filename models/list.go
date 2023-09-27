@@ -17,4 +17,5 @@ type List struct {
 	Species        []Species    `json:"species" gorm:"many2many:list_species"`
 	ListTemplateId zero.Int     `json:"-"`
 	ListTemplate   ListTemplate `json:"-"`
+	Color          zero.String  `json:"color"`
 }

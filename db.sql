@@ -627,3 +627,6 @@ CREATE TABLE `300sf`.`email_templates` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
 -->
+
+ALTER TABLE `300sf`.`lists` 
+ADD COLUMN `color` VARCHAR(16) NULL AFTER `list_template_id`;
