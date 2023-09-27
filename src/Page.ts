@@ -41,6 +41,11 @@ class Page extends Ui.Widget {
 		return this.mAppListener;
 	}
 
+	public setData(data: any): void {
+		super.setData(data);
+		history.pushState({}, "", "/" + this.id);
+	}
+
 	protected onCreateLoggedIn(): void {}
 
 	protected onCreateLoggedOut(): void {}

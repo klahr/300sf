@@ -59,6 +59,8 @@ class ListPage extends Page {
 	public setData(data: any): void {
 		super.setData(data);
 
+		//history.pushState({}, "", "/" + this.id + "/" + data.uuid);
+
 		this.mTitle.innerHTML = "";
 		this.mTable.clear();
 		this.mProgress.setProgress(0);
