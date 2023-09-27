@@ -225,6 +225,16 @@ div.surface > p,h1 {
 	color: var(--black-or-white-color);
 }
 
+div.progress-box {
+	width: 100px;
+	height: 100px;
+	background-color: #2782ac;
+	border-radius: var(--medium-radius);
+	display: inline-block;
+	margin: var(--small-distance);
+	position: relative;
+}
+
 span.menu {
 	font-size: 32px;
 	color: white;

@@ -3,6 +3,7 @@
 namespace Ui {
 	export class ProgressBar extends Div {
 		private mProgression: Div;
+
 		constructor() {
 			super();
 

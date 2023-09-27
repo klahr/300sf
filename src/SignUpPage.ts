@@ -66,6 +66,7 @@ class SignUpPage extends Page {
 
 			const r = new HttpRequest("POST", "/v1/users", JSON.stringify(content));
 			r.process(function(status: any, data: any) {
+				password.value = "",
 				self.appListener.showPage("home", {"email": email.value, "display_name": displayName.value});
 			}, function(status: any, data: Responses.Error, error: any) {
 				switch (data.code) {

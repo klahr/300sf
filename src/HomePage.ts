@@ -6,11 +6,13 @@
 /// <reference path="HttpRequest.ts"/>
 /// <reference path="SpeciesPopUp.ts"/>
 /// <reference path="ReportPopUp.ts"/>
+/// <reference path="responses/Users.ts"/>
 
 class HomePage extends Page {
 	private mTable: Ui.Table;
 	private mEmail: Ui.Input;
 	private mPassword: Ui.Input;
+	private mProgressBoxes: Ui.Div;
 
 	constructor(appListener: IAppListener) {
 		super(appListener);
@@ -54,7 +56,11 @@ class HomePage extends Page {
 		this.mTable = new Ui.Table();
 		this.attach(this.mTable);
 
-		this.refresh();
+		this.mProgressBoxes = new Ui.Div();
+		this.mProgressBoxes.style.position = "relative";
+		this.attach(this.mProgressBoxes);
+
+		//this.refresh();
 	}
 
 	public setVisible(visible: boolean): void {
@@ -64,7 +70,57 @@ class HomePage extends Page {
 
 	private refresh(): void {
 		const self = this;
-		const r = new HttpRequest("GET", "/v1/reports/list");
+
+		const me = new HttpRequest("GET", "/v1/users/me");
+		me.process(function(status: any, data: any) {
+			const d = data as Responses.UsersMe;
+			self.mProgressBoxes.clear();
+			self.mProgressBoxes.container.innerHTML = "";
+
+			d.list_reports.forEach(e => {
+				const d = new Ui.Div();
+				d.container.className = "progress-box";
+				d.container.style.cursor = "pointer";
+				d.container.addEventListener("click", function() {
+					self.appListener.showPage("list", e.list);
+				});
+				self.mProgressBoxes.attach(d);
+
+				const title = document.createElement("p");
+				title.style.padding = "var(--small-distance)";
+				title.style.fontSize = "0.8rem";
+				title.style.lineHeight = "unset";
+				title.innerHTML = App.getTranslation(e.list.name).substring(0, 25);
+				d.container.appendChild(title);
+
+				const pd = new Ui.Div();
+				pd.container.style.bottom = "4px";
+				pd.container.style.top = "unset";
+				pd.container.style.left = "0";
+				pd.container.style.width = "100%";
+				pd.container.style.padding = "0 4px";
+				pd.container.style.boxSizing = "border-box";
+				d.attach(pd);
+
+				const pbt = document.createElement("p");
+				pbt.innerHTML = e.reports.length.toString() + "/" + e.list.species.length.toString();
+				pbt.style.fontSize = "0.8rem";
+				pbt.style.fontWeight = "bold";
+				pbt.style.cssFloat = "right";
+				pbt.style.lineHeight = "unset";
+				pd.container.appendChild(pbt);
+
+				const pb = new Ui.ProgressBar();
+				pb.style.position = "relative";
+				pb.setProgress(e.reports.length / e.list.species.length * 100);
+				pd.attach(pb);
+			});
+
+		}, function(status: any, data: Responses.Error, error: any) {
+			console.log(data);
+		});
+
+		/*const r = new HttpRequest("GET", "/v1/reports/list");
 		r.process(function(status: any, data: any) {
 			self.mTable.clear();
 			data.result.forEach(e => {
@@ -90,13 +146,13 @@ class HomePage extends Page {
 
 				self.mTable.addRow([entry]);
 			});
-		});
+		});*/
 	}
 
 	public setData(data: any): void {
 		super.setData(data);
 
-		if (data.email) {
+		if (data && data.email) {
 			if (this.mEmail) {
 				this.mEmail.value = data.email;
 				new Ui.MessageBox("Welcome " + data.display_name, "Your account has been successfully created, and you can now proceed to sign in!", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
@@ -172,6 +228,7 @@ class HomePage extends Page {
 			r.setHeader("Authorization", authorization);
 			r.process(function(status: any, data: any) {
 				// TODO:
+				console.log(data);
 				setCookie("x300sf_at", data.access_token, stayLoggedIn ? null : data.expires_at);
 				//setCookie("x300sf_rt", data.refresh_token, 3600 * 24 * 60); // 60 days.
 				location.reload();
