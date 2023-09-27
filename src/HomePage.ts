@@ -65,7 +65,9 @@ class HomePage extends Page {
 
 	public setVisible(visible: boolean): void {
 		super.setVisible(visible);
-		this.refresh();
+		if (App.isLoggedIn()) {
+			this.refresh();
+		}
 	}
 
 	private refresh(): void {
