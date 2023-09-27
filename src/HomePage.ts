@@ -15,7 +15,7 @@ class HomePage extends Page {
 	}
 
 	public get id(): string {
-		return "home-page";
+		return "home";
 	}
 
 	protected onCreateLoggedIn(): void {
@@ -176,7 +176,7 @@ class HomePage extends Page {
 		const noAccountYet = document.createElement("p");
 		noAccountYet.innerHTML = App.translations.NoAccountYet;
 		noAccountYet.addEventListener("click", function() {
-			self.appListener.showPage("sign-up-page", null);
+			self.appListener.showPage("sign-up", null);
 		});
 		this.container.appendChild(noAccountYet);
 

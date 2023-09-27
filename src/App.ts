@@ -43,7 +43,7 @@ class App implements IAppListener {
 		this.mPages.push(listPage);
 		this.mLayerManager.addToLayer("base", listPage);
 
-		this.showPage(redirect === "" ? "home-page" : redirect, queryParameters);
+		this.showPage(redirect === "" ? "home" : redirect, queryParameters);
 
 		this.mLayerManager.addToLayer("base", this.mMainMenu);
 	}

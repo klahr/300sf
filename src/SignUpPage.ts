@@ -79,12 +79,12 @@ class SignUpPage extends Page {
 		const alreadyHaveAccount = document.createElement("p");
 		alreadyHaveAccount.innerHTML = App.translations.AlreadyHaveAnAccount;
 		alreadyHaveAccount.addEventListener("click", function() {
-			self.appListener.showPage("home-page", null);
+			self.appListener.showPage("home", null);
 		});
 		this.container.appendChild(alreadyHaveAccount);
     }
 
 	public get id(): string {
-		return "sign-up-page";
+		return "sign-up";
 	}
 }

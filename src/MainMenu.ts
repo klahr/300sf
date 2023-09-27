@@ -36,7 +36,7 @@ class MainMenu extends Ui.Widget {
 		logo.style.cursor = "pointer";
 		logo.setAttribute("height", "36");
 		logo.addEventListener("click", function() {
-			self.mAppListener.showPage("home-page", null);
+			self.mAppListener.showPage("home", null);
 		});
 		this.mContent.container.appendChild(logo);
 	}
@@ -64,7 +64,7 @@ class MainMenu extends Ui.Widget {
 
 		this.addSection("300sf");
 		this.addEntry("<span style='font-size: 1rem; color: #2782ac;' class='material-symbols-outlined'>home</span> " + App.translations.Dashboard, function() {
-			self.mAppListener.showPage("home-page", null);
+			self.mAppListener.showPage("home", null);
 		});
 
 		const manageChecklists = this.addEntry("<span style='font-size: 1rem; color: #2782ac;' class='material-symbols-outlined'>edit_note</span>  " + App.translations.ManageChecklists, function() {
