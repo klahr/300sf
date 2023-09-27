@@ -14,4 +14,9 @@ const (
 	ErrorInvalidApiKey     = 3003
 	ErrorTooManyApiCalls   = 3004
 	ErrorMissingPermission = 3005
+
+	ErrorSignUpInvalidDisplayName = 4001
+	ErrorSignUpInvalidEmail       = 4002
+	ErrorSignUpInvalidPassword    = 4003
+	ErrorSignUpTermsNotAccepted   = 4004
 )

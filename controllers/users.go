@@ -30,34 +30,34 @@ func Users(c *gin.Context) {
 		return
 	}
 
-	if !r.AcceptedTerms {
+	if !utils.VerifyDisplayName(r.DisplayName) {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    -20001,
-			"message": "terms not accepted",
+			"code":    ErrorSignUpInvalidDisplayName,
+			"message": "invalid display name",
 		})
 		return
 	}
 
 	if !utils.VerifyEmail(r.Email) {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    -20002,
+			"code":    ErrorSignUpInvalidEmail,
 			"message": "invalid email",
-		})
-		return
-	}
-
-	if !utils.VerifyDisplayName(r.DisplayName) {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    -20003,
-			"message": "invalid display name",
 		})
 		return
 	}
 
 	if len(r.Password) < 4 {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    -20004,
+			"code":    ErrorSignUpInvalidPassword,
 			"message": "invalid password",
+		})
+		return
+	}
+
+	if !r.AcceptedTerms {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorSignUpTermsNotAccepted,
+			"message": "terms not accepted",
 		})
 		return
 	}
