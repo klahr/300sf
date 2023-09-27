@@ -1,15 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const nm = require('./network-manager');
 const config = require('./config');
 const i18n = require('i18n');
 module.exports = router;
 
 router.get('/', function(req, res) {
-	res.render('pages/app', { data: { language: i18n.getLocale(req), api_key: config.ApiKey }});
+	res.render('pages/app', { data: { language: i18n.getLocale(req), api_key: config.ApiKey, redirect: "" }});
 });
 
-router.get('/old', function(req, res) {
+router.get('/sign-up', function(req, res) {
+	res.render('pages/app', { data: { language: i18n.getLocale(req), api_key: config.ApiKey, redirect: "sign-up-page", queryParameters: JSON.stringify(req.query) }});
+});
+
+/*router.get('/old', function(req, res) {
 	nm.request('GET', '/v1/list_templates/kjhkf4', {'X-Api-Key': config.ApiKey}, function(response) {
 		console.log(response);
 	}, function(error) {
@@ -53,4 +56,4 @@ router.post('/signup', function(req, res) {
 		console.log(error);
 		res.redirect('/');
 	}, JSON.stringify(body));
-});
+});*/

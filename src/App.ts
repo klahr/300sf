@@ -20,7 +20,7 @@ class App implements IAppListener {
 	public static apiKey: string;
 	private mPages = new Array<Page>();
 
-	constructor(language: string, apiKey: string) {
+	constructor(language: string, apiKey: string, redirect: string, queryParameters: object) {
 		App.setLanguage(language);
 		App.apiKey = apiKey;
 
@@ -43,7 +43,7 @@ class App implements IAppListener {
 		this.mPages.push(listPage);
 		this.mLayerManager.addToLayer("base", listPage);
 
-		this.showPage("home-page", null);
+		this.showPage(redirect === "" ? "home-page" : redirect, queryParameters);
 
 		this.mLayerManager.addToLayer("base", this.mMainMenu);
 	}
