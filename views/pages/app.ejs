@@ -2,6 +2,10 @@
 
 <script type="text/javascript" src="js/app.js"></script>
 <script type="text/javascript">
+	window.onpopstate = function(event) {
+		window.location.reload();
+	};
+
 	function onAppStart() {
 		new App("<%- data.language %>", "<%- data.api_key %>", "<%- data.redirect %>", "<% data.queryParameters %>" !== "" ? JSON.parse('<%- data.queryParameters %>') : {});
 	}

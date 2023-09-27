@@ -12,6 +12,11 @@ namespace Responses {
 		public static ErrorInvalidApiKey     = 3003;
 		public static ErrorTooManyApiCalls   = 3004;
 		public static ErrorMissingPermission = 3005;
+
+		public static ErrorSignUpInvalidDisplayName = 4001;
+		public static ErrorSignUpInvalidEmail       = 4002;
+		public static ErrorSignUpInvalidPassword    = 4003;
+		public static ErrorSignUpTermsNotAccepted   = 4004;
 	}
 
 	export class Error {

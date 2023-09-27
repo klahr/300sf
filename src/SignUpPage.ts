@@ -66,6 +66,24 @@ class SignUpPage extends Page {
 			const r = new HttpRequest("POST", "/v1/users", JSON.stringify(content));
 			r.process(function(status: any, data: any) {
 				console.log(data);
+			}, function(status: any, data: Responses.Error, error: any) {
+				switch (data.code) {
+					case Responses.ErrorCode.ErrorSignUpInvalidDisplayName:
+						new Ui.MessageBox("Oh, no!", "Your <b>Display name</b> appears to be invalid.", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
+						break;
+					case Responses.ErrorCode.ErrorSignUpInvalidEmail:
+						new Ui.MessageBox("Oh, no!", "Your <b>Email</b> appears to be invalid.", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
+						break;
+					case Responses.ErrorCode.ErrorSignUpInvalidPassword:
+						new Ui.MessageBox("Oh, no!", "Your <b>Password</b> appears to be invalid.", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
+						break;
+					case Responses.ErrorCode.ErrorSignUpTermsNotAccepted:
+						new Ui.MessageBox("Oh, no!", "You must accept the <b>terms</b>.", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
+						break;
+					default:
+						new Ui.MessageBox("Oh, no!", "It appears that the <b>email</b> or <b>password</b> you entered is invalid.", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
+						break;
+				}
 			});
 		});
 

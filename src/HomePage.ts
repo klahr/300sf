@@ -183,7 +183,7 @@ class HomePage extends Page {
 		const forgot = document.createElement("a");
 		forgot.innerHTML = App.translations.ForgotYourPassword;
 		forgot.addEventListener("click", function() {
-			self.appListener.showPage("forgot-page", null);
+			self.appListener.showPage("forgot", null);
 		});
 		this.container.appendChild(forgot);
 	}

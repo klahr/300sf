@@ -53,7 +53,7 @@ class ListPage extends Page {
 	}
 
 	public get id(): string {
-		return "list-page";
+		return "list";
 	}
 
 	public setData(data: any): void {

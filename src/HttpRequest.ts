@@ -24,7 +24,7 @@ class HttpRequest {
 		this.mHeaders.set(key, value);
 	}
 
-	public process(success: (status: any, data: any) => void = function() {}, fail: (status: any, data: any, error: any) => void = function() {}, complete: () => void = function() {}): void {
+	public process(success: (status: any, data: any) => void = function() {}, fail: (status: any, data: Responses.Error, error: any) => void = function() {}, complete: () => void = function() {}): void {
 		const self = this;
 		$.ajax({
 			beforeSend: function(xhr) {

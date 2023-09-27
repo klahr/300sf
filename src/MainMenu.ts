@@ -86,7 +86,7 @@ class MainMenu extends Ui.Widget {
 				c.innerHTML = "<span style='font-size: 1rem; color: #2782ac;' class='material-symbols-outlined'>checklist_rtl</span> " + App.getTranslation(e.name);
 				checklists.appendChild(c);
 				c.addEventListener("click", function() {
-					self.mAppListener.showPage("list-page", e);
+					self.mAppListener.showPage("list", e);
 				});
 			});
 		});

@@ -87,6 +87,7 @@ class App implements IAppListener {
 			if (e.id === id) {
 				e.setVisible(true);
 				e.setData(data);
+				history.pushState({}, "", "/" + id);
 			} else {
 				e.setVisible(false);
 			}

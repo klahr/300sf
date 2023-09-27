@@ -36,6 +36,6 @@ class ForgotPage extends Page {
 	}
 
 	public get id(): string {
-		return "forgot-page";
+		return "forgot";
 	}
 }
