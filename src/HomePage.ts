@@ -53,12 +53,16 @@ class HomePage extends Page {
 		});
 		this.container.appendChild(reportButton);
 
-		this.mTable = new Ui.Table();
-		this.attach(this.mTable);
-
 		this.mProgressBoxes = new Ui.Div();
 		this.mProgressBoxes.style.position = "relative";
 		this.attach(this.mProgressBoxes);
+
+		const lastReportsLbl = document.createElement("h2");
+		lastReportsLbl.innerHTML = "Last submissions";
+		this.container.appendChild(lastReportsLbl);
+
+		this.mTable = new Ui.Table();
+		this.attach(this.mTable);
 
 		//this.refresh();
 	}
@@ -95,6 +99,7 @@ class HomePage extends Page {
 				title.style.padding = "var(--small-distance)";
 				title.style.fontSize = "0.8rem";
 				title.style.lineHeight = "unset";
+				title.style.textShadow = "1px 1px #0000005e";
 				title.innerHTML = App.getTranslation(e.list.name).substring(0, 25);
 				d.container.appendChild(title);
 
@@ -109,6 +114,7 @@ class HomePage extends Page {
 
 				const pbt = document.createElement("p");
 				pbt.innerHTML = e.reports.length.toString() + "/" + e.list.species.length.toString();
+				pbt.style.textShadow = "1px 1px #0000005e";
 				pbt.style.fontSize = "0.8rem";
 				pbt.style.fontWeight = "bold";
 				pbt.style.cssFloat = "right";
@@ -119,6 +125,42 @@ class HomePage extends Page {
 				pb.style.position = "relative";
 				pb.setProgress(e.reports.length / e.list.species.length * 100);
 				pd.attach(pb);
+			});
+
+			d.last_reports.forEach(e => {
+				const d = e as Models.Report;
+				const species = e.species as Models.Species;
+				const entry = document.createElement("div");
+				entry.className = "list-entry";
+	
+				const name = document.createElement("h3");
+				name.innerHTML = App.getTranslation(species.name);
+				name.style.cursor = "pointer";
+				name.style.color = "var(--success-color)";
+				name.addEventListener("click", function() {
+					openSpeciesPopUp(e.species);
+				});
+				entry.appendChild(name);
+	
+				const subName = document.createElement("p");
+				subName.innerHTML = species.name.la;
+				entry.appendChild(subName);
+
+				const observationDate = document.createElement("p");
+				observationDate.innerHTML = new Date(d.from).toLocaleString();
+				entry.appendChild(observationDate);
+
+				const check = document.createElement("span");
+				check.className = "material-symbols-outlined";
+				check.innerHTML = "check_circle";
+				check.style.color = "var(--success-color)";
+				check.style.cursor = "pointer";
+				check.addEventListener("click", function() {
+					new Ui.MessageBox("Submission", "Here you will be able to edit your submission.", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
+				});
+				entry.appendChild(check);
+
+				self.mTable.addRow([entry]);
 			});
 
 		}, function(status: any, data: Responses.Error, error: any) {
