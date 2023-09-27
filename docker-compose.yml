@@ -1,7 +1,4 @@
 version: '3.5'
-networks:
-  monitor-net:
-    driver: bridge
 services:
   # api.300sf.se
   albatross:
