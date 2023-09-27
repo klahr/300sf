@@ -127,6 +127,71 @@ func Users(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+func UsersMe(c *gin.Context) {
+	type listReports struct {
+		List    models.List     `json:"list"`
+		Reports []models.Report `json:"reports"`
+	}
+	type response struct {
+		User        models.User     `json:"user"`
+		LastReports []models.Report `json:"last_reports"`
+		ListReports []listReports   `json:"list_reports"`
+	}
+
+	tx := models.DB.Begin()
+
+	var user models.User
+	if err := tx.Where("uuid=?", c.GetString("uuid")).Where("deleted_at IS NULL").First(&user).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	// TODO: Limit to last week too.
+	var lastReports []models.Report
+	if err := tx.Where("user_id=?", user.Id).Where("archived IS NULL").Order("timestamp DESC").Limit(5).Find(&lastReports).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var lists []models.List
+	if err := tx.Where("user_id=?", user.Id).Where("archived IS NULL").Preload("Name").Preload("Species.Name").Find(&lists).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	r := response{
+		User:        user,
+		LastReports: lastReports,
+	}
+
+	for _, list := range lists {
+		listReport := listReports{
+			List: list,
+		}
+		if err := tx.Table("list_reports").Select("reports.*").Where("list_id=?", list.Id).Joins("JOIN reports ON reports.id=report_id").Preload("Species.Name").Preload("Zone.Name").Preload("Age.Name").Preload("Gender.Name").Preload("Method.Name").Preload("Tags").Find(&listReport.Reports).Error; err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": err.Error(),
+			})
+			return
+		}
+		r.ListReports = append(r.ListReports, listReport)
+	}
+
+	tx.Commit()
+
+	c.JSON(http.StatusOK, r)
+}
+
 func UsersGetUser(c *gin.Context) {
 	type response struct {
 		User    models.User     `json:"user"`
