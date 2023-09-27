@@ -5,5 +5,6 @@ namespace Models {
         uuid: string;
         name: Translation;
         species: Array<Species>;
+        color: string;
     }
 }

@@ -85,6 +85,9 @@ class HomePage extends Page {
 					self.appListener.showPage("list", e.list);
 				});
 				self.mProgressBoxes.attach(d);
+				if (e.list.color !== "") {
+					d.container.style.backgroundColor = e.list.color;
+				}
 
 				const title = document.createElement("p");
 				title.style.padding = "var(--small-distance)";
