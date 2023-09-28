@@ -9,7 +9,9 @@ import (
 	"net/url"
 	"time"
 
+	"git.sr.ht/~klahr/300sf/config"
 	"git.sr.ht/~klahr/300sf/models"
+	"git.sr.ht/~klahr/300sf/table"
 	"git.sr.ht/~klahr/300sf/utils"
 	"gopkg.in/guregu/null.v4/zero"
 )
@@ -50,131 +52,139 @@ type discovered struct {
 	Discovered  bool   `json:"discovered"`
 }
 
-func migrate(user models.User, username, password string) (interface{}, error) {
+func migrate(user models.User, username, password string) (interface{}, error, int) {
+	if user.ImportedAt.Valid {
+		return nil, fmt.Errorf("already imported"), ErrorMigrateCompleted
+	}
+
 	loginJsonRequest := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"method\":\"SessionManager.create\",\"params\": {\"email\":\"%s\",\"password\":\"%s\"},\"id\":1}", username, password)
 	loginResponse, err := http.PostForm("https://angelsware.com/swedbirds/ajax_api.php", url.Values{
 		"data": {loginJsonRequest},
 	})
 
-	if err == nil {
-		defer loginResponse.Body.Close()
-		body, _ := io.ReadAll(loginResponse.Body)
+	if err != nil {
+		return nil, err, ErrorInternalServerError
+	}
 
-		type jsonrpc_response struct {
-			Result struct {
-				Token  string `json:"token"`
-				UserId int64  `json:"userid"`
-			}
+	defer loginResponse.Body.Close()
+	body, _ := io.ReadAll(loginResponse.Body)
+
+	type jsonrpc_response struct {
+		Result struct {
+			Token  string `json:"token"`
+			UserId int64  `json:"userid"`
 		}
+	}
 
-		var response jsonrpc_response
-		json.Unmarshal(body, &response)
+	var response jsonrpc_response
+	json.Unmarshal(body, &response)
 
-		if response.Result.UserId == 0 {
-			return nil, fmt.Errorf("invalid username or password")
-		}
+	if response.Result.UserId == 0 {
+		return nil, fmt.Errorf("invalid username or password"), ErrorMigrateInvalidCredentials
+	}
 
-		dataJsonRequest := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"method\":\"DataManager.sync\",\"params\": {\"userid\":%d},\"id\":1}", response.Result.UserId)
-		dataResponse, err := http.PostForm("https://angelsware.com/swedbirds/ajax_api.php", url.Values{
-			"data": {dataJsonRequest},
-		})
+	dataJsonRequest := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"method\":\"DataManager.sync\",\"params\": {\"userid\":%d},\"id\":1}", response.Result.UserId)
+	dataResponse, err := http.PostForm("https://angelsware.com/swedbirds/ajax_api.php", url.Values{
+		"data": {dataJsonRequest},
+	})
 
-		if err != nil {
-			return nil, err
-		}
+	if err != nil {
+		return nil, err, ErrorInternalServerError
+	}
 
-		defer dataResponse.Body.Close()
-		body, _ = io.ReadAll(dataResponse.Body)
+	defer dataResponse.Body.Close()
+	body, _ = io.ReadAll(dataResponse.Body)
 
-		type data struct {
-			JsonRpc string `json:"jsonrpc"`
-			Result  struct {
-				Discovered    []discovered    `json:"discovered"`
-				Lists         []list          `json:"lists"`
-				Tags          []tag           `json:"tags"`
-				TagEukaryotes []tag_eukaryote `json:"tag_eukaryotes"`
-				ListVisibles  []list_visible
-			} `json:"result"`
-		}
+	type data struct {
+		JsonRpc string `json:"jsonrpc"`
+		Result  struct {
+			Discovered    []discovered    `json:"discovered"`
+			Lists         []list          `json:"lists"`
+			Tags          []tag           `json:"tags"`
+			TagEukaryotes []tag_eukaryote `json:"tag_eukaryotes"`
+			ListVisibles  []list_visible
+		} `json:"result"`
+	}
 
-		var d data
-		json.Unmarshal(body, &d)
+	var d data
+	json.Unmarshal(body, &d)
 
-		species := fetchAllSpecies(response.Result.UserId)
+	species := fetchAllSpecies(response.Result.UserId)
 
-		tx := models.DB.Begin()
+	tx := models.DB.Begin()
 
-		var userLists []models.List
-		if err := tx.Where("user_id=?", user.Id).Preload("ListTemplate.Species").Find(&userLists).Error; err != nil {
-			tx.Rollback()
-			return nil, err
-		}
+	var userLists []models.List
+	if err := tx.Where("lists.user_id=?", user.Id).Preload("ListTemplate.Species").Joins("JOIN list_templates ON list_templates.id=lists.list_template_id").Where("list_templates.uuid IN (?)", config.AppConfig.DefaultLists).Find(&userLists).Error; err != nil {
+		tx.Rollback()
+		return nil, err, ErrorInternalServerError
+	}
 
-		for _, dc := range d.Result.Discovered {
-			if dc.Discovered {
-				if b := getBird(species, dc.Name); b != nil {
-					report := models.Report{
+	for _, dc := range d.Result.Discovered {
+		if dc.Discovered {
+			if b := getBird(species, dc.Name); b != nil {
+				report := models.Report{
+					Model: models.Model{
+						Timestamp: time.Now(),
+						Uuid:      utils.GenerateShortUuid(),
+					},
+					SpeciesId: b.Id,
+					UserId:    user.Id,
+					Quantity:  zero.IntFrom(1),
+					Comment: &models.Comment{
 						Model: models.Model{
 							Timestamp: time.Now(),
 							Uuid:      utils.GenerateShortUuid(),
 						},
-						SpeciesId: b.Id,
-						UserId:    user.Id,
-						Quantity:  zero.IntFrom(1),
-						Comment: &models.Comment{
+						UserId: user.Id,
+						Text:   dc.Comment,
+					},
+				}
+
+				if dc.DateSeen != "" {
+					dateSeen, _ := time.Parse("2006-01-02", dc.DateSeen)
+					report.From = zero.TimeFrom(dateSeen)
+				}
+
+				tags := getTags(d.Result.Tags, d.Result.TagEukaryotes, dc.EukaryoteId)
+				for _, t := range tags {
+					var existingTag models.Tag
+					if err := tx.Where("name=?", t.Name).Where("user_id=?", user.Id).First(&existingTag).Error; err == nil {
+						report.Tags = append(report.Tags, existingTag)
+					} else {
+						report.Tags = append(report.Tags, models.Tag{
 							Model: models.Model{
 								Timestamp: time.Now(),
 								Uuid:      utils.GenerateShortUuid(),
 							},
+							Name:   t.Name,
 							UserId: user.Id,
-							Text:   dc.Comment,
-						},
+						})
 					}
+				}
 
-					if dc.DateSeen != "" {
-						dateSeen, _ := time.Parse("2006-01-02", dc.DateSeen)
-						report.From = zero.TimeFrom(dateSeen)
-						report.Until = report.From
-					}
+				tx.Create(&report)
 
-					tags := getTags(d.Result.Tags, d.Result.TagEukaryotes, dc.EukaryoteId)
-					for _, t := range tags {
-						var existingTag models.Tag
-						if err := tx.Where("name=?", t.Name).Where("user_id=?", user.Id).First(&existingTag).Error; err == nil {
-							report.Tags = append(report.Tags, existingTag)
-						} else {
-							report.Tags = append(report.Tags, models.Tag{
-								Model: models.Model{
-									Timestamp: time.Now(),
-									Uuid:      utils.GenerateShortUuid(),
-								},
-								Name:   t.Name,
-								UserId: user.Id,
-							})
+				for _, t := range userLists {
+					if isInSpeciesList(b.Id, t.ListTemplate.Species) {
+						if err := tx.Create(&models.ListReport{
+							ListId:   t.Id,
+							ReportId: report.Id,
+						}).Error; err != nil {
+							tx.Rollback()
+							return nil, err, ErrorInsert
 						}
-					}
-
-					tx.Create(&report)
-
-					for _, t := range userLists {
-						if isInSpeciesList(b.Id, t.ListTemplate.Species) {
-							if err := tx.Create(&models.ListReport{
-								ListId:   t.Id,
-								ReportId: report.Id,
-							}).Error; err != nil {
-								return nil, err
-							}
-							break
-						}
+						break
 					}
 				}
 			}
 		}
-
-		tx.Commit()
 	}
 
-	return nil, nil
+	tx.Table(table.Users).Where("id=?", user.Id).UpdateColumn("imported_at", time.Now())
+
+	tx.Commit()
+
+	return nil, nil, 0
 }
 
 func isInSpeciesList(speciesId int64, species []models.Species) bool {

@@ -19,4 +19,7 @@ const (
 	ErrorSignUpInvalidEmail       = 4002
 	ErrorSignUpInvalidPassword    = 4003
 	ErrorSignUpTermsNotAccepted   = 4004
+
+	ErrorMigrateCompleted          = 5001
+	ErrorMigrateInvalidCredentials = 5002
 )

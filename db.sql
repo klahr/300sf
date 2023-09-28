@@ -630,3 +630,6 @@ CREATE TABLE `300sf`.`email_templates` (
 ALTER TABLE `300sf`.`lists` 
 ADD COLUMN `color` VARCHAR(16) NULL AFTER `list_template_id`;
 -->
+
+ALTER TABLE `300sf`.`users` 
+ADD COLUMN `imported_at` DATETIME NULL AFTER `accepted_terms_at`;
