@@ -16,7 +16,7 @@ class ProfilePopUp {
 		content.container.appendChild(logo);
 
 		const displayName = document.createElement("h1");
-		displayName.innerHTML = App.translations.Settings;
+		displayName.innerHTML = "Please wait...";
 		content.container.appendChild(displayName);
 
 		const uuidLbl = document.createElement("h2");
