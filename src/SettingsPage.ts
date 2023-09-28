@@ -66,13 +66,21 @@ class SettingsPage extends Page {
                 old_username: self.mEmail.value
             };
 
+            self.mImportButton.disabled = true;
+            self.mImportButton.innerHTML = "Please wait...";
+            self.mEmail.container.setAttribute("disabled", "");
+            self.mPassword.container.setAttribute("disabled", "");
 			const r = new HttpRequest("POST", "/v1/users/migrate", JSON.stringify(d));
 			r.setHeader("Authorization", authorization);
 			r.process(function(status: any, data: any) {
                 self.refresh();
-                new Ui.MessageBox("Succes", "All your submissions have successfully been imported!", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
-                self.mPassword.clear();
+                new Ui.MessageBox("Success", "All your submissions have successfully been imported!", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
+                self.mPassword.container.innerHTML = "";
             }, function() {
+                self.mImportButton.disabled = false;
+                self.mImportButton.innerHTML = "Import";
+                self.mEmail.container.removeAttribute("disabled");
+                self.mPassword.container.removeAttribute("disabled");
 				new Ui.MessageBox("Oh, no!", "It appears that the <b>email</b> or <b>password</b> you entered is invalid.", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
 			});
 		});
