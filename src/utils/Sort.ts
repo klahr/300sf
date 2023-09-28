@@ -1,3 +1,5 @@
+/// <reference path="../App.ts"/>
+
 namespace Utils {
     export function sortByNameOnCurrentLanguage<T extends { name: Models.Translation }>(a: T, b: T): number {
         switch (App.getLanguage()) {

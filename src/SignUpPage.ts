@@ -52,7 +52,7 @@ class SignUpPage extends Page {
 		this.container.appendChild(help);
 
 		const signUp = document.createElement("button");
-//		signUp.disabled = true;
+		signUp.disabled = true;
 		signUp.innerHTML = App.translations.SignUp;
 		signUp.addEventListener("click", function() {
 			const termsAccepted = (acceptTerms.container as HTMLInputElement).checked;

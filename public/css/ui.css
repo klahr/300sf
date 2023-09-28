@@ -30,9 +30,11 @@ div.uix-img {
 
 div.uix-select {
 	position: relative;
-	width: 100%;
+	width: calc(100% - var(--small-distance)*2);
 	background-color: var(--widget-color);
 	border-radius: var(--small-distance);
+	height: 48px;
+	margin: var(--small-distance);
 }
 
 p.uix-option {
@@ -40,6 +42,7 @@ p.uix-option {
 	cursor: pointer;
 	padding: 4px;
 	border-radius: 4px;
+	text-align: left;
 }
 
 p.uix-option:hover {

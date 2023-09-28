@@ -7,6 +7,7 @@
 /// <reference path="HttpRequest.ts"/>
 /// <reference path="SpeciesPopUp.ts"/>
 /// <reference path="ReportPopUp.ts"/>
+/// <reference path="ProfilePopUp.ts"/>
 /// <reference path="responses/Users.ts"/>
 
 class HomePage extends Page {
@@ -29,7 +30,9 @@ class HomePage extends Page {
 		const profile = new Ui.Image("/img/99249498-452f-4b0b-a1f5-45902f7ffe48.png", "48px", "48px");
 		profile.addClass("portrait");
 		profile.container.addEventListener("click", function() {
-			new Ui.MessageBox("Profile", "This is the section where you will be able to update your <b>Profile</b> in the future, once this feature has been fully implemented.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
+			openProfilePopUp(function() {
+				console.log("close profile");
+			});
 		});
 		this.attach(profile);
 

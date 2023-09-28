@@ -5,11 +5,11 @@
 /// <reference path="models/List.ts"/>
 /// <reference path="ui/Div.ts"/>
 /// <reference path="HttpRequest.ts"/>
-/// <reference path="utils/sort.ts"/>
+/// <reference path="utils/Sort.ts"/>
 
 declare const L;
 
-class ReportPopup {
+class ReportPopUp {
 	private mReportButton: HTMLButtonElement;
 	private mSpeciesList: Ui.Select;
 	private mChecklistContainer: Ui.Div;
@@ -308,5 +308,5 @@ class ReportPopup {
 }
 
 function openReportPopUp(species: Models.Species | null, list: Models.List | null, closeCallback: () => void = function() {}): void {
-	new ReportPopup(species, list, closeCallback);
+	new ReportPopUp(species, list, closeCallback);
 }

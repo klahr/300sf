@@ -21,7 +21,7 @@ namespace Ui {
 			this.mContainer.className = "uix-select";
 
 			this.mResult = document.createElement("p");
-			this.mResult.style.padding = "var(--medium-distance)";
+			this.mResult.style.padding = "12px 24px";
 			this.mResult.style.cursor = "pointer";
 			this.mResult.style.color = "var(--black-or-white)";
 			this.mResult.innerHTML = placeholder;
@@ -33,8 +33,8 @@ namespace Ui {
 			this.mOpenArrow = document.createElement("span");
 			this.mOpenArrow.className = "material-symbols-outlined";
 			this.mOpenArrow.style.position = "absolute";
-			this.mOpenArrow.style.right = "var(--medium-distance)";
-			this.mOpenArrow.style.top = "12px";
+			this.mOpenArrow.style.right = "16px";
+			this.mOpenArrow.style.top = "8px";
 			this.mOpenArrow.style.fontSize = "32px";
 			this.mOpenArrow.innerHTML = "expand_more";
 			this.mOpenArrow.style.pointerEvents = "none";
@@ -44,7 +44,7 @@ namespace Ui {
 			this.mExpandable.style.backgroundColor = "var(--widget-color)";
 			this.mExpandable.style.position = "absolute";
 			this.mExpandable.style.left = "0";
-			this.mExpandable.style.top = "56px";
+			this.mExpandable.style.top = "48px";
 			this.mExpandable.style.width = "100%";
 			this.mExpandable.style.height = "256px";
 			this.mExpandable.style.borderBottomLeftRadius = "var(--small-distance)";
