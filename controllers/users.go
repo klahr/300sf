@@ -141,7 +141,7 @@ func UsersMe(c *gin.Context) {
 	tx := models.DB.Begin()
 
 	var user models.User
-	if err := tx.Where("uuid=?", c.GetString("uuid")).Where("deleted_at IS NULL").First(&user).Error; err != nil {
+	if err := tx.Where("uuid=?", c.GetString("uuid")).Where("deleted_at IS NULL").Preload("Language").First(&user).Error; err != nil {
 		tx.Rollback()
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),

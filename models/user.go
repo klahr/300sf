@@ -21,4 +21,6 @@ type User struct {
 	DeletedAt       zero.Time `json:"deleted_at"`
 	AcceptedTermsAt zero.Time `json:"accepted_terms_at"`
 	ImportedAt      zero.Time `json:"imported_at"`
+	LanguageId      int64     `json:"-"`
+	Language        Language  `json:"language"`
 }

@@ -629,7 +629,26 @@ CREATE TABLE `300sf`.`email_templates` (
 
 ALTER TABLE `300sf`.`lists` 
 ADD COLUMN `color` VARCHAR(16) NULL AFTER `list_template_id`;
--->
 
 ALTER TABLE `300sf`.`users` 
 ADD COLUMN `imported_at` DATETIME NULL AFTER `accepted_terms_at`;
+
+CREATE TABLE `300sf`.`language` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `iso_name` VARCHAR(256) NOT NULL,
+  `native_name` VARCHAR(256) NOT NULL,
+  `code` VARCHAR(16) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `code_UNIQUE` (`code` ASC) VISIBLE);
+
+ALTER TABLE `300sf`.`users` 
+ADD COLUMN `language_id` INT AFTER `imported_at`,
+ADD INDEX `fk_users_2_idx` (`language_id` ASC) VISIBLE;
+;
+ALTER TABLE `300sf`.`users` 
+ADD CONSTRAINT `fk_users_2`
+  FOREIGN KEY (`language_id`)
+  REFERENCES `300sf`.`language` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+-->
