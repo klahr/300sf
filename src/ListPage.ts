@@ -1,6 +1,7 @@
 /// <reference path="ui/Table.ts"/>
 /// <reference path="ui/ProgressBar.ts"/>
 /// <reference path="ui/Image.ts"/>
+/// <reference path="utils/Report.ts"/>
 /// <reference path="HttpRequest.ts"/>
 /// <reference path="Page.ts"/>
 /// <reference path="models/Order.ts"/>
@@ -53,7 +54,6 @@ class ListPage extends Page {
 	}
 
 	public setData(data: any): void {
-		console.log(data);
 		super.setData(data);
 
 		history.pushState({}, "", "/" + this.id + "/" + data.uuid);
@@ -108,8 +108,9 @@ class ListPage extends Page {
 					openSpeciesPopUp(e);
 				});
 
-				self.mProgress.setProgress(reports.length / self.data.species.length * 100);
-				self.mProgressLbl.innerHTML = reports.length + "/" + self.data.species.length;
+				const uniqueSpeciesInReports = Utils.numberOfUniqueSpeciesInReports(reports);
+				self.mProgress.setProgress(uniqueSpeciesInReports / self.data.species.length * 100);
+				self.mProgressLbl.innerHTML = uniqueSpeciesInReports + "/" + self.data.species.length;
 
 				const subName = document.createElement("p");
 				subName.innerHTML = e.name.la;

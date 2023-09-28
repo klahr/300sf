@@ -1,6 +1,7 @@
 /// <reference path="ui/Widget.ts"/>
 /// <reference path="ui/Image.ts"/>
 /// <reference path="ui/Input.ts"/>
+/// <reference path="utils/Report.ts"/>
 /// <reference path="Page.ts"/>
 /// <reference path="App.ts"/>
 /// <reference path="HttpRequest.ts"/>
@@ -108,8 +109,9 @@ class HomePage extends Page {
 				pd.container.style.boxSizing = "border-box";
 				d.attach(pd);
 
+				const uniqueSpeciesInReports = Utils.numberOfUniqueSpeciesInReports(e.reports);
 				const pbt = document.createElement("p");
-				pbt.innerHTML = e.reports.length.toString() + "/" + e.list.species.length.toString();
+				pbt.innerHTML = uniqueSpeciesInReports.toString() + "/" + e.list.species.length.toString();
 				pbt.style.textShadow = "1px 1px #0000005e";
 				pbt.style.fontSize = "0.8rem";
 				pbt.style.fontWeight = "bold";
@@ -119,7 +121,7 @@ class HomePage extends Page {
 
 				const pb = new Ui.ProgressBar();
 				pb.style.position = "relative";
-				pb.setProgress(e.reports.length / e.list.species.length * 100);
+				pb.setProgress(uniqueSpeciesInReports / e.list.species.length * 100);
 				pd.attach(pb);
 			});
 
