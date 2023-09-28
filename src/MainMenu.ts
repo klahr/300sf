@@ -93,7 +93,7 @@ class MainMenu extends Ui.Widget {
 
 		this.addSection(App.translations.Account);
 		this.addEntry("<span style='font-size: 1rem; color: #2782ac;' class='material-symbols-outlined'>settings</span> " + App.translations.Settings, function() {
-			new Ui.MessageBox(App.translations.Settings, "This is the section where you will be able to update your <b>Settings</b> in the future, once this feature has been fully implemented.", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
+			self.mAppListener.showPage("settings", null);
 		});
 
 		this.addEntry("<span style='font-size: 1rem; color: #2782ac;' class='material-symbols-outlined'>logout</span> " + App.translations.LogOut, function() {

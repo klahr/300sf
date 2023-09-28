@@ -6,6 +6,7 @@
 /// <reference path="MainMenu.ts"/>
 /// <reference path="Translations.ts"/>
 /// <reference path="models/Translation.ts"/>
+/// <reference path="models/User.ts"/>
 
 interface IAppListener {
 	openMainMenu(): void;
@@ -42,6 +43,10 @@ class App implements IAppListener {
 		const listPage = new ListPage(this);
 		this.mPages.push(listPage);
 		this.mLayerManager.addToLayer("base", listPage);
+
+		const settingsPage = new SettingsPage(this);
+		this.mPages.push(settingsPage);
+		this.mLayerManager.addToLayer("base", settingsPage);
 
 		this.showPage(redirect === "" ? "home" : redirect, queryParameters);
 

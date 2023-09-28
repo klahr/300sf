@@ -3,5 +3,6 @@ namespace Models {
         uuid: string;
         display_name: string;
         permissions: number;
+        imported_at: Date;
     }
 }

@@ -24,10 +24,7 @@ class ListPage extends Page {
 		this.attach(this.mContent);
 
 		const profile = new Ui.Image("img/99249498-452f-4b0b-a1f5-45902f7ffe48.png", "48px", "48px");
-		profile.style.left = "unset";
-		profile.style.right = "var(--medium-distance)";
-		profile.style.top = "var(--small-distance)";
-		profile.style.borderRadius = "100%";
+		profile.addClass("portrait");
 		profile.container.addEventListener("click", function() {
 		});
 

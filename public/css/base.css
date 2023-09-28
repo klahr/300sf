@@ -242,6 +242,14 @@ div.progress-box:hover {
 	transition: transform 100ms;
 }
 
+div.portrait {
+	left: unset;
+	right: var(--medium-distance);
+	top: var(--small-distance);
+	border-radius: 100%;
+	cursor: pointer;
+}
+
 span.menu {
 	font-size: 32px;
 	color: white;

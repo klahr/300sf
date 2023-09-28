@@ -26,11 +26,7 @@ class HomePage extends Page {
 		const self = this;
 
 		const profile = new Ui.Image("img/99249498-452f-4b0b-a1f5-45902f7ffe48.png", "48px", "48px");
-		profile.style.left = "unset";
-		profile.style.right = "var(--medium-distance)";
-		profile.style.top = "var(--small-distance)";
-		profile.style.borderRadius = "100%";
-		profile.style.cursor = "pointer";
+		profile.addClass("portrait");
 		profile.container.addEventListener("click", function() {
 			new Ui.MessageBox("Profile", "This is the section where you will be able to update your <b>Profile</b> in the future, once this feature has been fully implemented.", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
 		});
@@ -133,7 +129,7 @@ class HomePage extends Page {
 				const species = e.species as Models.Species;
 				const entry = document.createElement("div");
 				entry.className = "list-entry";
-	
+
 				const name = document.createElement("h3");
 				name.innerHTML = App.getTranslation(species.name);
 				name.style.cursor = "pointer";
@@ -142,7 +138,7 @@ class HomePage extends Page {
 					openSpeciesPopUp(e.species);
 				});
 				entry.appendChild(name);
-	
+
 				const subName = document.createElement("p");
 				subName.innerHTML = species.name.la;
 				entry.appendChild(subName);

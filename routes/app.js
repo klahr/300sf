@@ -20,6 +20,10 @@ router.get('/sign-up', function(req, res) {
 	renderPage(req, res);
 });
 
+router.get('/settings', function(req, res) {
+	renderPage(req, res);
+});
+
 /*router.get('/old', function(req, res) {
 	nm.request('GET', '/v1/list_templates/kjhkf4', {'X-Api-Key': config.ApiKey}, function(response) {
 		console.log(response);
