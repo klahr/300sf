@@ -23,7 +23,7 @@ class ListPage extends Page {
 		this.mContent.style.width = "100%";
 		this.attach(this.mContent);
 
-		const profile = new Ui.Image("img/99249498-452f-4b0b-a1f5-45902f7ffe48.png", "48px", "48px");
+		const profile = new Ui.Image("/img/99249498-452f-4b0b-a1f5-45902f7ffe48.png", "48px", "48px");
 		profile.addClass("portrait");
 		profile.container.addEventListener("click", function() {
 		});
@@ -32,7 +32,6 @@ class ListPage extends Page {
 		this.container.appendChild(this.mTitle);
 
 		this.mProgressLbl = document.createElement("p");
-		this.mProgressLbl.innerHTML = "4/300";
 		this.mProgressLbl.style.margin = "0";
 		this.mProgressLbl.style.fontWeight = "bold";
 		this.mProgressLbl.style.cssFloat = "right";
@@ -54,9 +53,10 @@ class ListPage extends Page {
 	}
 
 	public setData(data: any): void {
+		console.log(data);
 		super.setData(data);
 
-		//history.pushState({}, "", "/" + this.id + "/" + data.uuid);
+		history.pushState({}, "", "/" + this.id + "/" + data.uuid);
 
 		this.mTitle.innerHTML = "";
 		this.mTable.clear();

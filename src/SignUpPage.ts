@@ -11,7 +11,7 @@ class SignUpPage extends Page {
 		content.style.textAlign = "center";
 		this.attach(content);
 		const logo = document.createElement("img");
-		logo.src = "img/99249498-452f-4b0b-a1f5-45902f7ffe48.png";
+		logo.src = "/img/99249498-452f-4b0b-a1f5-45902f7ffe48.png";
 		logo.alt = "TODO";
 		logo.style.width = "192px";
 		logo.style.borderRadius = "50%";
@@ -52,7 +52,7 @@ class SignUpPage extends Page {
 		this.container.appendChild(help);
 
 		const signUp = document.createElement("button");
-		signUp.disabled = true;
+//		signUp.disabled = true;
 		signUp.innerHTML = App.translations.SignUp;
 		signUp.addEventListener("click", function() {
 			const termsAccepted = (acceptTerms.container as HTMLInputElement).checked;
@@ -71,19 +71,19 @@ class SignUpPage extends Page {
 			}, function(status: any, data: Responses.Error, error: any) {
 				switch (data.code) {
 					case Responses.ErrorCode.ErrorSignUpInvalidDisplayName:
-						new Ui.MessageBox("Oh, no!", "Your <b>Display name</b> appears to be invalid.", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
+						new Ui.MessageBox("Oh, no!", "Your <b>Display name</b> appears to be invalid.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
 						break;
 					case Responses.ErrorCode.ErrorSignUpInvalidEmail:
-						new Ui.MessageBox("Oh, no!", "Your <b>Email</b> appears to be invalid.", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
+						new Ui.MessageBox("Oh, no!", "Your <b>Email</b> appears to be invalid.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
 						break;
 					case Responses.ErrorCode.ErrorSignUpInvalidPassword:
-						new Ui.MessageBox("Oh, no!", "Your <b>Password</b> appears to be invalid.", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
+						new Ui.MessageBox("Oh, no!", "Your <b>Password</b> appears to be invalid.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
 						break;
 					case Responses.ErrorCode.ErrorSignUpTermsNotAccepted:
-						new Ui.MessageBox("Oh, no!", "You must accept the <b>terms</b>.", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
+						new Ui.MessageBox("Oh, no!", "You must accept the <b>terms</b>.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
 						break;
 					default:
-						new Ui.MessageBox("Oh, no!", "It appears that the <b>email</b> or <b>password</b> you entered is invalid.", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
+						new Ui.MessageBox("Oh, no!", "It appears that the <b>email</b> or <b>password</b> you entered is invalid.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
 						break;
 				}
 			});

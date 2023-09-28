@@ -43,8 +43,10 @@ class HttpRequest {
 				switch (response.code) {
 					case Responses.ErrorCode.ErrorLoggedOut:
 					default:
-						// TODO: Refresh session instead of accept logged out.
-						//location.reload();
+						if (response.code === Responses.ErrorCode.ErrorLoggedOut) {
+							// TODO: Refresh session instead of accept logged out.
+							window.open("/?redirect=" + window.location.href, "_self");
+						}
 					break;
 				}
 				fail(xhr.status, xhr.responseJSON, errorThrown);

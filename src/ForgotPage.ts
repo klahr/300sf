@@ -1,3 +1,5 @@
+/// <reference path="App.ts"/>
+
 class ForgotPage extends Page {
 	constructor(appListener: IAppListener) {
 		super(appListener);
@@ -8,7 +10,7 @@ class ForgotPage extends Page {
 		content.style.textAlign = "center";
 		this.attach(content);
 		const logo = document.createElement("img");
-		logo.src = "img/99249498-452f-4b0b-a1f5-45902f7ffe48.png";
+		logo.src = "/img/99249498-452f-4b0b-a1f5-45902f7ffe48.png";
 		logo.alt = "TODO";
 		logo.style.width = "192px";
 		logo.style.borderRadius = "50%";

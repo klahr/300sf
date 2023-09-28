@@ -43,7 +43,7 @@ class Page extends Ui.Widget {
 
 	public setData(data: any): void {
 		super.setData(data);
-		history.pushState({}, "", "/" + this.id);
+		history.pushState({}, "", "/" + this.id + window.location.search);
 	}
 
 	protected onCreateLoggedIn(): void {}

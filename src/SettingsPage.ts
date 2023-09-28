@@ -16,7 +16,7 @@ class SettingsPage extends Page {
 		this.mContent.style.width = "100%";
 		this.attach(this.mContent);
 
-		const profile = new Ui.Image("img/99249498-452f-4b0b-a1f5-45902f7ffe48.png", "48px", "48px");
+		const profile = new Ui.Image("/img/99249498-452f-4b0b-a1f5-45902f7ffe48.png", "48px", "48px");
         profile.addClass("portrait");
 		profile.container.addEventListener("click", function() {
 		});
@@ -74,14 +74,14 @@ class SettingsPage extends Page {
 			r.setHeader("Authorization", authorization);
 			r.process(function(status: any, data: any) {
                 self.refresh();
-                new Ui.MessageBox("Success", "All your submissions have successfully been imported!", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
+                new Ui.MessageBox("Success", "All your submissions have successfully been imported!", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
                 self.mPassword.container.innerHTML = "";
             }, function() {
                 self.mImportButton.disabled = false;
                 self.mImportButton.innerHTML = "Import";
                 self.mEmail.container.removeAttribute("disabled");
                 self.mPassword.container.removeAttribute("disabled");
-				new Ui.MessageBox("Oh, no!", "It appears that the <b>email</b> or <b>password</b> you entered is invalid.", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
+				new Ui.MessageBox("Oh, no!", "It appears that the <b>email</b> or <b>password</b> you entered is invalid.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
 			});
 		});
 

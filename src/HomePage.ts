@@ -25,10 +25,10 @@ class HomePage extends Page {
 	protected onCreateLoggedIn(): void {
 		const self = this;
 
-		const profile = new Ui.Image("img/99249498-452f-4b0b-a1f5-45902f7ffe48.png", "48px", "48px");
+		const profile = new Ui.Image("/img/99249498-452f-4b0b-a1f5-45902f7ffe48.png", "48px", "48px");
 		profile.addClass("portrait");
 		profile.container.addEventListener("click", function() {
-			new Ui.MessageBox("Profile", "This is the section where you will be able to update your <b>Profile</b> in the future, once this feature has been fully implemented.", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
+			new Ui.MessageBox("Profile", "This is the section where you will be able to update your <b>Profile</b> in the future, once this feature has been fully implemented.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
 		});
 		this.attach(profile);
 
@@ -153,7 +153,7 @@ class HomePage extends Page {
 				check.style.color = "var(--success-color)";
 				check.style.cursor = "pointer";
 				check.addEventListener("click", function() {
-					new Ui.MessageBox("Submission", "Here you will be able to edit your submission.", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
+					new Ui.MessageBox("Submission", "Here you will be able to edit your submission.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
 				});
 				entry.appendChild(check);
 
@@ -171,7 +171,7 @@ class HomePage extends Page {
 		if (data && data.email) {
 			if (this.mEmail) {
 				this.mEmail.value = data.email;
-				new Ui.MessageBox("Welcome " + data.display_name, "Your account has been successfully created, and you can now proceed to sign in!", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
+				new Ui.MessageBox("Welcome " + data.display_name, "Your account has been successfully created, and you can now proceed to sign in!", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
 			}
 		}
 	}
@@ -183,7 +183,7 @@ class HomePage extends Page {
 		content.style.textAlign = "center";
 		this.attach(content);
 		const logo = document.createElement("img");
-		logo.src = "img/99249498-452f-4b0b-a1f5-45902f7ffe48.png";
+		logo.src = "/img/99249498-452f-4b0b-a1f5-45902f7ffe48.png";
 		logo.alt = "TODO";
 		logo.style.width = "192px";
 		logo.style.borderRadius = "50%";
@@ -247,7 +247,13 @@ class HomePage extends Page {
 				console.log(data);
 				setCookie("x300sf_at", data.access_token, stayLoggedIn ? null : data.expires_at);
 				//setCookie("x300sf_rt", data.refresh_token, 3600 * 24 * 60); // 60 days.
-				location.reload();
+				const url = new URL(window.location.href);
+				const redirectParam = url.searchParams.get("redirect");
+				if (redirectParam) {
+					window.open(redirectParam, "_self");
+				} else {
+					location.reload();
+				}
 			}, function() {
 				new Ui.MessageBox("Oh, no!", "It appears that the <b>email</b> or <b>password</b> you entered is invalid.", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
 			});

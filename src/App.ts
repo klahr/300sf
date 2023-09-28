@@ -2,6 +2,7 @@
 /// <reference path="HomePage.ts"/>
 /// <reference path="SignUpPage.ts"/>
 /// <reference path="ListPage.ts"/>
+/// <reference path="SettingsPage.ts"/>
 /// <reference path="ForgotPage.ts"/>
 /// <reference path="MainMenu.ts"/>
 /// <reference path="Translations.ts"/>

@@ -30,7 +30,7 @@ class MainMenu extends Ui.Widget {
 		this.mMainMenu.appendChild(this.mContent.container);
 
 		const logo = document.createElement("img");
-		logo.src = "img/300sf.svg";
+		logo.src = "/img/300sf.svg";
 		logo.style.width = "100%";
 		logo.style.marginTop = "29px";
 		logo.style.cursor = "pointer";
@@ -68,7 +68,7 @@ class MainMenu extends Ui.Widget {
 		});
 
 		const manageChecklists = this.addEntry("<span style='font-size: 1rem; color: #2782ac;' class='material-symbols-outlined'>edit_note</span>  " + App.translations.ManageChecklists, function() {
-			new Ui.MessageBox(App.translations.ManageChecklists, "This is the section where you will be able to manage your <b>checklists</b> in the future, once this feature has been fully implemented.", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
+			new Ui.MessageBox(App.translations.ManageChecklists, "This is the section where you will be able to manage your <b>checklists</b> in the future, once this feature has been fully implemented.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
 		});
 		manageChecklists.addEventListener("click", function() {
 		});
