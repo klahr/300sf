@@ -371,3 +371,74 @@ func ListsForSpecies(c *gin.Context) {
 
 	c.JSON(http.StatusOK, result)
 }
+
+func ListsCompare(c *gin.Context) {
+	type request struct {
+		Uuids []string `json:"uuids"`
+	}
+
+	type result struct {
+		User    models.User     `json:"user"`
+		Reports []models.Report `json:"reports"`
+	}
+
+	type response struct {
+		Species []models.Species `json:"species"`
+		Result  []result         `json:"result"`
+	}
+
+	var r request
+	if err := c.ShouldBindJSON(&r); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	tx := models.DB.Begin()
+	var resp response
+	if err := models.DB.Table("lists").
+		Select("distinct(list_species.species_id),species.*").
+		Joins("JOIN list_species ON list_species.list_id=lists.id JOIN species ON species_id=species.id").
+		Where("lists.uuid IN ?", r.Uuids).
+		Preload("Name").
+		Find(&resp.Species).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		tx.Rollback()
+		return
+	}
+
+	var lists []models.List
+	if err := tx.Where("uuid IN ?", r.Uuids).Find(&lists).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		tx.Rollback()
+		return
+	}
+
+	for _, list := range lists {
+		var res result
+		if err := tx.Where("id=?", list.UserId).First(&res.User).Error; err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": err.Error(),
+			})
+			tx.Rollback()
+			return
+		}
+		if err := tx.Table("list_reports").Select("reports.*").Preload("Species").Where("list_id=?", list.Id).Joins("JOIN reports ON reports.id=report_id").Find(&res.Reports).Error; err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": err.Error(),
+			})
+			tx.Rollback()
+			return
+		}
+		resp.Result = append(resp.Result, res)
+	}
+
+	tx.Commit()
+
+	c.JSON(http.StatusOK, resp)
+}

@@ -2,8 +2,8 @@
 package main
 
 import (
-	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -18,20 +18,22 @@ import (
 
 func requirePermission(c *gin.Context, requiredPermission int64) {
 	// TODO: Cache this value and also use in ws.
-	publicKey, _ := ioutil.ReadFile(config.AppConfig.PublicKeyFilename)
+	publicKey, _ := os.ReadFile(config.AppConfig.PublicKeyFilename)
 
 	xAccessToken := c.Request.Header.Get("X-Access-Token")
 	accessToken := auth.Token{}
-	if xAccessToken != "" {
-		if err := auth.ParseToken(xAccessToken, &accessToken, publicKey); err != nil {
+	if requiredPermission != auth.AuthPermissionNone {
+		if xAccessToken != "" {
+			if err := auth.ParseToken(xAccessToken, &accessToken, publicKey); err != nil {
+				c.JSON(http.StatusUnauthorized, gin.H{"message": "logged out", "code": controllers.ErrorLoggedOut})
+				c.Abort()
+				return
+			}
+		} else {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "logged out", "code": controllers.ErrorLoggedOut})
 			c.Abort()
 			return
 		}
-	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "logged out", "code": controllers.ErrorLoggedOut})
-		c.Abort()
-		return
 	}
 
 	xAppLanguage := c.Request.Header.Get("X-App-Language")
@@ -133,6 +135,7 @@ func SetupRoutes(r *gin.Engine) {
 	r.GET("/v1/lists/:uuid", apiKeyMiddleware, controllers.ListsDetails)
 	r.GET("/v1/lists/:uuid/reports", apiKeyMiddleware, basicMiddleware, controllers.ListsReports)
 	r.GET("/v1/lists/species/:species_uuid", apiKeyMiddleware, basicMiddleware, controllers.ListsForSpecies)
+	r.POST("/v1/lists/compare", noneMiddleware, controllers.ListsCompare)
 
 	// List templates
 	r.GET("/v1/list_templates/list", apiKeyMiddleware, noneMiddleware, controllers.ListTemplatesList)
