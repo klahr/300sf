@@ -287,7 +287,7 @@ func UsersMigrate(c *gin.Context) {
 		return
 	}
 
-	res, err, code := migrate(user, r.OldUsername, r.OldPassword)
+	res, code, err := migrate(user, r.OldUsername, r.OldPassword)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    code,

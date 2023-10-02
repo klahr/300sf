@@ -52,9 +52,9 @@ type discovered struct {
 	Discovered  bool   `json:"discovered"`
 }
 
-func migrate(user models.User, username, password string) (interface{}, error, int) {
+func migrate(user models.User, username, password string) (interface{}, int, error) {
 	if user.ImportedAt.Valid {
-		return nil, fmt.Errorf("already imported"), ErrorMigrateCompleted
+		return nil, ErrorMigrateCompleted, fmt.Errorf("already imported")
 	}
 
 	loginJsonRequest := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"method\":\"SessionManager.create\",\"params\": {\"email\":\"%s\",\"password\":\"%s\"},\"id\":1}", username, password)
@@ -63,7 +63,7 @@ func migrate(user models.User, username, password string) (interface{}, error, i
 	})
 
 	if err != nil {
-		return nil, err, ErrorInternalServerError
+		return nil, ErrorInternalServerError, err
 	}
 
 	defer loginResponse.Body.Close()
@@ -80,7 +80,7 @@ func migrate(user models.User, username, password string) (interface{}, error, i
 	json.Unmarshal(body, &response)
 
 	if response.Result.UserId == 0 {
-		return nil, fmt.Errorf("invalid username or password"), ErrorMigrateInvalidCredentials
+		return nil, ErrorMigrateInvalidCredentials, fmt.Errorf("invalid username or password")
 	}
 
 	dataJsonRequest := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"method\":\"DataManager.sync\",\"params\": {\"userid\":%d},\"id\":1}", response.Result.UserId)
@@ -89,7 +89,7 @@ func migrate(user models.User, username, password string) (interface{}, error, i
 	})
 
 	if err != nil {
-		return nil, err, ErrorInternalServerError
+		return nil, ErrorInternalServerError, err
 	}
 
 	defer dataResponse.Body.Close()
@@ -116,7 +116,7 @@ func migrate(user models.User, username, password string) (interface{}, error, i
 	var userLists []models.List
 	if err := tx.Where("lists.user_id=?", user.Id).Preload("ListTemplate.Species").Joins("JOIN list_templates ON list_templates.id=lists.list_template_id").Where("list_templates.uuid IN (?)", config.AppConfig.DefaultLists).Find(&userLists).Error; err != nil {
 		tx.Rollback()
-		return nil, err, ErrorInternalServerError
+		return nil, ErrorInternalServerError, err
 	}
 
 	for _, dc := range d.Result.Discovered {
@@ -171,7 +171,7 @@ func migrate(user models.User, username, password string) (interface{}, error, i
 							ReportId: report.Id,
 						}).Error; err != nil {
 							tx.Rollback()
-							return nil, err, ErrorInsert
+							return nil, ErrorInsert, err
 						}
 						break
 					}
@@ -184,7 +184,7 @@ func migrate(user models.User, username, password string) (interface{}, error, i
 
 	tx.Commit()
 
-	return nil, nil, 0
+	return nil, 0, nil
 }
 
 func isInSpeciesList(speciesId int64, species []models.Species) bool {

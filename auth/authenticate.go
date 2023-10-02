@@ -15,12 +15,12 @@ type AuthenticationResponse struct {
 	MaxAge       int64  `json:"max_age"`
 }
 
-func Authenticate(uuid string, availablePermissions int64, accessTokenLifetime int64, refreshTokenLifetime int64, privateKey []byte) *AuthenticationResponse {
+func Authenticate(uuid string, availablePermissions int64, accessTokenLifetime int64, refreshTokenLifetime int64, privateKey []byte) (*AuthenticationResponse, error) {
 	now := time.Now().Unix()
 	expiresAt := now + accessTokenLifetime
 	accessTokenClaims := Token{
 		uuid,
-		0,
+		availablePermissions,
 		jwt.StandardClaims{
 			ExpiresAt: expiresAt,
 			IssuedAt:  now,
@@ -28,29 +28,26 @@ func Authenticate(uuid string, availablePermissions int64, accessTokenLifetime i
 	}
 	refreshTokenClaims := Token{
 		uuid,
-		0,
+		availablePermissions,
 		jwt.StandardClaims{
 			ExpiresAt: now + refreshTokenLifetime,
 			IssuedAt:  now,
 		},
 	}
 
-	accessTokenClaims.Permissions = availablePermissions
-	refreshTokenClaims.Permissions = accessTokenClaims.Permissions
-
 	accessTokenWithClaims := jwt.NewWithClaims(jwt.SigningMethodRS256, accessTokenClaims)
 	key, err := jwt.ParseRSAPrivateKeyFromPEM(privateKey)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	accessToken, err := accessTokenWithClaims.SignedString(key)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	refreshTokenWithClaims := jwt.NewWithClaims(jwt.SigningMethodRS256, refreshTokenClaims)
 	refreshToken, err := refreshTokenWithClaims.SignedString(key)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	authenticationResponseSuccess := AuthenticationResponse{
 		AccessToken:  accessToken,
@@ -60,5 +57,5 @@ func Authenticate(uuid string, availablePermissions int64, accessTokenLifetime i
 		MaxAge:       accessTokenLifetime,
 	}
 
-	return &authenticationResponseSuccess
+	return &authenticationResponseSuccess, nil
 }

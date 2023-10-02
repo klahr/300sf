@@ -2,10 +2,8 @@
 package controllers
 
 import (
-	"encoding/base64"
-	"io/ioutil"
 	"net/http"
-	"strings"
+	"os"
 	"time"
 
 	"git.sr.ht/~klahr/300sf/auth"
@@ -34,24 +32,11 @@ func Auth(c *gin.Context) {
 	user := models.User{}
 
 	if authorization != "" {
-		fields := strings.Fields(authorization)
-		if len(fields) != 2 {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"code":    -30001,
-				"message": "invalid authorization header",
-			})
-			return
-		}
-
-		usernameAndPassword, _ := base64.StdEncoding.DecodeString(fields[1])
-		splitIndex := strings.Index(string(usernameAndPassword), ":")
-		if splitIndex < 0 {
+		email, password, ok := c.Request.BasicAuth()
+		if !ok {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_request"})
 			return
 		}
-
-		var email = string(usernameAndPassword[0:splitIndex])
-		var password = string(usernameAndPassword[splitIndex+1:])
 
 		if err := models.DB.Where("email=?", email).First(&user).Error; err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -71,7 +56,7 @@ func Auth(c *gin.Context) {
 		}
 	} else if r.RefreshToken != "" {
 		refreshToken := auth.Token{}
-		publicKey, _ := ioutil.ReadFile(config.AppConfig.PublicKeyFilename)
+		publicKey, _ := os.ReadFile(config.AppConfig.PublicKeyFilename)
 		if err := auth.ParseToken(r.RefreshToken, &refreshToken, publicKey); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid_grant"})
 			return
@@ -86,12 +71,17 @@ func Auth(c *gin.Context) {
 		return
 	}
 
-	privateKey, err := ioutil.ReadFile(config.AppConfig.PrivateKeyFilename)
+	privateKey, err := os.ReadFile(config.AppConfig.PrivateKeyFilename)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal_error"})
+		return
 	}
 
-	authenticationResponse := auth.Authenticate(user.Uuid, user.Permissions, config.AppConfig.AccessTokenLifetime, config.AppConfig.RefreshTokenLifetime, privateKey)
+	authenticationResponse, err := auth.Authenticate(user.Uuid, user.Permissions, config.AppConfig.AccessTokenLifetime, config.AppConfig.RefreshTokenLifetime, privateKey)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal_error"})
+		return
+	}
 
 	models.DB.Table(table.Users).Where("id=?", user.Id).UpdateColumn("last_seen_at", time.Now())
 
