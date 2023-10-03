@@ -62,12 +62,13 @@ class ListPage extends Page {
 		});
 		(this.mFilterInput.container as HTMLInputElement).addEventListener("keyup", function() {
 			const listEntries = self.mTable.container.getElementsByTagName("tr");
+			const value = this.value.toLowerCase();
 			let previousOrder: HTMLTableRowElement | null = null;
 			for (let i = 0; i < listEntries.length; ++i) {
 				const h3s = listEntries[i].getElementsByTagName("h3");
 				if (h3s.length > 0) {
 					for (let j = 0; j < h3s.length; ++j) {
-						if (h3s[j].innerHTML.toLocaleLowerCase().indexOf(this.value) > -1) {
+						if (h3s[j].innerHTML.toLocaleLowerCase().indexOf(value) > -1) {
 							(listEntries[i] as HTMLElement).style.display = "";
 							if (previousOrder) {
 								previousOrder.style.display = "";
