@@ -60,6 +60,11 @@ class ListPage extends Page {
 		this.mFilterInput.container.addEventListener("focus", function() {
 			self.mFilterInput.select();
 		});
+		(this.mFilterInput.container as HTMLInputElement).addEventListener("keydown", function(e) {
+			if (e.key === "Enter") {
+				this.blur();
+			}
+		});
 		(this.mFilterInput.container as HTMLInputElement).addEventListener("keyup", function() {
 			const listEntries = self.mTable.container.getElementsByTagName("tr");
 			const value = this.value.toLowerCase();
