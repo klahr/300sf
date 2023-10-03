@@ -226,9 +226,21 @@ div.surface > p,h1 {
 	color: var(--black-or-white-color);
 }
 
+div.filter {
+	width: 100%;
+	background-color: var(--surface-color);
+	box-shadow: 0 0 8px 0 black;
+	box-sizing: border-box;
+	padding: var(--small-distance);
+	border-radius: var(--small-distance);
+	position: sticky;
+	bottom: 0;
+	left: 0;
+}
+
 div.progress-box {
-	width: 100px;
-	height: 100px;
+	width: 128px;
+	height: 128px;
 	background-color: #2782ac;
 	border-radius: var(--medium-radius);
 	display: inline-block;

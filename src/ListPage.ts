@@ -15,6 +15,7 @@ class ListPage extends Page {
 	private mTable: Ui.Table;
 	private mProgress: Ui.ProgressBar;
 	private mProgressLbl: HTMLParagraphElement;
+	private mFilterInput: Ui.Input;
 
 	constructor(appListener: IAppListener) {
 		super(appListener);
@@ -47,6 +48,41 @@ class ListPage extends Page {
 		this.attach(this.mTable);
 
 		this.attach(profile);
+
+		const filter = new Ui.Div
+		filter.addClass("filter");
+		this.attach(filter);
+
+		const self = this;
+		this.mFilterInput = new Ui.Input("text");
+		this.mFilterInput.setPlaceHolder(App.translations.Search + "...");
+		filter.attach(this.mFilterInput);
+		this.mFilterInput.container.addEventListener("focus", function() {
+			self.mFilterInput.select();
+		});
+		(this.mFilterInput.container as HTMLInputElement).addEventListener("keyup", function() {
+			const listEntries = self.mTable.container.getElementsByTagName("tr");
+			let previousOrder: HTMLTableRowElement | null = null;
+			for (let i = 0; i < listEntries.length; ++i) {
+				const h3s = listEntries[i].getElementsByTagName("h3");
+				if (h3s.length > 0) {
+					for (let j = 0; j < h3s.length; ++j) {
+						if (h3s[j].innerHTML.toLocaleLowerCase().indexOf(this.value) > -1) {
+							(listEntries[i] as HTMLElement).style.display = "";
+							if (previousOrder) {
+								previousOrder.style.display = "";
+								previousOrder = null;
+							}
+						} else {
+							(listEntries[i] as HTMLElement).style.display = "none";
+						}
+					}
+				} else {
+					previousOrder = listEntries[i];
+					previousOrder.style.display = "none";
+				}
+			}
+		});
 	}
 
 	public get id(): string {
@@ -58,6 +94,7 @@ class ListPage extends Page {
 
 		history.pushState({}, "", "/" + this.id + "/" + data.uuid);
 
+		this.mFilterInput.value = "";
 		this.mTitle.innerHTML = "";
 		this.mTable.clear();
 		this.mProgress.setProgress(0);
