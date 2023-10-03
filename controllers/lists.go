@@ -383,8 +383,9 @@ func ListsCompare(c *gin.Context) {
 	}
 
 	type response struct {
-		Species []models.Species `json:"species"`
-		Result  []result         `json:"result"`
+		Species       []models.Species `json:"species"`
+		Result        []result         `json:"result"`
+		ReferenceList models.List      `json:"reference_list"`
 	}
 
 	var r request
@@ -400,7 +401,7 @@ func ListsCompare(c *gin.Context) {
 	if err := models.DB.Table("lists").
 		Select("distinct(list_species.species_id),species.*").
 		Joins("JOIN list_species ON list_species.list_id=lists.id JOIN species ON species_id=species.id").
-		Where("lists.uuid IN ?", r.Uuids).
+		Where("lists.uuid = ?", r.Uuids[0]).
 		Preload("Name").
 		Find(&resp.Species).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -411,13 +412,21 @@ func ListsCompare(c *gin.Context) {
 	}
 
 	var lists []models.List
-	if err := tx.Where("uuid IN ?", r.Uuids).Find(&lists).Error; err != nil {
+	if err := tx.Where("uuid IN ?", r.Uuids).Preload("Name").Find(&lists).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
 		tx.Rollback()
 		return
 	}
+	if len(lists) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "not found",
+		})
+		tx.Rollback()
+		return
+	}
+	resp.ReferenceList = lists[0]
 
 	for _, list := range lists {
 		var res result
