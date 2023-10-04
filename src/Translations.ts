@@ -44,6 +44,13 @@ class Translations {
         SelectActivity: "Select activity",
         SelectMethod: "Select method",
         Search: "Search",
+        LastSubmissions: "Last submissions",
+        InternalID: "Internal ID",
+        Language: "Language",
+        ImportSubmissions: "Import submissions",
+        ImportSubmissionsDescription: "If you possess any submittals within the previous version of the 300 Swedish Birds application, you have the ability to import them.",
+        AlreadyImported: "Already imported",
+        AvailableChecklists: "Available checklists",
     }
     static sv = {
         Name: "300 Svenska Fåglar",
@@ -90,5 +97,12 @@ class Translations {
         SelectActivity: "Välj aktivitet",
         SelectMethod: "Välj metod",
         Search: "Sök",
+        LastSubmissions: "Senaste rapporter",
+        InternalID: "Internt ID",
+        Language: "Språk",
+        ImportSubmissions: "Importera observationer",
+        ImportSubmissionsDescription: "Om du använt den förra versionen av 300 Svenska Fåglar-appen kan du importera dina observationer.",
+        AlreadyImported: "Redan importerat",
+        AvailableChecklists: "Tillgängliga krysslistor",
     }
 }

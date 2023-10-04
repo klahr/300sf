@@ -27,11 +27,11 @@ class SettingsPage extends Page {
 		this.container.appendChild(title);
 
 		const importSubmissionsLbl = document.createElement("h2");
-		importSubmissionsLbl.innerHTML = "Import submissions";
+		importSubmissionsLbl.innerHTML = App.translations.ImportSubmissions;
 		this.container.appendChild(importSubmissionsLbl);
 
 		const importSubmissionsDescription = document.createElement("p");
-		importSubmissionsDescription.innerHTML = "If you possess any submittals within the previous version of the 300 Swedish Birds application, you have the ability to import them.";
+		importSubmissionsDescription.innerHTML = App.translations.ImportSubmissionsDescription;
 		this.container.appendChild(importSubmissionsDescription);
 
 		this.mEmail = new Ui.Input("email");
@@ -106,7 +106,7 @@ class SettingsPage extends Page {
 			const d = data as Responses.UsersMe;
 			if (Utils.isValidDate(d.user.imported_at)) {
 				self.mImportButton.disabled = true;
-				self.mImportButton.innerHTML = "(Already imported)";
+				self.mImportButton.innerHTML = "(" + App.translations.AlreadyImported + ")";
 				self.mEmail.container.setAttribute("disabled", "");
 				self.mPassword.container.setAttribute("disabled", "");
 			}

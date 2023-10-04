@@ -10,6 +10,7 @@ const port = 3000;
 i18n.configure({
 	locales: ['en', 'sv'],
 	cookie: 'lang',
+	defaultLocale: 'sv',
 	queryParameter: 'lang',
 	updateFiles: false,
 	directory: __dirname + '/translations/locale'

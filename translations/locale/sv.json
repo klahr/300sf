@@ -42,5 +42,12 @@
 	"SelectGender": "Välj kön",
 	"SelectActivity": "Välj aktivitet",
 	"SelectMethod": "Välj metod",
-	"Search": "Sök"
+	"Search": "Sök",
+	"LastSubmissions": "Senaste rapporter",
+	"InternalID": "Internt ID",
+	"Language": "Språk",
+	"ImportSubmissions": "Importera observationer",
+	"ImportSubmissionsDescription": "Om du använt den förra versionen av 300 Svenska Fåglar-appen kan du importera dina observationer.",
+	"AlreadyImported": "Redan importerat",
+	"AvailableChecklists": "Tillgängliga krysslistor"
 }

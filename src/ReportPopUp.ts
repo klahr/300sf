@@ -139,7 +139,7 @@ class ReportPopUp {
 	
 		const activityListLbl = document.createElement("h3");
 		activityListLbl.className = "title";
-		activityListLbl.innerHTML = "Activity";
+		activityListLbl.innerHTML = App.translations.Activity;
 		content.container.appendChild(activityListLbl);
 		const activityList = new Ui.Select(App.translations.SelectActivity + "...");
 		content.attach(activityList);
@@ -187,7 +187,7 @@ class ReportPopUp {
 	
 		const listsLbl = document.createElement("h3");
 		listsLbl.className = "title";
-		listsLbl.innerHTML = "Available checklists";
+		listsLbl.innerHTML = App.translations.AvailableChecklists;
 		content.container.appendChild(listsLbl);
 		content.attach(self.mChecklistContainer);
 	

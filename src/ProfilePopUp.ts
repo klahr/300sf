@@ -20,7 +20,7 @@ class ProfilePopUp {
 		content.container.appendChild(displayName);
 
 		const uuidLbl = document.createElement("h2");
-		uuidLbl.innerHTML = "Internal ID";
+		uuidLbl.innerHTML = App.translations.InternalID;
 		uuidLbl.style.textAlign = "left";
 		content.container.appendChild(uuidLbl);
 
@@ -29,23 +29,41 @@ class ProfilePopUp {
 		content.attach(uuid);
 
 		const languageLbl = document.createElement("h2");
-		languageLbl.innerHTML = "Language";
+		languageLbl.innerHTML = App.translations.Language;
 		languageLbl.style.textAlign = "left";
 		content.container.appendChild(languageLbl);
 
-		const languageList = new Ui.Select("English", function(value: string | null) {
+		let lang;
+		switch (App.getLanguage()) {
+			case "sv":
+				lang = "Svenska";
+				break;
+			default:
+				lang = "English";
+				break;
+		}
 
+		const languageList = new Ui.Select(lang, function(value: string | null) {
+			if (value) {
+				const d = {
+					"language_code": value
+				};
+				const r = new HttpRequest("POST", "/v1/users/language", JSON.stringify(d));
+				r.process(function(status: any, data: any) {
+					App.setLanguage(value);
+					setCookie("lang", value);
+					location.reload();
+				});
+			}
 		});
 		languageList.style.textAlign = "left";
 		languageList.addOption("Svenska", "sv");
 		languageList.addOption("English", "en");
 		content.attach(languageList);
 
-		const self = this;
 		const me = new HttpRequest("GET", "/v1/users/me");
 		me.process(function(status: any, data: any) {
 			const d = data as Responses.UsersMe;
-			console.log(d);
 			displayName.innerHTML = d.user.display_name;
 			uuid.value = d.user.uuid;
 		});

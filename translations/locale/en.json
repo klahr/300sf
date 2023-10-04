@@ -42,5 +42,12 @@
 	"SelectGender": "Select gender",
 	"SelectActivity": "Select activity",
 	"SelectMethod": "Select method",
-	"Search": "Search"
+	"Search": "Search",
+	"LastSubmissions": "Last submissions",
+	"InternalID": "Internal ID",
+	"Language": "Language",
+	"ImportSubmissions": "Import submissions",
+	"ImportSubmissionsDescription": "If you possess any submittals within the previous version of the 300 Swedish Birds application, you have the ability to import them.",
+	"AlreadyImported": "Already imported",
+	"AvailableChecklists": "Available checklists"
 }

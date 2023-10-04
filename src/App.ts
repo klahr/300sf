@@ -23,7 +23,9 @@ class App implements IAppListener {
 	private mPages = new Array<Page>();
 
 	constructor(language: string, apiKey: string, redirect: string, queryParameters: object) {
-		App.setLanguage(language);
+		const lang = getCookie("lang");
+		App.setLanguage(lang !== "" ? lang : language);
+
 		App.apiKey = apiKey;
 
 		this.mLayerManager.addLayer("base");

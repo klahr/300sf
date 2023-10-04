@@ -58,7 +58,7 @@ class HomePage extends Page {
 		this.attach(this.mProgressBoxes);
 
 		const lastReportsLbl = document.createElement("h2");
-		lastReportsLbl.innerHTML = "Last submissions";
+		lastReportsLbl.innerHTML = App.translations.LastSubmissions;
 		this.container.appendChild(lastReportsLbl);
 
 		this.mTable = new Ui.Table();
