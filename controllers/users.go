@@ -7,6 +7,7 @@ import (
 
 	"git.sr.ht/~klahr/300sf/config"
 	"git.sr.ht/~klahr/300sf/models"
+	"git.sr.ht/~klahr/300sf/table"
 	"git.sr.ht/~klahr/300sf/utils"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/guregu/null.v4/zero"
@@ -297,4 +298,41 @@ func UsersMigrate(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, res)
+}
+
+func UsersLanguage(c *gin.Context) {
+	type request struct {
+		LanguageCode string `json:"language_code"`
+	}
+
+	var r request
+	if err := c.ShouldBindJSON(&r); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "could not parse request",
+			"code":    ErrorParse,
+		})
+		return
+	}
+
+	var language models.Language
+	if err := models.DB.Where("code=?", r.LanguageCode).First(&language).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "could not find species",
+			"code":    ErrorRecordNotFound,
+		})
+		return
+	}
+
+	var user models.User
+	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	models.DB.Table(table.Users).Where("id=?", user.Id).UpdateColumn("language_id", language.Id)
+
+	c.JSON(http.StatusNoContent, nil)
 }

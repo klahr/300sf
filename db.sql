@@ -652,3 +652,8 @@ ADD CONSTRAINT `fk_users_2`
   ON DELETE NO ACTION
   ON UPDATE NO ACTION;
 -->
+ALTER TABLE `300sf`.`language` 
+RENAME TO  `300sf`.`languages` ;
+
+INSERT INTO `300sf`.`languages` (`iso_name`, `native_name`, `code`) VALUES ('English', 'English', 'en');
+INSERT INTO `300sf`.`languages` (`iso_name`, `native_name`, `code`) VALUES ('Swedish', 'Svenska', 'sv');

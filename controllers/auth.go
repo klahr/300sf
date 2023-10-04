@@ -29,7 +29,7 @@ func Auth(c *gin.Context) {
 	}
 
 	authorization := c.Request.Header.Get("Authorization")
-	user := models.User{}
+	var user models.User
 
 	if authorization != "" {
 		email, password, ok := c.Request.BasicAuth()
@@ -38,7 +38,7 @@ func Auth(c *gin.Context) {
 			return
 		}
 
-		if err := models.DB.Where("email=?", email).First(&user).Error; err != nil {
+		if err := models.DB.Where("email=?", email).Preload("Language").First(&user).Error; err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"code":    -30002,
 				"message": "invalid email or password",
@@ -85,5 +85,6 @@ func Auth(c *gin.Context) {
 
 	models.DB.Table(table.Users).Where("id=?", user.Id).UpdateColumn("last_seen_at", time.Now())
 
+	c.Header("Content-Language", user.Language.Code)
 	c.JSON(http.StatusOK, authenticationResponse)
 }
