@@ -148,9 +148,12 @@ class HomePage extends Page {
 				subName.innerHTML = species.name.la;
 				entry.appendChild(subName);
 
-				const observationDate = document.createElement("p");
-				observationDate.innerHTML = new Date(d.from).toLocaleString();
-				entry.appendChild(observationDate);
+				const observationDateAndPlace = document.createElement("p");
+				observationDateAndPlace.innerHTML = new Date(d.from).toLocaleString();
+				if (d.zone) {
+					observationDateAndPlace.innerHTML += ", " + App.getTranslation(d.zone.name);
+				}
+				entry.appendChild(observationDateAndPlace);
 
 				const check = document.createElement("span");
 				check.className = "material-symbols-outlined";
