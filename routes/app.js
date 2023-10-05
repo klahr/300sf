@@ -38,6 +38,10 @@ router.get('/settings', function(req, res) {
 	renderPage(req, res);
 });
 
+router.get('/checklists', function(req, res) {
+	renderPage(req, res);
+});
+
 router.get('/list/:uuid', function(req, res) {
 	res.render('pages/app', {
 		data: {

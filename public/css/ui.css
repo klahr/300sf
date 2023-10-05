@@ -78,12 +78,12 @@ div.uix-messagebox {
 }
 
 div.uix-popup {
-	width: calc(100% - var(--large-distance) * 2);
-	height: calc(100% - var(--large-distance) * 2);
+	width: calc(100% - var(--medium-distance) * 2);
+	height: calc(100% - var(--medium-distance) * 2);
 	max-width: 800px;
 	box-sizing: border-box;
 	background-color: var(--surface-color);
-	margin: var(--large-distance);
+	margin: var(--medium-distance);
 	border-radius: 16px;
 	text-align: center;
 	position: relative;

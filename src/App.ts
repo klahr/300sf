@@ -51,6 +51,10 @@ class App implements IAppListener {
 		this.mPages.push(settingsPage);
 		this.mLayerManager.addToLayer("base", settingsPage);
 
+		const manageChecklistsPage = new ManageCheckListsPage(this);
+		this.mPages.push(manageChecklistsPage);
+		this.mLayerManager.addToLayer("base", manageChecklistsPage);
+
 		this.showPage(redirect === "" ? "home" : redirect, queryParameters);
 
 		this.mLayerManager.addToLayer("base", this.mMainMenu);
