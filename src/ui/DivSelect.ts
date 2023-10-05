@@ -1,0 +1,39 @@
+namespace Ui {
+	export class DivSelect extends Widget {
+		constructor() {
+			super();
+
+			this.mContainer = document.createElement("div");
+			this.mContainer.style.position = "relative";
+			this.mContainer.className = "uix-div";
+		}
+
+		public select(value: string): void {
+			const allOptionsSource = this.container.getElementsByClassName("uix-option");
+			for (let i = 0; i < allOptionsSource.length; ++i) {
+				if (allOptionsSource[i].getAttribute("value") === value) {
+					allOptionsSource[i].classList.add("selected");
+				} else {
+					allOptionsSource[i].classList.remove("selected");
+				}
+			}
+		}
+
+		public addOption(className: string, value: string): HTMLDivElement {
+			const self = this;
+			const option = document.createElement("div");
+			option.className = "uix-option";
+//			option.classList.add(className);
+			option.setAttribute("value", value);
+			option.addEventListener("click", function() {
+				const allOptionsSource = self.container.getElementsByClassName("uix-option");
+				for (let i = 0; i < allOptionsSource.length; ++i) {
+					allOptionsSource[i].classList.remove("selected");
+				}
+				option.classList.add("selected");
+			});
+			this.container.appendChild(option);
+			return option;
+		}
+	}
+}
