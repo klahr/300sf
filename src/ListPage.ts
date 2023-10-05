@@ -101,9 +101,19 @@ class ListPage extends Page {
 	public setData(data: any): void {
 		super.setData(data);
 		console.log(data);
+		const self = this;
 		if (data.name === undefined) {
-			console.log("missing");
-			// TODO: Fetch data and then call updateLists.
+			// TODO: Optimize this call that returns more then necessary.
+			const r = new HttpRequest("GET", "/v1/lists/list");
+			r.process(function(status: any, data: any) {
+				data.result.forEach( e => {
+					if (e.uuid === self.data.uuid) {
+						self.setData(e);
+						self.updateLists();
+						return;
+					}
+				});
+			});
 		} else {
 			this.updateLists();
 		}
