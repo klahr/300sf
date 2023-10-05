@@ -152,7 +152,7 @@ func UsersMe(c *gin.Context) {
 
 	// TODO: Limit to last week too.
 	var lastReports []models.Report
-	if err := tx.Where("user_id=?", user.Id).Where("archived IS NULL").Preload("Species.Name").Order("timestamp DESC").Limit(5).Find(&lastReports).Error; err != nil {
+	if err := tx.Where("user_id=?", user.Id).Where("archived IS NULL").Preload("Species.Name").Preload("Zone.Name").Order("timestamp DESC").Limit(5).Find(&lastReports).Error; err != nil {
 		tx.Rollback()
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
