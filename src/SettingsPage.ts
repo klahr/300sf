@@ -1,4 +1,6 @@
 /// <reference path="utils/Date.ts"/>
+/// <reference path="Page.ts"/>
+/// <reference path="ui/Input.ts"/>
 
 class SettingsPage extends Page {
 	private mContent: Ui.Div;

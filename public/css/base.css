@@ -247,6 +247,7 @@ div.progress-box {
 	margin: var(--small-distance);
 	position: relative;
 	transition: transform 100ms;
+	vertical-align: top;
 }
 
 div.progress-box:hover {
