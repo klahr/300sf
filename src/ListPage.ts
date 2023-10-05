@@ -100,8 +100,17 @@ class ListPage extends Page {
 
 	public setData(data: any): void {
 		super.setData(data);
+		console.log(data);
+		if (data.name === undefined) {
+			console.log("missing");
+			// TODO: Fetch data and then call updateLists.
+		} else {
+			this.updateLists();
+		}
+	}
 
-		history.pushState({}, "", "/" + this.id + "/" + data.uuid);
+	private updateLists(): void {
+		history.pushState({}, "", "/" + this.id + "/" + this.data.uuid);
 
 		this.mFilterInput.value = "";
 		this.mTitle.innerHTML = "";
@@ -111,8 +120,9 @@ class ListPage extends Page {
 
 		const self = this;
 
-		const r = new HttpRequest("GET", "/v1/lists/" + (data as Models.List).uuid + "/reports");
+		const r = new HttpRequest("GET", "/v1/lists/" + (this.data as Models.List).uuid + "/reports");
 		r.process(function(status: any, data: any) {
+			console.log(self.data);
 			self.mTitle.innerHTML = App.getTranslation((self.data as Models.List).name);
 			const reports = data.result as Models.Report[];
 			let lastOrder: Models.Order;
