@@ -27,6 +27,7 @@ type App struct {
 	WikipediaCacheDuration int64    `yaml:"wikipedia-cache-duration"`
 	MailjetPublicKey       string   `yaml:"mailjet-public-key"`
 	MailjetSecretKey       string   `yaml:"mailjet-secret-key"`
+	Mode                   string   `yaml:"mode"`
 }
 
 func (c *App) Parse(data []byte) error {

@@ -50,6 +50,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	gin.SetMode(config.AppConfig.Mode)
 	r := gin.New()
 	r.SetTrustedProxies([]string{})
 	r.Use(func(c *gin.Context) {
