@@ -8,6 +8,10 @@ class ManageCheckListsPage extends Page {
 	private mContent: Ui.Div;
 	private mTitle: HTMLHeadingElement;
 	private mChecklists: Ui.Div;
+	private mTemplateSelect: Ui.Select;
+	private mTemplateDescription: HTMLParagraphElement;
+	private mCreateButton: HTMLButtonElement;
+	private mName: Ui.Input;
 
 	constructor(appListener: IAppListener) {
 		super(appListener);
@@ -42,12 +46,12 @@ class ManageCheckListsPage extends Page {
 		newChecklistsLbl.innerHTML = "Create new checklist";
 		this.container.appendChild(newChecklistsLbl);
 
-		const nameLbl = document.createElement("h3");
-		nameLbl.className = "title";
-		nameLbl.innerHTML = "List name";
-		this.container.appendChild(nameLbl);
-		const name = new Ui.Input("text");
-		this.attach(name);
+		this.mName = new Ui.Input("text");
+		this.mName.setPlaceHolder("Name");
+		this.mName.container.addEventListener("input", function() {
+			self.updateCreateButtonStatus();
+		});
+		this.attach(this.mName);
 
 		const colorLbl = document.createElement("h3");
 		colorLbl.className = "title";
@@ -55,20 +59,53 @@ class ManageCheckListsPage extends Page {
 		this.container.appendChild(colorLbl);
 
 		const colorSelect = new Ui.DivSelect();
-		colorSelect.addOption("", "#ff00ff").style.backgroundColor = "#ff00ff";
-		colorSelect.addOption("", "#00ff00").style.backgroundColor = "#00ff00";
-		colorSelect.addOption("", "#00ffff").style.backgroundColor = "#00ffff";
+		colorSelect.addOption("", "#8227ac").style.backgroundColor = "#8227ac";
+		colorSelect.addOption("", "#0d81b4").style.backgroundColor = "#0d81b4";
+		colorSelect.addOption("", "#75b98e").style.backgroundColor = "#75b98e";
+		colorSelect.addOption("", "#68e060").style.backgroundColor = "#68e060";
+		colorSelect.addOption("", "#e06868").style.backgroundColor = "#e06868";
+		colorSelect.addOption("", "#ac7827").style.backgroundColor = "#ac7827";
 		this.attach(colorSelect);
-		colorSelect.select("#00ff00");
+		colorSelect.select("#0d81b4");
 
-		const createButton = document.createElement("button");
-		createButton.innerHTML = "Create Checklist";
-		createButton.style.width = "auto";
-		createButton.style.cssFloat = "right";
-		createButton.style.borderRadius = "8px";
-		createButton.style.backgroundColor = "var(--success-color)";
-		createButton.disabled = true;
-		this.container.appendChild(createButton);
+		const self = this;
+		this.mTemplateSelect = new Ui.Select("Select template" + "...", function(value: string | null) {
+			self.updateCreateButtonStatus();
+			if (value) {
+				const o = self.mTemplateSelect.getOption(value);
+				if (o) {
+					const description = o.getAttribute("description");
+					self.mTemplateDescription.innerHTML = description ? description : "No description.";
+				}
+			}
+		});
+		this.attach(this.mTemplateSelect);
+
+		this.mTemplateDescription = document.createElement("p");
+		this.container.appendChild(this.mTemplateDescription);
+
+		this.mCreateButton = document.createElement("button");
+		this.mCreateButton.innerHTML = "Create Checklist";
+		this.mCreateButton.style.width = "auto";
+		this.mCreateButton.style.cssFloat = "right";
+		this.mCreateButton.style.borderRadius = "8px";
+		this.mCreateButton.style.backgroundColor = "var(--success-color)";
+		this.mCreateButton.disabled = true;
+		this.container.appendChild(this.mCreateButton);
+		this.mCreateButton.addEventListener("click", function() {
+			const r = new Requests.Lists();
+			r.name = new Models.Translation();
+			r.name.en = self.mName.value;
+			r.name.sv = self.mName.value;
+			r.template = self.mTemplateSelect.value!;
+			r.visibility = Models.Visibility.Hidden;
+			r.color = colorSelect.value!;
+			console.log(r);
+			/*const req = new HttpRequest("POST", "/v1/lists", JSON.stringify(r));
+			req.process(function(status: any, data: any) {
+				console.log(data);
+			});*/
+		});
 	}
 
 	public get id(): string {
@@ -80,6 +117,19 @@ class ManageCheckListsPage extends Page {
 		if (visible) {
 			this.refresh();
 		}
+	}
+
+	private updateCreateButtonStatus(): void {
+		console.log(this.mTemplateSelect.value);
+		if (this.mTemplateSelect.value === null) {
+			this.mCreateButton.disabled = true;
+			return;
+		}
+		if(this.mName.value === "") {
+			this.mCreateButton.disabled = true;
+			return;
+		}
+		this.mCreateButton.disabled = false;
 	}
 
 	private refresh(): void {
@@ -95,6 +145,16 @@ class ManageCheckListsPage extends Page {
 				c.addEventListener("click", function() {
 					new Ui.MessageBox("Edit List", "Here you will edit list.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
 				});
+			});
+		});
+
+		this.mTemplateDescription.innerHTML = "";
+		this.mTemplateSelect.clear();
+		const s = new HttpRequest("GET", "/v1/list_templates/list");
+		s.process(function(status: any, data: any) {
+			data.result.forEach(element => {
+				const o = self.mTemplateSelect.addOption(App.getTranslation(element.name), element.uuid);
+				o.setAttribute("description", App.getTranslation(element.description));
 			});
 		});
 	}

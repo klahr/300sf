@@ -23,7 +23,7 @@ namespace Ui {
 			this.mResult = document.createElement("p");
 			this.mResult.style.padding = "12px 24px";
 			this.mResult.style.cursor = "pointer";
-			this.mResult.style.color = "var(--black-or-white)";
+			this.mResult.style.color = "var(--black-or-white-color)";
 			this.mResult.innerHTML = placeholder;
 			this.mResult.addEventListener("click", function() {
 				self.toggleVisible();
@@ -36,6 +36,7 @@ namespace Ui {
 			this.mOpenArrow.style.right = "16px";
 			this.mOpenArrow.style.top = "8px";
 			this.mOpenArrow.style.fontSize = "32px";
+			this.mOpenArrow.style.color = "var(--black-or-white-color)";
 			this.mOpenArrow.innerHTML = "expand_more";
 			this.mOpenArrow.style.pointerEvents = "none";
 			this.mContainer.appendChild(this.mOpenArrow);
@@ -140,7 +141,7 @@ namespace Ui {
 			this.mDropDown.style.height = "calc(100% - 56px)";
 			this.mDropDown.style.width = "calc(100% - 48px)";
 			this.mExpandable.container.appendChild(this.mDropDown);
-	}
+		}
 
 		public toggleVisible(): void {
 			if (this.mExpandable.isVisible()) {
@@ -199,6 +200,21 @@ namespace Ui {
 			} else if (selectedPRect.top < parentDivRect.top) {
 				this.mDropDown.scrollTop -= parentDivRect.top - selectedPRect.top;
 			}
+		}
+
+		public getOption(value: string): HTMLParagraphElement  | null {
+			const options = this.mDropDown.getElementsByClassName("uix-option");
+			for (let i = 0; i < options.length; ++i) {
+				if (options[i].getAttribute("value") === value) {
+					return options[i] as HTMLParagraphElement;
+				}
+			}
+			return null;
+		}
+
+		public clear(): void {
+			console.log("clear");
+			this.mDropDown.innerHTML = "";
 		}
 	}
 }

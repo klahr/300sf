@@ -19,6 +19,16 @@ namespace Ui {
 			}
 		}
 
+		public get value(): string | null {
+			const allOptionsSource = this.container.getElementsByClassName("uix-option");
+			for (let i = 0; i < allOptionsSource.length; ++i) {
+				if (allOptionsSource[i].classList.contains("selected")) {
+					return allOptionsSource[i].getAttribute("value");
+				}
+			}
+			return null;
+		}
+
 		public addOption(className: string, value: string): HTMLDivElement {
 			const self = this;
 			const option = document.createElement("div");
