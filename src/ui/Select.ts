@@ -1,4 +1,5 @@
 /// <reference path="Widget.ts"/>
+/// <reference path="Div.ts"/>
 /// <reference path="Input.ts"/>
 
 namespace Ui {
@@ -10,7 +11,7 @@ namespace Ui {
 		private mOpenArrow: HTMLSpanElement;
 		private mSelectCallback: (value: string | null) => void | null;
 
-		constructor(placeholder: string, selectCallback: (value: string | null) => void = function() {}) {
+		constructor(placeholder: string, searchText: string, selectCallback: (value: string | null) => void = function() {}) {
 			super();
 
 			this.mSelectCallback = selectCallback;
@@ -56,7 +57,7 @@ namespace Ui {
 
 			this.mSearch = new Ui.Input("text");
 			this.mSearch.style.margin = "0";
-			this.mSearch.setPlaceHolder(App.translations.Search + "...");
+			this.mSearch.setPlaceHolder(searchText + "...");
 			this.mSearch.style.borderBottomLeftRadius = "0";
 			this.mSearch.style.borderBottomRightRadius = "0";
 

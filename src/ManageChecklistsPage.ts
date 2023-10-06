@@ -3,6 +3,8 @@
 /// <reference path="ui/DivSelect.ts"/>
 /// <reference path="ProfilePopUp.ts"/>
 /// <reference path="HttpRequest.ts"/>
+/// <reference path="requests/Lists.ts"/>
+/// <reference path="models/Visibility.ts"/>
 
 class ManageCheckListsPage extends Page {
 	private mContent: Ui.Div;
@@ -69,7 +71,7 @@ class ManageCheckListsPage extends Page {
 		colorSelect.select("#0d81b4");
 
 		const self = this;
-		this.mTemplateSelect = new Ui.Select("Select template" + "...", function(value: string | null) {
+		this.mTemplateSelect = new Ui.Select("Select template" + "...", App.translations.Search, function(value: string | null) {
 			self.updateCreateButtonStatus();
 			if (value) {
 				const o = self.mTemplateSelect.getOption(value);

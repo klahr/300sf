@@ -43,7 +43,7 @@ class ProfilePopUp {
 				break;
 		}
 
-		const languageList = new Ui.Select(lang, function(value: string | null) {
+		const languageList = new Ui.Select(lang, App.translations.Search, function(value: string | null) {
 			if (value) {
 				const d = {
 					"language_code": value

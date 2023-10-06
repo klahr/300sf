@@ -79,7 +79,7 @@ class ReportPopUp {
 		speciesListLbl.className = "title";
 		speciesListLbl.innerHTML = App.translations.Species;
 		content.container.appendChild(speciesListLbl);
-		this.mSpeciesList = new Ui.Select(App.translations.SelectSpecies + "...", function(species: string | null) {
+		this.mSpeciesList = new Ui.Select(App.translations.SelectSpecies + "...", App.translations.Search, function(species: string | null) {
 			const r = new HttpRequest("GET", "/v1/lists/species/" + species);
 			r.process(function(status: any, data: any) {
 				const d = data as Responses.ListsSpecies;
@@ -120,28 +120,28 @@ class ReportPopUp {
 		ageListLbl.className = "title";
 		ageListLbl.innerHTML = App.translations.Age;
 		content.container.appendChild(ageListLbl);
-		const ageList = new Ui.Select(App.translations.SelectAge + "...");
+		const ageList = new Ui.Select(App.translations.SelectAge + "...", App.translations.Search);
 		content.attach(ageList);
 	
 		const genderListLbl = document.createElement("h3");
 		genderListLbl.className = "title";
 		genderListLbl.innerHTML = App.translations.Gender;
 		content.container.appendChild(genderListLbl);
-		const genderList = new Ui.Select(App.translations.SelectGender + "...");
+		const genderList = new Ui.Select(App.translations.SelectGender + "...", App.translations.Search);
 		content.attach(genderList);
 	
 		const methodListLbl = document.createElement("h3");
 		methodListLbl.className = "title";
 		methodListLbl.innerHTML = App.translations.Method;
 		content.container.appendChild(methodListLbl);
-		const methodList = new Ui.Select(App.translations.SelectMethod + "...");
+		const methodList = new Ui.Select(App.translations.SelectMethod + "...", App.translations.Search);
 		content.attach(methodList);
 	
 		const activityListLbl = document.createElement("h3");
 		activityListLbl.className = "title";
 		activityListLbl.innerHTML = App.translations.Activity;
 		content.container.appendChild(activityListLbl);
-		const activityList = new Ui.Select(App.translations.SelectActivity + "...");
+		const activityList = new Ui.Select(App.translations.SelectActivity + "...", App.translations.Search);
 		content.attach(activityList);
 	
 		const quantityLbl = document.createElement("h3");
