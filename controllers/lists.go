@@ -19,6 +19,7 @@ func Lists(c *gin.Context) {
 		Template   zero.String        `json:"template"`
 		From       zero.String        `json:"from"`
 		Until      zero.String        `json:"until"`
+		Color      zero.String        `json:"color"`
 	}
 
 	var r request
@@ -39,7 +40,7 @@ func Lists(c *gin.Context) {
 		return
 	}
 
-	list, err := CreateList(r.Template, r.Name, r.Visibility, user)
+	list, err := CreateList(r.Template, r.Name, r.Visibility, user, r.Color)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
@@ -64,7 +65,7 @@ func Lists(c *gin.Context) {
 	c.JSON(http.StatusOK, list)
 }
 
-func CreateList(template zero.String, name models.Translation, visibility int64, user models.User) (*models.List, error) {
+func CreateList(template zero.String, name models.Translation, visibility int64, user models.User, color zero.String) (*models.List, error) {
 	name.Timestamp = time.Now()
 	name.Uuid = utils.GenerateShortUuid()
 	if err := models.DB.Create(&name).Error; err != nil {
@@ -79,6 +80,7 @@ func CreateList(template zero.String, name models.Translation, visibility int64,
 		UserId:     user.Id,
 		Visibility: visibility,
 		Name:       name,
+		Color:      color,
 	}
 
 	if template.Valid {

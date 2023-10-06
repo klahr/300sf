@@ -105,7 +105,7 @@ func Users(c *gin.Context) {
 			Sv: listTemplate.Name.Sv,
 			En: listTemplate.Name.En,
 			La: listTemplate.Name.La,
-		}, models.VisibilityPrivate, user)
+		}, models.VisibilityPrivate, user, zero.NewString("", false))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),
