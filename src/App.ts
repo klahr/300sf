@@ -3,6 +3,7 @@
 /// <reference path="SignUpPage.ts"/>
 /// <reference path="ListPage.ts"/>
 /// <reference path="SettingsPage.ts"/>
+/// <reference path="DonationPage.ts"/>
 /// <reference path="ForgotPage.ts"/>
 /// <reference path="MainMenu.ts"/>
 /// <reference path="Translations.ts"/>
@@ -46,6 +47,10 @@ class App implements IAppListener {
 		const listPage = new ListPage(this);
 		this.mPages.push(listPage);
 		this.mLayerManager.addToLayer("base", listPage);
+
+		const donationPage = new DonationPage(this);
+		this.mPages.push(donationPage);
+		this.mLayerManager.addToLayer("base", donationPage);
 
 		const settingsPage = new SettingsPage(this);
 		this.mPages.push(settingsPage);

@@ -67,6 +67,10 @@ class MainMenu extends Ui.Widget {
 			self.mAppListener.showPage("home", null);
 		});
 
+		this.addEntry("<span style='font-size: 1rem; color: #2782ac;' class='material-symbols-outlined'>volunteer_activism</span> " + "Donera", function() {
+			self.mAppListener.showPage("donation", null);
+		});
+
 		this.addEntry("<span style='font-size: 1rem; color: #2782ac;' class='material-symbols-outlined'>edit_note</span>  " + App.translations.ManageChecklists, function() {
 			self.mAppListener.showPage("checklists", null);
 		});
