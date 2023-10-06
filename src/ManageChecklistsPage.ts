@@ -1,5 +1,6 @@
 /// <reference path="Page.ts"/>
 /// <reference path="ui/Image.ts"/>
+/// <reference path="ui/DivSelect.ts"/>
 /// <reference path="ProfilePopUp.ts"/>
 /// <reference path="HttpRequest.ts"/>
 
@@ -76,7 +77,9 @@ class ManageCheckListsPage extends Page {
 
 	public setVisible(visible: boolean): void {
 		super.setVisible(visible);
-		this.refresh();
+		if (visible) {
+			this.refresh();
+		}
 	}
 
 	private refresh(): void {
