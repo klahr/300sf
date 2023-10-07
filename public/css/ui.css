@@ -72,6 +72,7 @@ div.uix-option:hover {
 div.uix-option.selected {
 	transform: scale(1.1);
 	transition: all 150ms;
+	box-shadow: inset 0 0 0 4px #ffffffad;
 }
 
 div.uix-progress-bar {

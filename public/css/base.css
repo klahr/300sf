@@ -241,7 +241,7 @@ div.filter {
 div.progress-box {
 	width: 128px;
 	height: 128px;
-	background-color: #2782ac;
+	background-color: #0d81b4;
 	border-radius: var(--medium-radius);
 	display: inline-block;
 	margin: var(--small-distance);

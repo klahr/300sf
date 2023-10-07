@@ -102,11 +102,10 @@ class ManageCheckListsPage extends Page {
 			r.template = self.mTemplateSelect.value!;
 			r.visibility = Models.Visibility.Hidden;
 			r.color = colorSelect.value!;
-			console.log(r);
-			/*const req = new HttpRequest("POST", "/v1/lists", JSON.stringify(r));
+			const req = new HttpRequest("POST", "/v1/lists", JSON.stringify(r));
 			req.process(function(status: any, data: any) {
-				console.log(data);
-			});*/
+				location.reload();
+			});
 		});
 	}
 
@@ -122,7 +121,6 @@ class ManageCheckListsPage extends Page {
 	}
 
 	private updateCreateButtonStatus(): void {
-		console.log(this.mTemplateSelect.value);
 		if (this.mTemplateSelect.value === null) {
 			this.mCreateButton.disabled = true;
 			return;
@@ -142,7 +140,11 @@ class ManageCheckListsPage extends Page {
 			data.result.forEach(e => {
 				const c = document.createElement("p");
 				c.className = "entry";
-				c.innerHTML = "<span style='font-size: 1rem; color: #2782ac;' class='material-symbols-outlined'>edit_note</span> " + App.getTranslation(e.name);
+				let color = "#0d81b4";
+				if (e.color !== "") {
+					color = e.color;
+				}
+				c.innerHTML = "<span style='font-size: 1rem; color: " + color + ";' class='material-symbols-outlined'>trip_origin</span> " + App.getTranslation(e.name);
 				self.mChecklists.container.appendChild(c);
 				c.addEventListener("click", function() {
 					new Ui.MessageBox("Edit List", "Here you will edit list.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});

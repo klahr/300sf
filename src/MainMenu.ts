@@ -63,15 +63,11 @@ class MainMenu extends Ui.Widget {
 		const self = this;
 
 		this.addSection("300sf");
-		this.addEntry("<span style='font-size: 1rem; color: #2782ac;' class='material-symbols-outlined'>home</span> " + App.translations.Dashboard, function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>home</span> " + App.translations.Dashboard, function() {
 			self.mAppListener.showPage("home", null);
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #2782ac;' class='material-symbols-outlined'>volunteer_activism</span> " + "Donera", function() {
-			self.mAppListener.showPage("donation", null);
-		});
-
-		this.addEntry("<span style='font-size: 1rem; color: #2782ac;' class='material-symbols-outlined'>edit_note</span>  " + App.translations.ManageChecklists, function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>edit_note</span>  " + App.translations.ManageChecklists, function() {
 			self.mAppListener.showPage("checklists", null);
 		});
 
@@ -85,7 +81,11 @@ class MainMenu extends Ui.Widget {
 			data.result.forEach(e => {
 				const c = document.createElement("p");
 				c.className = "entry";
-				c.innerHTML = "<span style='font-size: 1rem; color: #2782ac;' class='material-symbols-outlined'>checklist_rtl</span> " + App.getTranslation(e.name);
+				let color = "#0d81b4";
+				if (e.color !== "") {
+					color = e.color;
+				}
+				c.innerHTML = "<span style='font-size: 1rem; color: " + color + ";' class='material-symbols-outlined'>trip_origin</span> " + App.getTranslation(e.name);
 				checklists.appendChild(c);
 				c.addEventListener("click", function() {
 					self.mAppListener.showPage("list", e);
@@ -93,13 +93,22 @@ class MainMenu extends Ui.Widget {
 			});
 		});
 
+		this.addSection("Support");
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>settings</span> " + "Contribute", function() {
+		});
+
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>volunteer_activism</span> " + "Donate", function() {
+			self.mAppListener.showPage("donation", null);
+		});
+
 		this.addSection(App.translations.Account);
-		this.addEntry("<span style='font-size: 1rem; color: #2782ac;' class='material-symbols-outlined'>settings</span> " + App.translations.Settings, function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>settings</span> " + App.translations.Settings, function() {
 			self.mAppListener.showPage("settings", null);
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #2782ac;' class='material-symbols-outlined'>logout</span> " + App.translations.LogOut, function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>logout</span> " + App.translations.LogOut, function() {
 			setCookie("x300sf_at", "", 0);
+			setCookie("lang", "", 0);
 			location.reload();
 		});
 	}
