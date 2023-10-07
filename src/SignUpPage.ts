@@ -60,7 +60,7 @@ class SignUpPage extends Page {
 				email: email.value,
 				display_name: displayName.value,
 				password: password.value,
-				icon_uuid: "",
+				portrait: "3.png",
 				accepted_terms: termsAccepted,
 			};
 

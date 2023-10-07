@@ -67,6 +67,7 @@ div.uix-option {
 	cursor: pointer;
 	vertical-align: middle;
 	transition: all 150ms;
+	background-size: contain;
 }
 
 div.uix-option:hover {

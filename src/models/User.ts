@@ -7,5 +7,6 @@ namespace Models {
 		permissions: number;
 		imported_at: Date;
 		language: Language;
+		portrait: string;
 	}
 }

@@ -7,14 +7,12 @@ class ProfilePopUp {
 		content.style.width = "100%";
 		content.style.position = "relative";
 
-		const logo = document.createElement("img");
-		logo.src = "/img/99249498-452f-4b0b-a1f5-45902f7ffe48.png";
-		logo.alt = "TODO";
-		logo.style.width = "192px";
-		logo.style.borderRadius = "50%";
-		logo.style.textAlign = "center";
-		logo.classList.add("shadow");
-		content.container.appendChild(logo);
+		const portraitSelect = new Ui.DivSelect();
+		portraitSelect.addOption("", "1.png").style.backgroundImage = "url(/img/portraits/1.png)";
+		portraitSelect.addOption("", "2.png").style.backgroundImage = "url(/img/portraits/2.png)";
+		portraitSelect.addOption("", "3.png").style.backgroundImage = "url(/img/portraits/3.png)";
+		portraitSelect.addOption("", "4.png").style.backgroundImage = "url(/img/portraits/4.png)";
+		content.attach(portraitSelect);
 
 		const displayName = document.createElement("h1");
 		displayName.innerHTML = "Please wait...";
