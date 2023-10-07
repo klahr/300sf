@@ -116,7 +116,7 @@ func SetupRoutes(r *gin.Engine) {
 	r.POST("/v1/auth", controllers.Auth)
 
 	// Users
-	r.POST("/v1/users", controllers.Users)
+	r.POST("/v1/users", noneMiddleware, controllers.Users)
 	r.GET("/v1/users/list", adminMiddleware, controllers.UsersGetUsers)
 	r.GET("/v1/users/me", basicMiddleware, controllers.UsersMe)
 	r.GET("/v1/users/:uuid", adminMiddleware, controllers.UsersGetUser)

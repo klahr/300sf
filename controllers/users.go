@@ -18,8 +18,8 @@ func Users(c *gin.Context) {
 		Email         string `json:"email"`
 		DisplayName   string `json:"display_name"`
 		Password      string `json:"password"`
-		IconUuid      string `json:"icon_uuid"`
 		AcceptedTerms bool   `json:"accepted_terms"`
+		Portrait      string `json:"portrait"`
 	}
 
 	var r request
@@ -78,11 +78,23 @@ func Users(c *gin.Context) {
 		Permissions:     1,
 		Notifications:   8,
 		AcceptedTermsAt: zero.TimeFrom(time.Now()),
+		Portrait:        zero.StringFrom(r.Portrait),
 	}
+
+	var language models.Language
+	if err := models.DB.Where("code=?", c.GetString("app_language")).First(&language).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorSignUpTermsNotAccepted,
+			"message": "invalid language",
+		})
+		return
+	}
+
+	user.LanguageId = language.Id
 
 	tx := models.DB.Begin()
 
-	if err := tx.Omit("icon_id").Create(&user).Error; err != nil {
+	if err := tx.Create(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
