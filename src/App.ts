@@ -49,6 +49,10 @@ class App implements IAppListener {
 		this.mPages.push(listPage);
 		this.mLayerManager.addToLayer("base", listPage);
 
+		const contributePage = new ContributePage(this);
+		this.mPages.push(contributePage);
+		this.mLayerManager.addToLayer("base", contributePage);
+
 		const donationPage = new DonationPage(this);
 		this.mPages.push(donationPage);
 		this.mLayerManager.addToLayer("base", donationPage);

@@ -2,10 +2,10 @@
 /// <reference path="ui/MessageBox.ts"/>
 
 class SignUpPage extends Page {
-    constructor(appListener: IAppListener) {
-        super(appListener);
+	constructor(appListener: IAppListener) {
+		super(appListener);
 
-        const content = new Ui.Div();
+		const content = new Ui.Div();
 		content.style.position = "relative";
 		content.style.width = "100%";
 		content.style.textAlign = "center";
@@ -102,7 +102,7 @@ class SignUpPage extends Page {
 			self.appListener.showPage("home", null);
 		});
 		this.container.appendChild(alreadyHaveAccount);
-    }
+	}
 
 	public get id(): string {
 		return "sign-up";

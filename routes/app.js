@@ -42,6 +42,10 @@ router.get('/checklists', function(req, res) {
 	renderPage(req, res);
 });
 
+router.get('/contribute', function(req, res) {
+	renderPage(req, res);
+});
+
 router.get('/donation', function(req, res) {
 	renderPage(req, res);
 });

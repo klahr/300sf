@@ -1,3 +1,9 @@
+/// <reference path="ui/PopUp.ts"/>
+/// <reference path="ui/DivSelect.ts"/>
+/// <reference path="ui/Input.ts"/>
+/// <reference path="ui/Select.ts"/>
+/// <reference path="HttpRequest.ts"/>
+
 class ProfilePopUp {
 	private mPopUp: Ui.PopUp;
 

@@ -94,7 +94,8 @@ class MainMenu extends Ui.Widget {
 		});
 
 		this.addSection("Support");
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>settings</span> " + "Contribute", function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>support</span> " + "Contribute", function() {
+			self.mAppListener.showPage("contribute", null);
 		});
 
 		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>volunteer_activism</span> " + "Donate", function() {
