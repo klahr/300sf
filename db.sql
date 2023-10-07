@@ -651,9 +651,21 @@ ADD CONSTRAINT `fk_users_2`
   REFERENCES `300sf`.`language` (`id`)
   ON DELETE NO ACTION
   ON UPDATE NO ACTION;
--->
+
 ALTER TABLE `300sf`.`language` 
 RENAME TO  `300sf`.`languages` ;
 
 INSERT INTO `300sf`.`languages` (`iso_name`, `native_name`, `code`) VALUES ('English', 'English', 'en');
 INSERT INTO `300sf`.`languages` (`iso_name`, `native_name`, `code`) VALUES ('Swedish', 'Svenska', 'sv');
+
+ALTER TABLE `300sf`.`users` 
+ADD COLUMN `portrait` VARCHAR(256) NULL AFTER `language_id`;
+
+ALTER TABLE `300sf`.`users` 
+DROP FOREIGN KEY `fk_users_1`;
+ALTER TABLE `300sf`.`users` 
+DROP COLUMN `icon_id`,
+DROP INDEX `fk_users_1_idx` ;
+;
+
+-->
