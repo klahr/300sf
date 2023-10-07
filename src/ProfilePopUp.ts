@@ -13,6 +13,7 @@ class ProfilePopUp {
 		logo.style.width = "192px";
 		logo.style.borderRadius = "50%";
 		logo.style.textAlign = "center";
+		logo.classList.add("shadow");
 		content.container.appendChild(logo);
 
 		const displayName = document.createElement("h1");
