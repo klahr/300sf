@@ -87,9 +87,10 @@ class App implements IAppListener {
 			default:
 				break;
 		}
-		if (t == "") {
-			return translation.en;
+		if (t === "") {
+			t = translation.en;
 		}
+		return t;
 	}
 
 	public static setLanguage(language: string): void {
