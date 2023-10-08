@@ -116,6 +116,7 @@ func Users(c *gin.Context) {
 		list, err := CreateList(zero.StringFrom(uuid), models.Translation{
 			Sv: listTemplate.Name.Sv,
 			En: listTemplate.Name.En,
+			De: listTemplate.Name.De,
 			La: listTemplate.Name.La,
 		}, models.VisibilityPrivate, user, zero.NewString("", false))
 		if err != nil {

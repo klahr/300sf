@@ -7,5 +7,6 @@ type Translation struct {
 	Model
 	Sv zero.String `json:"sv"`
 	En zero.String `json:"en"`
+	De zero.String `json:"de"`
 	La zero.String `json:"la"`
 }

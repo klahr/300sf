@@ -9,6 +9,8 @@ func Translation2Value(t models.Translation, lang string) string {
 		return t.Sv.String
 	case "en":
 		return t.En.String
+	case "de":
+		return t.De.String
 	case "la":
 		return t.La.String
 	}

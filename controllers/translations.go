@@ -55,6 +55,9 @@ func TranslationUpdate(c *gin.Context) {
 		if r.Sv.Valid {
 			translation.Sv = zero.StringFrom(r.Sv.String)
 		}
+		if r.De.Valid {
+			translation.De = zero.StringFrom(r.De.String)
+		}
 		if r.La.Valid {
 			translation.La = zero.StringFrom(r.La.String)
 		}
