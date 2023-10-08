@@ -39,10 +39,11 @@ class SignUpPage extends Page {
 		const acceptTerms = new Ui.Input("checkbox");
 		acceptTerms.style.position = "relative";
 		acceptTerms.container.setAttribute("name", "accept_terms");
+		acceptTerms.container.id = "accept_terms";
 		this.attach(acceptTerms);
 
 		const acceptTermsLbl = document.createElement("label");
-		acceptTermsLbl.setAttribute("for", acceptTerms.container.getAttribute("name")!);
+		acceptTermsLbl.setAttribute("for", acceptTerms.container.id);
 		acceptTermsLbl.innerHTML = App.translations.AcceptTerms;
 		this.container.appendChild(acceptTermsLbl);
 

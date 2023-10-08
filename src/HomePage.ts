@@ -229,10 +229,11 @@ class HomePage extends Page {
 		const staySignedIn = new Ui.Input("checkbox");
 		staySignedIn.style.position = "relative";
 		staySignedIn.container.setAttribute("name", "stay_signed_in");
+		staySignedIn.container.id = "stay_signed_in";
 		this.attach(staySignedIn);
 
 		const staySignedInLbl = document.createElement("label");
-		staySignedInLbl.setAttribute("for", staySignedIn.container.getAttribute("name")!);
+		staySignedInLbl.setAttribute("for", staySignedIn.container.id);
 		staySignedInLbl.innerHTML = App.translations.StaySignedIn;
 		this.container.appendChild(staySignedInLbl);
 
