@@ -99,6 +99,7 @@ class ManageCheckListsPage extends Page {
 			r.name = new Models.Translation();
 			r.name.en = self.mName.value;
 			r.name.sv = self.mName.value;
+			r.name.de = self.mName.value;
 			r.template = self.mTemplateSelect.value!;
 			r.visibility = Models.Visibility.Hidden;
 			r.color = colorSelect.value!;

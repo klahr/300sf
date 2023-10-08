@@ -43,6 +43,9 @@ class ProfilePopUp {
 			case "sv":
 				lang = "Svenska";
 				break;
+			case "de":
+				lang = "Deutch";
+				break;
 			default:
 				lang = "English";
 				break;
@@ -62,8 +65,9 @@ class ProfilePopUp {
 			}
 		});
 		languageList.style.textAlign = "left";
-		languageList.addOption("Svenska", "sv");
+		languageList.addOption("Deutch", "de");
 		languageList.addOption("English", "en");
+		languageList.addOption("Svenska", "sv");
 		content.attach(languageList);
 
 		const me = new HttpRequest("GET", "/v1/users/me");

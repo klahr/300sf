@@ -8,7 +8,7 @@ const app = express();
 const port = 3000;
 
 i18n.configure({
-	locales: ['en', 'sv'],
+	locales: ['en', 'sv', 'de'],
 	cookie: 'lang',
 	defaultLocale: 'sv',
 	queryParameter: 'lang',

@@ -152,6 +152,7 @@ router.post('/translation/update', function(req, res) {
             'uuid': req.body.uuid,
             'en': req.body.en,
             'sv': req.body.sv,
+            'de': req.body.de,
             'la': req.body.la
         };
         nm.request('POST', '/v1/translations/update', {'X-Api-Key': config.ApiKey, 'X-Access-Token': req.cookies.x300sf_at}, function(response) {

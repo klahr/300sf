@@ -7,6 +7,7 @@
 /// <reference path="ForgotPage.ts"/>
 /// <reference path="MainMenu.ts"/>
 /// <reference path="ManageChecklistsPage.ts"/>
+/// <reference path="ContributePage.ts"/>
 /// <reference path="Translations.ts"/>
 /// <reference path="models/Translation.ts"/>
 /// <reference path="models/User.ts"/>
@@ -75,11 +76,19 @@ class App implements IAppListener {
 	}
 
 	public static getTranslation(translation: Models.Translation): string {
+		let t = "";
 		switch (App.sLanguage) {
 			case "sv":
-				return translation.sv;
+				t = translation.sv;
+				break;
+			case "de":
+				t = translation.de;
+				break;
 			default:
-				return translation.en;
+				break;
+		}
+		if (t == "") {
+			return translation.en;
 		}
 	}
 
@@ -88,6 +97,10 @@ class App implements IAppListener {
 			case "sv":
 				App.translations = Translations.sv;
 				App.sLanguage = "sv";
+				break;
+			case "de":
+				App.translations = Translations.de;
+				App.sLanguage = "de";
 				break;
 			default:
 				App.translations = Translations.en;

@@ -23,7 +23,7 @@
 	"GoToWebsite": "Gå till webbsidan",
 	"Settings": "Inställningar",
 	"ManageChecklists": "Hantera krysslistor",
-	"Dashboard": "Dashboard",
+	"Dashboard": "Översikt",
 	"WelcomeMessage": "Hej!",
 	"Submit": "Rapportera",
 	"ObservationLocation": "Observationsplats",
@@ -49,5 +49,7 @@
 	"ImportSubmissions": "Importera observationer",
 	"ImportSubmissionsDescription": "Om du använt den förra versionen av 300 Svenska Fåglar-appen kan du importera dina observationer.",
 	"AlreadyImported": "Redan importerat",
-	"AvailableChecklists": "Tillgängliga krysslistor"
+	"AvailableChecklists": "Tillgängliga krysslistor",
+	"DonationDescription": "300 Svenska Fåglar utvecklas och underhålls av volontärer som bidrar med sin fritid. Med enbart hjälp av frivilliga donationer täcks de kostnader som är nödvändiga för att projektet ska kunna hållas igång. Tack för ditt frivilliga stöd.",
+	"Donation": "Donation"
 }
