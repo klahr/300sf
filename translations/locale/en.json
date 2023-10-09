@@ -1,5 +1,4 @@
 {
-	"Name": "300 Swedish Birds",
 	"SignIn": "Sign in",
 	"Email": "Email",
 	"Password": "Password",
@@ -51,5 +50,15 @@
 	"AlreadyImported": "Already imported",
 	"AvailableChecklists": "Available checklists",
 	"DonationDescription": "300 Swedish Birds is developed and maintained by volunteers who contribute their spare time. With only the help of voluntary donations, the necessary costs to keep the project running are covered. Thank you for your voluntary support.",
-	"Donation": "Donation"
+	"Donation": "Donation",
+	"Color": "Color",
+	"AppName": "300 Swedish Birds",
+	"Name": "Name",
+	"SelectTemplate": "Select template",
+	"CreateChecklist": "Create Checklist",
+	"New": "New",
+	"NoProvidedInfo": "No information has been provided.",
+	"Contribute": "Contribute",
+	"ReportIssue": "Report issue",
+	"ManageTags": "Tags"
 }

@@ -45,19 +45,35 @@ class ManageCheckListsPage extends Page {
 		this.attach(this.mChecklists);
 
 		const newChecklistsLbl = document.createElement("h2");
-		newChecklistsLbl.innerHTML = "Create new checklist";
+		newChecklistsLbl.innerHTML = App.translations.New;
 		this.container.appendChild(newChecklistsLbl);
 
 		this.mName = new Ui.Input("text");
-		this.mName.setPlaceHolder("Name");
+		this.mName.setPlaceHolder(App.translations.Name);
 		this.mName.container.addEventListener("input", function() {
 			self.updateCreateButtonStatus();
 		});
 		this.attach(this.mName);
 
+		const self = this;
+		this.mTemplateSelect = new Ui.Select(App.translations.SelectTemplate + "...", App.translations.Search, function(value: string | null) {
+			self.updateCreateButtonStatus();
+			if (value) {
+				const o = self.mTemplateSelect.getOption(value);
+				if (o) {
+					const description = o.getAttribute("description");
+					self.mTemplateDescription.innerHTML = description ? description : App.translations.NoProvidedInfo;
+				}
+			}
+		});
+		this.attach(this.mTemplateSelect);
+
+		this.mTemplateDescription = document.createElement("p");
+		this.container.appendChild(this.mTemplateDescription);
+
 		const colorLbl = document.createElement("h3");
 		colorLbl.className = "title";
-		colorLbl.innerHTML = "Color";
+		colorLbl.innerHTML = App.translations.Color;
 		this.container.appendChild(colorLbl);
 
 		const colorSelect = new Ui.DivSelect();
@@ -70,24 +86,8 @@ class ManageCheckListsPage extends Page {
 		this.attach(colorSelect);
 		colorSelect.select("#0d81b4");
 
-		const self = this;
-		this.mTemplateSelect = new Ui.Select("Select template" + "...", App.translations.Search, function(value: string | null) {
-			self.updateCreateButtonStatus();
-			if (value) {
-				const o = self.mTemplateSelect.getOption(value);
-				if (o) {
-					const description = o.getAttribute("description");
-					self.mTemplateDescription.innerHTML = description ? description : "No description.";
-				}
-			}
-		});
-		this.attach(this.mTemplateSelect);
-
-		this.mTemplateDescription = document.createElement("p");
-		this.container.appendChild(this.mTemplateDescription);
-
 		this.mCreateButton = document.createElement("button");
-		this.mCreateButton.innerHTML = "Create Checklist";
+		this.mCreateButton.innerHTML = App.translations.CreateChecklist;
 		this.mCreateButton.style.width = "auto";
 		this.mCreateButton.style.cssFloat = "right";
 		this.mCreateButton.style.borderRadius = "8px";

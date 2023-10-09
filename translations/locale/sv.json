@@ -1,5 +1,4 @@
 {
-	"Name": "300 Svenska Fåglar",
 	"SignIn": "Logga in",
 	"Email": "Epost",
 	"Password": "Lösenord",
@@ -51,5 +50,15 @@
 	"AlreadyImported": "Redan importerat",
 	"AvailableChecklists": "Tillgängliga krysslistor",
 	"DonationDescription": "300 Svenska Fåglar utvecklas och underhålls av volontärer som bidrar med sin fritid. Med enbart hjälp av frivilliga donationer täcks de kostnader som är nödvändiga för att projektet ska kunna hållas igång. Tack för ditt frivilliga stöd.",
-	"Donation": "Donation"
+	"Donation": "Donation",
+	"Color": "Färg",
+	"AppName": "300 Svenska Fåglar",
+	"Name": "Namn",
+	"SelectTemplate": "Välj mall",
+	"CreateChecklist": "Skapa Krysslista",
+	"New": "Ny",
+	"NoProvidedInfo": "Ingen information har angetts.",
+	"Contribute": "Bidra",
+	"ReportIssue": "Rapportera fel",
+	"ManageTags": "Etiketter"
 }

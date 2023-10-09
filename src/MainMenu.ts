@@ -67,8 +67,16 @@ class MainMenu extends Ui.Widget {
 			self.mAppListener.showPage("home", null);
 		});
 
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>home</span> " + "Reports", function() {
+			self.mAppListener.showPage("reports", null);
+		});
+
 		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>edit_note</span>  " + App.translations.ManageChecklists, function() {
 			self.mAppListener.showPage("checklists", null);
+		});
+
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>label</span>  " + App.translations.ManageTags, function() {
+			self.mAppListener.showPage("tags", null);
 		});
 
 		this.addSection(App.translations.Checklists);
@@ -94,11 +102,15 @@ class MainMenu extends Ui.Widget {
 		});
 
 		this.addSection("Support");
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>support</span> " + "Contribute", function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>bug_report</span> " + App.translations.ReportIssue, function() {
+			self.mAppListener.showPage("bugs", null);
+		});
+
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>support</span> " + App.translations.Contribute, function() {
 			self.mAppListener.showPage("contribute", null);
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>volunteer_activism</span> " + "Donate", function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>volunteer_activism</span> " + App.translations.Donation, function() {
 			self.mAppListener.showPage("donation", null);
 		});
 

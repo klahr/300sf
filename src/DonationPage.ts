@@ -24,7 +24,7 @@ class DonationPage extends Page {
 
 		const title = document.createElement("p");
 		title.style.textAlign = "center";
-		title.innerHTML = "Your donation helps us improve and expand our software. With your support, we can continue developing innovative solutions for you and the community. Help us make a difference by clicking the button below.";
+		title.innerHTML = App.translations.DonationDescription;
 		this.container.appendChild(title);
 
 		const d = new Ui.Div();

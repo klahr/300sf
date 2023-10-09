@@ -1,6 +1,5 @@
 class Translations {
     static en = {
-        Name: "300 Swedish Birds",
         SignIn: "Sign in",
         Email: "Email",
         Password: "Password",
@@ -53,9 +52,18 @@ class Translations {
         AvailableChecklists: "Available checklists",
         DonationDescription: "300 Swedish Birds is developed and maintained by volunteers who contribute their spare time. With only the help of voluntary donations, the necessary costs to keep the project running are covered. Thank you for your voluntary support.",
         Donation: "Donation",
+        Color: "Color",
+        AppName: "300 Swedish Birds",
+        Name: "Name",
+        SelectTemplate: "Select template",
+        CreateChecklist: "Create Checklist",
+        New: "New",
+        NoProvidedInfo: "No information has been provided.",
+        Contribute: "Contribute",
+        ReportIssue: "Report issue",
+        ManageTags: "Tags",
     }
     static sv = {
-        Name: "300 Svenska Fåglar",
         SignIn: "Logga in",
         Email: "Epost",
         Password: "Lösenord",
@@ -108,9 +116,18 @@ class Translations {
         AvailableChecklists: "Tillgängliga krysslistor",
         DonationDescription: "300 Svenska Fåglar utvecklas och underhålls av volontärer som bidrar med sin fritid. Med enbart hjälp av frivilliga donationer täcks de kostnader som är nödvändiga för att projektet ska kunna hållas igång. Tack för ditt frivilliga stöd.",
         Donation: "Donation",
+        Color: "Färg",
+        AppName: "300 Svenska Fåglar",
+        Name: "Namn",
+        SelectTemplate: "Välj mall",
+        CreateChecklist: "Skapa Krysslista",
+        New: "Ny",
+        NoProvidedInfo: "Ingen information har angetts.",
+        Contribute: "Bidra",
+        ReportIssue: "Rapportera fel",
+        ManageTags: "Etiketter",
     }
     static de = {
-        Name: "300 Schwedische Vögel",
         SignIn: "Anmelden",
         Email: "E-Mail",
         Password: "Passwort",
@@ -163,5 +180,15 @@ class Translations {
         AvailableChecklists: "Verfügbare Checklisten",
         DonationDescription: "300 Swedish Birds is developed and maintained by volunteers who contribute their spare time. With only the help of voluntary donations, the necessary costs to keep the project running are covered. Thank you for your voluntary support.",
         Donation: "Spende",
+        Color: "Farbe",
+        AppName: "300 Schwedische Vögel",
+        Name: "Name",
+        SelectTemplate: "Vorlage auswählen",
+        CreateChecklist: "Checkliste erstellen",
+        New: "Neu",
+        NoProvidedInfo: "Es wurden keine Informationen angegeben.",
+        Contribute: "Beitragen",
+        ReportIssue: "Problem melden",
+        ManageTags: "Tags",
     }
 }
