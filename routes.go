@@ -124,6 +124,7 @@ func SetupRoutes(r *gin.Engine) {
 	r.POST("/v1/users/migrate", apiKeyMiddleware, basicMiddleware, controllers.UsersMigrate)
 	r.GET("/v1/users/export", apiKeyMiddleware, basicMiddleware, controllers.UsersExportData)
 	r.POST("/v1/users/language", apiKeyMiddleware, basicMiddleware, controllers.UsersLanguage)
+	r.POST("/v1/users/portrait", apiKeyMiddleware, basicMiddleware, controllers.UsersPortrait)
 
 	r.GET("ping", Ping)
 

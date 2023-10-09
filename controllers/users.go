@@ -349,3 +349,23 @@ func UsersLanguage(c *gin.Context) {
 
 	c.JSON(http.StatusNoContent, nil)
 }
+
+func UsersPortrait(c *gin.Context) {
+	type request struct {
+		Portrait string `json:"portrait"`
+	}
+
+	var r request
+	if err := c.ShouldBindJSON(&r); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "could not parse request",
+			"code":    ErrorParse,
+		})
+		return
+	}
+
+	// TODO: This supports anything, which is not OK.
+	models.DB.Table(table.Users).Where("uuid=?", c.GetString("uuid")).UpdateColumn("portrait", r.Portrait)
+
+	c.JSON(http.StatusNoContent, nil)
+}
