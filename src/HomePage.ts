@@ -15,6 +15,7 @@ class HomePage extends Page {
 	private mEmail: Ui.Input;
 	private mPassword: Ui.Input;
 	private mProgressBoxes: Ui.Div;
+	private mProfile: Ui.Image;
 
 	constructor(appListener: IAppListener) {
 		super(appListener);
@@ -27,14 +28,14 @@ class HomePage extends Page {
 	protected onCreateLoggedIn(): void {
 		const self = this;
 
-		const profile = new Ui.Image("/img/99249498-452f-4b0b-a1f5-45902f7ffe48.png", "48px", "48px");
-		profile.addClass("portrait");
-		profile.container.addEventListener("click", function() {
+		this.mProfile = new Ui.Image("/img/99249498-452f-4b0b-a1f5-45902f7ffe48.png", "48px", "48px");
+		this.mProfile.addClass("portrait");
+		this.mProfile.container.addEventListener("click", function() {
 			openProfilePopUp(function() {
 				console.log("close profile");
 			});
 		});
-		this.attach(profile);
+		this.attach(this.mProfile);
 
 		const title = document.createElement("h1");
 		title.innerHTML = App.translations.WelcomeMessage;
@@ -80,6 +81,8 @@ class HomePage extends Page {
 		const me = new HttpRequest("GET", "/v1/users/me");
 		me.process(function(status: any, data: any) {
 			const d = data as Responses.UsersMe;
+			App.setUser(d.user);
+			self.mProfile.setImage("/img/portraits/" + d.user.portrait);
 			self.mProgressBoxes.clear();
 			self.mProgressBoxes.container.innerHTML = "";
 
@@ -253,8 +256,6 @@ class HomePage extends Page {
 			const r = new HttpRequest("POST", "/v1/auth", JSON.stringify(content));
 			r.setHeader("Authorization", authorization);
 			r.process(function(status: any, data: any) {
-				// TODO:
-				console.log(data);
 				setCookie("x300sf_at", data.access_token, stayLoggedIn ? null : data.expires_at);
 				//setCookie("x300sf_rt", data.refresh_token, 3600 * 24 * 60); // 60 days.
 				const url = new URL(window.location.href);

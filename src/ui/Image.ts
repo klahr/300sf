@@ -17,5 +17,9 @@ namespace Ui {
 				self.onClick(event);
 			});
 		}
+
+		public setImage(src: string): void {
+			this.mContainer.style.backgroundImage = "url(" + src + ")";
+		}
 	}
 }

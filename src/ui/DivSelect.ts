@@ -1,7 +1,11 @@
 namespace Ui {
 	export class DivSelect extends Widget {
-		constructor() {
+		private mSelectCallback: (value: string | null) => void | null;
+
+		constructor(selectCallback: (value: string | null) => void = function() {}) {
 			super();
+
+			this.mSelectCallback = selectCallback;
 
 			this.mContainer = document.createElement("div");
 			this.mContainer.style.position = "relative";
@@ -33,7 +37,6 @@ namespace Ui {
 			const self = this;
 			const option = document.createElement("div");
 			option.className = "uix-option";
-//			option.classList.add(className);
 			option.setAttribute("value", value);
 			option.addEventListener("click", function() {
 				const allOptionsSource = self.container.getElementsByClassName("uix-option");
@@ -41,6 +44,7 @@ namespace Ui {
 					allOptionsSource[i].classList.remove("selected");
 				}
 				option.classList.add("selected");
+				self.mSelectCallback(option.getAttribute("value"));
 			});
 			this.container.appendChild(option);
 			return option;

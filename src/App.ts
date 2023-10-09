@@ -5,6 +5,7 @@
 /// <reference path="SettingsPage.ts"/>
 /// <reference path="DonationPage.ts"/>
 /// <reference path="ForgotPage.ts"/>
+/// <reference path="ManageTagsPage.ts"/>
 /// <reference path="MainMenu.ts"/>
 /// <reference path="ManageChecklistsPage.ts"/>
 /// <reference path="ContributePage.ts"/>
@@ -24,6 +25,7 @@ class App implements IAppListener {
 	public static translations = Translations.en;
 	public static apiKey: string;
 	private mPages = new Array<Page>();
+	private static sUser: Models.User;
 
 	constructor(language: string, apiKey: string, redirect: string, queryParameters: object) {
 		const lang = getCookie("lang");
@@ -66,9 +68,26 @@ class App implements IAppListener {
 		this.mPages.push(manageChecklistsPage);
 		this.mLayerManager.addToLayer("base", manageChecklistsPage);
 
-		this.showPage(redirect === "" ? "home" : redirect, queryParameters);
+		const manageTagsPage = new ManageTagsPage(this);
+		this.mPages.push(manageTagsPage);
+		this.mLayerManager.addToLayer("base", manageTagsPage);
 
 		this.mLayerManager.addToLayer("base", this.mMainMenu);
+
+		if (App.isLoggedIn()) {
+			this.fetchUser();
+		}
+
+		this.showPage(redirect === "" ? "home" : redirect, queryParameters);
+	}
+
+	private fetchUser(): void {
+		const me = new HttpRequest("GET", "/v1/users/me");
+		me.setSync();
+		me.process(function(status: any, data: any) {
+			const d = data as Responses.UsersMe;
+			App.setUser(d.user);
+		});
 	}
 
 	public static isLoggedIn(): boolean {
@@ -110,8 +129,16 @@ class App implements IAppListener {
 		}
 	}
 
-	public static getLanguage(): string {
+	public static get language(): string {
 		return App.sLanguage;
+	}
+
+	public static setUser(user: Models.User): void {
+		App.sUser = user;
+	}
+
+	public static get user(): Models.User {
+		return App.sUser;
 	}
 
 	openMainMenu(): void {

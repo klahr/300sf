@@ -13,7 +13,13 @@ class ProfilePopUp {
 		content.style.width = "100%";
 		content.style.position = "relative";
 
-		const portraitSelect = new Ui.DivSelect();
+		const portraitSelect = new Ui.DivSelect((value) => {
+			const r = new HttpRequest("POST", "/v1/users/portrait", JSON.stringify({"portrait": value}));
+			r.process(function(status: any, data: any) {
+				App.user.portrait = value!;
+				location.reload();
+			});
+		});
 		portraitSelect.addOption("", "1.png").style.backgroundImage = "url(/img/portraits/1.png)";
 		portraitSelect.addOption("", "2.png").style.backgroundImage = "url(/img/portraits/2.png)";
 		portraitSelect.addOption("", "3.png").style.backgroundImage = "url(/img/portraits/3.png)";
@@ -39,7 +45,7 @@ class ProfilePopUp {
 		content.container.appendChild(languageLbl);
 
 		let lang;
-		switch (App.getLanguage()) {
+		switch (App.language) {
 			case "sv":
 				lang = "Svenska";
 				break;
@@ -75,6 +81,7 @@ class ProfilePopUp {
 			const d = data as Responses.UsersMe;
 			displayName.innerHTML = d.user.display_name;
 			uuid.value = d.user.uuid;
+			portraitSelect.select(d.user.portrait);
 		});
 
 		this.mPopUp = new Ui.PopUp(content.container, function() {
