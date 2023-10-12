@@ -24,7 +24,6 @@
 	"ManageChecklists": "Hantera krysslistor",
 	"Dashboard": "Översikt",
 	"WelcomeMessage": "Hej!",
-	"Submit": "Rapportera",
 	"ObservationLocation": "Observationsplats",
 	"Species": "Art",
 	"Age": "Ålder",
@@ -42,11 +41,8 @@
 	"SelectActivity": "Välj aktivitet",
 	"SelectMethod": "Välj metod",
 	"Search": "Sök",
-	"LastSubmissions": "Senaste rapporter",
 	"InternalID": "Internt ID",
 	"Language": "Språk",
-	"ImportSubmissions": "Importera observationer",
-	"ImportSubmissionsDescription": "Om du använt den förra versionen av 300 Svenska Fåglar-appen kan du importera dina observationer.",
 	"AlreadyImported": "Redan importerat",
 	"AvailableChecklists": "Tillgängliga krysslistor",
 	"DonationDescription": "300 Svenska Fåglar utvecklas och underhålls av volontärer som bidrar med sin fritid. Med enbart hjälp av frivilliga donationer täcks de kostnader som är nödvändiga för att projektet ska kunna hållas igång. Tack för ditt frivilliga stöd.",
@@ -60,5 +56,10 @@
 	"NoProvidedInfo": "Ingen information har angetts.",
 	"Contribute": "Bidra",
 	"ReportIssue": "Rapportera fel",
-	"ManageTags": "Etiketter"
+	"ManageTags": "Taggar",
+	"Sightings": "Fynd",
+	"SubmitSighting": "Rapportera Fynd",
+	"ImportSightings": "Importera fynd",
+	"LastSightings": "Senaste fynd",
+	"ImportSightingsDescription": "Om du använt den förra versionen av 300 Svenska Fåglar-appen kan du importera dina fynd."
 }

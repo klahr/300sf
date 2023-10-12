@@ -24,7 +24,6 @@
 	"ManageChecklists": "Manage checklists",
 	"Dashboard": "Dashboard",
 	"WelcomeMessage": "Hello!",
-	"Submit": "Submit",
 	"ObservationLocation": "Observation location",
 	"Species": "Species",
 	"Age": "Age",
@@ -42,11 +41,8 @@
 	"SelectActivity": "Select activity",
 	"SelectMethod": "Select method",
 	"Search": "Search",
-	"LastSubmissions": "Last submissions",
 	"InternalID": "Internal ID",
 	"Language": "Language",
-	"ImportSubmissions": "Import submissions",
-	"ImportSubmissionsDescription": "If you possess any submittals within the previous version of the 300 Swedish Birds application, you have the ability to import them.",
 	"AlreadyImported": "Already imported",
 	"AvailableChecklists": "Available checklists",
 	"DonationDescription": "300 Swedish Birds is developed and maintained by volunteers who contribute their spare time. With only the help of voluntary donations, the necessary costs to keep the project running are covered. Thank you for your voluntary support.",
@@ -60,5 +56,10 @@
 	"NoProvidedInfo": "No information has been provided.",
 	"Contribute": "Contribute",
 	"ReportIssue": "Report issue",
-	"ManageTags": "Tags"
+	"ManageTags": "Tags",
+	"Sightings": "Sightings",
+	"SubmitSighting": "SubmitSighting",
+	"ImportSightings": "Import sightings",
+	"LastSightings": "Recent sightings",
+	"ImportSightingsDescription": "If you possess any sightings within the previous version of the 300 Swedish Birds application, you have the ability to import them."
 }

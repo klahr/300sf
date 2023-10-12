@@ -24,7 +24,6 @@
 	"ManageChecklists": "Checklisten verwalten",
 	"Dashboard": "Übersicht",
 	"WelcomeMessage": "Hallo!",
-	"Submit": "Einreichen",
 	"ObservationLocation": "Beobachtungsort",
 	"Species": "Arten",
 	"Age": "Alter",
@@ -42,11 +41,8 @@
 	"SelectActivity": "Aktivität auswählen",
 	"SelectMethod": "Methode auswählen",
 	"Search": "Suchen",
-	"LastSubmissions": "Letzte Einreichungen",
 	"InternalID": "Interne ID",
 	"Language": "Sprache",
-	"ImportSubmissions": "Einreichungen importieren",
-	"ImportSubmissionsDescription": "Wenn Sie über Einreichungen in der vorherigen Version des 300 schwedischen Vogelantrags verfügen, haben Sie die Möglichkeit, diese zu importieren.",
 	"AlreadyImported": "Bereits importiert",
 	"AvailableChecklists": "Verfügbare Checklisten",
 	"DonationDescription": "300 Swedish Birds is developed and maintained by volunteers who contribute their spare time. With only the help of voluntary donations, the necessary costs to keep the project running are covered. Thank you for your voluntary support.",
@@ -60,5 +56,10 @@
 	"NoProvidedInfo": "Es wurden keine Informationen angegeben.",
 	"Contribute": "Beitragen",
 	"ReportIssue": "Problem melden",
-	"ManageTags": "Tags"
+	"ManageTags": "Tags",
+	"Sightings": "Sightings",
+	"SubmitSighting": "Einreichen",
+	"ImportSightings": "Einreichungen importieren",
+	"LastSightings": "Letzte Einreichungen",
+	"ImportSightingsDescription": "Wenn Sie über Einreichungen in der vorherigen Version des 300 schwedischen Vogelantrags verfügen, haben Sie die Möglichkeit, diese zu importieren."
 }

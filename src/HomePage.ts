@@ -30,7 +30,7 @@ class HomePage extends Page {
 		this.container.appendChild(title);
 
 		const reportButton = document.createElement("button");
-		reportButton.innerHTML = App.translations.Submit;
+		reportButton.innerHTML = App.translations.SubmitSighting;
 		reportButton.style.width = "auto";
 		reportButton.style.cssFloat = "right";
 		reportButton.style.borderRadius = "inherit";
@@ -47,7 +47,7 @@ class HomePage extends Page {
 		this.attach(this.mProgressBoxes);
 
 		const lastReportsLbl = document.createElement("h2");
-		lastReportsLbl.innerHTML = App.translations.LastSubmissions;
+		lastReportsLbl.innerHTML = App.translations.LastSightings;
 		this.container.appendChild(lastReportsLbl);
 
 		this.mTable = new Ui.Table();

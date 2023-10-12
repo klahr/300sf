@@ -67,7 +67,7 @@ class MainMenu extends Ui.Widget {
 			self.mAppListener.showPage("home", null);
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>home</span> " + "Reports", function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>home</span> " + App.translations.Sightings, function() {
 			self.mAppListener.showPage("reports", null);
 		});
 

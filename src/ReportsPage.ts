@@ -11,7 +11,7 @@ class ReportsPage extends Page {
 		super(appListener);
 
 		this.mTitle = document.createElement("h1");
-		this.mTitle.innerHTML = "Reports";
+		this.mTitle.innerHTML = App.translations.Sightings;
 		this.container.appendChild(this.mTitle);
 
 		this.mProgressLbl = document.createElement("p");

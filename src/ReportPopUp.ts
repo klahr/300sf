@@ -28,7 +28,7 @@ class ReportPopUp {
 		this.mChecklistContainer.style.position = "relative";
 	
 		const name = document.createElement("h1");
-		name.innerHTML = App.translations.Submit;
+		name.innerHTML = App.translations.SubmitSighting;
 		name.style.margin = "unset";
 		content.container.appendChild(name);
 	
@@ -206,7 +206,7 @@ class ReportPopUp {
 		});
 	
 		this.mReportButton = document.createElement("button");
-		this.mReportButton.innerHTML = App.translations.Submit;
+		this.mReportButton.innerHTML = App.translations.SubmitSighting;
 		this.mReportButton.style.width = "auto";
 		this.mReportButton.style.cssFloat = "right";
 		this.mReportButton.style.borderRadius = "8px";
