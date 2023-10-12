@@ -1,3 +1,7 @@
+/// <reference path="ui/Table.ts"/>
+/// <reference path="Page.ts"/>
+/// <reference path="App.ts"/>
+
 class ReportsPage extends Page {
 	private mTitle: HTMLHeadingElement;
 	private mTable: Ui.Table;
@@ -25,6 +29,15 @@ class ReportsPage extends Page {
 
 	public get id(): string {
 		return "reports";
+	}
+
+	public onBecomeVisible(): void {
+		super.onBecomeVisible();
+		this.refresh();
+	}
+
+	private refresh(): void {
+		this.mProfile.setImage("/img/portraits/" + App.user.portrait);
 	}
 
 	public setData(data: any): void {

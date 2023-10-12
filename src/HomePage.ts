@@ -16,10 +16,6 @@ class HomePage extends Page {
 	private mPassword: Ui.Input;
 	private mProgressBoxes: Ui.Div;
 
-	constructor(appListener: IAppListener) {
-		super(appListener);
-	}
-
 	public get id(): string {
 		return "home";
 	}
