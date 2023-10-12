@@ -165,8 +165,14 @@ class HomePage extends Page {
 					entry.appendChild(comment);
 				}
 
-				self.mTable.addRow([entry]);
+				//self.mTable.addRow([entry]);
 			});
+
+			if (d.last_reports.length !== 0) {
+				const noRecent = document.createElement("p");
+				noRecent.innerHTML = App.translations.NoRecentSightings;
+				self.mTable.addRow([noRecent]);
+			}
 
 		}, function(status: any, data: Responses.Error, error: any) {
 			console.log(data);
