@@ -62,12 +62,12 @@ class MainMenu extends Ui.Widget {
 	private createLoggedIn(): void  {
 		const self = this;
 
-		this.addSection("300sf");
+		this.addSection(App.translations.AppName);
 		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>home</span> " + App.translations.Dashboard, function() {
 			self.mAppListener.showPage("home", null);
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>home</span> " + App.translations.Sightings, function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>raven</span> " + App.translations.Sightings, function() {
 			self.mAppListener.showPage("reports", null);
 		});
 
