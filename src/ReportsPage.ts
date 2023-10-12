@@ -92,6 +92,17 @@ class ReportsPage extends Page {
 				location.style.fontStyle = "unset";
 				entry.appendChild(location);
 
+				if (e.comment.text !== "") {
+					const comment = document.createElement("p");
+					comment.style.backgroundColor = "#1d3944";
+					comment.style.borderRadius = "0 12px 0 12px";
+					comment.style.lineHeight = "unset";
+					comment.style.padding = "8px";
+					comment.style.width = "fit-content";
+					comment.innerHTML = e.comment.text;
+					entry.appendChild(comment);
+				}
+
 				self.mTable.addRow([entry]);
 			});
 		});

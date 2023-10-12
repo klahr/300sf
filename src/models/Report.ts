@@ -6,6 +6,7 @@
 /// <reference path="Tag.ts"/>
 /// <reference path="Species.ts"/>
 /// <reference path="List.ts"/>
+/// <reference path="Comment.ts"/>
 
 namespace Models {
 	export class Report {
