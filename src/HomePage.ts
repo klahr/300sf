@@ -87,10 +87,6 @@ class HomePage extends Page {
 				}
 
 				const title = document.createElement("p");
-				title.style.padding = "var(--small-distance)";
-				title.style.fontSize = "0.8rem";
-				title.style.lineHeight = "unset";
-				title.style.textShadow = "1px 1px #0000005e";
 				title.innerHTML = App.getTranslation(e.list.name).substring(0, 25);
 				d.container.appendChild(title);
 
@@ -130,31 +126,44 @@ class HomePage extends Page {
 				name.innerHTML = App.getTranslation(species.name);
 				name.style.cursor = "pointer";
 				name.style.color = "var(--success-color)";
-				name.addEventListener("click", function() {
+				name.style.width = "fit-content";
+				entry.appendChild(name);
+				name.addEventListener("click", function(event) {
+					event.stopPropagation();
 					openSpeciesPopUp(e.species);
 				});
-				entry.appendChild(name);
 
 				const subName = document.createElement("p");
 				subName.innerHTML = species.name.la;
 				entry.appendChild(subName);
 
-				const observationDateAndPlace = document.createElement("p");
-				observationDateAndPlace.innerHTML = new Date(d.from).toLocaleString();
-				if (d.zone) {
-					observationDateAndPlace.innerHTML += ", " + App.getTranslation(d.zone.name);
+				const dateInterval = document.createElement("p");
+				if (Utils.isValidDate(d.from)) {
+					dateInterval.innerHTML = Utils.toYYYY_MM_DD_hh_mm(d.from);
 				}
-				entry.appendChild(observationDateAndPlace);
+				if (Utils.isValidDate(d.until)) {
+					dateInterval.innerHTML += " - " + Utils.toYYYY_MM_DD_hh_mm(d.until);
+				}
+				dateInterval.style.fontStyle = "unset";
+				entry.appendChild(dateInterval);
 
-				const check = document.createElement("span");
-				check.className = "material-symbols-outlined";
-				check.innerHTML = "check_circle";
-				check.style.color = "var(--success-color)";
-				check.style.cursor = "pointer";
-				check.addEventListener("click", function() {
-					new Ui.MessageBox("Submission", "Here you will be able to edit your submission.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
-				});
-				entry.appendChild(check);
+				const location = document.createElement("p");
+				if (d.zone) {
+					location.innerHTML = App.getTranslation(d.zone.name);
+				}
+				location.style.fontStyle = "unset";
+				entry.appendChild(location);
+
+				if (d.comment.text !== "") {
+					const comment = document.createElement("p");
+					comment.style.backgroundColor = "#1d3944";
+					comment.style.borderRadius = "0 12px 0 12px";
+					comment.style.lineHeight = "unset";
+					comment.style.padding = "8px";
+					comment.style.width = "fit-content";
+					comment.innerHTML = d.comment.text;
+					entry.appendChild(comment);
+				}
 
 				self.mTable.addRow([entry]);
 			});

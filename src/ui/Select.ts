@@ -214,7 +214,6 @@ namespace Ui {
 		}
 
 		public clear(): void {
-			console.log("clear");
 			this.mDropDown.innerHTML = "";
 		}
 	}

@@ -52,7 +52,6 @@ class ReportsPage extends Page {
 			self.mTable.clear();
 			const reports = data.result as Models.Report[];
 			self.mProgressLbl.innerHTML = reports.length.toString();
-			console.log(reports);
 			reports.forEach(e => {
 				const entry = document.createElement("div");
 				entry.addEventListener("click", function() {

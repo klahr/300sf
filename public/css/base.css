@@ -255,6 +255,14 @@ div.progress-box:hover {
 	transition: transform 100ms;
 }
 
+div.progress-box > p {
+	padding: var(--small-distance);
+	font-size: 1rem;
+	font-weight: bold;
+	line-height: unset;
+	text-shadow: 1px 1px #0000005e;
+}
+
 div.portrait {
 	left: unset;
 	right: var(--medium-distance);
