@@ -126,7 +126,6 @@ class ListPage extends Page {
 
 		const r = new HttpRequest("GET", "/v1/lists/" + (this.data as Models.List).uuid + "/reports");
 		r.process(function(status: any, data: any) {
-			console.log(self.data);
 			self.mTitle.innerHTML = App.getTranslation((self.data as Models.List).name);
 			const reports = data.result as Models.Report[];
 			let lastOrder: Models.Order;
