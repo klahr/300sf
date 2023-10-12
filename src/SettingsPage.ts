@@ -3,7 +3,6 @@
 /// <reference path="ui/Input.ts"/>
 
 class SettingsPage extends Page {
-	private mContent: Ui.Div;
 	private mEmail: Ui.Input;
 	private mPassword: Ui.Input;
 	private mImportButton: HTMLButtonElement;
@@ -12,11 +11,6 @@ class SettingsPage extends Page {
 		super(appListener);
 
 		const self = this;
-	
-		this.mContent = new Ui.Div();
-		this.mContent.style.position = "relative";
-		this.mContent.style.width = "100%";
-		this.attach(this.mContent);
 
 		this.addProfile();
 

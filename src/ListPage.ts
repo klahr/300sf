@@ -10,7 +10,6 @@
 /// <reference path="SpeciesPopUp.ts"/>
 
 class ListPage extends Page {
-	private mContent: Ui.Div;
 	private mTitle: HTMLHeadingElement;
 	private mTable: Ui.Table;
 	private mProgress: Ui.ProgressBar;
@@ -19,11 +18,6 @@ class ListPage extends Page {
 
 	constructor(appListener: IAppListener) {
 		super(appListener);
-
-		this.mContent = new Ui.Div();
-		this.mContent.style.position = "relative";
-		this.mContent.style.width = "100%";
-		this.attach(this.mContent);
 
 		this.mTitle = document.createElement("h1");
 		this.container.appendChild(this.mTitle);

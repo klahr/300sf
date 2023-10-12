@@ -72,6 +72,10 @@ class App implements IAppListener {
 		this.mPages.push(manageTagsPage);
 		this.mLayerManager.addToLayer("base", manageTagsPage);
 
+		const reportsPage = new ReportsPage(this);
+		this.mPages.push(reportsPage);
+		this.mLayerManager.addToLayer("base", reportsPage);
+
 		this.mLayerManager.addToLayer("base", this.mMainMenu);
 
 		if (App.isLoggedIn()) {

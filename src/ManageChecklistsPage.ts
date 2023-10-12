@@ -7,7 +7,6 @@
 /// <reference path="models/Visibility.ts"/>
 
 class ManageCheckListsPage extends Page {
-	private mContent: Ui.Div;
 	private mTitle: HTMLHeadingElement;
 	private mChecklists: Ui.Div;
 	private mTemplateSelect: Ui.Select;
@@ -17,11 +16,6 @@ class ManageCheckListsPage extends Page {
 
 	constructor(appListener: IAppListener) {
 		super(appListener);
-
-		this.mContent = new Ui.Div();
-		this.mContent.style.position = "relative";
-		this.mContent.style.width = "100%";
-		this.attach(this.mContent);
 
 		this.addProfile();
 

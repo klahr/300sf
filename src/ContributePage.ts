@@ -3,15 +3,8 @@
 /// <reference path="ui/Input.ts"/>
 
 class ContributePage extends Page {
-	private mContent: Ui.Div;
-
 	constructor(appListener: IAppListener) {
 		super(appListener);
-
-		this.mContent = new Ui.Div();
-		this.mContent.style.position = "relative";
-		this.mContent.style.width = "100%";
-		this.attach(this.mContent);
 
 		this.addProfile();
 

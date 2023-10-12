@@ -54,6 +54,10 @@ router.get('/tags', function(req, res) {
 	renderPage(req, res);
 });
 
+router.get('/reports', function(req, res) {
+	renderPage(req, res);
+});
+
 router.get('/list/:uuid', function(req, res) {
 	res.render('pages/app', {
 		data: {

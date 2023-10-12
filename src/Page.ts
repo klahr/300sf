@@ -3,6 +3,7 @@
 class Page extends Ui.Widget {
 	private mAppListener: IAppListener;
 	protected mProfile: Ui.Image;
+	private mContent: Ui.Div;
 
 	constructor(appListener: IAppListener) {
 		super();
@@ -12,6 +13,11 @@ class Page extends Ui.Widget {
 		this.mContainer = document.createElement("div");
 		this.mContainer.className = "uix-div surface";
 		this.mContainer.style.minHeight = "32px";
+
+		this.mContent = new Ui.Div();
+		this.mContent.style.position = "relative";
+		this.mContent.style.width = "100%";
+		this.attach(this.mContent);
 
 		const menu =  document.createElement("span");
 		menu.className = "material-symbols-outlined menu";
