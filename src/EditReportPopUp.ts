@@ -7,7 +7,7 @@
 /// <reference path="HttpRequest.ts"/>
 /// <reference path="utils/Sort.ts"/>
 
-declare const L;
+//declare const L;
 
 class EditReportPopUp {
 	private mReportButton: HTMLButtonElement;
