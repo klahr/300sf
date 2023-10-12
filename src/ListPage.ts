@@ -25,14 +25,6 @@ class ListPage extends Page {
 		this.mContent.style.width = "100%";
 		this.attach(this.mContent);
 
-		const profile = new Ui.Image("/img/99249498-452f-4b0b-a1f5-45902f7ffe48.png", "48px", "48px");
-		profile.addClass("portrait");
-		profile.container.addEventListener("click", function() {
-			openProfilePopUp(function() {
-				console.log("close profile");
-			});
-		});
-
 		this.mTitle = document.createElement("h1");
 		this.container.appendChild(this.mTitle);
 
@@ -50,7 +42,7 @@ class ListPage extends Page {
 		this.mTable = new Ui.Table();
 		this.attach(this.mTable);
 
-		this.attach(profile);
+		this.addProfile();
 
 		const filter = new Ui.Div
 		filter.addClass("filter");
@@ -96,6 +88,15 @@ class ListPage extends Page {
 
 	public get id(): string {
 		return "list";
+	}
+
+	public onBecomeVisible(): void {
+		super.onBecomeVisible();
+		this.refresh();
+	}
+
+	private refresh(): void {
+		this.mProfile.setImage("/img/portraits/" + App.user.portrait);
 	}
 
 	public setData(data: any): void {

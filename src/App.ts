@@ -78,7 +78,24 @@ class App implements IAppListener {
 			this.fetchUser();
 		}
 
+		const self = this;
+		document.addEventListener("visibilitychange", () => {
+			if (document.visibilityState === "visible") {
+				if (App.isLoggedIn()) {
+					self.fetchUser();
+				} else {
+					App.logOut();
+				}
+			}
+		});
+
 		this.showPage(redirect === "" ? "home" : redirect, queryParameters);
+	}
+
+	public static logOut(): void {
+		setCookie("x300sf_at", "", 0);
+		setCookie("lang", "", 0);
+		location.reload();
 	}
 
 	private fetchUser(): void {

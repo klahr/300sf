@@ -120,9 +120,7 @@ class MainMenu extends Ui.Widget {
 		});
 
 		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>logout</span> " + App.translations.LogOut, function() {
-			setCookie("x300sf_at", "", 0);
-			setCookie("lang", "", 0);
-			location.reload();
+			App.logOut();
 		});
 	}
 

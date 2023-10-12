@@ -18,14 +18,7 @@ class SettingsPage extends Page {
 		this.mContent.style.width = "100%";
 		this.attach(this.mContent);
 
-		const profile = new Ui.Image("/img/99249498-452f-4b0b-a1f5-45902f7ffe48.png", "48px", "48px");
-		profile.addClass("portrait");
-		profile.container.addEventListener("click", function() {
-			openProfilePopUp(function() {
-				console.log("close profile");
-			});
-		});
-		this.attach(profile);
+		this.addProfile();
 
 		const title = document.createElement("h1");
 		title.innerHTML = App.translations.Settings;
@@ -97,15 +90,14 @@ class SettingsPage extends Page {
 		return "settings";
 	}
 
-	public setVisible(visible: boolean): void {
-		super.setVisible(visible);
-		if (visible) {
-			this.refresh();
-		}
+	public onBecomeVisible(): void {
+		super.onBecomeVisible();
+		this.refresh();
 	}
 
 	private refresh(): void {
 		const self = this;
+		this.mProfile.setImage("/img/portraits/" + App.user.portrait);
 		const me = new HttpRequest("GET", "/v1/users/me");
 		me.process(function(status: any, data: any) {
 			const d = data as Responses.UsersMe;

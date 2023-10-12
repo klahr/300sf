@@ -2,6 +2,7 @@
 
 class Page extends Ui.Widget {
 	private mAppListener: IAppListener;
+	protected mProfile: Ui.Image;
 
 	constructor(appListener: IAppListener) {
 		super();
@@ -35,10 +36,30 @@ class Page extends Ui.Widget {
 
 	public setVisible(visible: boolean): void {
 		this.mContainer.style.display = visible ? "block" : "none";
+		if (visible) {
+			this.onBecomeVisible();
+		}
+	}
+
+	protected onBecomeVisible(): void {}
+
+	protected addProfile(): void {
+		this.mProfile = new Ui.Image("/img/99249498-452f-4b0b-a1f5-45902f7ffe48.png", "48px", "48px");
+		this.mProfile.addClass("portrait");
+		this.mProfile.container.addEventListener("click", function() {
+			openProfilePopUp(function() {
+				console.log("close profile");
+			});
+		});
+		this.attach(this.mProfile);
 	}
 
 	protected get appListener(): IAppListener {
 		return this.mAppListener;
+	}
+
+	protected get profile(): Ui.Image {
+		return this.mProfile;
 	}
 
 	public setData(data: any): void {

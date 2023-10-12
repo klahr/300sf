@@ -23,14 +23,7 @@ class ManageCheckListsPage extends Page {
 		this.mContent.style.width = "100%";
 		this.attach(this.mContent);
 
-		const profile = new Ui.Image("/img/99249498-452f-4b0b-a1f5-45902f7ffe48.png", "48px", "48px");
-		profile.addClass("portrait");
-		profile.container.addEventListener("click", function() {
-			openProfilePopUp(function() {
-				console.log("close profile");
-			});
-		});
-		this.attach(profile);
+		this.addProfile();
 
 		this.mTitle = document.createElement("h1");
 		this.mTitle.innerHTML = App.translations.ManageChecklists;
@@ -114,11 +107,9 @@ class ManageCheckListsPage extends Page {
 		return "checklists";
 	}
 
-	public setVisible(visible: boolean): void {
-		super.setVisible(visible);
-		if (visible) {
-			this.refresh();
-		}
+	public onBecomeVisible(): void {
+		super.onBecomeVisible();
+		this.refresh();
 	}
 
 	private updateCreateButtonStatus(): void {
@@ -134,6 +125,7 @@ class ManageCheckListsPage extends Page {
 	}
 
 	private refresh(): void {
+		this.mProfile.setImage("/img/portraits/" + App.user.portrait);
 		const self = this;
 		const r = new HttpRequest("GET", "/v1/lists/list");
 		r.process(function(status: any, data: any) {

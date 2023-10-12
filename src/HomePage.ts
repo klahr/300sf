@@ -15,7 +15,6 @@ class HomePage extends Page {
 	private mEmail: Ui.Input;
 	private mPassword: Ui.Input;
 	private mProgressBoxes: Ui.Div;
-	private mProfile: Ui.Image;
 
 	constructor(appListener: IAppListener) {
 		super(appListener);
@@ -28,14 +27,7 @@ class HomePage extends Page {
 	protected onCreateLoggedIn(): void {
 		const self = this;
 
-		this.mProfile = new Ui.Image("/img/99249498-452f-4b0b-a1f5-45902f7ffe48.png", "48px", "48px");
-		this.mProfile.addClass("portrait");
-		this.mProfile.container.addEventListener("click", function() {
-			openProfilePopUp(function() {
-				console.log("close profile");
-			});
-		});
-		this.attach(this.mProfile);
+		this.addProfile();
 
 		const title = document.createElement("h1");
 		title.innerHTML = App.translations.WelcomeMessage;
