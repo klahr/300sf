@@ -55,7 +55,7 @@ class ReportsPage extends Page {
 			reports.forEach(e => {
 				const entry = document.createElement("div");
 				entry.addEventListener("click", function() {
-					console.log("show edit report");
+					openEditReportPopUp(e);
 				});
 				entry.className = "list-entry";
 

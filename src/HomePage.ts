@@ -120,6 +120,9 @@ class HomePage extends Page {
 				const d = e as Models.Report;
 				const species = e.species as Models.Species;
 				const entry = document.createElement("div");
+				entry.addEventListener("click", function() {
+					openEditReportPopUp(e);
+				});
 				entry.className = "list-entry";
 
 				const name = document.createElement("h3");
@@ -165,10 +168,10 @@ class HomePage extends Page {
 					entry.appendChild(comment);
 				}
 
-				//self.mTable.addRow([entry]);
+				self.mTable.addRow([entry]);
 			});
 
-			if (d.last_reports.length !== 0) {
+			if (d.last_reports.length === 0) {
 				const noRecent = document.createElement("p");
 				noRecent.innerHTML = App.translations.NoRecentSightings;
 				self.mTable.addRow([noRecent]);
