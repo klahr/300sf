@@ -163,9 +163,9 @@ func UsersMe(c *gin.Context) {
 		return
 	}
 
-	// TODO: Limit to last week too.
+	oneWeekAgo := time.Now().AddDate(0, 0, -14)
 	var lastReports []models.Report
-	if err := tx.Where("user_id=?", user.Id).Where("archived IS NULL").Preload("Species.Name").Preload("Zone.Name").Order("timestamp DESC").Limit(5).Find(&lastReports).Error; err != nil {
+	if err := tx.Where("user_id=?", user.Id).Where("timestamp>=?", oneWeekAgo).Where("archived IS NULL").Preload("Species.Name").Preload("Zone.Name").Preload("Comment").Order("timestamp DESC").Limit(50).Find(&lastReports).Error; err != nil {
 		tx.Rollback()
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
@@ -174,7 +174,7 @@ func UsersMe(c *gin.Context) {
 	}
 
 	var lists []models.List
-	if err := tx.Where("user_id=?", user.Id).Where("archived IS NULL").Preload("Name").Preload("Species.Name").Find(&lists).Error; err != nil {
+	if err := tx.Where("user_id=?", user.Id).Where("archived IS NULL").Preload("Species.Order.Name").Preload("Name").Preload("Species.Name").Find(&lists).Error; err != nil {
 		tx.Rollback()
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
@@ -191,7 +191,7 @@ func UsersMe(c *gin.Context) {
 		listReport := listReports{
 			List: list,
 		}
-		if err := tx.Table("list_reports").Select("reports.*").Where("list_id=?", list.Id).Joins("JOIN reports ON reports.id=report_id").Preload("Species.Name").Preload("Zone.Name").Preload("Age.Name").Preload("Gender.Name").Preload("Method.Name").Preload("Tags").Find(&listReport.Reports).Error; err != nil {
+		if err := tx.Table("list_reports").Select("reports.*").Where("list_id=?", list.Id).Joins("JOIN reports ON reports.id=report_id").Preload("Species.Order.Name").Preload("Species.Name").Preload("Zone.Name").Preload("Age.Name").Preload("Gender.Name").Preload("Method.Name").Preload("Tags").Find(&listReport.Reports).Error; err != nil {
 			tx.Rollback()
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": err.Error(),
