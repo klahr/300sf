@@ -32,29 +32,31 @@ class EditReportPopUp {
 		name.style.margin = "unset";
 		content.container.appendChild(name);
 	
-		const locationLbl = document.createElement("h3");
-		locationLbl.className = "title";
-		locationLbl.innerHTML = App.translations.ObservationLocation;
-		content.container.appendChild(locationLbl);
-		const mapDiv = new Ui.Div();
-		mapDiv.container.id = "map";
-		mapDiv.style.height = "300px";
-		mapDiv.style.width = "100%";
-		mapDiv.style.position = "relative";
-		mapDiv.style.borderRadius = "var(--small-distance)";
-		content.attach(mapDiv);
+		if (report.latitude !== 0 && report.longitude !== 0) {
+			const locationLbl = document.createElement("h3");
+			locationLbl.className = "title";
+			locationLbl.innerHTML = App.translations.ObservationLocation;
+			content.container.appendChild(locationLbl);
+			const mapDiv = new Ui.Div();
+			mapDiv.container.id = "map";
+			mapDiv.style.height = "300px";
+			mapDiv.style.width = "100%";
+			mapDiv.style.position = "relative";
+			mapDiv.style.borderRadius = "var(--small-distance)";
+			content.attach(mapDiv);
 
-		setTimeout(function() {
-			const latLng = [report.latitude, report.longitude];
-			console.log(latLng);
-			const map = L.map('map').setView(latLng, 13);
-			L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-				maxZoom: 19,
-				attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-			}).addTo(map);
-			const markerGroup = L.layerGroup().addTo(map);
-			L.marker(latLng).addTo(markerGroup);
-		}, 10);
+			setTimeout(function() {
+				const latLng = [report.latitude, report.longitude];
+				console.log(latLng);
+				const map = L.map('map').setView(latLng, 13);
+				L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+					maxZoom: 19,
+					attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+				}).addTo(map);
+				const markerGroup = L.layerGroup().addTo(map);
+				L.marker(latLng).addTo(markerGroup);
+			}, 10);
+		}
 
 		this.mSpeciesList = new Ui.Select(App.getTranslation(report.species.name), "");
 		this.mSpeciesList.setDisabled(true);
