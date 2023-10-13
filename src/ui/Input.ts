@@ -10,6 +10,10 @@ namespace Ui {
 			this.mContainer.className = "uix-input";
 		}
 
+		public setDisabled(disabled: boolean): void {
+			(this.mContainer as HTMLInputElement).disabled = disabled;
+		}
+
 		public setPlaceHolder(str: string): void {
 			this.mContainer.setAttribute("placeholder", str);
 		}

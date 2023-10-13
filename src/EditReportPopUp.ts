@@ -28,7 +28,7 @@ class EditReportPopUp {
 		this.mChecklistContainer.style.position = "relative";
 	
 		const name = document.createElement("h1");
-		name.innerHTML = "Edit sighting";
+		name.innerHTML = App.translations.Sightings;
 		name.style.margin = "unset";
 		content.container.appendChild(name);
 	
@@ -43,85 +43,37 @@ class EditReportPopUp {
 		mapDiv.style.position = "relative";
 		mapDiv.style.borderRadius = "var(--small-distance)";
 		content.attach(mapDiv);
-	
-		const locateButton = document.createElement("button");
-		locateButton.innerHTML = App.translations.FindMyLocation;
-		locateButton.style.borderRadius = "8px";
-		locateButton.style.backgroundColor = "var(--success-color)";
-		content.container.appendChild(locateButton);
-	
+
 		setTimeout(function() {
-			const map = L.map('map').setView([58.1801188016368, 13.959220108737176], 13);
+			const latLng = [report.latitude, report.longitude];
+			console.log(latLng);
+			const map = L.map('map').setView(latLng, 13);
 			L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				maxZoom: 19,
 				attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 			}).addTo(map);
-			map.locate({setView: true, maxZoom: 19});
 			const markerGroup = L.layerGroup().addTo(map);
-			map.on("click", function(e) {
-				markerGroup.clearLayers();
-				L.marker(e.latlng).addTo(markerGroup);
-				self.mLocation = e.latlng;
-			});
-			map.on('locationfound', function(e) {
-				markerGroup.clearLayers();
-				L.marker(e.latlng).addTo(markerGroup);
-				self.mLocation = e.latlng;
-				map.setZoom(16);
-			});
-	
-			locateButton.addEventListener("click", function() {
-				map.locate({setView: true, maxZoom: 19});
-			});
+			L.marker(latLng).addTo(markerGroup);
 		}, 10);
 
-		this.mSpeciesList = new Ui.Select(App.translations.SelectSpecies + "...", App.translations.Search, function(species: string | null) {
-			const r = new HttpRequest("GET", "/v1/lists/species/" + report.species.uuid);
-			r.process(function(status: any, data: any) {
-				const d = data as Responses.ListsSpecies;
-				self.mChecklistContainer.detachAll();
-				self.mChecklistContainer.container.innerHTML = "";
-	
-				d.result.forEach(e => {
-					const dd = new Ui.Div();
-					dd.style.position = "relative";
-					dd.style.width = "100%";
-					self.mChecklistContainer.attach(dd);
-					const c = new Ui.Input("checkbox");
-					c.container.setAttribute("name", e.list.uuid);
-					c.container.addEventListener("click", function() {
-						self.validate();
-					});
-
-					dd.attach(c);
-					const cLbl = document.createElement("label");
-					cLbl.setAttribute("for", c.container.getAttribute("name")!);
-					cLbl.innerHTML = App.getTranslation(e.list.name);
-					dd.container.appendChild(cLbl);
-
-					/*if (!e.available) {
-						c.container.setAttribute("disabled", "");
-						cLbl.style.color = "var(--secondary-color)";
-					} else if (list && e.list.uuid === list.uuid) {
-						(c.container as HTMLInputElement).checked = true;
-					}*/
-				});
-
-				self.validate();
-			});
-		});
+		this.mSpeciesList = new Ui.Select(App.getTranslation(report.species.name), "");
+		this.mSpeciesList.setDisabled(true);
 		content.attach(this.mSpeciesList);
 	
-		const ageList = new Ui.Select(App.translations.SelectAge + "...", App.translations.Search);
+		const ageList = new Ui.Select(report.age ? App.getTranslation(report.age.name) : "", "");
+		ageList.setDisabled(true);
 		content.attach(ageList);
 
-		const genderList = new Ui.Select(App.translations.SelectGender + "...", App.translations.Search);
+		const genderList = new Ui.Select(report.gender ? App.getTranslation(report.gender.name) : "", "");
+		genderList.setDisabled(true);
 		content.attach(genderList);
 
-		const methodList = new Ui.Select(App.translations.SelectMethod + "...", App.translations.Search);
+		const methodList = new Ui.Select(report.method ? App.getTranslation(report.method.name) : "", "");
+		methodList.setDisabled(true);
 		content.attach(methodList);
 
-		const activityList = new Ui.Select(App.translations.SelectActivity + "...", App.translations.Search);
+		const activityList = new Ui.Select(report.activity ? App.getTranslation(report.activity.name) : "", "");
+		activityList.setDisabled(true);
 		content.attach(activityList);
 	
 		const quantityLbl = document.createElement("h3");
@@ -129,9 +81,8 @@ class EditReportPopUp {
 		quantityLbl.innerHTML = App.translations.Quantity;
 		content.container.appendChild(quantityLbl);
 		const quantity = new Ui.Input("number");
-		quantity.container.setAttribute("min", "1");
-		quantity.container.setAttribute("step", "1");
-		quantity.value = "1";
+		quantity.setDisabled(true);
+		quantity.value = report.quantity.toString();
 		content.attach(quantity);
 	
 		const fromLbl = document.createElement("h3");
@@ -139,6 +90,7 @@ class EditReportPopUp {
 		fromLbl.innerHTML = App.translations.ObservedFrom;
 		content.container.appendChild(fromLbl);
 		const from = new Ui.Input("datetime-local");
+		from.setDisabled(true);
 		content.attach(from);
 
 		const now = new Date();
@@ -151,6 +103,7 @@ class EditReportPopUp {
 		untilLbl.innerHTML = App.translations.ObservedUntil;
 		content.container.appendChild(untilLbl);
 		const until = new Ui.Input("datetime-local");
+		until.setDisabled(true);
 		content.attach(until);
 	
 		const privateCommentLbl = document.createElement("h3");
@@ -163,6 +116,7 @@ class EditReportPopUp {
 		privateComment.style.resize = "none";
 		privateComment.style.padding = "var(--small-distance)";
 		privateComment.style.boxSizing = "border-box";
+		privateComment.disabled = true;
 		privateComment.innerHTML = report.comment.text;
 		content.container.appendChild(privateComment);
 	
@@ -171,120 +125,20 @@ class EditReportPopUp {
 		listsLbl.innerHTML = App.translations.AvailableChecklists;
 		content.container.appendChild(listsLbl);
 		content.attach(self.mChecklistContainer);
-	
-		const r = new HttpRequest("GET", "/v1/reports/basis");
-		r.process(function(status: any, data: any) {
-			const d = data as Responses.ReportsBasis;
-	
-			d.species.sort(Utils.sortByNameOnCurrentLanguage);
-			d.species.forEach(e => {
-				const option = self.mSpeciesList.addOption(App.getTranslation(e.name), e.uuid);
-				if (report.species && report.species.uuid === e.uuid) {
-					option.click();
-					self.mSpeciesList.hide();
-				}
-			});
-	
-			d.ages.sort(Utils.sortByNameOnCurrentLanguage);
-			d.ages.forEach(e => {
-				ageList.addOption(App.getTranslation(e.name), e.uuid);
-			});
-	
-			d.genders.sort(Utils.sortByNameOnCurrentLanguage);
-			d.genders.forEach(e => {
-				genderList.addOption(App.getTranslation(e.name), e.uuid);
-			});
-	
-			d.methods.sort(Utils.sortByNameOnCurrentLanguage);
-			d.methods.forEach(e => {
-				methodList.addOption(App.getTranslation(e.name), e.uuid);
-			});
-	
-			d.activities.sort(Utils.sortByNameOnCurrentLanguage);
-			d.activities.forEach(e => {
-				activityList.addOption(App.getTranslation(e.name), e.uuid);
-			});
-		});
-	
+
 		this.mReportButton = document.createElement("button");
-		this.mReportButton.innerHTML = App.translations.SubmitSighting;
+		this.mReportButton.innerHTML = "Delete Sighting";
 		this.mReportButton.style.width = "auto";
 		this.mReportButton.style.cssFloat = "right";
 		this.mReportButton.style.borderRadius = "8px";
-		this.mReportButton.style.backgroundColor = "var(--success-color)";
-		this.mReportButton.disabled = true;
+		this.mReportButton.style.backgroundColor = "#a11f1f";
 		this.mReportButton.addEventListener("click", function() {
-			const r = new Requests.Reports();
-			r.species_uuid = self.mSpeciesList.value!;
-			if (from.value !== "") {
-				const localFromDate = new Date(from.value);
-				r.from = new Date(localFromDate.getTime()).toISOString();
-				r.from = r.from.slice(0, r.from.lastIndexOf(".")) + 'Z';
-			}
-			if (until.value !== "") {
-				const localUntilData = new Date(until.value);
-				r.until = new Date(localUntilData.getTime()).toISOString();	
-				r.until = r.until.slice(0, r.until.lastIndexOf(".")) + 'Z';
-			}
-
-			r.latitude = self.mLocation.lat;
-			r.longitude = self.mLocation.lng;
-			r.quantity = parseInt(quantity.value);
-			if (ageList.value) {
-				r.age_uuid = ageList.value;
-			}
-			if (activityList.value) {
-				r.activity_uuid = activityList.value;
-			}
-			if (genderList.value) {
-				r.gender_uuid = genderList.value;
-			}
-			if (methodList.value) {
-				r.method_uuid = methodList.value;
-			}
-			r.comment = privateComment.value;
-			r.silent = true;
-			const checklists = self.mChecklistContainer.container.getElementsByTagName("input");
-			r.list_uuids = Array();
-			for (let i = 0; i < checklists.length; ++i) {
-				if (checklists[i].checked) {
-					r.list_uuids.push(checklists[i].name);
-				}
-			}
-			// TODO: Tags and notifications.
-
-			const rr = new HttpRequest("POST", "/v1/reports", JSON.stringify(r));
-			rr.process(function(status: any, data: any) {
-				self.mPopUp.close();
-			});
 		});
 		content.container.appendChild(this.mReportButton);
 
 		this.mPopUp = new Ui.PopUp(content.container, function() {
 			closeCallback();
 		});
-	}
-
-	private validate(): void {
-		this.mReportButton.disabled = false;
-		if (this.mSpeciesList.value === "") {
-			this.mReportButton.disabled = true;
-			return;
-		}
-
-		const checklists = this.mChecklistContainer.container.getElementsByTagName("input");
-		let isAnyChecked = false;
-		for (let i = 0; i < checklists.length; ++i) {
-			if (checklists[i].checked) {
-				isAnyChecked = true;
-				break;
-			}
-		}
-
-		if (!isAnyChecked) {
-			this.mReportButton.disabled = true;
-			return;
-		}
 	}
 }
 

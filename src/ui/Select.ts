@@ -28,7 +28,7 @@ namespace Ui {
 			this.mResult.innerHTML = placeholder;
 			this.mResult.addEventListener("click", function() {
 				self.toggleVisible();
-			})
+			});
 			this.mContainer.appendChild(this.mResult);
 
 			this.mOpenArrow = document.createElement("span");
@@ -211,6 +211,18 @@ namespace Ui {
 				}
 			}
 			return null;
+		}
+
+		public setDisabled(disabled: boolean): void {
+			if (disabled) {
+				this.mResult.style.pointerEvents = "none";
+				this.mResult.style.color = "gray";
+				this.mOpenArrow.style.color = "gray";	
+			} else {
+				this.mResult.style.pointerEvents = "unset";
+				this.mResult.style.color = "unset";
+				this.mOpenArrow.style.color = "unset";	
+			}
 		}
 
 		public clear(): void {
