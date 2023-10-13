@@ -62,5 +62,6 @@
 	"ImportSightings": "Importera fynd",
 	"LastSightings": "Senaste fynd",
 	"ImportSightingsDescription": "Om du använt den förra versionen av 300 Svenska Fåglar-appen kan du importera dina fynd.",
-	"NoRecentSightings": "Det finns inga fynd rapporterade de senaste 14 dagarna."
+	"NoRecentSightings": "Det finns inga fynd rapporterade de senaste 14 dagarna.",
+	"DeleteSighting": "Ta Bort Fynd"
 }

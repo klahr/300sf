@@ -127,7 +127,7 @@ class EditReportPopUp {
 		content.attach(self.mChecklistContainer);
 
 		this.mReportButton = document.createElement("button");
-		this.mReportButton.innerHTML = "Delete Sighting";
+		this.mReportButton.innerHTML = App.translations.DeleteSighting;
 		this.mReportButton.style.width = "auto";
 		this.mReportButton.style.cssFloat = "right";
 		this.mReportButton.style.borderRadius = "8px";
