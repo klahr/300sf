@@ -11,7 +11,6 @@
 
 class EditReportPopUp {
 	private mReportButton: HTMLButtonElement;
-	private mSpeciesList: Ui.Select;
 	private mChecklistContainer: Ui.Div;
 	private mLocation = L.latLng;
 	private mPopUp: Ui.PopUp;
@@ -47,7 +46,6 @@ class EditReportPopUp {
 
 			setTimeout(function() {
 				const latLng = [report.latitude, report.longitude];
-				console.log(latLng);
 				const map = L.map('map').setView(latLng, 13);
 				L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 					maxZoom: 19,
@@ -58,25 +56,38 @@ class EditReportPopUp {
 			}, 10);
 		}
 
-		this.mSpeciesList = new Ui.Select(App.getTranslation(report.species.name), "");
-		this.mSpeciesList.setDisabled(true);
-		content.attach(this.mSpeciesList);
-	
-		const ageList = new Ui.Select(report.age ? App.getTranslation(report.age.name) : "", "");
-		ageList.setDisabled(true);
-		content.attach(ageList);
+		const speciesList = new Ui.Input("text")
+		speciesList.setPlaceHolder(App.getTranslation(report.species.name));
+		speciesList.setDisabled(true);
+		content.attach(speciesList);
 
-		const genderList = new Ui.Select(report.gender ? App.getTranslation(report.gender.name) : "", "");
-		genderList.setDisabled(true);
-		content.attach(genderList);
+		if (report.age) {
+			const ageList = new Ui.Input("text");
+			ageList.setPlaceHolder(App.getTranslation(report.age.name));
+			ageList.setDisabled(true);
+			content.attach(ageList);	
+		}
 
-		const methodList = new Ui.Select(report.method ? App.getTranslation(report.method.name) : "", "");
-		methodList.setDisabled(true);
-		content.attach(methodList);
+		if (report.gender) {
+			const genderList = new Ui.Input("text");
+			genderList.setPlaceHolder(App.getTranslation(report.gender.name));
+			genderList.setDisabled(true);
+			content.attach(genderList);	
+		}
 
-		const activityList = new Ui.Select(report.activity ? App.getTranslation(report.activity.name) : "", "");
-		activityList.setDisabled(true);
-		content.attach(activityList);
+		if (report.method) {
+			const methodList = new Ui.Input("text");
+			methodList.setPlaceHolder(App.getTranslation(report.method.name));
+			methodList.setDisabled(true);
+			content.attach(methodList);	
+		}
+
+		if (report.activity) {
+			const activityList = new Ui.Input("text");
+			activityList.setPlaceHolder(App.getTranslation(report.activity.name));
+			activityList.setDisabled(true);
+			content.attach(activityList);	
+		}
 	
 		const quantityLbl = document.createElement("h3");
 		quantityLbl.className = "title";
@@ -86,47 +97,67 @@ class EditReportPopUp {
 		quantity.setDisabled(true);
 		quantity.value = report.quantity.toString();
 		content.attach(quantity);
-	
-		const fromLbl = document.createElement("h3");
-		fromLbl.className = "title";
-		fromLbl.innerHTML = App.translations.ObservedFrom;
-		content.container.appendChild(fromLbl);
-		const from = new Ui.Input("datetime-local");
-		from.setDisabled(true);
-		content.attach(from);
 
-		const now = new Date();
-		now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-		now.setSeconds(now.getMinutes());
-		from.value = now.toISOString().slice(0, -8);
+		if (Utils.isValidDate(report.from)) {
+			const fromLbl = document.createElement("h3");
+			fromLbl.className = "title";
+			fromLbl.innerHTML = App.translations.ObservedFrom;
+			content.container.appendChild(fromLbl);
+			const from = new Ui.Input("text");
+			from.setPlaceHolder(Utils.toYYYY_MM_DD_hh_mm(report.from));
+			from.setDisabled(true);
+			content.attach(from);
 
-		const untilLbl = document.createElement("h3");
-		untilLbl.className = "title";
-		untilLbl.innerHTML = App.translations.ObservedUntil;
-		content.container.appendChild(untilLbl);
-		const until = new Ui.Input("datetime-local");
-		until.setDisabled(true);
-		content.attach(until);
-	
-		const privateCommentLbl = document.createElement("h3");
-		privateCommentLbl.className = "title";
-		privateCommentLbl.innerHTML = App.translations.PrivateComment;
-		content.container.appendChild(privateCommentLbl);
-		const privateComment = document.createElement("textarea");
-		privateComment.style.width = "100%";
-		privateComment.style.height = "128px";
-		privateComment.style.resize = "none";
-		privateComment.style.padding = "var(--small-distance)";
-		privateComment.style.boxSizing = "border-box";
-		privateComment.disabled = true;
-		privateComment.innerHTML = report.comment.text;
-		content.container.appendChild(privateComment);
+			if (Utils.isValidDate(report.until)) {
+				const untilLbl = document.createElement("h3");
+				untilLbl.className = "title";
+				untilLbl.innerHTML = App.translations.ObservedUntil;
+				content.container.appendChild(untilLbl);
+				const until = new Ui.Input("text");
+				until.setPlaceHolder(Utils.toYYYY_MM_DD_hh_mm(report.until));
+				until.setDisabled(true);
+				content.attach(until);
+			}
+		}
+
+		if (report.comment.text !== "") {
+			const privateCommentLbl = document.createElement("h3");
+			privateCommentLbl.className = "title";
+			privateCommentLbl.innerHTML = App.translations.PrivateComment;
+			content.container.appendChild(privateCommentLbl);
+			const privateComment = document.createElement("textarea");
+			privateComment.style.width = "100%";
+			privateComment.style.height = "128px";
+			privateComment.style.resize = "none";
+			privateComment.style.padding = "var(--small-distance)";
+			privateComment.style.boxSizing = "border-box";
+			privateComment.disabled = true;
+			privateComment.innerHTML = report.comment.text;
+			content.container.appendChild(privateComment);	
+		}
 	
 		const listsLbl = document.createElement("h3");
 		listsLbl.className = "title";
-		listsLbl.innerHTML = App.translations.AvailableChecklists;
+		listsLbl.innerHTML = App.translations.Checklists;
 		content.container.appendChild(listsLbl);
 		content.attach(self.mChecklistContainer);
+
+		report.lists.forEach(e => {
+			const dd = new Ui.Div();
+			dd.style.position = "relative";
+			dd.style.width = "100%";
+			self.mChecklistContainer.attach(dd);
+			const c = new Ui.Input("checkbox");
+			c.container.setAttribute("disabled", "");
+			(c.container as HTMLInputElement).checked = true;
+
+			dd.attach(c);
+			const cLbl = document.createElement("label");
+			cLbl.setAttribute("for", c.container.getAttribute("name")!);
+			cLbl.innerHTML = App.getTranslation(e.name);
+			dd.container.appendChild(cLbl);
+			cLbl.style.color = "var(--secondary-color)";
+		});
 
 		this.mReportButton = document.createElement("button");
 		this.mReportButton.innerHTML = App.translations.DeleteSighting;
