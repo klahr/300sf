@@ -1,7 +1,7 @@
 namespace Models {
 	export class Tag {
 		uuid: string;
-		name: Translation;
+		name: string;
 		color: string;
 	}
 }

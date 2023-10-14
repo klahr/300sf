@@ -238,6 +238,25 @@ div.filter {
 	left: 0;
 }
 
+div.tag {
+	background-color: #0d81b4;
+	padding: 2px 8px;
+	border-radius: 8px;
+	margin: 8px;
+	width: fit-content;
+	cursor: pointer;
+}
+
+div.tag.selected {
+	box-shadow: inset 0 0 0 2px #ffffffad;
+}
+
+div.tag > p {
+	color: white;
+	font-weight: bold;
+	font-size: 0.8rem;
+}
+
 div.progress-box {
 	width: 128px;
 	height: 128px;

@@ -66,6 +66,7 @@ class Translations {
         NoRecentSightings: "There have been no recent sightings in the last 14 days.",
         DeleteSighting: "Delete Sighting",
         ArchiveSighting: "Archive Sighting",
+        CreateTag: "Create Tag",
     }
     static sv = {
         SignIn: "Logga in",
@@ -134,6 +135,7 @@ class Translations {
         NoRecentSightings: "Det finns inga fynd rapporterade de senaste 14 dagarna.",
         DeleteSighting: "Ta Bort Fynd",
         ArchiveSighting: "Arkivera Fynd",
+        CreateTag: "Skapa Tagg",
     }
     static de = {
         SignIn: "Anmelden",
@@ -202,5 +204,6 @@ class Translations {
         NoRecentSightings: "There have been no recent sightings in the last 14 days.",
         DeleteSighting: "Delete Sighting",
         ArchiveSighting: "Archive Sighting",
+        CreateTag: "Create Tag",
     }
 }
