@@ -84,7 +84,7 @@ class HomePage extends Page {
 				});
 				self.mProgressBoxes.attach(d);
 				if (e.list.color !== "") {
-					d.container.style.backgroundColor = e.list.color;
+					d.container.style.background = "linear-gradient(" + e.list.color + ", " + e.list.color + "bf)";
 				}
 
 				const title = document.createElement("p");

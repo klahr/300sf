@@ -257,12 +257,13 @@ div.tag > p {
 	font-weight: bold;
 	font-size: 0.8rem;
 	user-select: none;
+	text-shadow: 1px 1px #0000005e;
 }
 
 div.progress-box {
 	width: 128px;
 	height: 128px;
-	background-color: #0d81b4;
+	background: linear-gradient(#0d81b4, #0d81b4bf);
 	border-radius: var(--medium-radius);
 	display: inline-block;
 	margin: var(--small-distance);
