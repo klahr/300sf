@@ -65,5 +65,6 @@
 	"NoRecentSightings": "There have been no recent sightings in the last 14 days.",
 	"DeleteSighting": "Delete Sighting",
 	"ArchiveSighting": "Archive Sighting",
-	"CreateTag": "Create Tag"
+	"CreateTag": "Create Tag",
+	"Tags": "Tags"
 }

@@ -242,9 +242,10 @@ div.tag {
 	background-color: #0d81b4;
 	padding: 2px 8px;
 	border-radius: 8px;
-	margin: 8px;
+	margin: 4px;
 	width: fit-content;
 	cursor: pointer;
+	display: inline-block;
 }
 
 div.tag.selected {
@@ -255,6 +256,7 @@ div.tag > p {
 	color: white;
 	font-weight: bold;
 	font-size: 0.8rem;
+	user-select: none;
 }
 
 div.progress-box {

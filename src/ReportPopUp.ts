@@ -13,6 +13,7 @@ class ReportPopUp {
 	private mReportButton: HTMLButtonElement;
 	private mSpeciesList: Ui.Select;
 	private mChecklistContainer: Ui.Div;
+	private mTagsContainer: Ui.Div;
 	private mLocation = L.latLng;
 	private mPopUp: Ui.PopUp;
 
@@ -23,10 +24,10 @@ class ReportPopUp {
 		content.style.textAlign = "left";
 		content.style.width = "100%";
 		content.style.position = "relative";
-	
+
 		this.mChecklistContainer = new Ui.Div();
 		this.mChecklistContainer.style.position = "relative";
-	
+
 		const name = document.createElement("h1");
 		name.innerHTML = App.translations.SubmitSighting;
 		name.style.margin = "unset";
@@ -164,7 +165,16 @@ class ReportPopUp {
 		privateComment.style.padding = "var(--small-distance)";
 		privateComment.style.boxSizing = "border-box";
 		content.container.appendChild(privateComment);
-	
+
+		const tagsLbl = document.createElement("h3");
+		tagsLbl.className = "title";
+		tagsLbl.innerHTML = App.translations.Tags;
+		content.container.appendChild(tagsLbl);
+
+		this.mTagsContainer = new Ui.Div();
+		this.mTagsContainer.style.position = "relative";
+		content.attach(this.mTagsContainer);
+
 		const listsLbl = document.createElement("h3");
 		listsLbl.className = "title";
 		listsLbl.innerHTML = App.translations.AvailableChecklists;
@@ -202,6 +212,26 @@ class ReportPopUp {
 			d.activities.sort(Utils.sortByNameOnCurrentLanguage);
 			d.activities.forEach(e => {
 				activityList.addOption(App.getTranslation(e.name), e.uuid);
+			});
+
+			d.tags.forEach(e => {
+				const tag = document.createElement("div");
+				tag.className = "tag";
+				tag.setAttribute("uuid", e.uuid);
+				tag.addEventListener("click", () => {
+					if (tag.classList.contains("selected")) {
+						tag.classList.remove("selected");
+					} else {
+						tag.classList.add("selected");
+					}
+				});
+				if (e.color !== "") {
+					tag.style.backgroundColor = e.color;
+				}
+				const c = document.createElement("p");
+				c.innerHTML = e.name;
+				tag.appendChild(c);
+				self.mTagsContainer.container.appendChild(tag);
 			});
 		});
 	
@@ -250,6 +280,16 @@ class ReportPopUp {
 					r.list_uuids.push(checklists[i].name);
 				}
 			}
+
+			const tags = self.mTagsContainer.container.getElementsByClassName("tag");
+			r.tag_uuids = Array();
+			for (let i = 0; i < tags.length; ++i) {
+				if (tags[i].classList.contains("selected")) {
+					r.tag_uuids.push(tags[i].getAttribute("uuid")!);
+				}
+			}
+			console.log(r);
+
 			// TODO: Tags and notifications.
 
 			const rr = new HttpRequest("POST", "/v1/reports", JSON.stringify(r));

@@ -67,6 +67,7 @@ class Translations {
         DeleteSighting: "Delete Sighting",
         ArchiveSighting: "Archive Sighting",
         CreateTag: "Create Tag",
+        Tags: "Tags",
     }
     static sv = {
         SignIn: "Logga in",
@@ -136,6 +137,7 @@ class Translations {
         DeleteSighting: "Ta Bort Fynd",
         ArchiveSighting: "Arkivera Fynd",
         CreateTag: "Skapa Tagg",
+        Tags: "Taggar",
     }
     static de = {
         SignIn: "Anmelden",
@@ -205,5 +207,6 @@ class Translations {
         DeleteSighting: "Delete Sighting",
         ArchiveSighting: "Archive Sighting",
         CreateTag: "Create Tag",
+        Tags: "Tags",
     }
 }

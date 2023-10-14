@@ -65,5 +65,6 @@
 	"NoRecentSightings": "Det finns inga fynd rapporterade de senaste 14 dagarna.",
 	"DeleteSighting": "Ta Bort Fynd",
 	"ArchiveSighting": "Arkivera Fynd",
-	"CreateTag": "Skapa Tagg"
+	"CreateTag": "Skapa Tagg",
+	"Tags": "Taggar"
 }
