@@ -160,7 +160,7 @@ class EditReportPopUp {
 		});
 
 		this.mReportButton = document.createElement("button");
-		this.mReportButton.innerHTML = App.translations.DeleteSighting;
+		this.mReportButton.innerHTML = App.translations.ArchiveSighting;
 		this.mReportButton.style.width = "auto";
 		this.mReportButton.style.cssFloat = "right";
 		this.mReportButton.style.borderRadius = "8px";

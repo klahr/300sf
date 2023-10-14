@@ -63,5 +63,6 @@
 	"LastSightings": "Recent sightings",
 	"ImportSightingsDescription": "If you possess any sightings within the previous version of the 300 Swedish Birds application, you have the ability to import them.",
 	"NoRecentSightings": "There have been no recent sightings in the last 14 days.",
-	"DeleteSighting": "Delete Sighting"
+	"DeleteSighting": "Delete Sighting",
+	"ArchiveSighting": "Archive Sighting"
 }

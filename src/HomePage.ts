@@ -8,6 +8,7 @@
 /// <reference path="SpeciesPopUp.ts"/>
 /// <reference path="ReportPopUp.ts"/>
 /// <reference path="ProfilePopUp.ts"/>
+/// <reference path="EditReportPopUp.ts"/>
 /// <reference path="responses/Users.ts"/>
 
 class HomePage extends Page {

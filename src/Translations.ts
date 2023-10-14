@@ -65,6 +65,7 @@ class Translations {
         ImportSightingsDescription: "If you possess any sightings within the previous version of the 300 Swedish Birds application, you have the ability to import them.",
         NoRecentSightings: "There have been no recent sightings in the last 14 days.",
         DeleteSighting: "Delete Sighting",
+        ArchiveSighting: "Archive Sighting",
     }
     static sv = {
         SignIn: "Logga in",
@@ -132,6 +133,7 @@ class Translations {
         ImportSightingsDescription: "Om du använt den förra versionen av 300 Svenska Fåglar-appen kan du importera dina fynd.",
         NoRecentSightings: "Det finns inga fynd rapporterade de senaste 14 dagarna.",
         DeleteSighting: "Ta Bort Fynd",
+        ArchiveSighting: "Arkivera Fynd",
     }
     static de = {
         SignIn: "Anmelden",
@@ -199,5 +201,6 @@ class Translations {
         ImportSightingsDescription: "Wenn Sie über Einreichungen in der vorherigen Version des 300 schwedischen Vogelantrags verfügen, haben Sie die Möglichkeit, diese zu importieren.",
         NoRecentSightings: "There have been no recent sightings in the last 14 days.",
         DeleteSighting: "Delete Sighting",
+        ArchiveSighting: "Archive Sighting",
     }
 }

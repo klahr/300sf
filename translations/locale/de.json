@@ -63,5 +63,6 @@
 	"LastSightings": "Letzte Einreichungen",
 	"ImportSightingsDescription": "Wenn Sie über Einreichungen in der vorherigen Version des 300 schwedischen Vogelantrags verfügen, haben Sie die Möglichkeit, diese zu importieren.",
 	"NoRecentSightings": "There have been no recent sightings in the last 14 days.",
-	"DeleteSighting": "Delete Sighting"
+	"DeleteSighting": "Delete Sighting",
+	"ArchiveSighting": "Archive Sighting"
 }
