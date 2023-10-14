@@ -166,11 +166,18 @@ class EditReportPopUp {
 		this.mReportButton.style.borderRadius = "8px";
 		this.mReportButton.style.backgroundColor = "#a11f1f";
 		this.mReportButton.addEventListener("click", function() {
+			const r = new HttpRequest("POST", "/v1/reports/" + report.uuid + "/archive");
+			r.process(function(status: any, data: any) {
+				self.mPopUp.close();
+			});
 		});
 		content.container.appendChild(this.mReportButton);
 
 		this.mPopUp = new Ui.PopUp(content.container, function() {
 			closeCallback();
+			setTimeout(() => {
+				location.reload();
+			}, 150);
 		});
 	}
 }

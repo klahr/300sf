@@ -99,10 +99,11 @@ class ListPage extends Page {
 		if (data.name === undefined) {
 			// TODO: Optimize this call that returns more then necessary.
 			const r = new HttpRequest("GET", "/v1/lists/list");
+			const superSetData = super.setData;
 			r.process(function(status: any, data: any) {
 				data.result.forEach( e => {
 					if (e.uuid === self.data.uuid) {
-						self.setData(e);
+						superSetData.call(self, e);
 						self.updateLists();
 						return;
 					}
@@ -121,7 +122,6 @@ class ListPage extends Page {
 		this.mTable.clear();
 		this.mProgress.setProgress(0);
 		this.mProgressLbl.innerHTML = "";
-
 		const self = this;
 
 		const r = new HttpRequest("GET", "/v1/lists/" + (this.data as Models.List).uuid + "/reports");

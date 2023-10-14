@@ -6,6 +6,7 @@
 /// <reference path="DonationPage.ts"/>
 /// <reference path="ForgotPage.ts"/>
 /// <reference path="ManageTagsPage.ts"/>
+/// <reference path="ReportsPage.ts"/>
 /// <reference path="MainMenu.ts"/>
 /// <reference path="ManageChecklistsPage.ts"/>
 /// <reference path="ContributePage.ts"/>
