@@ -159,6 +159,29 @@ class EditReportPopUp {
 			cLbl.style.color = "var(--secondary-color)";
 		});
 
+		if (report.tags.length > 0) {
+			const tagsLbl = document.createElement("h3");
+			tagsLbl.className = "title";
+			tagsLbl.innerHTML = App.translations.Tags;
+			content.container.appendChild(tagsLbl);
+	
+			const tagsContainer = new Ui.Div();
+			tagsContainer.style.position = "relative";
+			content.attach(tagsContainer);
+	
+			report.tags.forEach(e => {
+				const tag = document.createElement("div");
+				tag.className = "tag";
+				if (e.color !== "") {
+					tag.style.backgroundColor = e.color;
+				}
+				const c = document.createElement("p");
+				c.innerHTML = e.name;
+				tag.appendChild(c);
+				tagsContainer.container.appendChild(tag);
+			});
+		}
+
 		this.mReportButton = document.createElement("button");
 		this.mReportButton.innerHTML = App.translations.ArchiveSighting;
 		this.mReportButton.style.width = "auto";
@@ -169,15 +192,15 @@ class EditReportPopUp {
 			const r = new HttpRequest("POST", "/v1/reports/" + report.uuid + "/archive");
 			r.process(function(status: any, data: any) {
 				self.mPopUp.close();
+				setTimeout(() => {
+					location.reload();
+				}, 150);
 			});
 		});
 		content.container.appendChild(this.mReportButton);
 
 		this.mPopUp = new Ui.PopUp(content.container, function() {
 			closeCallback();
-			setTimeout(() => {
-				location.reload();
-			}, 150);
 		});
 	}
 }

@@ -288,7 +288,6 @@ class ReportPopUp {
 					r.tag_uuids.push(tags[i].getAttribute("uuid")!);
 				}
 			}
-			console.log(r);
 
 			// TODO: Tags and notifications.
 
