@@ -169,6 +169,24 @@ class HomePage extends Page {
 					entry.appendChild(comment);
 				}
 
+				if (e.tags.length > 0) {
+					const tagsContainer = document.createElement("div");
+					tagsContainer.style.position = "relative";
+					entry.appendChild(tagsContainer);
+
+					e.tags.forEach(e => {
+						const tag = document.createElement("div");
+						tag.className = "tag";
+						if (e.color !== "") {
+							tag.style.backgroundColor = e.color;
+						}
+						const c = document.createElement("p");
+						c.innerHTML = e.name;
+						tag.appendChild(c);
+						tagsContainer.appendChild(tag);
+					});
+				}
+
 				self.mTable.addRow([entry]);
 			});
 
