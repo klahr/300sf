@@ -6,6 +6,8 @@ class ReportsPage extends Page {
 	private mTitle: HTMLHeadingElement;
 	private mTable: Ui.Table;
 	private mProgressLbl: HTMLParagraphElement;
+	private mFilterInput: Ui.Input;
+	private mFilterTags: Ui.Div;
 
 	constructor(appListener: IAppListener) {
 		super(appListener);
@@ -25,6 +27,77 @@ class ReportsPage extends Page {
 		this.attach(this.mTable);
 
 		this.addProfile();
+
+		const filter = new Ui.Div
+		filter.addClass("filter");
+		this.attach(filter);
+
+		const self = this;
+		this.mFilterInput = new Ui.Input("text");
+		this.mFilterInput.setPlaceHolder(App.translations.Search + "...");
+		filter.attach(this.mFilterInput);
+		this.mFilterInput.container.addEventListener("focus", function() {
+			self.mFilterInput.select();
+		});
+		(this.mFilterInput.container as HTMLInputElement).addEventListener("keydown", function(e) {
+			if (e.key === "Enter") {
+				this.blur();
+			}
+		});
+		(this.mFilterInput.container as HTMLInputElement).addEventListener("keyup", function() {
+			self.filter();
+		});
+
+		this.mFilterTags = new Ui.Div();
+		this.mFilterTags.style.position = "relative";
+		filter.attach(this.mFilterTags);
+	}
+
+
+	private filter(): void {
+		let count = 0;
+		const tags = Array();
+		const allTags = this.mFilterTags.container.getElementsByClassName("tag");
+		for (let i = 0; i < allTags.length; ++i) {
+			if (allTags[i].classList.contains("selected")) {
+				tags.push(allTags[i].getAttribute("uuid"));
+			}
+		}
+		const listEntries = this.mTable.container.getElementsByTagName("tr");
+		const value = this.mFilterInput.value.toLowerCase();
+		for (let i = 0; i < listEntries.length; ++i) {
+			if (tags.length > 0) {
+				let ok = false;
+				const entryTags = listEntries[i].getElementsByClassName("tag");
+				for (let j = 0; j < tags.length; ++j) {
+					for (let k = 0; k < entryTags.length; ++k) {
+						if (entryTags[k].getAttribute("uuid") === tags[j]) {
+							ok = true;
+							break;
+						}
+					}
+					if (ok) {
+						break;
+					}
+				}
+				if (!ok) {
+					listEntries[i].style.display = "none";
+					continue;
+				}
+			}
+			const h3s = listEntries[i].getElementsByTagName("h3");
+			if (h3s.length > 0) {
+				for (let j = 0; j < h3s.length; ++j) {
+					if (h3s[j].innerHTML.toLocaleLowerCase().indexOf(value) > -1) {
+						(listEntries[i] as HTMLElement).style.display = "";
+						count++;
+					} else {
+						(listEntries[i] as HTMLElement).style.display = "none";
+					}
+				}
+			}
+		}
+		this.mProgressLbl.innerHTML = count.toString();
 	}
 
 	public get id(): string {
@@ -47,6 +120,31 @@ class ReportsPage extends Page {
 
 	private updateLists(): void {
 		const self = this;
+		const t = new HttpRequest("GET", "/v1/tags/list");
+		t.process(function(status: any, data: any) {
+			self.mFilterTags.clear();
+			data.result.forEach(e => {
+				const tag = document.createElement("div");
+				tag.className = "tag";
+				tag.setAttribute("uuid", e.uuid);
+				tag.addEventListener("click", () => {
+					if (tag.classList.contains("selected")) {
+						tag.classList.remove("selected");
+					} else {
+						tag.classList.add("selected");
+					}
+					self.filter();
+				});
+				if (e.color !== "") {
+					tag.style.backgroundColor = e.color;
+				}
+				const c = document.createElement("p");
+				c.innerHTML = e.name;
+				tag.appendChild(c);
+				self.mFilterTags.container.appendChild(tag);
+			});
+		});
+
 		const r = new HttpRequest("GET", "/v1/reports/list");
 		r.process(function(status: any, data: any) {
 			self.mTable.clear();
@@ -110,6 +208,7 @@ class ReportsPage extends Page {
 					e.tags.forEach(e => {
 						const tag = document.createElement("div");
 						tag.className = "tag";
+						tag.setAttribute("uuid", e.uuid);
 						if (e.color !== "") {
 							tag.style.backgroundColor = e.color;
 						}
