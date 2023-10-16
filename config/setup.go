@@ -2,7 +2,6 @@
 package config
 
 import (
-	"io/ioutil"
 	"os"
 
 	"gopkg.in/yaml.v2"
@@ -15,6 +14,7 @@ type App struct {
 	RefreshTokenLifetime   int64    `yaml:"refresh-token-lifetime"`
 	PrivateKeyFilename     string   `yaml:"private-key-filename"`
 	PublicKeyFilename      string   `yaml:"public-key-filename"`
+	HashingSecret          string   `json:"hashing-secret"`
 	Domain                 string   `yaml:"domain"`
 	ResourcePath           string   `yaml:"resource-path"`
 	RedisHost              string   `yaml:"redis-host"`
@@ -49,7 +49,7 @@ func (a *App) GetDataStorage() string {
 var AppConfig *App
 
 func SetupAppConfig(filename string) error {
-	raw, err := ioutil.ReadFile(filename)
+	raw, err := os.ReadFile(filename)
 	if err != nil {
 		return err
 	}

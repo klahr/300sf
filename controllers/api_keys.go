@@ -37,7 +37,7 @@ func ApiKeys(c *gin.Context) {
 	}
 
 	originalKey := utils.RandomSha256()
-	hashedOriginalKey := utils.ComputeHmac256(originalKey, "0b8879c940c5af8076712b19cc614f732086ad822d41572e39f93be31ef7f550")
+	hashedOriginalKey := utils.ComputeHmac256(originalKey, config.AppConfig.HashingSecret)
 
 	prefix := utils.GenerateUuidWithFixedLength(7)
 	apiKey := models.ApiKey{

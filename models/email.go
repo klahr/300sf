@@ -18,4 +18,5 @@ type Email struct {
 	HtmlPart  string    `json:"html_part"`
 	SendAt    time.Time `json:"send_at"`
 	SentAt    zero.Time `json:"sent_at"`
+	Checksum  string    `json:"checksum"`
 }

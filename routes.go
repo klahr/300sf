@@ -76,7 +76,7 @@ func apiKeyMiddleware(c *gin.Context) {
 	}
 
 	var apiKey models.ApiKey
-	hashedOrignalKey := utils.ComputeHmac256(v[1], "0b8879c940c5af8076712b19cc614f732086ad822d41572e39f93be31ef7f550")
+	hashedOrignalKey := utils.ComputeHmac256(v[1], config.AppConfig.HashingSecret)
 	if err := models.DB.Where("hash=?", hashedOrignalKey).Where("prefix=?", v[0]).First(&apiKey).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid api key", "code": controllers.ErrorInvalidApiKey})
 		c.Abort()

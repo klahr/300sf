@@ -668,8 +668,12 @@ DROP COLUMN `icon_id`,
 DROP INDEX `fk_users_1_idx` ;
 ;
 
--->
 INSERT INTO `300sf`.`languages` (`iso_name`, `native_name`, `code`) VALUES ('German', 'Deutch', 'de');
 
 ALTER TABLE `300sf`.`translations` 
 ADD COLUMN `de` VARCHAR(128) NULL AFTER `la`;
+
+ALTER TABLE `300sf`.`emails` 
+ADD COLUMN `checksum` VARCHAR(64) NOT NULL AFTER `sent_at`;
+
+-->
