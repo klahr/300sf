@@ -89,7 +89,7 @@ class App implements IAppListener {
 				if (App.isLoggedIn()) {
 					self.fetchUser();
 				} else {
-					App.logOut();
+					window.open("/?redirect=" + window.location.href, "_self");
 				}
 			}
 		});
