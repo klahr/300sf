@@ -58,8 +58,8 @@ p.uix-option.selected {
 }
 
 div.uix-option {
-	width: 100px;
-	height: 100px;
+	width: 64px;
+	height: 64px;
 	background-color: white;
 	display: inline-block;
 	border-radius: var(--small-distance);

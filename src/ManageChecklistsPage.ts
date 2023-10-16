@@ -20,12 +20,8 @@ class ManageCheckListsPage extends Page {
 		this.addProfile();
 
 		this.mTitle = document.createElement("h1");
-		this.mTitle.innerHTML = App.translations.ManageChecklists;
+		this.mTitle.innerHTML = App.translations.Checklists;
 		this.container.appendChild(this.mTitle);
-
-		const checklistsLbl = document.createElement("h2");
-		checklistsLbl.innerHTML = App.translations.Checklists;
-		this.container.appendChild(checklistsLbl);
 
 		this.mChecklists = new Ui.Div();
 		this.mChecklists.style.position = "relative";

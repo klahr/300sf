@@ -57,7 +57,6 @@ class Translations {
         NoProvidedInfo: "No information has been provided.",
         Contribute: "Contribute",
         ReportIssue: "Report issue",
-        ManageTags: "Tags",
         Sightings: "Sightings",
         SubmitSighting: "Submit Sighting",
         ImportSightings: "Import sightings",
@@ -66,8 +65,9 @@ class Translations {
         NoRecentSightings: "There have been no recent sightings in the last 14 days.",
         DeleteSighting: "Delete Sighting",
         ArchiveSighting: "Archive Sighting",
-        CreateTag: "Create Tag",
-        Tags: "Tags",
+        CreateTag: "Create Label",
+        Tags: "Labels",
+        PleaseWait: "Please wait",
     }
     static sv = {
         SignIn: "Logga in",
@@ -127,7 +127,6 @@ class Translations {
         NoProvidedInfo: "Ingen information har angetts.",
         Contribute: "Bidra",
         ReportIssue: "Rapportera fel",
-        ManageTags: "Taggar",
         Sightings: "Fynd",
         SubmitSighting: "Rapportera Fynd",
         ImportSightings: "Importera fynd",
@@ -136,8 +135,9 @@ class Translations {
         NoRecentSightings: "Det finns inga fynd rapporterade de senaste 14 dagarna.",
         DeleteSighting: "Ta Bort Fynd",
         ArchiveSighting: "Arkivera Fynd",
-        CreateTag: "Skapa Tagg",
-        Tags: "Taggar",
+        CreateTag: "Skapa Etikett",
+        Tags: "Etiketter",
+        PleaseWait: "Vänta",
     }
     static de = {
         SignIn: "Anmelden",
@@ -197,7 +197,6 @@ class Translations {
         NoProvidedInfo: "Es wurden keine Informationen angegeben.",
         Contribute: "Beitragen",
         ReportIssue: "Problem melden",
-        ManageTags: "Tags",
         Sightings: "Sightings",
         SubmitSighting: "Einreichen",
         ImportSightings: "Einreichungen importieren",
@@ -206,7 +205,8 @@ class Translations {
         NoRecentSightings: "There have been no recent sightings in the last 14 days.",
         DeleteSighting: "Delete Sighting",
         ArchiveSighting: "Archive Sighting",
-        CreateTag: "Create Tag",
-        Tags: "Tags",
+        CreateTag: "Create Label",
+        Tags: "Labels",
+        PleaseWait: "Please wait",
     }
 }

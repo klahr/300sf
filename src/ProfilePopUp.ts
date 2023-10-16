@@ -24,10 +24,16 @@ class ProfilePopUp {
 		portraitSelect.addOption("", "2.png").style.backgroundImage = "url(/img/portraits/2.png)";
 		portraitSelect.addOption("", "3.png").style.backgroundImage = "url(/img/portraits/3.png)";
 		portraitSelect.addOption("", "4.png").style.backgroundImage = "url(/img/portraits/4.png)";
+		portraitSelect.addOption("", "5.png").style.backgroundImage = "url(/img/portraits/5.png)";
+		portraitSelect.addOption("", "6.png").style.backgroundImage = "url(/img/portraits/6.png)";
+		portraitSelect.addOption("", "7.png").style.backgroundImage = "url(/img/portraits/7.png)";
+		portraitSelect.addOption("", "8.png").style.backgroundImage = "url(/img/portraits/8.png)";
+		portraitSelect.addOption("", "9.png").style.backgroundImage = "url(/img/portraits/9.png)";
+		portraitSelect.addOption("", "10.png").style.backgroundImage = "url(/img/portraits/10.png)";
 		content.attach(portraitSelect);
 
 		const displayName = document.createElement("h1");
-		displayName.innerHTML = "Please wait...";
+		displayName.innerHTML = App.translations.PleaseWait + "...";
 		content.container.appendChild(displayName);
 
 		const uuidLbl = document.createElement("h2");

@@ -1,6 +1,7 @@
 /// <reference path="Page.ts"/>
 /// <reference path="ui/Input.ts"/>
 /// <reference path="App.ts"/>
+/// <reference path="requests/Tags.ts"/>
 
 class ManageTagsPage extends Page {
 	private mTitle: HTMLHeadingElement;
@@ -15,12 +16,8 @@ class ManageTagsPage extends Page {
 		this.addProfile();
 
 		this.mTitle = document.createElement("h1");
-		this.mTitle.innerHTML = App.translations.ManageTags;
+		this.mTitle.innerHTML = App.translations.Tags;
 		this.container.appendChild(this.mTitle);
-
-		const tagsLbl = document.createElement("h2");
-		tagsLbl.innerHTML = App.translations.ManageTags;
-		this.container.appendChild(tagsLbl);
 
 		this.mTags = new Ui.Div();
 		this.mTags.style.position = "relative";

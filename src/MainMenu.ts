@@ -71,11 +71,11 @@ class MainMenu extends Ui.Widget {
 			self.mAppListener.showPage("reports", null);
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>edit_note</span>  " + App.translations.ManageChecklists, function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>edit_note</span>  " + App.translations.Checklists, function() {
 			self.mAppListener.showPage("checklists", null);
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>label</span>  " + App.translations.ManageTags, function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>label</span>  " + App.translations.Tags, function() {
 			self.mAppListener.showPage("tags", null);
 		});
 

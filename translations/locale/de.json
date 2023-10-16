@@ -56,7 +56,6 @@
 	"NoProvidedInfo": "Es wurden keine Informationen angegeben.",
 	"Contribute": "Beitragen",
 	"ReportIssue": "Problem melden",
-	"ManageTags": "Tags",
 	"Sightings": "Sightings",
 	"SubmitSighting": "Einreichen",
 	"ImportSightings": "Einreichungen importieren",
@@ -65,6 +64,7 @@
 	"NoRecentSightings": "There have been no recent sightings in the last 14 days.",
 	"DeleteSighting": "Delete Sighting",
 	"ArchiveSighting": "Archive Sighting",
-	"CreateTag": "Create Tag",
-	"Tags": "Tags"
+	"CreateTag": "Create Label",
+	"Tags": "Labels",
+	"PleaseWait": "Please wait"
 }

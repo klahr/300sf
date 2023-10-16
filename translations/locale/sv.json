@@ -56,7 +56,6 @@
 	"NoProvidedInfo": "Ingen information har angetts.",
 	"Contribute": "Bidra",
 	"ReportIssue": "Rapportera fel",
-	"ManageTags": "Taggar",
 	"Sightings": "Fynd",
 	"SubmitSighting": "Rapportera Fynd",
 	"ImportSightings": "Importera fynd",
@@ -65,6 +64,7 @@
 	"NoRecentSightings": "Det finns inga fynd rapporterade de senaste 14 dagarna.",
 	"DeleteSighting": "Ta Bort Fynd",
 	"ArchiveSighting": "Arkivera Fynd",
-	"CreateTag": "Skapa Tagg",
-	"Tags": "Taggar"
+	"CreateTag": "Skapa Etikett",
+	"Tags": "Etiketter",
+	"PleaseWait": "Vänta"
 }
