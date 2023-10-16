@@ -136,6 +136,39 @@ func Users(c *gin.Context) {
 		}
 	}
 
+	emailTemplate, err := utils.GetEmailTemplate("welcome", language.Code)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		tx.Rollback()
+		return
+	}
+
+	email := models.Email{
+		Model: models.Model{
+			Timestamp: time.Now(),
+			Uuid:      utils.GenerateShortUuid(),
+		},
+		FromEmail: "hej@300sf.se",
+		ToEmail:   r.Email,
+		FromName:  "300sf",
+		ToName:    r.DisplayName,
+		Subject:   "Welcome to 300sf",
+		TextPart:  emailTemplate.Txt,
+		HtmlPart:  emailTemplate.Html,
+		SendAt:    time.Now(),
+	}
+
+	email.Checksum = utils.ComputeHmac256(email.Subject+email.HtmlPart+email.SendAt.String(), config.AppConfig.HashingSecret)
+	if err := tx.Create(&email).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		tx.Rollback()
+		return
+	}
+
 	tx.Commit()
 
 	c.JSON(http.StatusOK, user)
