@@ -1,3 +1,0 @@
-Welcome ${DISPLAY_NAME},
-
-This is a text email.

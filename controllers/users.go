@@ -3,6 +3,7 @@ package controllers
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"git.sr.ht/~klahr/300sf/config"
@@ -136,7 +137,7 @@ func Users(c *gin.Context) {
 		}
 	}
 
-	emailTemplate, err := utils.GetEmailTemplate("welcome", language.Code)
+	et, err := utils.GetEmailTemplate("welcome", language.Code)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
@@ -145,18 +146,21 @@ func Users(c *gin.Context) {
 		return
 	}
 
+	et.Txt = strings.ReplaceAll(et.Txt, "${DISPLAY_NAME}", r.DisplayName)
+	et.Html = strings.ReplaceAll(et.Html, "${DISPLAY_NAME}", r.DisplayName)
+
 	email := models.Email{
 		Model: models.Model{
 			Timestamp: time.Now(),
 			Uuid:      utils.GenerateShortUuid(),
 		},
-		FromEmail: "hej@300sf.se",
+		FromEmail: et.Email,
 		ToEmail:   r.Email,
-		FromName:  "300sf",
+		FromName:  et.Name,
 		ToName:    r.DisplayName,
-		Subject:   "Welcome to 300sf",
-		TextPart:  emailTemplate.Txt,
-		HtmlPart:  emailTemplate.Html,
+		Subject:   et.Subject,
+		TextPart:  et.Txt,
+		HtmlPart:  et.Html,
 		SendAt:    time.Now(),
 	}
 

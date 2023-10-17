@@ -11,6 +11,7 @@ import (
 	"git.sr.ht/~klahr/300sf/config"
 	"git.sr.ht/~klahr/300sf/log"
 	"git.sr.ht/~klahr/300sf/models"
+	"git.sr.ht/~klahr/300sf/services"
 	"github.com/gin-gonic/gin"
 )
 
@@ -68,6 +69,10 @@ func main() {
 	})
 
 	SetupRoutes(r)
+
+	if config.AppConfig.SendEmailInterval > 0 {
+		go services.SendAllEmails(ctx, config.AppConfig.SendEmailInterval)
+	}
 
 	r.Run(config.AppConfig.Address)
 }

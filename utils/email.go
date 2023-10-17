@@ -3,24 +3,27 @@ package utils
 import (
 	"fmt"
 	"os"
+
+	"gopkg.in/yaml.v2"
 )
 
 type EmailTemplate struct {
-	Html string
-	Txt  string
+	Subject string `yaml:"subject"`
+	Email   string `yaml:"email"`
+	Name    string `yaml:"name"`
+	Txt     string `yaml:"txt"`
+	Html    string `yaml:"html"`
 }
 
 func GetEmailTemplate(name, lang string) (*EmailTemplate, error) {
-	txt, err := os.ReadFile(fmt.Sprintf("email-templates/%s.%s.txt", name, lang))
+	filename := fmt.Sprintf("email-templates/%s.%s.yml", name, lang)
+	raw, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
-	html, err := os.ReadFile(fmt.Sprintf("email-templates/%s.%s.html", name, lang))
-	if err != nil {
+	var e EmailTemplate
+	if err := yaml.Unmarshal(raw, &e); err != nil {
 		return nil, err
 	}
-	return &EmailTemplate{
-		Html: string(html),
-		Txt:  string(txt),
-	}, nil
+	return &e, nil
 }
