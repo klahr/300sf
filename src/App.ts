@@ -10,6 +10,7 @@
 /// <reference path="MainMenu.ts"/>
 /// <reference path="ManageChecklistsPage.ts"/>
 /// <reference path="ContributePage.ts"/>
+/// <reference path="SetPasswordPage.ts"/>
 /// <reference path="Translations.ts"/>
 /// <reference path="models/Translation.ts"/>
 /// <reference path="models/User.ts"/>
@@ -37,45 +38,17 @@ class App implements IAppListener {
 		this.mLayerManager.addLayer("base");
 		this.mLayerManager.showLayer("base");
 
-		const homePage = new HomePage(this);
-		this.mPages.push(homePage);
-		this.mLayerManager.addToLayer("base", homePage);
-
-		const signUpPage = new SignUpPage(this);
-		this.mPages.push(signUpPage);
-		this.mLayerManager.addToLayer("base", signUpPage);
-
-		const forgotPage = new ForgotPage(this);
-		this.mPages.push(forgotPage);
-		this.mLayerManager.addToLayer("base", forgotPage);
-
-		const listPage = new ListPage(this);
-		this.mPages.push(listPage);
-		this.mLayerManager.addToLayer("base", listPage);
-
-		const contributePage = new ContributePage(this);
-		this.mPages.push(contributePage);
-		this.mLayerManager.addToLayer("base", contributePage);
-
-		const donationPage = new DonationPage(this);
-		this.mPages.push(donationPage);
-		this.mLayerManager.addToLayer("base", donationPage);
-
-		const settingsPage = new SettingsPage(this);
-		this.mPages.push(settingsPage);
-		this.mLayerManager.addToLayer("base", settingsPage);
-
-		const manageChecklistsPage = new ManageCheckListsPage(this);
-		this.mPages.push(manageChecklistsPage);
-		this.mLayerManager.addToLayer("base", manageChecklistsPage);
-
-		const manageTagsPage = new ManageTagsPage(this);
-		this.mPages.push(manageTagsPage);
-		this.mLayerManager.addToLayer("base", manageTagsPage);
-
-		const reportsPage = new ReportsPage(this);
-		this.mPages.push(reportsPage);
-		this.mLayerManager.addToLayer("base", reportsPage);
+		this.addPage(new HomePage(this));
+		this.addPage(new SignUpPage(this));
+		this.addPage(new ForgotPage(this));
+		this.addPage(new ListPage(this));
+		this.addPage(new ContributePage(this));
+		this.addPage(new DonationPage(this));
+		this.addPage(new SettingsPage(this));
+		this.addPage(new ManageCheckListsPage(this));
+		this.addPage(new ManageTagsPage(this));
+		this.addPage(new ReportsPage(this));
+		this.addPage(new SetPasswordPage(this));
 
 		this.mLayerManager.addToLayer("base", this.mMainMenu);
 
@@ -95,6 +68,11 @@ class App implements IAppListener {
 		});
 
 		this.showPage(redirect === "" ? "home" : redirect, queryParameters);
+	}
+
+	private addPage(page: Page): void {
+		this.mPages.push(page);
+		this.mLayerManager.addToLayer("base", page);
 	}
 
 	public static logOut(): void {
