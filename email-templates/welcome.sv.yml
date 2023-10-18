@@ -1,0 +1,9 @@
+subject: Välkommen
+email: hej@300sf.se
+name: 300sf
+txt: "Välkommen ${DISPLAY_NAME},
+
+Det här är ett text-epost."
+html: "<h1>Välkommen ${DISPLAY_NAME}</h1>
+
+<p>Det här ett html-epost.</p>"

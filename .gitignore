@@ -1,8 +1,6 @@
-key
-key.pub
 private_key.pem
 public_key.pem
 300sf
 docs/_build
-*.yml
+/*.yml
 logs/

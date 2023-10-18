@@ -15,7 +15,7 @@
 			"env": {
 				"LOG_FILE_LOCATION": "${workspaceFolder}/logs/300sf.log"
 			},
-			"args": ["-config", "${workspaceFolder}/300sf.yml"]
+			"args": ["-config", "${workspaceFolder}/config.yml"]
 		}
 	]
 }
