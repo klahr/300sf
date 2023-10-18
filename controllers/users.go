@@ -2,6 +2,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -48,7 +49,7 @@ func Users(c *gin.Context) {
 		return
 	}
 
-	if len(r.Password) < 4 {
+	if !utils.VerifyPassword(r.Password) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    ErrorSignUpInvalidPassword,
 			"message": "invalid password",
@@ -403,6 +404,177 @@ func UsersPortrait(c *gin.Context) {
 
 	// TODO: This supports anything, which is not OK.
 	models.DB.Table(table.Users).Where("uuid=?", c.GetString("uuid")).UpdateColumn("portrait", r.Portrait)
+
+	c.JSON(http.StatusNoContent, nil)
+}
+
+func UsersResetPassword(c *gin.Context) {
+	type request struct {
+		Email string `json:"email"`
+	}
+
+	var r request
+	if err := c.ShouldBindJSON(&r); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "could not parse request",
+			"code":    ErrorParse,
+		})
+		return
+	}
+
+	var user models.User
+	if err := models.DB.Where("email=?", r.Email).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var language models.Language
+	if err := models.DB.Where("code=?", c.GetString("app_language")).First(&language).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorSignUpTermsNotAccepted,
+			"message": "invalid language",
+		})
+		return
+	}
+
+	cpr := models.ChangePasswordRequest{
+		Model: models.Model{
+			Timestamp: time.Now(),
+			Uuid:      utils.GenerateShortUuid(),
+		},
+		ExpireAt: time.Now().Add(1 * time.Hour),
+		Token:    utils.ComputeHmac256(user.Email+time.Now().String(), config.AppConfig.HashingSecret),
+		UserId:   user.Id,
+	}
+
+	et, err := utils.GetEmailTemplate("set_password", language.Code)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	resetLink := fmt.Sprintf("%s/set-password?token=%s", config.AppConfig.Domain, cpr.Token)
+	et.Txt = strings.ReplaceAll(et.Txt, "${LINK}", resetLink)
+	et.Html = strings.ReplaceAll(et.Html, "${LINK}", resetLink)
+
+	email := models.Email{
+		Model: models.Model{
+			Timestamp: time.Now(),
+			Uuid:      utils.GenerateShortUuid(),
+		},
+		FromEmail: et.Email,
+		ToEmail:   user.Email,
+		FromName:  et.Name,
+		ToName:    user.DisplayName,
+		Subject:   et.Subject,
+		TextPart:  et.Txt,
+		HtmlPart:  et.Html,
+		SendAt:    time.Now(),
+	}
+
+	tx := models.DB.Begin()
+
+	email.Checksum = utils.ComputeHmac256(email.Subject+email.HtmlPart+email.SendAt.String(), config.AppConfig.HashingSecret)
+	if err := tx.Create(&email).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		tx.Rollback()
+		return
+	}
+
+	if err := tx.Create(&cpr).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		tx.Rollback()
+		return
+	}
+
+	tx.Commit()
+
+	c.JSON(http.StatusNoContent, nil)
+}
+
+func UsersSetPassword(c *gin.Context) {
+	type request struct {
+		Password string `json:"password"`
+	}
+
+	var r request
+	if err := c.ShouldBindJSON(&r); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "could not parse request",
+			"code":    ErrorParse,
+		})
+		return
+	}
+
+	tx := models.DB.Begin()
+
+	var cpr models.ChangePasswordRequest
+	if err := tx.Where("token=?", c.Param("token")).First(&cpr).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		tx.Rollback()
+		return
+	}
+
+	if cpr.ExpireAt.Before(time.Now()) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorLinkExpired,
+			"message": "link expired",
+		})
+		tx.Rollback()
+		return
+	}
+
+	var user models.User
+	if err := tx.Where("id=?", cpr.UserId).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		tx.Rollback()
+		return
+	}
+
+	if !utils.VerifyPassword(r.Password) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorSignUpInvalidPassword,
+			"message": "invalid password",
+		})
+		return
+	}
+
+	p := utils.Password{}
+	p.Create(r.Password)
+
+	if err := tx.Table(table.Users).Where("id=?", user.Id).UpdateColumn("password", p.Value).UpdateColumn("password_salt", p.Salt).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		tx.Rollback()
+		return
+	}
+
+	if err := tx.Table(table.ChangePasswordRequests).Where("id=?", cpr.Id).UpdateColumn("expire_at", time.Now()).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		tx.Rollback()
+		return
+	}
+
+	tx.Commit()
 
 	c.JSON(http.StatusNoContent, nil)
 }

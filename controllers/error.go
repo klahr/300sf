@@ -7,7 +7,8 @@ const (
 	ErrorInsert              = 1002
 	ErrorDelete              = 1003
 
-	ErrorParse = 2001
+	ErrorParse       = 2001
+	ErrorLinkExpired = 2002
 
 	ErrorLoggedOut         = 3001
 	ErrorMissingApiKey     = 3002

@@ -21,3 +21,7 @@ func VerifyEmail(email string) bool {
 
 	return count <= 0
 }
+
+func VerifyPassword(password string) bool {
+	return len(password) >= 4
+}

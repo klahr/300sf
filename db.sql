@@ -676,4 +676,22 @@ ADD COLUMN `de` VARCHAR(128) NULL AFTER `la`;
 ALTER TABLE `300sf`.`emails` 
 ADD COLUMN `checksum` VARCHAR(64) NOT NULL AFTER `sent_at`;
 
+
+
+CREATE TABLE `300sf`.`change_password_requests` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `timestamp` DATETIME NOT NULL,
+  `uuid` VARCHAR(32) NOT NULL,
+  `expire_at` DATETIME NOT NULL,
+  `token` VARCHAR(256) NOT NULL,
+  `user_id` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) VISIBLE,
+  UNIQUE INDEX `token_UNIQUE` (`token` ASC) VISIBLE,
+  INDEX `fk_change_password_requests_1_idx` (`user_id` ASC) VISIBLE,
+  CONSTRAINT `fk_change_password_requests_1`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `300sf`.`users` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
 -->

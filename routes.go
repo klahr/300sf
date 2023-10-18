@@ -125,6 +125,8 @@ func SetupRoutes(r *gin.Engine) {
 	r.GET("/v1/users/export", apiKeyMiddleware, basicMiddleware, controllers.UsersExportData)
 	r.POST("/v1/users/language", apiKeyMiddleware, basicMiddleware, controllers.UsersLanguage)
 	r.POST("/v1/users/portrait", apiKeyMiddleware, basicMiddleware, controllers.UsersPortrait)
+	r.POST("/v1/users/reset_password", noneMiddleware, controllers.UsersResetPassword)
+	r.POST("/v1/users/set_password/:token", noneMiddleware, controllers.UsersSetPassword)
 
 	r.GET("ping", Ping)
 
