@@ -1,0 +1,8 @@
+subject: Ta Bort Konto
+email: noreply@300sf.se
+name: 300sf
+txt: "Gå till den här sidan för att ta bort ditt konto: ${LINK}
+
+Om du inte har valt att ta bort ditt konto kan du bortse från det här mailet."
+html: "<p>Gå till den här sidan för att ta bort ditt konto: <a href='${LINK}'>${LINK}</a></p>
+<p>Om du inte har valt att ta bort ditt konto kan du bortse från det här mailet.</p>"

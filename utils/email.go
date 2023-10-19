@@ -16,7 +16,7 @@ type EmailTemplate struct {
 }
 
 func GetEmailTemplate(name, lang string) (*EmailTemplate, error) {
-	filename := fmt.Sprintf("email-templates/%s.%s.yml", name, lang)
+	filename := fmt.Sprintf("email-templates/%s/%s.yml", lang, name)
 	raw, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err

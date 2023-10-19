@@ -1,0 +1,8 @@
+subject: Delete Account
+email: noreply@300sf.se
+name: 300sf
+txt: "Follow this link to delete your account: ${LINK}
+
+If you did not requested to delete your account, please ignore this email."
+html: "<p>Follow this link to delete your account: <a href='${LINK}'>${LINK}</a></p>
+<p>If you did not requested to delete your account please ignore this email.</p>"

@@ -578,3 +578,112 @@ func UsersSetPassword(c *gin.Context) {
 
 	c.JSON(http.StatusNoContent, nil)
 }
+
+func UsersRequestDelete(c *gin.Context) {
+	type request struct {
+		Password string `json:"password"`
+	}
+
+	var r request
+	if err := c.ShouldBindJSON(&r); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "could not parse request",
+			"code":    ErrorParse,
+		})
+		return
+	}
+
+	tx := models.DB.Begin()
+
+	var user models.User
+	if err := tx.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		tx.Rollback()
+		return
+	}
+
+	var language models.Language
+	if err := tx.Where("id=?", user.LanguageId).First(&language).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorSignUpTermsNotAccepted,
+			"message": "invalid language",
+		})
+		tx.Rollback()
+		return
+	}
+
+	p := utils.Password{}
+	if !p.IsMatching(r.Password, user.Password, user.PasswordSalt) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -30002,
+			"message": "invalid password",
+		})
+		tx.Rollback()
+		return
+	}
+
+	dr := models.DeleteAccountRequest{
+		Model: models.Model{
+			Timestamp: time.Now(),
+			Uuid:      utils.GenerateShortUuid(),
+		},
+		ExpireAt: time.Now().Add(1 * time.Hour),
+		Token:    utils.ComputeHmac256(user.Email+time.Now().String(), config.AppConfig.HashingSecret),
+		UserId:   user.Id,
+		DeleteAt: time.Now().Add(time.Hour * 168), // One week.
+	}
+
+	et, err := utils.GetEmailTemplate("delete_account", language.Code)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		tx.Rollback()
+		return
+	}
+
+	deleteLink := fmt.Sprintf("%s/delete-account?token=%s", config.AppConfig.Domain, dr.Token)
+	et.Txt = strings.ReplaceAll(et.Txt, "${LINK}", deleteLink)
+	et.Html = strings.ReplaceAll(et.Html, "${LINK}", deleteLink)
+
+	email := models.Email{
+		Model: models.Model{
+			Timestamp: time.Now(),
+			Uuid:      utils.GenerateShortUuid(),
+		},
+		FromEmail: et.Email,
+		ToEmail:   user.Email,
+		FromName:  et.Name,
+		ToName:    user.DisplayName,
+		Subject:   et.Subject,
+		TextPart:  et.Txt,
+		HtmlPart:  et.Html,
+		SendAt:    time.Now(),
+	}
+
+	email.Checksum = utils.ComputeHmac256(email.Subject+email.HtmlPart+email.SendAt.String(), config.AppConfig.HashingSecret)
+	if err := tx.Create(&email).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		tx.Rollback()
+		return
+	}
+
+	if err := tx.Create(&dr).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		tx.Rollback()
+		return
+	}
+
+	tx.Commit()
+	c.JSON(http.StatusNoContent, nil)
+}
+
+func UsersConfirmDelete(c *gin.Context) {
+}

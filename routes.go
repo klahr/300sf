@@ -127,6 +127,8 @@ func SetupRoutes(r *gin.Engine) {
 	r.POST("/v1/users/portrait", apiKeyMiddleware, basicMiddleware, controllers.UsersPortrait)
 	r.POST("/v1/users/reset_password", noneMiddleware, controllers.UsersResetPassword)
 	r.POST("/v1/users/set_password/:token", noneMiddleware, controllers.UsersSetPassword)
+	r.POST("/v1/users/request_delete", apiKeyMiddleware, basicMiddleware, controllers.UsersRequestDelete)
+	r.DELETE("/v1/users/confirm_delete/:token", apiKeyMiddleware, basicMiddleware, controllers.UsersConfirmDelete)
 
 	r.GET("ping", Ping)
 
