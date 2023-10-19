@@ -78,6 +78,49 @@ class SettingsPage extends Page {
 		});
 
 		this.container.appendChild(this.mImportButton);
+
+		const deleteAccountLbl = document.createElement("h2");
+		deleteAccountLbl.innerHTML = "Delete Account";
+		this.container.appendChild(deleteAccountLbl);
+
+		const deleteAccountDescription = document.createElement("p");
+		deleteAccountDescription.innerHTML = "Leaving us?";
+		this.container.appendChild(deleteAccountDescription);
+
+		const deleteAccountPassword = new Ui.Input("password");
+		const deleteAccountButton = document.createElement("button");
+
+		deleteAccountPassword.style.position = "relative";
+		deleteAccountPassword.setPlaceHolder(App.translations.Password);
+		deleteAccountPassword.container.addEventListener("keydown", function(e) {
+			if (e.key == "Enter") {
+				e.preventDefault();
+				deleteAccountButton.click();
+			}
+		});
+		this.attach(deleteAccountPassword);
+
+		deleteAccountButton.innerHTML = "Delete Account";
+		deleteAccountButton.style.backgroundColor = "red";
+		deleteAccountButton.addEventListener("click", function() {
+			deleteAccountButton.disabled = true;
+			deleteAccountPassword.container.setAttribute("disabled", "");
+			const d = {
+				password: deleteAccountPassword.value
+			}
+			const r = new HttpRequest("POST", "/v1/users/request_delete", JSON.stringify(d));
+			r.process(function(status: any, data: any) {
+				self.refresh();
+				new Ui.MessageBox("All right", "Check your email inbox for further instructions.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
+				deleteAccountPassword.container.innerHTML = "";
+			}, function() {
+				deleteAccountButton.disabled = false;
+				deleteAccountPassword.container.removeAttribute("disabled");
+				new Ui.MessageBox("Oh, no!", "Something went wrong.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
+			});
+		});
+
+		this.container.appendChild(deleteAccountButton);
 	}
 
 	public get id(): string {
