@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"gopkg.in/guregu/null.v4/zero"
+)
 
 type DeleteAccountRequest struct {
 	Model
@@ -8,5 +12,5 @@ type DeleteAccountRequest struct {
 	Token    string    `json:"token"`
 	UserId   int64     `json:"-"`
 	User     User      `json:"user"`
-	DeleteAt time.Time `json:"delete_at"`
+	DeleteAt zero.Time `json:"delete_at"`
 }

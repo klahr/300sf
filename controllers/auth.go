@@ -46,6 +46,14 @@ func Auth(c *gin.Context) {
 			return
 		}
 
+		if user.DeactivatedAt.Valid {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    ErrorAccountDeactivated,
+				"message": "account is deactivated",
+			})
+			return
+		}
+
 		p := utils.Password{}
 		if !p.IsMatching(password, user.Password, user.PasswordSalt) {
 			c.JSON(http.StatusBadRequest, gin.H{

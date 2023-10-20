@@ -633,7 +633,6 @@ func UsersRequestDelete(c *gin.Context) {
 		ExpireAt: time.Now().Add(1 * time.Hour),
 		Token:    utils.ComputeHmac256(user.Email+time.Now().String(), config.AppConfig.HashingSecret),
 		UserId:   user.Id,
-		DeleteAt: time.Now().Add(time.Hour * 168), // One week.
 	}
 
 	et, err := utils.GetEmailTemplate("delete_account", language.Code)
@@ -686,4 +685,89 @@ func UsersRequestDelete(c *gin.Context) {
 }
 
 func UsersConfirmDelete(c *gin.Context) {
+	type request struct {
+		Password string `json:"password"`
+	}
+
+	var r request
+	if err := c.ShouldBindJSON(&r); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "could not parse request",
+			"code":    ErrorParse,
+		})
+		return
+	}
+
+	tx := models.DB.Begin()
+
+	var user models.User
+	if err := tx.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		tx.Rollback()
+		return
+	}
+
+	var language models.Language
+	if err := tx.Where("id=?", user.LanguageId).First(&language).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorSignUpTermsNotAccepted,
+			"message": "invalid language",
+		})
+		tx.Rollback()
+		return
+	}
+
+	p := utils.Password{}
+	if !p.IsMatching(r.Password, user.Password, user.PasswordSalt) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -30002,
+			"message": "invalid password",
+		})
+		tx.Rollback()
+		return
+	}
+
+	var dr models.DeleteAccountRequest
+	if err := tx.Table(table.DeleteAccountRequests).Where("token=?", c.Param("token")).Where("delete_at IS NULL").First(&dr).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorRecordNotFound,
+			"message": "not found",
+		})
+		tx.Rollback()
+		return
+	}
+
+	if dr.ExpireAt.Before(time.Now()) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorLinkExpired,
+			"message": "link expired",
+		})
+		tx.Rollback()
+		return
+	}
+
+	if err := tx.Table(table.DeleteAccountRequests).Where("id=?", dr.Id).UpdateColumn("delete_at", time.Now().Add(time.Hour*168)).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    ErrorRecordNotFound,
+			"message": "link expired",
+		})
+		tx.Rollback()
+		return
+	}
+
+	if err := tx.Table(table.Users).Where("id=?", user.Id).UpdateColumn("deactivated_at", time.Now()).UpdateColumn("delete_account_request_id", dr.Id).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    ErrorRecordNotFound,
+			"message": "link expired",
+		})
+		tx.Rollback()
+		return
+	}
+
+	tx.Commit()
+
+	c.JSON(http.StatusNoContent, nil)
 }

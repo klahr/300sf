@@ -23,4 +23,6 @@ const (
 
 	ErrorMigrateCompleted          = 5001
 	ErrorMigrateInvalidCredentials = 5002
+
+	ErrorAccountDeactivated = 6001
 )

@@ -4,6 +4,7 @@ package table
 const (
 	ApiKeys                = "api_keys"
 	ChangePasswordRequests = "change_password_requests"
+	DeleteAccountRequests  = "delete_account_requests"
 	Emails                 = "emails"
 	Genders                = "genders"
 	Lists                  = "lists"
