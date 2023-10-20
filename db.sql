@@ -694,4 +694,36 @@ CREATE TABLE `300sf`.`change_password_requests` (
     REFERENCES `300sf`.`users` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
+
+CREATE TABLE `300sf`.`delete_account_requests` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `timestamp` DATETIME NOT NULL,
+  `uuid` VARCHAR(32) NOT NULL,
+  `expire_at` DATETIME NOT NULL,
+  `token` VARCHAR(256) NOT NULL,
+  `user_id` INT NOT NULL,
+  `delete_at` DATETIME NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) VISIBLE,
+  UNIQUE INDEX `token_UNIQUE` (`token` ASC) VISIBLE,
+  INDEX `fk_delete_account_requests_1_idx` (`user_id` ASC) VISIBLE,
+  CONSTRAINT `fk_delete_account_requests_1`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `300sf`.`users` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+    ALTER TABLE `300sf`.`delete_account_requests` 
+CHANGE COLUMN `delete_at` `delete_at` DATETIME NULL ;
+
+ALTER TABLE `300sf`.`users` 
+ADD COLUMN `delete_account_request_id` INT NULL AFTER `portrait`,
+ADD INDEX `fk_users_1_idx` (`delete_account_request_id` ASC) VISIBLE;
+;
+ALTER TABLE `300sf`.`users` 
+ADD CONSTRAINT `fk_users_1`
+  FOREIGN KEY (`delete_account_request_id`)
+  REFERENCES `300sf`.`delete_account_requests` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
 -->
