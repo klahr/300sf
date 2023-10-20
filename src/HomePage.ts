@@ -290,8 +290,12 @@ class HomePage extends Page {
 				} else {
 					location.reload();
 				}
-			}, function() {
-				new Ui.MessageBox("Oh, no!", "It appears that the <b>email</b> or <b>password</b> you entered is invalid.", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
+			}, function(status: any, data: Responses.Error, err: any) {
+				if (data.code === Responses.ErrorCode.ErrorAccountDeactivated) {
+					new Ui.MessageBox("Oh, no!", "Your account has been deactivated.", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
+				} else {
+					new Ui.MessageBox("Oh, no!", "It appears that the <b>email</b> or <b>password</b> you entered is invalid.", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
+				}
 			});
 		});
 

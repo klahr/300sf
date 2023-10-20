@@ -62,6 +62,10 @@ router.get('/set-password', function(req, res) {
 	renderPage(req, res);
 });
 
+router.get('/delete-account', function(req, res) {
+	renderPage(req, res);
+});
+
 router.get('/list/:uuid', function(req, res) {
 	res.render('pages/app', {
 		data: {
