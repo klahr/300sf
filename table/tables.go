@@ -4,6 +4,7 @@ package table
 const (
 	ApiKeys                = "api_keys"
 	ChangePasswordRequests = "change_password_requests"
+	Comments               = "comments"
 	DeleteAccountRequests  = "delete_account_requests"
 	Emails                 = "emails"
 	Genders                = "genders"
@@ -13,7 +14,10 @@ const (
 	ListTemplateSpecies    = "list_template_species"
 	Rarities               = "rarities"
 	Reports                = "reports"
+	ReportTags             = "report_tags"
 	Species                = "species"
+	SubscriptionSpecies    = "subscription_species"
+	Subscriptions          = "subscriptions"
 	Tags                   = "tags"
 	Translations           = "translations"
 	Users                  = "users"

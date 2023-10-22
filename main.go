@@ -74,5 +74,9 @@ func main() {
 		go services.SendAllEmails(ctx, config.AppConfig.SendEmailInterval)
 	}
 
+	if config.AppConfig.DeleteAccountsInterval > 0 {
+		go services.DeleteAccounts(ctx, config.AppConfig.DeleteAccountsInterval)
+	}
+
 	r.Run(config.AppConfig.Address)
 }

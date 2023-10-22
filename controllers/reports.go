@@ -377,7 +377,7 @@ func ReportsAddTag(c *gin.Context) {
 		return
 	}
 
-	if err := models.DB.Table("report_tags").Create(&models.ReportTags{
+	if err := models.DB.Table("report_tags").Create(&models.ReportTag{
 		ReportId: report.Id,
 		TagId:    tag.Id,
 	}).Error; err != nil {
@@ -428,7 +428,7 @@ func ReportsRemoveTag(c *gin.Context) {
 		return
 	}
 
-	if err := models.DB.Where("report_id=?", report.Id).Where("tag_id=?", tag.Id).Delete(&models.ReportTags{}).Error; err != nil {
+	if err := models.DB.Where("report_id=?", report.Id).Where("tag_id=?", tag.Id).Delete(&models.ReportTag{}).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})

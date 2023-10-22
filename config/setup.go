@@ -29,6 +29,7 @@ type App struct {
 	MailjetSecretKey       string   `yaml:"mailjet-secret-key"`
 	Mode                   string   `yaml:"mode"`
 	SendEmailInterval      int64    `yaml:"send-email-interval"`
+	DeleteAccountsInterval int64    `yaml:"delete-accounts-interval"`
 }
 
 func (c *App) Parse(data []byte) error {

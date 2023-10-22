@@ -727,3 +727,208 @@ ADD CONSTRAINT `fk_users_1`
   ON DELETE NO ACTION
   ON UPDATE NO ACTION;
 -->
+
+ALTER TABLE `300sf`.`api_keys` 
+DROP FOREIGN KEY `fk_api_keys_2`;
+ALTER TABLE `300sf`.`api_keys` 
+ADD CONSTRAINT `fk_api_keys_2`
+  FOREIGN KEY (`user_id`)
+  REFERENCES `300sf`.`users` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;
+
+
+ALTER TABLE `300sf`.`change_password_requests` 
+DROP FOREIGN KEY `fk_change_password_requests_1`;
+ALTER TABLE `300sf`.`change_password_requests` 
+ADD CONSTRAINT `fk_change_password_requests_1`
+  FOREIGN KEY (`user_id`)
+  REFERENCES `300sf`.`users` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`comments` 
+DROP FOREIGN KEY `fk_comment_1`;
+ALTER TABLE `300sf`.`comments` 
+ADD CONSTRAINT `fk_comment_1`
+  FOREIGN KEY (`user_id`)
+  REFERENCES `300sf`.`users` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`reports` 
+DROP FOREIGN KEY `fk_reports_2`;
+ALTER TABLE `300sf`.`reports` 
+ADD CONSTRAINT `fk_reports_2`
+  FOREIGN KEY (`user_id`)
+  REFERENCES `300sf`.`users` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`reports` 
+DROP FOREIGN KEY `fk_reports_2`,
+DROP FOREIGN KEY `fk_reports_7`;
+ALTER TABLE `300sf`.`reports` 
+ADD CONSTRAINT `fk_reports_2`
+  FOREIGN KEY (`user_id`)
+  REFERENCES `300sf`.`users` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION,
+ADD CONSTRAINT `fk_reports_7`
+  FOREIGN KEY (`comment_id`)
+  REFERENCES `300sf`.`comments` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`list_reports` 
+DROP FOREIGN KEY `fk_list_reports_2`;
+ALTER TABLE `300sf`.`list_reports` 
+ADD CONSTRAINT `fk_list_reports_2`
+  FOREIGN KEY (`report_id`)
+  REFERENCES `300sf`.`reports` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`notifications` 
+DROP FOREIGN KEY `fk_notifications_1`;
+ALTER TABLE `300sf`.`notifications` 
+ADD CONSTRAINT `fk_notifications_1`
+  FOREIGN KEY (`report_id`)
+  REFERENCES `300sf`.`reports` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`report_tags` 
+DROP FOREIGN KEY `fk_report_tags_1`;
+ALTER TABLE `300sf`.`report_tags` 
+ADD CONSTRAINT `fk_report_tags_1`
+  FOREIGN KEY (`report_id`)
+  REFERENCES `300sf`.`reports` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`delete_account_requests` 
+DROP FOREIGN KEY `fk_delete_account_requests_1`;
+ALTER TABLE `300sf`.`delete_account_requests` 
+ADD CONSTRAINT `fk_delete_account_requests_1`
+  FOREIGN KEY (`user_id`)
+  REFERENCES `300sf`.`users` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`users` 
+DROP FOREIGN KEY `fk_users_1`;
+ALTER TABLE `300sf`.`users` 
+ADD CONSTRAINT `fk_users_1`
+  FOREIGN KEY (`delete_account_request_id`)
+  REFERENCES `300sf`.`delete_account_requests` (`id`)
+  ON DELETE SET NULL
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`list_templates` 
+DROP FOREIGN KEY `fk_list_templates_1`;
+ALTER TABLE `300sf`.`list_templates` 
+ADD CONSTRAINT `fk_list_templates_1`
+  FOREIGN KEY (`user_id`)
+  REFERENCES `300sf`.`users` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`list_template_species` 
+DROP FOREIGN KEY `fk_list_template_species_1`;
+ALTER TABLE `300sf`.`list_template_species` 
+ADD CONSTRAINT `fk_list_template_species_1`
+  FOREIGN KEY (`list_template_id`)
+  REFERENCES `300sf`.`list_templates` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`lists` 
+DROP FOREIGN KEY `fk_lists_3`;
+ALTER TABLE `300sf`.`lists` 
+ADD CONSTRAINT `fk_lists_3`
+  FOREIGN KEY (`list_template_id`)
+  REFERENCES `300sf`.`list_templates` (`id`)
+  ON DELETE SET NULL
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`lists` 
+DROP FOREIGN KEY `fk_lists_1`;
+ALTER TABLE `300sf`.`lists` 
+ADD CONSTRAINT `fk_lists_1`
+  FOREIGN KEY (`user_id`)
+  REFERENCES `300sf`.`users` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`list_species` 
+DROP FOREIGN KEY `fk_list_species_1`;
+ALTER TABLE `300sf`.`list_species` 
+ADD CONSTRAINT `fk_list_species_1`
+  FOREIGN KEY (`list_id`)
+  REFERENCES `300sf`.`lists` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`tags` 
+DROP FOREIGN KEY `fk_tags_1`;
+ALTER TABLE `300sf`.`tags` 
+ADD CONSTRAINT `fk_tags_1`
+  FOREIGN KEY (`user_id`)
+  REFERENCES `300sf`.`users` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`list_reports` 
+DROP FOREIGN KEY `fk_list_reports_1`;
+ALTER TABLE `300sf`.`list_reports` 
+ADD CONSTRAINT `fk_list_reports_1`
+  FOREIGN KEY (`list_id`)
+  REFERENCES `300sf`.`lists` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`notification_comments` 
+DROP FOREIGN KEY `fk_notification_comments_2`;
+ALTER TABLE `300sf`.`notification_comments` 
+ADD CONSTRAINT `fk_notification_comments_2`
+  FOREIGN KEY (`comment_id`)
+  REFERENCES `300sf`.`comments` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`notifications` 
+DROP FOREIGN KEY `fk_notifications_2`;
+ALTER TABLE `300sf`.`notifications` 
+ADD CONSTRAINT `fk_notifications_2`
+  FOREIGN KEY (`comment_id`)
+  REFERENCES `300sf`.`comments` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`report_tags` 
+DROP FOREIGN KEY `fk_report_tags_2`;
+ALTER TABLE `300sf`.`report_tags` 
+ADD CONSTRAINT `fk_report_tags_2`
+  FOREIGN KEY (`tag_id`)
+  REFERENCES `300sf`.`tags` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`subscriptions` 
+DROP FOREIGN KEY `fk_subscriptions_1`;
+ALTER TABLE `300sf`.`subscriptions` 
+ADD CONSTRAINT `fk_subscriptions_1`
+  FOREIGN KEY (`user_id`)
+  REFERENCES `300sf`.`users` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`subscription_species` 
+DROP FOREIGN KEY `fk_subscription_species_1`;
+ALTER TABLE `300sf`.`subscription_species` 
+ADD CONSTRAINT `fk_subscription_species_1`
+  FOREIGN KEY (`subscription_id`)
+  REFERENCES `300sf`.`subscriptions` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;
