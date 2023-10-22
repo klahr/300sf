@@ -37,8 +37,7 @@ class DeleteAccountPage extends Page {
 				setCookie("x300sf_at", "", 0);
 				setCookie("lang", "", 0);
 				new Ui.MessageBox("Account Deleted", "Your account has been inactivated or will be permanently deleted in 7 days. If you change your mind you must contact support@300sf.se within a week.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {
-					appListener.showPage("home", null);
-					App.logOut();
+					appListener.logOut();
 				});
 			});
 		});

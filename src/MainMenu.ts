@@ -120,7 +120,7 @@ class MainMenu extends Ui.Widget {
 		});
 
 		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>logout</span> " + App.translations.LogOut, function() {
-			App.logOut();
+			self.mAppListener.logOut();
 		});
 	}
 

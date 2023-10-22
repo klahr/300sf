@@ -19,6 +19,7 @@
 interface IAppListener {
 	openMainMenu(): void;
 	showPage(id: string, data: any): void;
+	logOut(): void;
 }
 
 class App implements IAppListener {
@@ -77,10 +78,10 @@ class App implements IAppListener {
 		this.mLayerManager.addToLayer("base", page);
 	}
 
-	public static logOut(): void {
+	public logOut(): void {
 		setCookie("x300sf_at", "", 0);
 		setCookie("lang", "", 0);
-		location.reload();
+		window.open("/", "_self");
 	}
 
 	private fetchUser(): void {
