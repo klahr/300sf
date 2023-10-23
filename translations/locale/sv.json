@@ -55,7 +55,6 @@
 	"ReportIssue": "Rapportera fel",
 	"Sightings": "Fynd",
 	"SubmitSighting": "Rapportera Fynd",
-	"ImportSightings": "Importera fynd",
 	"LastSightings": "Senaste fynd",
 	"ImportSightingsDescription": "Om du använt den förra versionen av 300 Svenska Fåglar-appen kan du importera dina fynd.",
 	"NoRecentSightings": "Det finns inga fynd rapporterade de senaste 14 dagarna.",
@@ -70,5 +69,7 @@
 	"DeleteAccount": "Ta Bort Konto",
 	"DeleteAccountDescription": "Ange ditt lösenord nedan för att på ett säkert sätt radera ditt konto. Du kommer att få ett bekräftelsemejl för att slutföra processen. Tänk på att detta är en permanent åtgärd, och tveka inte att kontakta oss om du behöver hjälp.",
 	"PermanentlyDeleteAccount": "Ta bort kontot permanent",
-	"Support": "Support"
+	"Support": "Support",
+	"ImportData": "Importera data",
+	"ImportDataDescription": "Importera dina data från '300 Svenska Fåglar'-appen till vår nya webbsida. Ange ditt app-användarnamn och lösenord nedan och klicka på 'Importera'-knappen. Vi kommer att överföra dina data för att säkerställa en smidig övergång till vår uppdaterade plattform. Din integritet och datasäkerhet är våra högsta prioriteringar."
 }

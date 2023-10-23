@@ -19,11 +19,11 @@ class SettingsPage extends Page {
 		this.container.appendChild(title);
 
 		const importSubmissionsLbl = document.createElement("h2");
-		importSubmissionsLbl.innerHTML = App.translations.ImportSightings;
+		importSubmissionsLbl.innerHTML = App.translations.ImportData;
 		this.container.appendChild(importSubmissionsLbl);
 
 		const importSubmissionsDescription = document.createElement("p");
-		importSubmissionsDescription.innerHTML = App.translations.ImportSightingsDescription;
+		importSubmissionsDescription.innerHTML = App.translations.ImportDataDescription;
 		this.container.appendChild(importSubmissionsDescription);
 
 		this.mEmail = new Ui.Input("email");

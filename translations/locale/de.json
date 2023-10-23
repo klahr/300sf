@@ -55,7 +55,6 @@
 	"ReportIssue": "Problem melden",
 	"Sightings": "Sightings",
 	"SubmitSighting": "Einreichen",
-	"ImportSightings": "Einreichungen importieren",
 	"LastSightings": "Letzte Einreichungen",
 	"ImportSightingsDescription": "Wenn Sie über Einreichungen in der vorherigen Version des 300 schwedischen Vogelantrags verfügen, haben Sie die Möglichkeit, diese zu importieren.",
 	"NoRecentSightings": "There have been no recent sightings in the last 14 days.",
@@ -70,5 +69,7 @@
 	"DeleteAccount": "Delete Account",
 	"DeleteAccountDescription": "To securely delete your account, enter your password below. You will receive a confirmation email to complete the process. Please consider the permanence of this action, and feel free to reach out for assistance.",
 	"PermanentlyDeleteAccount": "Permanently delete account",
-	"Support": "Support"
+	"Support": "Support",
+	"ImportData": "Einreichungen importieren",
+	"ImportDataDescription": "Migrate your data seamlessly from the 300 Swedish Birds app to our new webpage. Simply provide your app username and password below and click the 'Import' button. We'll securely transfer your data to ensure a smooth transition to our updated platform. Your privacy and data security are our top priorities."
 }

@@ -56,7 +56,6 @@ class Translations {
         ReportIssue: "Report issue",
         Sightings: "Sightings",
         SubmitSighting: "Submit Sighting",
-        ImportSightings: "Import sightings",
         LastSightings: "Recent sightings",
         ImportSightingsDescription: "If you possess any sightings within the previous version of the 300 Swedish Birds application, you have the ability to import them.",
         NoRecentSightings: "There have been no recent sightings in the last 14 days.",
@@ -72,6 +71,8 @@ class Translations {
         DeleteAccountDescription: "To securely delete your account, enter your password below. You will receive a confirmation email to complete the process. Please consider the permanence of this action, and feel free to reach out for assistance.",
         PermanentlyDeleteAccount: "Permanently delete account",
         Support: "Support",
+        ImportData: "Import data",
+        ImportDataDescription: "Migrate your data seamlessly from the 300 Swedish Birds app to our new webpage. Simply provide your app username and password below and click the 'Import' button. We'll securely transfer your data to ensure a smooth transition to our updated platform. Your privacy and data security are our top priorities.",
     }
     static sv = {
         SignIn: "Logga in",
@@ -130,7 +131,6 @@ class Translations {
         ReportIssue: "Rapportera fel",
         Sightings: "Fynd",
         SubmitSighting: "Rapportera Fynd",
-        ImportSightings: "Importera fynd",
         LastSightings: "Senaste fynd",
         ImportSightingsDescription: "Om du använt den förra versionen av 300 Svenska Fåglar-appen kan du importera dina fynd.",
         NoRecentSightings: "Det finns inga fynd rapporterade de senaste 14 dagarna.",
@@ -146,6 +146,8 @@ class Translations {
         DeleteAccountDescription: "Ange ditt lösenord nedan för att på ett säkert sätt radera ditt konto. Du kommer att få ett bekräftelsemejl för att slutföra processen. Tänk på att detta är en permanent åtgärd, och tveka inte att kontakta oss om du behöver hjälp.",
         PermanentlyDeleteAccount: "Ta bort kontot permanent",
         Support: "Support",
+        ImportData: "Importera data",
+        ImportDataDescription: "Importera dina data från '300 Svenska Fåglar'-appen till vår nya webbsida. Ange ditt app-användarnamn och lösenord nedan och klicka på 'Importera'-knappen. Vi kommer att överföra dina data för att säkerställa en smidig övergång till vår uppdaterade plattform. Din integritet och datasäkerhet är våra högsta prioriteringar.",
     }
     static de = {
         SignIn: "Anmelden",
@@ -204,7 +206,6 @@ class Translations {
         ReportIssue: "Problem melden",
         Sightings: "Sightings",
         SubmitSighting: "Einreichen",
-        ImportSightings: "Einreichungen importieren",
         LastSightings: "Letzte Einreichungen",
         ImportSightingsDescription: "Wenn Sie über Einreichungen in der vorherigen Version des 300 schwedischen Vogelantrags verfügen, haben Sie die Möglichkeit, diese zu importieren.",
         NoRecentSightings: "There have been no recent sightings in the last 14 days.",
@@ -220,5 +221,7 @@ class Translations {
         DeleteAccountDescription: "To securely delete your account, enter your password below. You will receive a confirmation email to complete the process. Please consider the permanence of this action, and feel free to reach out for assistance.",
         PermanentlyDeleteAccount: "Permanently delete account",
         Support: "Support",
+        ImportData: "Einreichungen importieren",
+        ImportDataDescription: "Migrate your data seamlessly from the 300 Swedish Birds app to our new webpage. Simply provide your app username and password below and click the 'Import' button. We'll securely transfer your data to ensure a smooth transition to our updated platform. Your privacy and data security are our top priorities.",
     }
 }
