@@ -126,11 +126,7 @@ class EditReportPopUp {
 			privateCommentLbl.innerHTML = App.translations.PrivateComment;
 			content.container.appendChild(privateCommentLbl);
 			const privateComment = document.createElement("textarea");
-			privateComment.style.width = "100%";
 			privateComment.style.height = "128px";
-			privateComment.style.resize = "none";
-			privateComment.style.padding = "var(--small-distance)";
-			privateComment.style.boxSizing = "border-box";
 			privateComment.disabled = true;
 			privateComment.innerHTML = report.comment.text;
 			content.container.appendChild(privateComment);	

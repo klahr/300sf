@@ -160,11 +160,7 @@ class ReportPopUp {
 		privateCommentLbl.innerHTML = App.translations.PrivateComment;
 		content.container.appendChild(privateCommentLbl);
 		const privateComment = document.createElement("textarea");
-		privateComment.style.width = "100%";
 		privateComment.style.height = "128px";
-		privateComment.style.resize = "none";
-		privateComment.style.padding = "var(--small-distance)";
-		privateComment.style.boxSizing = "border-box";
 		content.container.appendChild(privateComment);
 
 		const tagsLbl = document.createElement("h3");

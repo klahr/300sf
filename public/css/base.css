@@ -39,6 +39,23 @@ a:hover {
 	cursor: pointer;
 }
 
+textarea {
+	width: calc(100% - var(--small-distance)*2);
+	resize: none;
+	margin: var(--small-distance);
+	padding: 12px 24px;
+	box-sizing: border-box;
+	margin: var(--small-distance);
+	border-radius: var(--small-distance);
+	border: none;
+	background-color: var(--widget-color);
+	color: white;
+}
+
+textarea:disabled {
+	box-shadow: 0 0 0 1px inset var(--secondary-color);
+}
+
 p,label {
 	color: var(--black-or-white-color);
 	font-size: 1rem;
