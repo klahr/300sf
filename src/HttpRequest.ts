@@ -2,6 +2,7 @@
 /// <reference path="App.ts"/>
 /// <reference path="responses/Error.ts"/>
 
+
 declare let $: any;
 
 class HttpRequest {
@@ -10,14 +11,14 @@ class HttpRequest {
 
 	constructor(private mMethod: string, private mUrl: string, private mData: any = null) {
 		this.setHeader("Accept", "application/json");
-		this.setHeader("Content-Type", "text/plain");
+		this.setHeader("Content-Type", "application/json");
 		this.setHeader("X-App-Language", App.language);
 		const accessToken = getCookie("x300sf_at");
 		if (accessToken != null && accessToken != "") {
 			this.setHeader("X-Access-Token", accessToken);
 		}
 		if (App.apiKey != null) {
-			this.setHeader("X-Api-Key", App.apiKey);
+			//this.setHeader("X-Api-Key", App.apiKey);
 		}
 	}
 
@@ -38,9 +39,9 @@ class HttpRequest {
 				}
 			},
 			type: self.mMethod,
-			data: self.mData,
+			data: JSON.stringify(self.mData),
 			async: self.mAsync,
-			url: Config.ApiEndpoint + self.mUrl,
+			url: "http://localhost:3000/api" + self.mUrl,
 			success: function(data, _textStatus, xhr) {
 				const cl = xhr.getResponseHeader('Content-Language');
 				if (cl) {
@@ -64,6 +65,7 @@ class HttpRequest {
 			},
 			timeout: 20000,
 			dataType: "json",
+			contentType: "application/json",
 			complete: function() {
 				complete();
 			},

@@ -28,9 +28,9 @@ class SetPasswordPage extends Page {
 		set.innerHTML = "Set Password";
 		set.addEventListener("click", function() {
 			password.setDisabled(true);
-			const r = new HttpRequest("POST", "/v1/users/set_password/" + self.data.token, JSON.stringify({
+			const r = new HttpRequest("POST", "/v1/users/set_password/" + self.data.token, {
 				password: password.value,
-			}));
+			});
 			r.process(function(status: any, data: any) {
 				password.setDisabled(false);
 				password.value = "";

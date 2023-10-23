@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const request = require('request');
 const config = require('./config');
 const i18n = require('i18n');
 const nm = require('./network-manager');
@@ -92,4 +93,19 @@ router.get('/compare', function(req, res) {
 		console.log(err);
 		res.redirect(200, req.baseUrl);
 	}, JSON.stringify(r));
+});
+
+router.all('/api/*', (req, res) => {
+	const apiUrl = config.ApiEndpoint + req.originalUrl.substring(4);
+
+	req.headers['X-Api-Key'] = config.ApiKey;
+
+	const options = {
+		url: apiUrl,
+		method: req.method,
+		headers: req.headers,
+		body: JSON.stringify(req.body),
+	};
+
+	request(options).pipe(res);
 });

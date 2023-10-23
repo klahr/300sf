@@ -207,22 +207,22 @@ class ReportPopUp {
 					self.mSpeciesList.hide();
 				}
 			});
-	
+
 			d.ages.sort(Utils.sortByNameOnCurrentLanguage);
 			d.ages.forEach(e => {
 				ageList.addOption(App.getTranslation(e.name), e.uuid);
 			});
-	
+
 			d.genders.sort(Utils.sortByNameOnCurrentLanguage);
 			d.genders.forEach(e => {
 				genderList.addOption(App.getTranslation(e.name), e.uuid);
 			});
-	
+
 			d.methods.sort(Utils.sortByNameOnCurrentLanguage);
 			d.methods.forEach(e => {
 				methodList.addOption(App.getTranslation(e.name), e.uuid);
 			});
-	
+
 			d.activities.sort(Utils.sortByNameOnCurrentLanguage);
 			d.activities.forEach(e => {
 				activityList.addOption(App.getTranslation(e.name), e.uuid);
@@ -248,7 +248,7 @@ class ReportPopUp {
 				self.mTagsContainer.container.appendChild(tag);
 			});
 		});
-	
+
 		this.mReportButton = document.createElement("button");
 		this.mReportButton.innerHTML = App.translations.SubmitSighting;
 		this.mReportButton.style.width = "auto";
@@ -305,7 +305,7 @@ class ReportPopUp {
 
 			// TODO: Tags and notifications.
 
-			const rr = new HttpRequest("POST", "/v1/reports", JSON.stringify(r));
+			const rr = new HttpRequest("POST", "/v1/reports", r);
 			rr.process(function(status: any, data: any) {
 				self.mPopUp.close();
 			});

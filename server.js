@@ -4,6 +4,7 @@ const expressSession = require('express-session');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const i18n = require('i18n');
+const morgan = require('morgan');
 const app = express();
 const port = 3000;
 
@@ -18,9 +19,10 @@ i18n.configure({
 
 app.set('view engine', 'ejs');
 app.use(i18n.init);
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json());
 app.use(expressLayouts);
 app.use(cookieParser());
+app.use(morgan('dev'));
 app.use(expressSession({
 	secret: 'keyboard cat',
 	cookie: {

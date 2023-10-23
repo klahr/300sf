@@ -65,7 +65,7 @@ class SignUpPage extends Page {
 				accepted_terms: termsAccepted,
 			};
 
-			const r = new HttpRequest("POST", "/v1/users", JSON.stringify(content));
+			const r = new HttpRequest("POST", "/v1/users", content);
 			r.process(function(status: any, data: any) {
 				password.value = "",
 				self.appListener.showPage("home", {"email": email.value, "display_name": displayName.value});

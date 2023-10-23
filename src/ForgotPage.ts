@@ -29,9 +29,9 @@ class ForgotPage extends Page {
 		reset.innerHTML = App.translations.SendResetLink;
 		reset.addEventListener("click", function() {
 			email.setDisabled(true);
-			const r = new HttpRequest("POST", "/v1/users/reset_password", JSON.stringify({
+			const r = new HttpRequest("POST", "/v1/users/reset_password", {
 				email: email.value,
-			}));
+			});
 			r.process(function(status: any, data: any) {
 				email.setDisabled(false);
 				email.value = "";

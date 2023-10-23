@@ -62,7 +62,7 @@ class SettingsPage extends Page {
 			self.mImportButton.innerHTML = "Please wait...";
 			self.mEmail.container.setAttribute("disabled", "");
 			self.mPassword.container.setAttribute("disabled", "");
-			const r = new HttpRequest("POST", "/v1/users/migrate", JSON.stringify(d));
+			const r = new HttpRequest("POST", "/v1/users/migrate", d);
 			r.setHeader("Authorization", authorization);
 			r.process(function(status: any, data: any) {
 				self.refresh();
@@ -108,7 +108,7 @@ class SettingsPage extends Page {
 			const d = {
 				password: deleteAccountPassword.value
 			}
-			const r = new HttpRequest("POST", "/v1/users/request_delete", JSON.stringify(d));
+			const r = new HttpRequest("POST", "/v1/users/request_delete", d);
 			r.process(function(status: any, data: any) {
 				self.refresh();
 				new Ui.MessageBox("All right", "Check your email inbox for further instructions.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});

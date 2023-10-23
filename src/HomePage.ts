@@ -278,7 +278,7 @@ class HomePage extends Page {
 				'refresh-token': ''
 			};
 
-			const r = new HttpRequest("POST", "/v1/auth", JSON.stringify(content));
+			const r = new HttpRequest("POST", "/v1/auth", content);
 			r.setHeader("Authorization", authorization);
 			r.process(function(status: any, data: any) {
 				setCookie("x300sf_at", data.access_token, stayLoggedIn ? null : data.expires_at);

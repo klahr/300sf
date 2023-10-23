@@ -14,7 +14,7 @@ class ProfilePopUp {
 		content.style.position = "relative";
 
 		const portraitSelect = new Ui.DivSelect((value) => {
-			const r = new HttpRequest("POST", "/v1/users/portrait", JSON.stringify({"portrait": value}));
+			const r = new HttpRequest("POST", "/v1/users/portrait", {"portrait": value});
 			r.process(function(status: any, data: any) {
 				App.user.portrait = value!;
 				location.reload();
@@ -68,7 +68,7 @@ class ProfilePopUp {
 				const d = {
 					"language_code": value
 				};
-				const r = new HttpRequest("POST", "/v1/users/language", JSON.stringify(d));
+				const r = new HttpRequest("POST", "/v1/users/language", d);
 				r.process(function(status: any, data: any) {
 					App.setLanguage(value);
 					setCookie("lang", value);

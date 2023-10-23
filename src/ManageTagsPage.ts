@@ -61,7 +61,7 @@ class ManageTagsPage extends Page {
 			const r = new Requests.Tags();
 			r.name = self.mName.value;
 			r.color = colorSelect.value!;
-			const req = new HttpRequest("POST", "/v1/tags", JSON.stringify(r));
+			const req = new HttpRequest("POST", "/v1/tags", r);
 			req.process(function(status: any, data: any) {
 				location.reload();
 			});

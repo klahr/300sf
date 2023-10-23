@@ -86,7 +86,7 @@ class ManageCheckListsPage extends Page {
 			r.template = self.mTemplateSelect.value!;
 			r.visibility = Models.Visibility.Hidden;
 			r.color = colorSelect.value!;
-			const req = new HttpRequest("POST", "/v1/lists", JSON.stringify(r));
+			const req = new HttpRequest("POST", "/v1/lists", r);
 			req.process(function(status: any, data: any) {
 				location.reload();
 			});

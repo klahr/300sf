@@ -1,3 +1,3 @@
 class Config {
-    static ApiEndpoint: string = "http://localhost:8090";
+    static ApiEndpoint: string = "http://localhost:3000/api";
 }
