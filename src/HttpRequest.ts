@@ -38,7 +38,7 @@ class HttpRequest {
 			type: self.mMethod,
 			data: JSON.stringify(self.mData),
 			async: self.mAsync,
-			url: "http://localhost:3000/api" + self.mUrl,
+			url: Config.ApiEndpoint + self.mUrl,
 			success: function(data, _textStatus, xhr) {
 				const cl = xhr.getResponseHeader('Content-Language');
 				if (cl) {
