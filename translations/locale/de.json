@@ -66,5 +66,9 @@
 	"PleaseWait": "Please wait",
 	" ThankYou": "Thank you!",
 	"NewLabel": "Neu",
-	"ForgotPasswordDescription": "To reset your password, please enter your registered email address below, and then click on the 'Reset Password' button. We'll send you an email with further instructions on how to regain access to your account."
+	"ForgotPasswordDescription": "To reset your password, please enter your registered email address below, and then click on the 'Reset Password' button. We'll send you an email with further instructions on how to regain access to your account.",
+	"DeleteAccount": "Delete Account",
+	"DeleteAccountDescription": "To securely delete your account, enter your password below. You will receive a confirmation email to complete the process. Please consider the permanence of this action, and feel free to reach out for assistance.",
+	"PermanentlyDeleteAccount": "Permanently delete account",
+	"Support": "Support"
 }

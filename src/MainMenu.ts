@@ -101,7 +101,7 @@ class MainMenu extends Ui.Widget {
 			});
 		});
 
-		this.addSection("Support");
+		this.addSection(App.translations.Support);
 		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>bug_report</span> " + App.translations.ReportIssue, function() {
 			self.mAppListener.showPage("bugs", null);
 		});
@@ -115,7 +115,7 @@ class MainMenu extends Ui.Widget {
 		});
 
 		this.addSection(App.translations.Account);
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>settings</span> " + App.translations.Settings, function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>manage_accounts</span> " + App.translations.Account, function() {
 			self.mAppListener.showPage("settings", null);
 		});
 
@@ -126,7 +126,7 @@ class MainMenu extends Ui.Widget {
 
 	private createLoggedOut(): void {
 		const self = this;
-		this.addSection("Support");
+		this.addSection(App.translations.Support);
 
 		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>support</span> " + App.translations.Contribute, function() {
 			self.mAppListener.showPage("contribute", null);

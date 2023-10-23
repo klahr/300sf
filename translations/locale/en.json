@@ -41,7 +41,7 @@
 	"Search": "Search",
 	"InternalID": "Internal ID",
 	"Language": "Language",
-	"AlreadyImported": "Already imported",
+	"AlreadyImported": "Already Imported",
 	"AvailableChecklists": "Available checklists",
 	"DonationDescription": "300 Swedish Birds is developed and maintained by volunteers who contribute their spare time. With only the help of voluntary donations, the necessary costs to keep the project running are covered. Thank you for your voluntary support.",
 	"Donation": "Donation",
@@ -66,5 +66,9 @@
 	"PleaseWait": "Please wait",
 	" ThankYou": "Thank you!",
 	"NewLabel": "New label",
-	"ForgotPasswordDescription": "To reset your password, please enter your registered email address below, and then click on the 'Reset Password' button. We'll send you an email with further instructions on how to regain access to your account."
+	"ForgotPasswordDescription": "To reset your password, please enter your registered email address below, and then click on the 'Reset Password' button. We'll send you an email with further instructions on how to regain access to your account.",
+	"DeleteAccount": "Delete Account",
+	"DeleteAccountDescription": "To securely delete your account, enter your password below. You will receive a confirmation email to complete the process. Please consider the permanence of this action, and feel free to reach out for assistance.",
+	"PermanentlyDeleteAccount": "Permanently delete account",
+	"Support": "Support"
 }

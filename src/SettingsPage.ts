@@ -15,7 +15,7 @@ class SettingsPage extends Page {
 		this.addProfile();
 
 		const title = document.createElement("h1");
-		title.innerHTML = App.translations.Settings;
+		title.innerHTML = App.translations.Account;
 		this.container.appendChild(title);
 
 		const importSubmissionsLbl = document.createElement("h2");
@@ -80,11 +80,11 @@ class SettingsPage extends Page {
 		this.container.appendChild(this.mImportButton);
 
 		const deleteAccountLbl = document.createElement("h2");
-		deleteAccountLbl.innerHTML = "Delete Account";
+		deleteAccountLbl.innerHTML = App.translations.PermanentlyDeleteAccount;
 		this.container.appendChild(deleteAccountLbl);
 
 		const deleteAccountDescription = document.createElement("p");
-		deleteAccountDescription.innerHTML = "Leaving us?";
+		deleteAccountDescription.innerHTML = App.translations.DeleteAccountDescription;
 		this.container.appendChild(deleteAccountDescription);
 
 		const deleteAccountPassword = new Ui.Input("password");
@@ -100,7 +100,7 @@ class SettingsPage extends Page {
 		});
 		this.attach(deleteAccountPassword);
 
-		deleteAccountButton.innerHTML = "Delete Account";
+		deleteAccountButton.innerHTML = App.translations.DeleteAccount;
 		deleteAccountButton.style.backgroundColor = "red";
 		deleteAccountButton.addEventListener("click", function() {
 			deleteAccountButton.disabled = true;

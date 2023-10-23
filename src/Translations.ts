@@ -42,7 +42,7 @@ class Translations {
         Search: "Search",
         InternalID: "Internal ID",
         Language: "Language",
-        AlreadyImported: "Already imported",
+        AlreadyImported: "Already Imported",
         AvailableChecklists: "Available checklists",
         DonationDescription: "300 Swedish Birds is developed and maintained by volunteers who contribute their spare time. With only the help of voluntary donations, the necessary costs to keep the project running are covered. Thank you for your voluntary support.",
         Donation: "Donation",
@@ -68,6 +68,10 @@ class Translations {
          ThankYou: "Thank you!",
         NewLabel: "New label",
         ForgotPasswordDescription: "To reset your password, please enter your registered email address below, and then click on the 'Reset Password' button. We'll send you an email with further instructions on how to regain access to your account.",
+        DeleteAccount: "Delete Account",
+        DeleteAccountDescription: "To securely delete your account, enter your password below. You will receive a confirmation email to complete the process. Please consider the permanence of this action, and feel free to reach out for assistance.",
+        PermanentlyDeleteAccount: "Permanently delete account",
+        Support: "Support",
     }
     static sv = {
         SignIn: "Logga in",
@@ -112,7 +116,7 @@ class Translations {
         Search: "Sök",
         InternalID: "Internt ID",
         Language: "Språk",
-        AlreadyImported: "Redan importerat",
+        AlreadyImported: "Redan Importerat",
         AvailableChecklists: "Tillgängliga krysslistor",
         DonationDescription: "300 Svenska Fåglar utvecklas och underhålls av volontärer som bidrar med sin fritid. Med enbart hjälp av frivilliga donationer täcks de kostnader som är nödvändiga för att projektet ska kunna hållas igång. Tack för ditt frivilliga stöd.",
         Donation: "Donation",
@@ -138,6 +142,10 @@ class Translations {
          ThankYou: "Tack!",
         NewLabel: "Ny etikett",
         ForgotPasswordDescription: "Ange din registrerade e-postadress nedan för att återställa ditt lösenord, och klicka sedan på knappen 'Återställ Lösenord'. Vi kommer att skicka ett e-postmeddelande med ytterligare instruktioner om hur du återfår åtkomst till ditt konto.",
+        DeleteAccount: "Ta Bort Konto",
+        DeleteAccountDescription: "Ange ditt lösenord nedan för att på ett säkert sätt radera ditt konto. Du kommer att få ett bekräftelsemejl för att slutföra processen. Tänk på att detta är en permanent åtgärd, och tveka inte att kontakta oss om du behöver hjälp.",
+        PermanentlyDeleteAccount: "Ta bort kontot permanent",
+        Support: "Support",
     }
     static de = {
         SignIn: "Anmelden",
@@ -208,5 +216,9 @@ class Translations {
          ThankYou: "Thank you!",
         NewLabel: "Neu",
         ForgotPasswordDescription: "To reset your password, please enter your registered email address below, and then click on the 'Reset Password' button. We'll send you an email with further instructions on how to regain access to your account.",
+        DeleteAccount: "Delete Account",
+        DeleteAccountDescription: "To securely delete your account, enter your password below. You will receive a confirmation email to complete the process. Please consider the permanence of this action, and feel free to reach out for assistance.",
+        PermanentlyDeleteAccount: "Permanently delete account",
+        Support: "Support",
     }
 }
