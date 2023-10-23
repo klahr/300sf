@@ -105,6 +105,7 @@ class ReportPopUp {
 						cLbl.style.color = "var(--secondary-color)";
 					} else if (list && e.list.uuid === list.uuid) {
 						(c.container as HTMLInputElement).checked = true;
+						(c.container as HTMLInputElement).disabled = true;
 					}
 				});
 
@@ -187,6 +188,19 @@ class ReportPopUp {
 	
 			d.species.sort(Utils.sortByNameOnCurrentLanguage);
 			d.species.forEach(e => {
+				if (list) {
+					let found = false;
+					for (let i = 0; i < list.species.length; ++i) {
+						if (list.species[i].uuid === e.uuid) {
+							found = true;
+							break;
+						}
+					}
+					if (!found) {
+						return;
+					}
+				}
+
 				const option = self.mSpeciesList.addOption(App.getTranslation(e.name), e.uuid);
 				if (species && species.uuid === e.uuid) {
 					option.click();
