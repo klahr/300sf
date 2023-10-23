@@ -24,6 +24,8 @@ class ContributePage extends Page {
 	}
 
 	private refresh(): void {
-		this.mProfile.setImage("/img/portraits/" + App.user.portrait);
+		if (App.user) {
+			this.mProfile.setImage("/img/portraits/" + App.user.portrait);
+		}
 	}
 }

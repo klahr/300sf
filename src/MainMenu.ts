@@ -125,12 +125,21 @@ class MainMenu extends Ui.Widget {
 	}
 
 	private createLoggedOut(): void {
-		this.addSection("A Poem");
-		const poem = document.createElement("p");
-		poem.style.padding = "0 16px";
-		poem.style.fontStyle = "italic";
-		poem.innerHTML = App.translations.Poem;
-		this.mContent.container.appendChild(poem);
+		const self = this;
+		this.addSection("Support");
+
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>support</span> " + App.translations.Contribute, function() {
+			self.mAppListener.showPage("contribute", null);
+		});
+
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>volunteer_activism</span> " + App.translations.Donation, function() {
+			self.mAppListener.showPage("donation", null);
+		});
+
+		this.addSection(App.translations.Account);
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>join</span> " + App.translations.SignUp, function() {
+			window.open("/sign-up", "_self");
+		});
 	}
 
 	private addSection(name: string): HTMLParagraphElement {

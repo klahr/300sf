@@ -49,11 +49,10 @@ class Page extends Ui.Widget {
 	protected onBecomeVisible(): void {}
 
 	protected addProfile(): void {
-		this.mProfile = new Ui.Image("/img/99249498-452f-4b0b-a1f5-45902f7ffe48.png", "48px", "48px");
+		this.mProfile = new Ui.Image("", "48px", "48px");
 		this.mProfile.addClass("portrait");
 		this.mProfile.container.addEventListener("click", function() {
 			openProfilePopUp(function() {
-				console.log("close profile");
 			});
 		});
 		this.attach(this.mProfile);
