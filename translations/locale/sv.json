@@ -5,7 +5,6 @@
 	"StaySignedIn": "Förbli inloggad",
 	"MarkSignInCheckbox": "Kryssa i rutan om du föredrar att inte logga in vid varje besök.",
 	"NoAccountYet": "Har du inget konto ännu? <a>Skapa ett här.</a>",
-	"Poem": "Bird watching, what a blast!\nPigeons perched on my head so fast,\nA crow stole my sandwich, oh woe!\nSparrows mistook my hair for a cozy château.\n\nA duck landed on my shoe with a quack,\nCreating a scene, what a makeshift track!\nAmidst the chaos, an eagle soared high,\nNature's wonder in the sky.\n\nBird watching full of laughter and fun,\nEven with mishaps, it can't be undone.\nSo grab your binoculars, come with glee,\nAnd join the adventure, let's bird watch with glee!",
 	"Checklists": "Krysslistor",
 	"NewChecklist": "Ny krysslista",
 	"Account": "Konto",
@@ -66,5 +65,6 @@
 	"Tags": "Etiketter",
 	"PleaseWait": "Vänta",
 	" ThankYou": "Tack!",
-	"NewLabel": "Ny etikett"
+	"NewLabel": "Ny etikett",
+	"ForgotPasswordDescription": "Ange din registrerade e-postadress nedan för att återställa ditt lösenord, och klicka sedan på knappen 'Återställ Lösenord'. Vi kommer att skicka ett e-postmeddelande med ytterligare instruktioner om hur du återfår åtkomst till ditt konto."
 }

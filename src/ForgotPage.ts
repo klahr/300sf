@@ -20,6 +20,10 @@ class ForgotPage extends Page {
 		title.innerHTML = App.translations.ForgotPassword;
 		this.container.appendChild(title);
 
+		const description = document.createElement("p");
+		description.innerHTML = App.translations.ForgotPasswordDescription;
+		this.container.appendChild(description);
+
 		const email = new Ui.Input("email");
 		email.style.position = "relative";
 		email.setPlaceHolder(App.translations.Email);

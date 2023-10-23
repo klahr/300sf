@@ -6,7 +6,6 @@ class Translations {
         StaySignedIn: "Stay signed in",
         MarkSignInCheckbox: "Please mark the checkbox if you prefer not to sign in during each visit.",
         NoAccountYet: "Don't have an account yet? <a>Sign up here.</a>",
-        Poem: "Bird watching, what a blast!<br/>Pigeons perched on my head so fast,<br/>A crow stole my sandwich, oh woe!<br/>Sparrows mistook my hair for a cozy château.<br/><br/>A duck landed on my shoe with a quack,<br/>Creating a scene, what a makeshift track!<br/>Amidst the chaos, an eagle soared high,<br/>Nature's wonder in the sky.<br/><br/>Bird watching full of laughter and fun,<br/>Even with mishaps, it can't be undone.<br/>So grab your binoculars, come with glee,<br/>And join the adventure, let's bird watch with glee!",
         Checklists: "Checklists",
         NewChecklist: "New checklist",
         Account: "Account",
@@ -68,6 +67,7 @@ class Translations {
         PleaseWait: "Please wait",
          ThankYou: "Thank you!",
         NewLabel: "New label",
+        ForgotPasswordDescription: "To reset your password, please enter your registered email address below, and then click on the 'Reset Password' button. We'll send you an email with further instructions on how to regain access to your account.",
     }
     static sv = {
         SignIn: "Logga in",
@@ -76,7 +76,6 @@ class Translations {
         StaySignedIn: "Förbli inloggad",
         MarkSignInCheckbox: "Kryssa i rutan om du föredrar att inte logga in vid varje besök.",
         NoAccountYet: "Har du inget konto ännu? <a>Skapa ett här.</a>",
-        Poem: "Bird watching, what a blast!<br/>Pigeons perched on my head so fast,<br/>A crow stole my sandwich, oh woe!<br/>Sparrows mistook my hair for a cozy château.<br/><br/>A duck landed on my shoe with a quack,<br/>Creating a scene, what a makeshift track!<br/>Amidst the chaos, an eagle soared high,<br/>Nature's wonder in the sky.<br/><br/>Bird watching full of laughter and fun,<br/>Even with mishaps, it can't be undone.<br/>So grab your binoculars, come with glee,<br/>And join the adventure, let's bird watch with glee!",
         Checklists: "Krysslistor",
         NewChecklist: "Ny krysslista",
         Account: "Konto",
@@ -138,6 +137,7 @@ class Translations {
         PleaseWait: "Vänta",
          ThankYou: "Tack!",
         NewLabel: "Ny etikett",
+        ForgotPasswordDescription: "Ange din registrerade e-postadress nedan för att återställa ditt lösenord, och klicka sedan på knappen 'Återställ Lösenord'. Vi kommer att skicka ett e-postmeddelande med ytterligare instruktioner om hur du återfår åtkomst till ditt konto.",
     }
     static de = {
         SignIn: "Anmelden",
@@ -146,7 +146,6 @@ class Translations {
         StaySignedIn: "Angemeldet bleiben",
         MarkSignInCheckbox: "Bitte markieren Sie das Kontrollkästchen, wenn Sie sich bei jedem Besuch nicht anmelden möchten.",
         NoAccountYet: "Sie haben noch kein Konto? <a>Melden Sie sich hier an.</a>",
-        Poem: "Bird watching, what a blast!<br/>Pigeons perched on my head so fast,<br/>A crow stole my sandwich, oh woe!<br/>Sparrows mistook my hair for a cozy château.<br/><br/>A duck landed on my shoe with a quack,<br/>Creating a scene, what a makeshift track!<br/>Amidst the chaos, an eagle soared high,<br/>Nature's wonder in the sky.<br/><br/>Bird watching full of laughter and fun,<br/>Even with mishaps, it can't be undone.<br/>So grab your binoculars, come with glee,<br/>And join the adventure, let's bird watch with glee!",
         Checklists: "Checklisten",
         NewChecklist: "Neue Checkliste",
         Account: "Account",
@@ -208,5 +207,6 @@ class Translations {
         PleaseWait: "Please wait",
          ThankYou: "Thank you!",
         NewLabel: "Neu",
+        ForgotPasswordDescription: "To reset your password, please enter your registered email address below, and then click on the 'Reset Password' button. We'll send you an email with further instructions on how to regain access to your account.",
     }
 }

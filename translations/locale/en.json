@@ -5,7 +5,6 @@
 	"StaySignedIn": "Stay signed in",
 	"MarkSignInCheckbox": "Please mark the checkbox if you prefer not to sign in during each visit.",
 	"NoAccountYet": "Don't have an account yet? <a>Sign up here.</a>",
-	"Poem": "Bird watching, what a blast!\nPigeons perched on my head so fast,\nA crow stole my sandwich, oh woe!\nSparrows mistook my hair for a cozy château.\n\nA duck landed on my shoe with a quack,\nCreating a scene, what a makeshift track!\nAmidst the chaos, an eagle soared high,\nNature's wonder in the sky.\n\nBird watching full of laughter and fun,\nEven with mishaps, it can't be undone.\nSo grab your binoculars, come with glee,\nAnd join the adventure, let's bird watch with glee!",
 	"Checklists": "Checklists",
 	"NewChecklist": "New checklist",
 	"Account": "Account",
@@ -66,5 +65,6 @@
 	"Tags": "Labels",
 	"PleaseWait": "Please wait",
 	" ThankYou": "Thank you!",
-	"NewLabel": "New label"
+	"NewLabel": "New label",
+	"ForgotPasswordDescription": "To reset your password, please enter your registered email address below, and then click on the 'Reset Password' button. We'll send you an email with further instructions on how to regain access to your account."
 }
