@@ -17,9 +17,6 @@ class HttpRequest {
 		if (accessToken != null && accessToken != "") {
 			this.setHeader("X-Access-Token", accessToken);
 		}
-		if (App.apiKey != null) {
-			//this.setHeader("X-Api-Key", App.apiKey);
-		}
 	}
 
 	public setHeader(key: string, value: string): void {

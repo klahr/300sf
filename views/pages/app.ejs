@@ -7,7 +7,7 @@
 	};
 
 	function onAppStart() {
-		new App("<%- data.language %>", "<%- data.api_key %>", "<%- data.redirect %>", '<%- data.queryParameters %>' !== "" ? JSON.parse('<%- data.queryParameters %>') : {});
+		new App("<%- data.language %>", "<%- data.redirect %>", '<%- data.queryParameters %>' !== "" ? JSON.parse('<%- data.queryParameters %>') : {});
 	}
 	onAppStart();
 </script>

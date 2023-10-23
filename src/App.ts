@@ -27,15 +27,12 @@ class App implements IAppListener {
 	private mMainMenu = new MainMenu(this);
 	private static sLanguage: string = "en";
 	public static translations = Translations.en;
-	public static apiKey: string;
 	private mPages = new Array<Page>();
 	private static sUser: Models.User;
 
-	constructor(language: string, apiKey: string, redirect: string, queryParameters: object) {
+	constructor(language: string, redirect: string, queryParameters: object) {
 		const lang = getCookie("lang");
 		App.setLanguage(lang !== "" ? lang : language);
-
-		App.apiKey = apiKey;
 
 		this.mLayerManager.addLayer("base");
 		this.mLayerManager.showLayer("base");
