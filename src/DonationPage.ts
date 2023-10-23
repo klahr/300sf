@@ -8,10 +8,15 @@ class DonationPage extends Page {
 
 		this.addProfile();
 
-		const title = document.createElement("p");
+		const title = document.createElement("h1");
 		title.style.textAlign = "center";
-		title.innerHTML = App.translations.DonationDescription;
+		title.innerHTML = App.translations.ThankYou;
 		this.container.appendChild(title);
+
+		const description = document.createElement("p");
+		description.style.textAlign = "center";
+		description.innerHTML = App.translations.DonationDescription;
+		this.container.appendChild(description);
 
 		const d = new Ui.Div();
 		d.style.position = "relative";

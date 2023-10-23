@@ -314,6 +314,7 @@ class HomePage extends Page {
 
 		const forgot = document.createElement("a");
 		forgot.innerHTML = App.translations.ForgotYourPassword;
+		forgot.style.margin = "var(--small-distance)";
 		forgot.addEventListener("click", function() {
 			self.appListener.showPage("forgot", null);
 		});
