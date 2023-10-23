@@ -15,7 +15,6 @@ class Page extends Ui.Widget {
 		this.mContainer.style.minHeight = "32px";
 
 		this.mContent = new Ui.Div();
-		this.mContent.style.position = "relative";
 		this.mContent.style.width = "100%";
 		this.attach(this.mContent);
 
