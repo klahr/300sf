@@ -24,7 +24,7 @@ class ManageTagsPage extends Page {
 		this.attach(this.mTags);
 
 		const newTagLbl = document.createElement("h2");
-		newTagLbl.innerHTML = App.translations.New;
+		newTagLbl.innerHTML = App.translations.NewLabel;
 		this.container.appendChild(newTagLbl);
 
 		this.mName = new Ui.Input("text");

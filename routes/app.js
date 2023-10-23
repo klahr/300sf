@@ -33,6 +33,10 @@ router.get('/sign-up', function(req, res) {
 	renderPage(req, res);
 });
 
+router.get('/forgot', function(req, res) {
+	renderPage(req, res);
+});
+
 router.get('/settings', function(req, res) {
 	renderPage(req, res);
 });

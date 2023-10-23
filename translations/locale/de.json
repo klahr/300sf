@@ -21,7 +21,6 @@
 	"GoToArticle": "Zum Artikel gehen",
 	"GoToWebsite": "Zur Webseite",
 	"Settings": "Einstellungen",
-	"ManageChecklists": "Checklisten verwalten",
 	"Dashboard": "Übersicht",
 	"WelcomeMessage": "Hallo!",
 	"ObservationLocation": "Beobachtungsort",
@@ -52,7 +51,6 @@
 	"Name": "Name",
 	"SelectTemplate": "Vorlage auswählen",
 	"CreateChecklist": "Checkliste erstellen",
-	"New": "Neu",
 	"NoProvidedInfo": "Es wurden keine Informationen angegeben.",
 	"Contribute": "Beitragen",
 	"ReportIssue": "Problem melden",
@@ -66,5 +64,7 @@
 	"ArchiveSighting": "Archive Sighting",
 	"CreateTag": "Create Label",
 	"Tags": "Labels",
-	"PleaseWait": "Please wait"
+	"PleaseWait": "Please wait",
+	" ThankYou": "Thank you!",
+	"NewLabel": "Neu"
 }

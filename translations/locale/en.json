@@ -13,7 +13,7 @@
 	"LogOut": "Log out",
 	"ForgotYourPassword": "Forgot your password?",
 	"ForgotPassword": "Forgot password",
-	"SendResetLink": "Send reset link",
+	"SendResetLink": "Reset Password",
 	"DisplayName": "Display name",
 	"AcceptTerms": "Accept terms",
 	"SignUp": "Sign up",
@@ -21,7 +21,6 @@
 	"GoToArticle": "Go to article",
 	"GoToWebsite": "Go to website",
 	"Settings": "Settings",
-	"ManageChecklists": "Manage checklists",
 	"Dashboard": "Dashboard",
 	"WelcomeMessage": "Hello!",
 	"ObservationLocation": "Observation location",
@@ -52,7 +51,6 @@
 	"Name": "Name",
 	"SelectTemplate": "Select template",
 	"CreateChecklist": "Create Checklist",
-	"New": "New",
 	"NoProvidedInfo": "No information has been provided.",
 	"Contribute": "Contribute",
 	"ReportIssue": "Report issue",
@@ -66,5 +64,7 @@
 	"ArchiveSighting": "Archive Sighting",
 	"CreateTag": "Create Label",
 	"Tags": "Labels",
-	"PleaseWait": "Please wait"
+	"PleaseWait": "Please wait",
+	" ThankYou": "Thank you!",
+	"NewLabel": "New label"
 }

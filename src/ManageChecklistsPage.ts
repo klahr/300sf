@@ -28,7 +28,7 @@ class ManageCheckListsPage extends Page {
 		this.attach(this.mChecklists);
 
 		const newChecklistsLbl = document.createElement("h2");
-		newChecklistsLbl.innerHTML = App.translations.New;
+		newChecklistsLbl.innerHTML = App.translations.NewChecklist;
 		this.container.appendChild(newChecklistsLbl);
 
 		this.mName = new Ui.Input("text");

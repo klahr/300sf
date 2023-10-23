@@ -13,7 +13,7 @@
 	"LogOut": "Logga ut",
 	"ForgotYourPassword": "Har du glömt ditt lösenord?",
 	"ForgotPassword": "Glömt lösenord",
-	"SendResetLink": "Skicka återställningslänk",
+	"SendResetLink": "Återställ Lösenord",
 	"DisplayName": "Visningsnamn",
 	"AcceptTerms": "Acceptera villkor",
 	"SignUp": "Skapa konto",
@@ -21,7 +21,6 @@
 	"GoToArticle": "Gå till artikeln",
 	"GoToWebsite": "Gå till webbsidan",
 	"Settings": "Inställningar",
-	"ManageChecklists": "Hantera krysslistor",
 	"Dashboard": "Översikt",
 	"WelcomeMessage": "Hej!",
 	"ObservationLocation": "Observationsplats",
@@ -52,7 +51,6 @@
 	"Name": "Namn",
 	"SelectTemplate": "Välj mall",
 	"CreateChecklist": "Skapa Krysslista",
-	"New": "Ny",
 	"NoProvidedInfo": "Ingen information har angetts.",
 	"Contribute": "Bidra",
 	"ReportIssue": "Rapportera fel",
@@ -66,5 +64,7 @@
 	"ArchiveSighting": "Arkivera Fynd",
 	"CreateTag": "Skapa Etikett",
 	"Tags": "Etiketter",
-	"PleaseWait": "Vänta"
+	"PleaseWait": "Vänta",
+	" ThankYou": "Tack!",
+	"NewLabel": "Ny etikett"
 }
