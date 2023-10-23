@@ -1,5 +1,6 @@
 const Config = {
-	ApiKey: '<YOUR_API_KEY>'
+	ApiKey: '<YOUR_API_KEY>',
+	ApiEndpoint: 'http://localhost:8090'
 };
 
 module.exports = Config;
