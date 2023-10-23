@@ -726,7 +726,6 @@ ADD CONSTRAINT `fk_users_1`
   REFERENCES `300sf`.`delete_account_requests` (`id`)
   ON DELETE NO ACTION
   ON UPDATE NO ACTION;
--->
 
 ALTER TABLE `300sf`.`api_keys` 
 DROP FOREIGN KEY `fk_api_keys_2`;
@@ -932,3 +931,5 @@ ADD CONSTRAINT `fk_subscription_species_1`
   REFERENCES `300sf`.`subscriptions` (`id`)
   ON DELETE CASCADE
   ON UPDATE NO ACTION;
+
+-->
