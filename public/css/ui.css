@@ -93,10 +93,6 @@ input.uix-input {
 	border-bottom: 1px solid var(--main-color);
 }
 
-input.uix-input:disabled {
-	color: gray;
-}
-
 div.uix-messagebox {
 	width: calc(100% - var(--large-distance) * 2);
 	max-width: 800px;

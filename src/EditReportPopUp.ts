@@ -57,34 +57,34 @@ class EditReportPopUp {
 		}
 
 		const speciesList = new Ui.Input("text")
-		speciesList.setPlaceHolder(App.getTranslation(report.species.name));
+		speciesList.value = App.getTranslation(report.species.name);
 		speciesList.setDisabled(true);
 		content.attach(speciesList);
 
 		if (report.age) {
 			const ageList = new Ui.Input("text");
-			ageList.setPlaceHolder(App.getTranslation(report.age.name));
+			ageList.value = App.getTranslation(report.age.name);
 			ageList.setDisabled(true);
 			content.attach(ageList);	
 		}
 
 		if (report.gender) {
 			const genderList = new Ui.Input("text");
-			genderList.setPlaceHolder(App.getTranslation(report.gender.name));
+			genderList.value = App.getTranslation(report.gender.name);
 			genderList.setDisabled(true);
 			content.attach(genderList);	
 		}
 
 		if (report.method) {
 			const methodList = new Ui.Input("text");
-			methodList.setPlaceHolder(App.getTranslation(report.method.name));
+			methodList.value = App.getTranslation(report.method.name);
 			methodList.setDisabled(true);
 			content.attach(methodList);	
 		}
 
 		if (report.activity) {
 			const activityList = new Ui.Input("text");
-			activityList.setPlaceHolder(App.getTranslation(report.activity.name));
+			activityList.value = App.getTranslation(report.activity.name);
 			activityList.setDisabled(true);
 			content.attach(activityList);	
 		}
@@ -104,7 +104,7 @@ class EditReportPopUp {
 			fromLbl.innerHTML = App.translations.ObservedFrom;
 			content.container.appendChild(fromLbl);
 			const from = new Ui.Input("text");
-			from.setPlaceHolder(Utils.toYYYY_MM_DD_hh_mm(report.from));
+			from.value = Utils.toYYYY_MM_DD_hh_mm(report.from);
 			from.setDisabled(true);
 			content.attach(from);
 
@@ -114,7 +114,7 @@ class EditReportPopUp {
 				untilLbl.innerHTML = App.translations.ObservedUntil;
 				content.container.appendChild(untilLbl);
 				const until = new Ui.Input("text");
-				until.setPlaceHolder(Utils.toYYYY_MM_DD_hh_mm(report.until));
+				until.value = Utils.toYYYY_MM_DD_hh_mm(report.until);
 				until.setDisabled(true);
 				content.attach(until);
 			}
@@ -156,7 +156,6 @@ class EditReportPopUp {
 			cLbl.setAttribute("for", c.container.getAttribute("name")!);
 			cLbl.innerHTML = App.getTranslation(e.name);
 			dd.container.appendChild(cLbl);
-			cLbl.style.color = "var(--secondary-color)";
 		});
 
 		if (report.tags.length > 0) {
