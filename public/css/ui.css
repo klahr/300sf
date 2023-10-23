@@ -84,13 +84,17 @@ div.uix-progress-bar {
 	width: 100%;
 	height: 6px;
 	border-radius: 3px;
-	background-color: var(--widget-color);;
+	background-color: var(--widget-color);
 }
 
 input.uix-input {
 	display: inline-block;
 	border: none;
 	border-bottom: 1px solid var(--main-color);
+}
+
+input.uix-input:disabled {
+	box-shadow: 0 0 0 1px inset var(--secondary-color);
 }
 
 div.uix-messagebox {
