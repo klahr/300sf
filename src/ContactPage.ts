@@ -47,10 +47,10 @@ class ContactPage extends Page {
 			};
 
 			self.mSendButton.disabled = true;
-			self.mSendButton.innerHTML = App.translations.Sending;
+			self.mSendButton.innerHTML = App.translations.Sending + "...";
 			self.mSubject.container.setAttribute("disabled", "disabled");
 			self.mMessage.setAttribute("disabled", "disabled");
-			const r = new HttpRequest("POST", "/v1/users/sdmigrate", d);
+			const r = new HttpRequest("POST", "/v1/contact", d);
 			r.process(function(status: any, data: any) {
 				new Ui.MessageBox("Success", "Message sent!", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
 				self.mMessage.value = "";
