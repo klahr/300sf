@@ -57,7 +57,6 @@ class Translations {
         Sightings: "Sightings",
         SubmitSighting: "Submit Sighting",
         LastSightings: "Recent sightings",
-        ImportSightingsDescription: "If you possess any sightings within the previous version of the 300 Swedish Birds application, you have the ability to import them.",
         NoRecentSightings: "There have been no recent sightings in the last 14 days.",
         DeleteSighting: "Delete Sighting",
         ArchiveSighting: "Archive Sighting",
@@ -73,6 +72,7 @@ class Translations {
         Support: "Support",
         ImportData: "Import data",
         ImportDataDescription: "Migrate your data seamlessly from the 300 Swedish Birds app to our new webpage. Simply provide your app username and password below and click the 'Import' button. We'll securely transfer your data to ensure a smooth transition to our updated platform. Your privacy and data security are our top priorities.",
+        ContributionDescription: "Our project is open-source, which means we welcome contributions from the community. Whether you're a developer or a translator, your help is valuable.<br/><br/>Code Contributions: If you're a developer, you can contribute code by checking out our repository on SourceHut and submitting merge requests. We appreciate your technical expertise.<br/><br/>Translations: If you're interested in translations, you can help make the project accessible in different languages.<br/><br/>Thank you for considering contributing to 300sf. Your contributions help us grow and improve.",
     }
     static sv = {
         SignIn: "Logga in",
@@ -132,7 +132,6 @@ class Translations {
         Sightings: "Fynd",
         SubmitSighting: "Rapportera Fynd",
         LastSightings: "Senaste fynd",
-        ImportSightingsDescription: "Om du använt den förra versionen av 300 Svenska Fåglar-appen kan du importera dina fynd.",
         NoRecentSightings: "Det finns inga fynd rapporterade de senaste 14 dagarna.",
         DeleteSighting: "Ta Bort Fynd",
         ArchiveSighting: "Arkivera Fynd",
@@ -148,6 +147,7 @@ class Translations {
         Support: "Support",
         ImportData: "Importera data",
         ImportDataDescription: "Importera dina data från '300 Svenska Fåglar'-appen till vår nya webbsida. Ange ditt app-användarnamn och lösenord nedan och klicka på 'Importera'-knappen. Vi kommer att överföra dina data för att säkerställa en smidig övergång till vår uppdaterade plattform. Din integritet och datasäkerhet är våra högsta prioriteringar.",
+        ContributionDescription: "300sf är ett opensource-projekt, vilket innebär att vi välkomnar bidrag. Oavsett om du är en utvecklare eller en översättare är din hjälp värdefull.<br/><br/>Bidra med kod: Om du är en utvecklare kan du bidra med kod genom att besöka projektet på SourceHut och skicka merge-requests. Vi uppskattar din tekniska kompetens.<br/><br/>Översättningar: Om du är intresserad av översättningar kan du hjälpa oss att göra projektet tillgängligt på olika språk.<br/><br/>Tack för ditt bidrag till 300sf.",
     }
     static de = {
         SignIn: "Anmelden",
@@ -207,7 +207,6 @@ class Translations {
         Sightings: "Sightings",
         SubmitSighting: "Einreichen",
         LastSightings: "Letzte Einreichungen",
-        ImportSightingsDescription: "Wenn Sie über Einreichungen in der vorherigen Version des 300 schwedischen Vogelantrags verfügen, haben Sie die Möglichkeit, diese zu importieren.",
         NoRecentSightings: "There have been no recent sightings in the last 14 days.",
         DeleteSighting: "Delete Sighting",
         ArchiveSighting: "Archive Sighting",
@@ -223,5 +222,6 @@ class Translations {
         Support: "Support",
         ImportData: "Einreichungen importieren",
         ImportDataDescription: "Migrate your data seamlessly from the 300 Swedish Birds app to our new webpage. Simply provide your app username and password below and click the 'Import' button. We'll securely transfer your data to ensure a smooth transition to our updated platform. Your privacy and data security are our top priorities.",
+        ContributionDescription: "Our project is open-source, which means we welcome contributions from the community. Whether you're a developer or a translator, your help is valuable.<br/><br/>Code Contributions: If you're a developer, you can contribute code by checking out our repository on SourceHut and submitting merge requests. We appreciate your technical expertise.<br/><br/>Translations: If you're interested in translations, you can help make the project accessible in different languages.<br/><br/>Thank you for considering contributing to 300sf. Your contributions help us grow and improve.",
     }
 }

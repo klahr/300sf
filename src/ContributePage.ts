@@ -8,10 +8,13 @@ class ContributePage extends Page {
 
 		this.addProfile();
 
-		const title = document.createElement("p");
-		title.style.textAlign = "center";
-		title.innerHTML = "sourcehut";
+		const title = document.createElement("h1");
+		title.innerHTML = App.translations.Contribute;
 		this.container.appendChild(title);
+
+		const description = document.createElement("p");
+		description.innerHTML = App.translations.ContributionDescription;
+		this.container.appendChild(description);
 	}
 
 	public get id(): string {

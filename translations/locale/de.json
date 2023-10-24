@@ -56,7 +56,6 @@
 	"Sightings": "Sightings",
 	"SubmitSighting": "Einreichen",
 	"LastSightings": "Letzte Einreichungen",
-	"ImportSightingsDescription": "Wenn Sie über Einreichungen in der vorherigen Version des 300 schwedischen Vogelantrags verfügen, haben Sie die Möglichkeit, diese zu importieren.",
 	"NoRecentSightings": "There have been no recent sightings in the last 14 days.",
 	"DeleteSighting": "Delete Sighting",
 	"ArchiveSighting": "Archive Sighting",
@@ -71,5 +70,6 @@
 	"PermanentlyDeleteAccount": "Permanently delete account",
 	"Support": "Support",
 	"ImportData": "Einreichungen importieren",
-	"ImportDataDescription": "Migrate your data seamlessly from the 300 Swedish Birds app to our new webpage. Simply provide your app username and password below and click the 'Import' button. We'll securely transfer your data to ensure a smooth transition to our updated platform. Your privacy and data security are our top priorities."
+	"ImportDataDescription": "Migrate your data seamlessly from the 300 Swedish Birds app to our new webpage. Simply provide your app username and password below and click the 'Import' button. We'll securely transfer your data to ensure a smooth transition to our updated platform. Your privacy and data security are our top priorities.",
+	"ContributionDescription": "Our project is open-source, which means we welcome contributions from the community. Whether you're a developer or a translator, your help is valuable.\n\nCode Contributions: If you're a developer, you can contribute code by checking out our repository on SourceHut and submitting merge requests. We appreciate your technical expertise.\n\nTranslations: If you're interested in translations, you can help make the project accessible in different languages.\n\nThank you for considering contributing to 300sf. Your contributions help us grow and improve."
 }

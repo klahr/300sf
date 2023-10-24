@@ -56,7 +56,6 @@
 	"Sightings": "Fynd",
 	"SubmitSighting": "Rapportera Fynd",
 	"LastSightings": "Senaste fynd",
-	"ImportSightingsDescription": "Om du använt den förra versionen av 300 Svenska Fåglar-appen kan du importera dina fynd.",
 	"NoRecentSightings": "Det finns inga fynd rapporterade de senaste 14 dagarna.",
 	"DeleteSighting": "Ta Bort Fynd",
 	"ArchiveSighting": "Arkivera Fynd",
@@ -71,5 +70,6 @@
 	"PermanentlyDeleteAccount": "Ta bort kontot permanent",
 	"Support": "Support",
 	"ImportData": "Importera data",
-	"ImportDataDescription": "Importera dina data från '300 Svenska Fåglar'-appen till vår nya webbsida. Ange ditt app-användarnamn och lösenord nedan och klicka på 'Importera'-knappen. Vi kommer att överföra dina data för att säkerställa en smidig övergång till vår uppdaterade plattform. Din integritet och datasäkerhet är våra högsta prioriteringar."
+	"ImportDataDescription": "Importera dina data från '300 Svenska Fåglar'-appen till vår nya webbsida. Ange ditt app-användarnamn och lösenord nedan och klicka på 'Importera'-knappen. Vi kommer att överföra dina data för att säkerställa en smidig övergång till vår uppdaterade plattform. Din integritet och datasäkerhet är våra högsta prioriteringar.",
+	"ContributionDescription": "300sf är ett opensource-projekt, vilket innebär att vi välkomnar bidrag. Oavsett om du är en utvecklare eller en översättare är din hjälp värdefull.\n\nBidra med kod: Om du är en utvecklare kan du bidra med kod genom att besöka projektet på SourceHut och skicka merge-requests. Vi uppskattar din tekniska kompetens.\n\nÖversättningar: Om du är intresserad av översättningar kan du hjälpa oss att göra projektet tillgängligt på olika språk.\n\nTack för ditt bidrag till 300sf."
 }
