@@ -102,8 +102,8 @@ class MainMenu extends Ui.Widget {
 		});
 
 		this.addSection(App.translations.Support);
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>bug_report</span> " + App.translations.ReportIssue, function() {
-			self.mAppListener.showPage("bugs", null);
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>mail</span> " + App.translations.Contact, function() {
+			self.mAppListener.showPage("contact", null);
 		});
 
 		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>support</span> " + App.translations.Contribute, function() {

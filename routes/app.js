@@ -53,6 +53,10 @@ router.get('/donation', function(req, res) {
 	renderPage(req, res);
 });
 
+router.get('/contact', function(req, res) {
+	renderPage(req, res);
+});
+
 router.get('/tags', function(req, res) {
 	renderPage(req, res);
 });

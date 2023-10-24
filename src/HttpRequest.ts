@@ -49,18 +49,20 @@ class HttpRequest {
 			},
 			error: function(xhr, _textStatus, errorThrown) {
 				const response = xhr.responseJSON as Responses.Error;
-				switch (response.code) {
-					case Responses.ErrorCode.ErrorLoggedOut:
-					default:
-						if (response.code === Responses.ErrorCode.ErrorLoggedOut) {
-							// TODO: Refresh session instead of accept logged out.
-							window.open("/?redirect=" + window.location.href, "_self");
-						}
-					break;
+				if (response) {
+					switch (response.code) {
+						case Responses.ErrorCode.ErrorLoggedOut:
+						default:
+							if (response.code === Responses.ErrorCode.ErrorLoggedOut) {
+								// TODO: Refresh session instead of accept logged out.
+								window.open("/?redirect=" + window.location.href, "_self");
+							}
+						break;
+					}
 				}
 				fail(xhr.status, xhr.responseJSON, errorThrown);
 			},
-			timeout: 20000,
+			timeout: 60000,
 			dataType: "json",
 			contentType: "application/json",
 			complete: function() {
