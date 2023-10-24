@@ -7,6 +7,8 @@ import (
 	"encoding/hex"
 	"strconv"
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Password struct {
@@ -14,14 +16,19 @@ type Password struct {
 	Salt  string
 }
 
-func (p *Password) Create(str string) {
+func (p *Password) Create(str string) error {
 	salt := RandomSha256()
 	p.Salt = salt
-	p.Value = ComputeHmac256(str, salt)
+	if hashedPassword, err := bcrypt.GenerateFromPassword([]byte(str+salt), bcrypt.DefaultCost); err != nil {
+		return err
+	} else {
+		p.Value = string(hashedPassword)
+	}
+	return nil
 }
 
 func (p *Password) IsMatching(str, password, salt string) bool {
-	return ComputeHmac256(str, salt) == password
+	return bcrypt.CompareHashAndPassword([]byte(password), []byte(str+salt)) == nil
 }
 
 func RandomSha256() string {

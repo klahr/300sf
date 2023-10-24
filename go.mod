@@ -11,6 +11,7 @@ require (
 	github.com/mailjet/mailjet-apiv3-go v0.0.0-20201009050126-c24bc15a9394
 	github.com/tidwall/geojson v1.4.3
 	github.com/trietmn/go-wiki v1.0.0
+	golang.org/x/crypto v0.1.0
 	gopkg.in/guregu/null.v4 v4.0.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.4.0
@@ -46,7 +47,6 @@ require (
 	github.com/tidwall/rtree v1.3.1 // indirect
 	github.com/tidwall/sjson v1.2.4 // indirect
 	github.com/ugorji/go/codec v1.1.7 // indirect
-	golang.org/x/crypto v0.1.0 // indirect
 	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
