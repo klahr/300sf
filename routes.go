@@ -204,6 +204,9 @@ func SetupRoutes(r *gin.Engine) {
 	// Notifications
 	r.POST("/v1/notifications/:uuid/comment", apiKeyMiddleware, basicMiddleware, controllers.NotificationsComment)
 
+	// Contact
+	r.POST("/v1/contact", apiKeyMiddleware, basicMiddleware, controllers.Contact)
+
 	setupPrivateRoutes(r)
 }
 

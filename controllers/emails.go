@@ -35,8 +35,12 @@ func EmailsSendAll(c *gin.Context) {
 			To: &mailjet.RecipientsV31{
 				mailjet.RecipientV31{
 					Email: e.ToEmail,
-					Name:  e.ToEmail,
+					Name:  e.ToName,
 				},
+			},
+			ReplyTo: &mailjet.RecipientV31{
+				Email: e.ReplyEmail,
+				Name:  e.ReplyName,
 			},
 			Subject:  e.Subject,
 			TextPart: e.TextPart,

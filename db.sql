@@ -933,3 +933,7 @@ ADD CONSTRAINT `fk_subscription_species_1`
   ON UPDATE NO ACTION;
 
 -->
+
+ALTER TABLE `300sf`.`emails` 
+ADD COLUMN `reply_email` VARCHAR(254) NOT NULL AFTER `checksum`,
+ADD COLUMN `reply_name` VARCHAR(128) NOT NULL AFTER `reply_email`;

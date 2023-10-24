@@ -32,6 +32,10 @@ func SendAllEmails(ctx *context.Context, interval int64) {
 							Name:  e.ToEmail,
 						},
 					},
+					ReplyTo: &mailjet.RecipientV31{
+						Email: e.ReplyEmail,
+						Name:  e.ReplyName,
+					},
 					Subject:  e.Subject,
 					TextPart: e.TextPart,
 					HTMLPart: e.HtmlPart,
