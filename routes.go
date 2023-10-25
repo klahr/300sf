@@ -112,14 +112,14 @@ func Health(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, controllers.GeneralSuccessMessage{
-		Message: "good",
+		Message: "healthy",
 		Data:    res,
 	})
 }
 
 func SetupRoutes(r *gin.Engine) {
 	// Authenticate
-	r.POST("/v1/auth", controllers.Auth)
+	r.PUT("/v1/auth", controllers.Auth)
 
 	// Users
 	r.POST("/v1/users", noneMiddleware, controllers.Users)

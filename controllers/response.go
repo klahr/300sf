@@ -14,18 +14,14 @@ type GeneralSuccessMessage struct {
 }
 
 type GeneralErrorResponse struct {
-	Error struct {
-		Message string `json:"message"`
-		Code    int64  `json:"code"`
-	} `json:"error"`
+	Message string `json:"message"`
+	Code    int64  `json:"code"`
 }
 
 type ValidationErrorResponse struct {
-	Error struct {
+	Message string `json:"message"`
+	Errors  []struct {
+		Field   string `json:"field"`
 		Message string `json:"message"`
-		Errors  []struct {
-			Field   string `json:"field"`
-			Message string `json:"message"`
-		}
-	} `json:"error"`
+	}
 }

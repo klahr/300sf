@@ -6,10 +6,19 @@ info:
 servers:
   - url: https://api.300sf.se
     description: Live server.
+components:
+  schemas:
+    GeneralErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
 paths:
   /health:
     get:
-      summary: Returns pong
+      summary: This API endpoint allows you to retrieve the current health status of the server. It provides information about the overall health and operational status of the server, indicating whether it is functioning correctly or experiencing issues.
       responses:
         '200':
           description: Just pong
@@ -20,10 +29,46 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "good"
+                    example: "healthy"
                   data:
                     type: object
                     properties:
                       version:
                         type: string
                         example: "0.1.0"
+  /v1/auth:
+    put:
+      summary: Login.
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token_type:
+                    type: string
+                    example: "bearer"
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+                  expires_at:
+                    type: integer
+                    example: 427413600
+                  max_age:
+                    type: integer
+                    example: 3600
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneralErrorResponse'

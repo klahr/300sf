@@ -15,19 +15,6 @@ import (
 )
 
 func Auth(c *gin.Context) {
-	type request struct {
-		RefreshToken string `json:"refresh_token"`
-	}
-
-	var r request
-	if err := c.ShouldBindJSON(&r); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    -10001,
-			"message": err.Error(),
-		})
-		return
-	}
-
 	authorization := c.Request.Header.Get("Authorization")
 	var user models.User
 
@@ -62,18 +49,6 @@ func Auth(c *gin.Context) {
 			})
 			return
 		}
-	} else if r.RefreshToken != "" {
-		refreshToken := auth.Token{}
-		publicKey, _ := os.ReadFile(config.AppConfig.PublicKeyFilename)
-		if err := auth.ParseToken(r.RefreshToken, &refreshToken, publicKey); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid_grant"})
-			return
-		}
-
-		if err := models.DB.Where("uuid=?", refreshToken.Uuid).First(&user).Error; err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_grant"})
-			return
-		}
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_request"})
 		return
@@ -94,5 +69,7 @@ func Auth(c *gin.Context) {
 	models.DB.Table(table.Users).Where("id=?", user.Id).UpdateColumn("last_seen_at", time.Now())
 
 	c.Header("Content-Language", user.Language.Code)
-	c.JSON(http.StatusOK, authenticationResponse)
+	c.JSON(http.StatusOK, SingleItemDataResponse{
+		Data: authenticationResponse,
+	})
 }
