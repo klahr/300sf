@@ -1,4 +1,4 @@
-openapi: 3.0.0
+openapi: 3.0.3
 info:
   title: 300sf Open API
   description: Description
@@ -12,7 +12,7 @@ servers:
   - url: https://api.300sf.se
     description: Live server.
 components:
-  schemas:
+  responses:
     GeneralErrorResponse:
       type: object
       properties:
@@ -20,6 +20,10 @@ components:
           type: integer
         message:
           type: string
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
 paths:
   /health:
     get:
@@ -45,15 +49,11 @@ paths:
                         example: "0.1.0"
   /v1/auth:
     put:
+      security:
+        - BasicAuth: []
       summary: Login.
       tags:
         - "Authentication"
-      parameters:
-        - in: header
-          name: Authorization
-          required: true
-          schema:
-            type: string
       responses:
         '200':
           description: OK
@@ -67,8 +67,6 @@ paths:
                     example: "bearer"
                   access_token:
                     type: string
-                  refresh_token:
-                    type: string
                   expires_at:
                     type: integer
                     example: 427413600
@@ -80,4 +78,4 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GeneralErrorResponse'
+                $ref: '#/components/responses/GeneralErrorResponse'
