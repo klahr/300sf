@@ -1,7 +1,7 @@
 /// <reference path="Cookie.ts"/>
 /// <reference path="App.ts"/>
 /// <reference path="responses/Error.ts"/>
-/// <reference path="Config.ts"/>
+/// <reference path="AppConfig.ts"/>
 
 declare let $: any;
 
@@ -38,7 +38,7 @@ class HttpRequest {
 			type: self.mMethod,
 			data: JSON.stringify(self.mData),
 			async: self.mAsync,
-			url: Config.ApiEndpoint + self.mUrl,
+			url: AppConfig.ApiEndpoint + self.mUrl,
 			success: function(data, _textStatus, xhr) {
 				const cl = xhr.getResponseHeader('Content-Language');
 				if (cl) {
