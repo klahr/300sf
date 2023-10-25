@@ -5,6 +5,5 @@
 		"outFile": "../public/js/app.js",
 		"sourceMap": false
 	},
-	"include": ["**/*"],
-	"exclude": ["ConfigDebug.ts"]
+	"include": ["**/*"]
 }

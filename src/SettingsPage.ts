@@ -52,7 +52,6 @@ class SettingsPage extends Page {
 
 		this.mImportButton.innerHTML = "Import";
 		this.mImportButton.addEventListener("click", function() {
-			const authorization = 'Basic ' + btoa(self.mEmail.value + ':' + self.mPassword.value);
 			const d = {
 				old_password: self.mPassword.value,
 				old_username: self.mEmail.value
@@ -63,7 +62,6 @@ class SettingsPage extends Page {
 			self.mEmail.container.setAttribute("disabled", "");
 			self.mPassword.container.setAttribute("disabled", "");
 			const r = new HttpRequest("POST", "/v1/users/migrate", d);
-			r.setHeader("Authorization", authorization);
 			r.process(function(status: any, data: any) {
 				self.refresh();
 				new Ui.MessageBox("Success", "All your submissions have successfully been imported!", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});

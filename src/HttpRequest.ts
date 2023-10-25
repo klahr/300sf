@@ -1,15 +1,15 @@
 /// <reference path="Cookie.ts"/>
 /// <reference path="App.ts"/>
 /// <reference path="responses/Error.ts"/>
+/// <reference path="Config.ts"/>
 
-declare const Config;
 declare let $: any;
 
 class HttpRequest {
 	private mHeaders = new Map<string, string>();
 	private mAsync = true;
 
-	constructor(private mMethod: string, private mUrl: string, private mData: any = null) {
+	constructor(private mMethod: string, private mUrl: string, private mData: any = {}) {
 		this.setHeader("Accept", "application/json");
 		this.setHeader("Content-Type", "application/json");
 		this.setHeader("X-App-Language", App.language);

@@ -7,6 +7,5 @@
 		"mapRoot": "../public/js",
 		"watch": true
 	},
-	"include": ["**/*"],
-	"exclude": ["ConfigRelease.ts"]
+	"include": ["**/*"]
 }

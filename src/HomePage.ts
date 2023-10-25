@@ -11,6 +11,7 @@
 /// <reference path="EditReportPopUp.ts"/>
 /// <reference path="responses/Users.ts"/>
 /// <reference path="responses/Auth.ts"/>
+/// <reference path="responses/Response.ts"/>
 
 class HomePage extends Page {
 	private mTable: Ui.Table;
