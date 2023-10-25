@@ -6,7 +6,6 @@ import "gopkg.in/guregu/null.v4/zero"
 type Report struct {
 	Model
 	UserId       int64         `json:"-"`
-	User         User          `json:"user"`
 	SpeciesId    int64         `json:"-"`
 	Species      Species       `json:"species"`
 	From         zero.Time     `json:"from"`

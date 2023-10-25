@@ -12,6 +12,7 @@ import (
 	"git.sr.ht/~klahr/300sf/log"
 	"git.sr.ht/~klahr/300sf/models"
 	"git.sr.ht/~klahr/300sf/services"
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 )
 
@@ -54,6 +55,7 @@ func main() {
 	gin.SetMode(config.AppConfig.Mode)
 	r := gin.New()
 	r.SetTrustedProxies([]string{})
+	r.Use(gzip.Gzip(gzip.DefaultCompression))
 	r.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Authorization,Content-Type,X-Access-Token,X-App-Version,X-App-Language,X-Api-Key")
