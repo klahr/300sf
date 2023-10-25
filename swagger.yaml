@@ -4,8 +4,6 @@ info:
   description: Description
   version: 0.1.0
 servers:
-  - url: http://localhost:8090
-    description: Local development server.
   - url: https://api.300sf.se
     description: Live server.
 paths:
