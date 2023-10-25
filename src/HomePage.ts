@@ -276,16 +276,12 @@ class HomePage extends Page {
 		signIn.addEventListener("click", function() {
 			const authorization = 'Basic ' + btoa(self.mEmail.value + ':' + self.mPassword.value);
 			const stayLoggedIn = (staySignedIn.container as HTMLInputElement).checked;
-			const content = {
-				'refresh-token': ''
-			};
 
-			const r = new HttpRequest("PUT", "/v1/auth", content);
+			const r = new HttpRequest("PUT", "/v1/auth");
 			r.setHeader("Authorization", authorization);
 			r.process(function(status: any, data: Responses.SingleItemDataResponse) {
 				const content = data.data as Responses.AuthenticationResponse;
 				setCookie("x300sf_at", content.access_token, stayLoggedIn ? null : content.expires_at);
-				//setCookie("x300sf_rt", data.refresh_token, 3600 * 24 * 60); // 60 days.
 				const url = new URL(window.location.href);
 				const redirectParam = url.searchParams.get("redirect");
 				if (redirectParam) {
