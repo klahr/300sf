@@ -111,7 +111,7 @@ func Health(c *gin.Context) {
 		Version: "0.1.0",
 	}
 
-	c.JSON(http.StatusOK, controllers.GeneralSuccessMessage{
+	c.JSON(http.StatusOK, controllers.GeneralSuccessResponse{
 		Message: "healthy",
 		Data:    res,
 	})

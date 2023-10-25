@@ -286,30 +286,17 @@ func UsersGetUsers(c *gin.Context) {
 }
 
 func UsersWhoAmI(c *gin.Context) {
-	type response struct {
-		User    models.User     `json:"user"`
-		Reports []models.Report `json:"reports"`
-	}
-
 	var user models.User
-	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+	if err := models.DB.Preload("Language").Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
 		return
 	}
 
-	var reports []models.Report
-	if err := models.DB.Where("user_id=?", user.Id).Where("archived IS NULL").Find(&reports).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, response{
-		User:    user,
-		Reports: reports,
+	c.JSON(http.StatusOK, GeneralSuccessResponse{
+		Data:    user,
+		Message: "success",
 	})
 }
 

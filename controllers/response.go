@@ -8,7 +8,7 @@ type ListDataResponse struct {
 	Data []interface{} `json:"data"`
 }
 
-type GeneralSuccessMessage struct {
+type GeneralSuccessResponse struct {
 	Message string      `json:"message"`
 	Data    interface{} `json:"data"`
 }
