@@ -8,14 +8,13 @@ import (
 )
 
 type AuthenticationResponse struct {
-	TokenType    string `json:"token_type"`
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-	ExpiresAt    int64  `json:"expires_at"`
-	MaxAge       int64  `json:"max_age"`
+	TokenType   string `json:"token_type"`
+	AccessToken string `json:"access_token"`
+	ExpiresAt   int64  `json:"expires_at"`
+	MaxAge      int64  `json:"max_age"`
 }
 
-func Authenticate(uuid string, availablePermissions int64, accessTokenLifetime int64, refreshTokenLifetime int64, privateKey []byte) (*AuthenticationResponse, error) {
+func Authenticate(uuid string, availablePermissions int64, accessTokenLifetime int64, privateKey []byte) (*AuthenticationResponse, error) {
 	now := time.Now().Unix()
 	expiresAt := now + accessTokenLifetime
 	accessTokenClaims := Token{
@@ -23,14 +22,6 @@ func Authenticate(uuid string, availablePermissions int64, accessTokenLifetime i
 		availablePermissions,
 		jwt.StandardClaims{
 			ExpiresAt: expiresAt,
-			IssuedAt:  now,
-		},
-	}
-	refreshTokenClaims := Token{
-		uuid,
-		availablePermissions,
-		jwt.StandardClaims{
-			ExpiresAt: now + refreshTokenLifetime,
 			IssuedAt:  now,
 		},
 	}
@@ -44,17 +35,11 @@ func Authenticate(uuid string, availablePermissions int64, accessTokenLifetime i
 	if err != nil {
 		return nil, err
 	}
-	refreshTokenWithClaims := jwt.NewWithClaims(jwt.SigningMethodRS256, refreshTokenClaims)
-	refreshToken, err := refreshTokenWithClaims.SignedString(key)
-	if err != nil {
-		return nil, err
-	}
 	authenticationResponseSuccess := AuthenticationResponse{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-		TokenType:    "bearer",
-		ExpiresAt:    expiresAt,
-		MaxAge:       accessTokenLifetime,
+		AccessToken: accessToken,
+		TokenType:   "bearer",
+		ExpiresAt:   expiresAt,
+		MaxAge:      accessTokenLifetime,
 	}
 
 	return &authenticationResponseSuccess, nil

@@ -6,9 +6,13 @@ const (
 	ErrorRecordNotFound      = 1001
 	ErrorInsert              = 1002
 	ErrorDelete              = 1003
+	ErrorMissingHeader       = 1004
+	ErrorInvalidRequest      = 1005
 
 	ErrorParse       = 2001
 	ErrorLinkExpired = 2002
+	ErrorMissingFile = 2003
+	ErrorUnknown     = 2004
 
 	ErrorLoggedOut         = 3001
 	ErrorMissingApiKey     = 3002
@@ -25,4 +29,6 @@ const (
 	ErrorMigrateInvalidCredentials = 5002
 
 	ErrorAccountDeactivated = 6001
+
+	ErrorAuthInvalid = 7001
 )

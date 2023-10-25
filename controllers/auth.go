@@ -21,13 +21,16 @@ func Auth(c *gin.Context) {
 	if authorization != "" {
 		email, password, ok := c.Request.BasicAuth()
 		if !ok {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_request"})
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    ErrorInvalidRequest,
+				"message": "invalid request",
+			})
 			return
 		}
 
 		if err := models.DB.Where("email=?", email).Preload("Language").First(&user).Error; err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"code":    -30002,
+				"code":    ErrorAuthInvalid,
 				"message": "invalid email or password",
 			})
 			return
@@ -44,25 +47,34 @@ func Auth(c *gin.Context) {
 		p := utils.Password{}
 		if !p.IsMatching(password, user.Password, user.PasswordSalt) {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"code":    -30002,
+				"code":    ErrorAuthInvalid,
 				"message": "invalid email or password",
 			})
 			return
 		}
 	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_request"})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorMissingHeader,
+			"message": "invalid request",
+		})
 		return
 	}
 
 	privateKey, err := os.ReadFile(config.AppConfig.PrivateKeyFilename)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal_error"})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    ErrorMissingFile,
+			"message": "internal error",
+		})
 		return
 	}
 
-	authenticationResponse, err := auth.Authenticate(user.Uuid, user.Permissions, config.AppConfig.AccessTokenLifetime, config.AppConfig.RefreshTokenLifetime, privateKey)
+	authenticationResponse, err := auth.Authenticate(user.Uuid, user.Permissions, config.AppConfig.AccessTokenLifetime, privateKey)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal_error"})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    ErrorUnknown,
+			"message": "internal error",
+		})
 		return
 	}
 
