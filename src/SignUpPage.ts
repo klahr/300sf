@@ -69,7 +69,7 @@ class SignUpPage extends Page {
 			r.process(function(status: any, data: any) {
 				password.value = "",
 				self.appListener.showPage("home", {"email": email.value, "display_name": displayName.value});
-			}, function(status: any, data: Responses.Error, error: any) {
+			}, function(status: any, data: Responses.GeneralErrorResponse, error: any) {
 				switch (data.code) {
 					case Responses.ErrorCode.ErrorSignUpInvalidDisplayName:
 						new Ui.MessageBox("Oh, no!", "Your <b>Display name</b> appears to be invalid.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});

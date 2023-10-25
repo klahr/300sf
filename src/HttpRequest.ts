@@ -2,7 +2,7 @@
 /// <reference path="App.ts"/>
 /// <reference path="responses/Error.ts"/>
 
-
+declare const Config;
 declare let $: any;
 
 class HttpRequest {
@@ -27,7 +27,7 @@ class HttpRequest {
 		this.mAsync = false;
 	}
 
-	public process(success: (status: any, data: any) => void = function() {}, fail: (status: any, data: Responses.Error, error: any) => void = function() {}, complete: () => void = function() {}): void {
+	public process(success: (status: any, data: any) => void = function() {}, fail: (status: any, data: Responses.GeneralErrorResponse, error: any) => void = function() {}, complete: () => void = function() {}): void {
 		const self = this;
 		$.ajax({
 			beforeSend: function(xhr) {
@@ -48,7 +48,7 @@ class HttpRequest {
 				success(xhr.status, data);
 			},
 			error: function(xhr, _textStatus, errorThrown) {
-				const response = xhr.responseJSON as Responses.Error;
+				const response = xhr.responseJSON as Responses.GeneralErrorResponse;
 				if (response) {
 					switch (response.code) {
 						case Responses.ErrorCode.ErrorLoggedOut:

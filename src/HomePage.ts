@@ -10,6 +10,7 @@
 /// <reference path="ProfilePopUp.ts"/>
 /// <reference path="EditReportPopUp.ts"/>
 /// <reference path="responses/Users.ts"/>
+/// <reference path="responses/Auth.ts"/>
 
 class HomePage extends Page {
 	private mTable: Ui.Table;
@@ -196,7 +197,7 @@ class HomePage extends Page {
 				self.mTable.addRow([noRecent]);
 			}
 
-		}, function(status: any, data: Responses.Error, error: any) {
+		}, function(status: any, data: Responses.GeneralErrorResponse, error: any) {
 			console.log(data);
 		});
 	}
@@ -278,10 +279,11 @@ class HomePage extends Page {
 				'refresh-token': ''
 			};
 
-			const r = new HttpRequest("POST", "/v1/auth", content);
+			const r = new HttpRequest("PUT", "/v1/auth", content);
 			r.setHeader("Authorization", authorization);
-			r.process(function(status: any, data: any) {
-				setCookie("x300sf_at", data.access_token, stayLoggedIn ? null : data.expires_at);
+			r.process(function(status: any, data: Responses.SingleItemDataResponse) {
+				const content = data.data as Responses.AuthenticationResponse;
+				setCookie("x300sf_at", content.access_token, stayLoggedIn ? null : content.expires_at);
 				//setCookie("x300sf_rt", data.refresh_token, 3600 * 24 * 60); // 60 days.
 				const url = new URL(window.location.href);
 				const redirectParam = url.searchParams.get("redirect");
@@ -290,7 +292,7 @@ class HomePage extends Page {
 				} else {
 					location.reload();
 				}
-			}, function(status: any, data: Responses.Error, err: any) {
+			}, function(status: any, data: Responses.GeneralErrorResponse, err: any) {
 				if (data.code === Responses.ErrorCode.ErrorAccountDeactivated) {
 					new Ui.MessageBox("Oh, no!", "Your account has been deactivated.", "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
 				} else {

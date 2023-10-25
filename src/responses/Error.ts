@@ -23,9 +23,4 @@ namespace Responses {
 
 		public static ErrorAccountDeactivated = 6001;
 	}
-
-	export class Error {
-		public message: string;
-		public code: number;
-	}
 }
