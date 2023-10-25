@@ -3,6 +3,11 @@ info:
   title: 300sf Open API
   description: Description
   version: 0.1.0
+contact:
+  name: Joachim Klahr
+  email: joachim@300sf.se
+license:
+  name: GPL-2.0
 servers:
   - url: https://api.300sf.se
     description: Live server.
@@ -19,6 +24,8 @@ paths:
   /health:
     get:
       summary: This API endpoint allows you to retrieve the current health status of the server. It provides information about the overall health and operational status of the server, indicating whether it is functioning correctly or experiencing issues.
+      tags:
+        - "Status"
       responses:
         '200':
           description: Just pong
@@ -39,6 +46,8 @@ paths:
   /v1/auth:
     put:
       summary: Login.
+      tags:
+        - "Authentication"
       parameters:
         - in: header
           name: Authorization
