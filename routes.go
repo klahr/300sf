@@ -102,13 +102,19 @@ func apiKeyMiddleware(c *gin.Context) {
 	c.Next()
 }
 
-func Ping(c *gin.Context) {
-	if param, found := c.GetQuery("param"); found {
-		c.Writer.Write([]byte(param))
-	} else {
-		c.Writer.Write([]byte("pong"))
+func Health(c *gin.Context) {
+	type response struct {
+		Version string `json:"version"`
 	}
-	c.Writer.WriteHeader(http.StatusOK)
+
+	res := response{
+		Version: "0.1.0",
+	}
+
+	c.JSON(http.StatusOK, controllers.GeneralSuccessMessage{
+		Message: "good",
+		Data:    res,
+	})
 }
 
 func SetupRoutes(r *gin.Engine) {
@@ -130,7 +136,7 @@ func SetupRoutes(r *gin.Engine) {
 	r.POST("/v1/users/request_delete", apiKeyMiddleware, basicMiddleware, controllers.UsersRequestDelete)
 	r.DELETE("/v1/users/confirm_delete/:token", apiKeyMiddleware, basicMiddleware, controllers.UsersConfirmDelete)
 
-	r.GET("ping", Ping)
+	r.GET("/health", Health)
 
 	// Lists
 	r.GET("/v1/lists/list", apiKeyMiddleware, basicMiddleware, controllers.ListsList)
