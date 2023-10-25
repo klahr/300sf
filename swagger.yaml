@@ -18,8 +18,10 @@ components:
       properties:
         code:
           type: integer
+          example: 3002
         message:
           type: string
+          example: "missing api key"
     GeneralSuccessResponse:
       type: object
       properties:
@@ -58,6 +60,56 @@ components:
         code:
           type: string
           example: "sv"
+    Order:
+      type: object
+      properties:
+        uuid:
+          type: string
+          example: "a1b2c3"
+        name:
+          $ref: "#/components/schemas/Translation"
+    Species:
+      type: object
+      properties:
+        uuid:
+          type: string
+        name:
+          $ref: "#/components/schemas/Translation"
+        order:
+          $ref: "#/components/schemas/Order"
+    Tag:
+      type: object
+      properties:
+        uuid:
+          type: string
+          example: "a1b2c3"
+        name:
+          type: string
+          example: "Garden"
+        color:
+          type: string
+          example: "#ff00ff"
+        archived:
+          type: string
+          example: "2023-07-19T07:04:20Z"
+    Translation:
+      type: object
+      properties:
+        uuid:
+          type: string
+          example: "a1b2c3"
+        sv:
+          type: string
+          example: "Hej"
+        en:
+          type: string
+          example: "Hello"
+        de:
+          type: string
+          example: "Hallo"
+        la:
+          type: string
+          example: "Salve"
     User:
       type: object
       properties:
