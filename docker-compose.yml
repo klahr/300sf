@@ -46,3 +46,12 @@ services:
       context: ../300sf-web
       dockerfile: Dockerfile
     restart: unless-stopped
+  # api-docs.300sf.se
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    ports:
+      - "8070:8080"
+    environment:
+      - SWAGGER_JSON=/foo/swagger.yaml
+    volumes:
+      - ../300sf:/foo
