@@ -67,7 +67,6 @@ namespace Ui {
 					self.close();
 				});
 			}, 500);
-
 		}
 
 		public close(): void {
@@ -87,6 +86,10 @@ namespace Ui {
 			if (this.mCloseCallback) {
 				this.mCloseCallback();
 			}
+		}
+
+		protected popUp(): Div {
+			return this.mPopup;
 		}
 	}
 }

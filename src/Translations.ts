@@ -78,6 +78,8 @@ class Translations {
         Message: "Message",
         Send: "Send",
         Sending: "Sending",
+        Cancel: "Cancel",
+        ConfirmLogOut: "Are you sure you want to log out?",
     }
     static sv = {
         SignIn: "Logga in",
@@ -158,6 +160,8 @@ class Translations {
         Message: "Meddelande",
         Send: "Skicka",
         Sending: "Skickar",
+        Cancel: "Avbryt",
+        ConfirmLogOut: "Är du säker på att du vill logga ut?",
     }
     static de = {
         SignIn: "Anmelden",
@@ -238,5 +242,7 @@ class Translations {
         Message: "Message",
         Send: "Send",
         Sending: "Sending",
+        Cancel: "Cancel",
+        ConfirmLogOut: "Are you sure you want to log out?",
     }
 }

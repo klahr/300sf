@@ -1,5 +1,6 @@
 /// <reference path="ui/Div.ts"/>
 /// <reference path="App.ts"/>
+/// <reference path="ui/ConfirmBox.ts"/>
 
 class MainMenu extends Ui.Widget {
 	private mContent = new Ui.Div();
@@ -120,7 +121,10 @@ class MainMenu extends Ui.Widget {
 		});
 
 		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>logout</span> " + App.translations.LogOut, function() {
-			self.mAppListener.logOut();
+			new Ui.ConfirmBox(App.translations.LogOut, App.translations.ConfirmLogOut, null, "var(--success-color)", function() {
+				self.mAppListener.logOut();
+			}, function() {
+			}, App.translations.LogOut, App.translations.Cancel);
 		});
 	}
 

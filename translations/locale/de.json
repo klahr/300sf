@@ -76,5 +76,7 @@
 	"Subject": "Subject",
 	"Message": "Message",
 	"Send": "Send",
-	"Sending": "Sending"
+	"Sending": "Sending",
+	"Cancel": "Cancel",
+	"ConfirmLogOut": "Are you sure you want to log out?"
 }

@@ -349,6 +349,7 @@ button {
 	font-weight: bold;
 	font-size: 1em;
 	width: calc(100% - var(--small-distance)*2);
+	min-width: fit-content;
 	height: 48px;
 	margin: var(--small-distance);
 	cursor: pointer;

@@ -76,5 +76,7 @@
 	"Subject": "Ämne",
 	"Message": "Meddelande",
 	"Send": "Skicka",
-	"Sending": "Skickar"
+	"Sending": "Skickar",
+	"Cancel": "Avbryt",
+	"ConfirmLogOut": "Är du säker på att du vill logga ut?"
 }
