@@ -9,8 +9,10 @@ contact:
 license:
   name: "GPL-2.0"
 servers:
-  - url: http://localhost:8090
+  - url: https://api.300sf.se
     description: "Live server."
+  - url: http://localhost:8090
+    description: "Local development server."
 components:
   responses:
     GeneralErrorResponse:
