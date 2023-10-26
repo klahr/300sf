@@ -184,13 +184,16 @@ class EditReportPopUp {
 		this.mReportButton.style.borderRadius = "8px";
 		this.mReportButton.style.backgroundColor = "#a11f1f";
 		this.mReportButton.addEventListener("click", function() {
-			const r = new HttpRequest("POST", "/v1/reports/" + report.uuid + "/archive");
-			r.process(function(status: any, data: any) {
-				self.mPopUp.close();
-				setTimeout(() => {
-					location.reload();
-				}, 150);
-			});
+			new Ui.ConfirmBox(App.translations.ArchiveSighting, App.translations.ConfirmArchiveSighting, null, "var(--success-color)", function() {
+				const r = new HttpRequest("POST", "/v1/reports/" + report.uuid + "/archive");
+				r.process(function(status: any, data: any) {
+					self.mPopUp.close();
+					setTimeout(() => {
+						location.reload();
+					}, 150);
+				});
+			}, function() {
+			}, App.translations.ArchiveSighting, App.translations.Cancel);
 		});
 		content.container.appendChild(this.mReportButton);
 

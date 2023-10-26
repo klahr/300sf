@@ -78,5 +78,6 @@
 	"Send": "Skicka",
 	"Sending": "Skickar",
 	"Cancel": "Avbryt",
-	"ConfirmLogOut": "Är du säker på att du vill logga ut?"
+	"ConfirmLogOut": "Är du säker på att du vill logga ut?",
+	"ConfirmArchiveSighting": "Är du säker på att du vill arkivera fyndet?"
 }

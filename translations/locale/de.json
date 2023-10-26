@@ -78,5 +78,6 @@
 	"Send": "Send",
 	"Sending": "Sending",
 	"Cancel": "Cancel",
-	"ConfirmLogOut": "Are you sure you want to log out?"
+	"ConfirmLogOut": "Are you sure you want to log out?",
+	"ConfirmArchiveSighting": "Are you sure you want to archive this sighting?"
 }

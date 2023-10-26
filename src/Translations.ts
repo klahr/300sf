@@ -80,6 +80,7 @@ class Translations {
         Sending: "Sending",
         Cancel: "Cancel",
         ConfirmLogOut: "Are you sure you want to log out?",
+        ConfirmArchiveSighting: "Are you sure you want to archive this sighting?",
     }
     static sv = {
         SignIn: "Logga in",
@@ -162,6 +163,7 @@ class Translations {
         Sending: "Skickar",
         Cancel: "Avbryt",
         ConfirmLogOut: "Är du säker på att du vill logga ut?",
+        ConfirmArchiveSighting: "Är du säker på att du vill arkivera fyndet?",
     }
     static de = {
         SignIn: "Anmelden",
@@ -244,5 +246,6 @@ class Translations {
         Sending: "Sending",
         Cancel: "Cancel",
         ConfirmLogOut: "Are you sure you want to log out?",
+        ConfirmArchiveSighting: "Are you sure you want to archive this sighting?",
     }
 }
