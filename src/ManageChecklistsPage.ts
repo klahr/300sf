@@ -130,7 +130,7 @@ class ManageCheckListsPage extends Page {
 				c.innerHTML = "<span style='font-size: 1rem; color: " + color + ";' class='material-symbols-outlined'>trip_origin</span> " + App.getTranslation(e.name);
 				self.mChecklists.container.appendChild(c);
 				c.addEventListener("click", function() {
-					new Ui.MessageBox("Edit List", "Here you will edit list.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
+					openEditListPopUp(e);
 				});
 			});
 		});

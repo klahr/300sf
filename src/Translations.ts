@@ -81,6 +81,12 @@ class Translations {
         Cancel: "Cancel",
         ConfirmLogOut: "Are you sure you want to log out?",
         ConfirmArchiveSighting: "Are you sure you want to archive this sighting?",
+        ArchiveLabel: "Archive Label",
+        ConfirmArchiveLabel: "Are you sure you want to archive this label?",
+        Checklist: "Checklist",
+        Label: "Label",
+        ArchiveChecklist: "Archive Checklist",
+        ConfirmArchiveChecklist: "Are you sure you want to archive this checklist?",
     }
     static sv = {
         SignIn: "Logga in",
@@ -164,6 +170,12 @@ class Translations {
         Cancel: "Avbryt",
         ConfirmLogOut: "Är du säker på att du vill logga ut?",
         ConfirmArchiveSighting: "Är du säker på att du vill arkivera fyndet?",
+        ArchiveLabel: "Arkivera Etikett",
+        ConfirmArchiveLabel: "Är du säker på att du vill arkivera etiketten?",
+        Checklist: "Krysslista",
+        Label: "Etikett",
+        ArchiveChecklist: "Arkivera Krysslista",
+        ConfirmArchiveChecklist: "Är du säker på att du vill arkivera krysslistan?",
     }
     static de = {
         SignIn: "Anmelden",
@@ -247,5 +259,11 @@ class Translations {
         Cancel: "Cancel",
         ConfirmLogOut: "Are you sure you want to log out?",
         ConfirmArchiveSighting: "Are you sure you want to archive this sighting?",
+        ArchiveLabel: "Archive Label",
+        ConfirmArchiveLabel: "Are you sure you want to archive this label?",
+        Checklist: "Checklist",
+        Label: "Label",
+        ArchiveChecklist: "Archive Checklist",
+        ConfirmArchiveChecklist: "Are you sure you want to archive this checklist?",
     }
 }
