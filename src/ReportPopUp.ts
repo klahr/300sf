@@ -303,6 +303,7 @@ class ReportPopUp {
 
 			const rr = new HttpRequest("POST", "/v1/reports", r);
 			rr.process(function(status: any, data: any) {
+				new Ui.MessageBox(App.translations.Congratulations, App.translations.YouFoundA.replace("{0}", self.mSpeciesList.getOption(self.mSpeciesList.value!)?.innerHTML!), null, "var(--success-color)", function() {});
 				self.mPopUp.close();
 			});
 		});

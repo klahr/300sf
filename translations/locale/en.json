@@ -85,5 +85,7 @@
 	"Checklist": "Checklist",
 	"Label": "Label",
 	"ArchiveChecklist": "Archive Checklist",
-	"ConfirmArchiveChecklist": "Are you sure you want to archive this checklist?"
+	"ConfirmArchiveChecklist": "Are you sure you want to archive this checklist?",
+	"Congratulations": "Congratulations",
+	"YouFoundA": "You have found a <b>{0}</b>!"
 }

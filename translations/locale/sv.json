@@ -85,5 +85,7 @@
 	"Checklist": "Krysslista",
 	"Label": "Etikett",
 	"ArchiveChecklist": "Arkivera Krysslista",
-	"ConfirmArchiveChecklist": "Är du säker på att du vill arkivera krysslistan?"
+	"ConfirmArchiveChecklist": "Är du säker på att du vill arkivera krysslistan?",
+	"Congratulations": "Grattis",
+	"YouFoundA": "Du har hittat en <b>{0}</b>!"
 }

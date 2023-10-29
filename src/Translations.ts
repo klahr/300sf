@@ -87,6 +87,8 @@ class Translations {
         Label: "Label",
         ArchiveChecklist: "Archive Checklist",
         ConfirmArchiveChecklist: "Are you sure you want to archive this checklist?",
+        Congratulations: "Congratulations",
+        YouFoundA: "You have found a <b>{0}</b>!",
     }
     static sv = {
         SignIn: "Logga in",
@@ -176,6 +178,8 @@ class Translations {
         Label: "Etikett",
         ArchiveChecklist: "Arkivera Krysslista",
         ConfirmArchiveChecklist: "Är du säker på att du vill arkivera krysslistan?",
+        Congratulations: "Grattis",
+        YouFoundA: "Du har hittat en <b>{0}</b>!",
     }
     static de = {
         SignIn: "Anmelden",
@@ -265,5 +269,7 @@ class Translations {
         Label: "Label",
         ArchiveChecklist: "Archive Checklist",
         ConfirmArchiveChecklist: "Are you sure you want to archive this checklist?",
+        Congratulations: "Congratulations",
+        YouFoundA: "You have found a <b>{0}</b>!",
     }
 }
