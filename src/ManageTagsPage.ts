@@ -103,7 +103,7 @@ class ManageTagsPage extends Page {
 				tag.appendChild(c);
 				self.mTags.container.appendChild(tag);
 				c.addEventListener("click", function() {
-					new Ui.MessageBox("Edit Tag", "Here you will edit the tag.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
+					openEditTagPopUp(e);
 				});
 			});
 		});
