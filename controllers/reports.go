@@ -230,7 +230,7 @@ func ReportsList(c *gin.Context) {
 	}
 
 	var reports []models.Report
-	if err := models.DB.Table(table.Reports).Where("user_id=?", user.Id).Where("archived IS NULL").Preload("Tags").Preload("Zone.Name").Preload("Lists").Preload("Species.Name").Preload("Age.Name").Preload("Gender.Name").Preload("Activity.Name").Preload("Method.Name").Preload("Lists.Name").Preload("Comment").Order("timestamp DESC").Find(&reports).Error; err != nil {
+	if err := models.DB.Table(table.Reports).Where("user_id=?", user.Id).Where("archived IS NULL").Preload("Tags", "archived IS NULL").Preload("Zone.Name").Preload("Lists").Preload("Species.Name").Preload("Age.Name").Preload("Gender.Name").Preload("Activity.Name").Preload("Method.Name").Preload("Lists.Name").Preload("Comment").Order("timestamp DESC").Find(&reports).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -323,7 +323,7 @@ func ReportsDetails(c *gin.Context) {
 	}
 
 	// TODO: Preload("Lists.Name") is not working and returns an empty list.
-	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("user_id=?", user.Id).Preload("Zone.Name").Preload("Species.Name").Preload("Age.Name").Preload("Method.Name").Preload("Activity.Name").Preload("Lists.Name").Preload("Tags").Preload("Comment").Preload("Notification.Comment").Preload("Notification.Comments.User").First(&result).Error; err != nil {
+	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("user_id=?", user.Id).Preload("Zone.Name").Preload("Species.Name").Preload("Age.Name").Preload("Method.Name").Preload("Activity.Name").Preload("Lists.Name").Preload("Tags", "archived IS NULL").Preload("Comment").Preload("Notification.Comment").Preload("Notification.Comments.User").First(&result).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "report not found",
 		})
@@ -362,7 +362,7 @@ func ReportsAddTag(c *gin.Context) {
 	}
 
 	var report models.Report
-	if err := models.DB.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).Preload("Tags").First(&report).Error; err != nil {
+	if err := models.DB.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).Preload("Tags", "archived IS NULL").First(&report).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -413,7 +413,7 @@ func ReportsRemoveTag(c *gin.Context) {
 	}
 
 	var report models.Report
-	if err := models.DB.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).Preload("Tags").First(&report).Error; err != nil {
+	if err := models.DB.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).Preload("Tags", "archived IS NULL").First(&report).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -496,7 +496,7 @@ func ReportsBasis(c *gin.Context) {
 		})
 	}
 
-	if err := models.DB.Where("user_id=?", user.Id).Find(&resp.Tags).Error; err != nil {
+	if err := models.DB.Where("user_id=?", user.Id).Where("archived IS NULL").Find(&resp.Tags).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})

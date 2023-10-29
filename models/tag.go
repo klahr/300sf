@@ -8,5 +8,5 @@ type Tag struct {
 	Name     string      `json:"name"`
 	UserId   int64       `json:"-"`
 	Color    zero.String `json:"color"`
-	Archived zero.String `json:"-"`
+	Archived zero.Time   `json:"-"`
 }
