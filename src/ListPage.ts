@@ -148,6 +148,7 @@ class ListPage extends Page {
 					name.addEventListener("click", function() {
 						const r = new HttpRequest("GET", "/v1/orders/" + e.order.uuid);
 						r.process(function(status: any, data: any) {
+							console.log(data);
 						});
 					});
 
@@ -163,7 +164,7 @@ class ListPage extends Page {
 				name.innerHTML = App.getTranslation(e.name);
 				name.style.cursor = "pointer";
 				entry.appendChild(name);
-				name.addEventListener("click", function() {
+				entry.addEventListener("click", function() {
 					openSpeciesPopUp(e);
 				});
 
@@ -180,7 +181,8 @@ class ListPage extends Page {
 				check.innerHTML = "check_circle";
 				check.style.color = "var(--secondary-color)";
 				check.style.cursor = "pointer";
-				check.addEventListener("click", function() {
+				check.addEventListener("click", function(event) {
+					event.stopPropagation();
 					openReportPopUp(e, self.data, function() {
 						self.setData(self.data);
 					});

@@ -161,6 +161,11 @@ div.list-entry {
 	box-sizing: border-box;
 	border-bottom: 1px inset var(--widget-color);
 	position: relative;
+	cursor: pointer;
+}
+
+div.list-entry:hover {
+	background-color: var(--widget-color);
 }
 
 div.list-entry > p {
