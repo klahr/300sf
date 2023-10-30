@@ -80,7 +80,7 @@ func Auth(c *gin.Context) {
 
 	models.DB.Table(table.Users).Where("id=?", user.Id).UpdateColumn("last_seen_at", time.Now())
 
-	c.Header("Content-Language", user.Language.Code)
+	authenticationResponse.Lang = user.Language.Code
 	c.JSON(http.StatusOK, SingleItemDataResponse{
 		Data: authenticationResponse,
 	})
