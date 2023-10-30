@@ -115,6 +115,14 @@ class MainMenu extends Ui.Widget {
 			self.mAppListener.showPage("donation", null);
 		});
 
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>policy</span> " + App.translations.PrivacyPolicy, function() {
+			window.open("/privacy-policy", "_blank");
+		});
+
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>handshake</span> " + App.translations.TermsOfService, function() {
+			window.open("/terms", "_blank");
+		});
+
 		this.addSection(App.translations.Account);
 		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>manage_accounts</span> " + App.translations.Account, function() {
 			self.mAppListener.showPage("settings", null);
@@ -138,6 +146,14 @@ class MainMenu extends Ui.Widget {
 
 		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>volunteer_activism</span> " + App.translations.Donation, function() {
 			self.mAppListener.showPage("donation", null);
+		});
+
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>policy</span> " + App.translations.PrivacyPolicy, function() {
+			window.open("/privacy-policy", "_blank");
+		});
+
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>handshake</span> " + App.translations.TermsOfService, function() {
+			window.open("/terms", "_blank");
 		});
 
 		this.addSection(App.translations.Account);

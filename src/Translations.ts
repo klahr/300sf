@@ -62,7 +62,6 @@ class Translations {
         CreateTag: "Create Label",
         Tags: "Labels",
         PleaseWait: "Please wait",
-         ThankYou: "Thank you!",
         NewLabel: "New label",
         ForgotPasswordDescription: "To reset your password, please enter your registered email address below, and then click on the 'Reset Password' button. We'll send you an email with further instructions on how to regain access to your account.",
         DeleteAccount: "Delete Account",
@@ -96,6 +95,9 @@ class Translations {
         AccountDeactivated: "Your account has been deactivated. To reactivate it, please contact our support team at <a href='mailto:support@300sf.se'>support@300sf.se</a>.",
         InvalidEmailOrPassword: "It seems that the <b>email</b> or <b>password</b> you entered is not valid.",
         Sighting: "Sighting",
+        ThankYou: "Thank you!",
+        PrivacyPolicy: "Privacy policy",
+        TermsOfService: "Terms of service",
     }
     static sv = {
         SignIn: "Logga in",
@@ -160,7 +162,6 @@ class Translations {
         CreateTag: "Skapa Etikett",
         Tags: "Etiketter",
         PleaseWait: "Vänta",
-         ThankYou: "Tack!",
         NewLabel: "Ny etikett",
         ForgotPasswordDescription: "Ange din registrerade e-postadress nedan för att återställa ditt lösenord, och klicka sedan på knappen 'Återställ Lösenord'. Vi kommer att skicka ett e-postmeddelande med ytterligare instruktioner om hur du återfår åtkomst till ditt konto.",
         DeleteAccount: "Ta Bort Konto",
@@ -194,6 +195,9 @@ class Translations {
         AccountDeactivated: "Ditt konto har inaktiverats. För att återaktivera det, kontakta vårt supportteam på <a href='mailto:support@300sf.se'>support@300sf.se</a>.",
         InvalidEmailOrPassword: "Det verkar som om din <b>Epost-adress</b> eller <b>Lösenord</b> du angav inte är giltigt.",
         Sighting: "Fynd",
+        ThankYou: "Tack!",
+        PrivacyPolicy: "Integritetspolicy",
+        TermsOfService: "Användarvillkor",
     }
     static de = {
         SignIn: "Anmelden",
@@ -258,7 +262,6 @@ class Translations {
         CreateTag: "Create Label",
         Tags: "Labels",
         PleaseWait: "Please wait",
-         ThankYou: "Thank you!",
         NewLabel: "Neu",
         ForgotPasswordDescription: "To reset your password, please enter your registered email address below, and then click on the 'Reset Password' button. We'll send you an email with further instructions on how to regain access to your account.",
         DeleteAccount: "Delete Account",
@@ -292,5 +295,8 @@ class Translations {
         AccountDeactivated: "Your account has been deactivated. To reactivate it, please contact our support team at <a href='mailto:support@300sf.se'>support@300sf.se</a>.",
         InvalidEmailOrPassword: "It seems that the <b>email</b> or <b>password</b> you entered is not valid.",
         Sighting: "Sighting",
+        ThankYou: "Thank you!",
+        PrivacyPolicy: "Privacy policy",
+        TermsOfService: "Terms of service",
     }
 }

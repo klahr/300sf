@@ -61,7 +61,6 @@
 	"CreateTag": "Skapa Etikett",
 	"Tags": "Etiketter",
 	"PleaseWait": "Vänta",
-	" ThankYou": "Tack!",
 	"NewLabel": "Ny etikett",
 	"ForgotPasswordDescription": "Ange din registrerade e-postadress nedan för att återställa ditt lösenord, och klicka sedan på knappen 'Återställ Lösenord'. Vi kommer att skicka ett e-postmeddelande med ytterligare instruktioner om hur du återfår åtkomst till ditt konto.",
 	"DeleteAccount": "Ta Bort Konto",
@@ -94,5 +93,8 @@
 	"Error": "Fel",
 	"AccountDeactivated": "Ditt konto har inaktiverats. För att återaktivera det, kontakta vårt supportteam på <a href='mailto:support@300sf.se'>support@300sf.se</a>.",
 	"InvalidEmailOrPassword": "Det verkar som om din <b>Epost-adress</b> eller <b>Lösenord</b> du angav inte är giltigt.",
-	"Sighting": "Fynd"
+	"Sighting": "Fynd",
+	"ThankYou": "Tack!",
+	"PrivacyPolicy": "Integritetspolicy",
+	"TermsOfService": "Användarvillkor"
 }

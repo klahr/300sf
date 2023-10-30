@@ -100,6 +100,18 @@ router.get('/compare', function(req, res) {
 	}, JSON.stringify(r));
 });
 
+router.get('/terms', function(req, res) {
+	res.render('pages/terms', {
+		layout: false
+	});
+});
+
+router.get('/privacy-policy', function(req, res) {
+	res.render('pages/privacy-policy', {
+		layout: false
+	});
+});
+
 router.all('/api/*', async (req, res) => {
 	const apiUrl = config.ApiEndpoint + req.originalUrl.substring(4);
 
