@@ -206,10 +206,12 @@ class HomePage extends Page {
 	public setData(data: any): void {
 		super.setData(data);
 
-		if (data && data.email) {
-			if (this.mEmail) {
-				this.mEmail.value = data.email;
-				new Ui.MessageBox("Welcome " + data.display_name, "Your account has been successfully created, and you can now proceed to sign in!", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
+		if (data) {
+			if (data.email) {
+				if (this.mEmail) {
+					this.mEmail.value = data.email;
+					new Ui.MessageBox("Welcome " + data.display_name, "Your account has been successfully created, and you can now proceed to sign in!", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
+				}
 			}
 		}
 	}

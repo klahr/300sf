@@ -3,6 +3,7 @@
 /// <reference path="ui/DivSelect.ts"/>
 /// <reference path="ProfilePopUp.ts"/>
 /// <reference path="HttpRequest.ts"/>
+/// <reference path="EditListPopUp.ts"/>
 /// <reference path="requests/Lists.ts"/>
 /// <reference path="models/Visibility.ts"/>
 

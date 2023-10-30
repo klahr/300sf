@@ -29,6 +29,7 @@ class HttpRequest {
 
 	public process(success: (status: any, data: any) => void = function() {}, fail: (status: any, data: Responses.GeneralErrorResponse, error: any) => void = function() {}, complete: () => void = function() {}): void {
 		const self = this;
+
 		$.ajax({
 			beforeSend: function(xhr) {
 				for (const [key, value] of self.mHeaders.entries()) {
@@ -48,19 +49,26 @@ class HttpRequest {
 				success(xhr.status, data);
 			},
 			error: function(xhr, _textStatus, errorThrown) {
-				const response = xhr.responseJSON as Responses.GeneralErrorResponse;
-				if (response) {
-					switch (response.code) {
-						case Responses.ErrorCode.ErrorLoggedOut:
-						default:
-							if (response.code === Responses.ErrorCode.ErrorLoggedOut) {
-								// TODO: Refresh session instead of accept logged out.
-								window.open("/?redirect=" + window.location.href, "_self");
-							}
-						break;
+				if (xhr.status === 0) {
+					console.error("Server is not reachable.");
+				} else {
+					const response = xhr.responseJSON as Responses.GeneralErrorResponse;
+					if (response) {
+						switch (response.code) {
+							case Responses.ErrorCode.ErrorLoggedOut:
+							default:
+								if (response.code === Responses.ErrorCode.ErrorLoggedOut) {
+									let url = window.location.href;
+									if (url.indexOf("?redirect=") < 0) {
+										url = "/?redirect=" + url;
+									}
+									window.open(url, "_self");
+								}
+							break;
+						}
 					}
+					fail(xhr.status, xhr.responseJSON, errorThrown);
 				}
-				fail(xhr.status, xhr.responseJSON, errorThrown);
 			},
 			timeout: 60000,
 			dataType: "json",

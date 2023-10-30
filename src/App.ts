@@ -64,7 +64,11 @@ class App implements IAppListener {
 				if (App.isLoggedIn()) {
 					self.fetchUser();
 				} else {
-					window.open("/?redirect=" + window.location.href, "_self");
+					let url = window.location.href;
+					if (url.indexOf("?redirect=") < 0) {
+						url = "/?redirect=" + url;
+					}
+					window.open(url, "_self");
 				}
 			}
 		});
