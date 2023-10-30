@@ -89,6 +89,12 @@ class Translations {
         ConfirmArchiveChecklist: "Are you sure you want to archive this checklist?",
         Congratulations: "Congratulations",
         YouFoundA: "You have found a <b>{0}</b>!",
+        Success: "Success",
+        MessageSentWithSuccess: "The message has been successfully sent, and we will respond to you as soon as possible.",
+        MessageNotDelivered: "The message could not be delivered.",
+        Error: "Error",
+        AccountDeactivated: "Your account has been deactivated. To reactivate it, please contact our support team at <a href='mailto:support@300sf.se'>support@300sf.se</a>.",
+        InvalidEmailOrPassword: "It seems that the <b>email</b> or <b>password</b> you entered is not valid.",
     }
     static sv = {
         SignIn: "Logga in",
@@ -180,6 +186,12 @@ class Translations {
         ConfirmArchiveChecklist: "Är du säker på att du vill arkivera krysslistan?",
         Congratulations: "Grattis",
         YouFoundA: "Du har hittat en <b>{0}</b>!",
+        Success: "Klart",
+        MessageSentWithSuccess: "Meddelandet har skickats och vi kommer att svara dig så snart som möjligt.",
+        MessageNotDelivered: "Meddelandet kunde inte skickas.",
+        Error: "Fel",
+        AccountDeactivated: "Ditt konto har inaktiverats. För att återaktivera det, kontakta vårt supportteam på <a href='mailto:support@300sf.se'>support@300sf.se</a>.",
+        InvalidEmailOrPassword: "Det verkar som om din <b>Epost-adress</b> eller <b>Lösenord</b> du angav inte är giltigt.",
     }
     static de = {
         SignIn: "Anmelden",
@@ -271,5 +283,11 @@ class Translations {
         ConfirmArchiveChecklist: "Are you sure you want to archive this checklist?",
         Congratulations: "Congratulations",
         YouFoundA: "You have found a <b>{0}</b>!",
+        Success: "Success",
+        MessageSentWithSuccess: "The message has been successfully sent, and we will respond to you as soon as possible.",
+        MessageNotDelivered: "The message could not be delivered.",
+        Error: "Error",
+        AccountDeactivated: "Your account has been deactivated. To reactivate it, please contact our support team at <a href='mailto:support@300sf.se'>support@300sf.se</a>.",
+        InvalidEmailOrPassword: "It seems that the <b>email</b> or <b>password</b> you entered is not valid.",
     }
 }

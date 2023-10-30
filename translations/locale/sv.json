@@ -87,5 +87,11 @@
 	"ArchiveChecklist": "Arkivera Krysslista",
 	"ConfirmArchiveChecklist": "Är du säker på att du vill arkivera krysslistan?",
 	"Congratulations": "Grattis",
-	"YouFoundA": "Du har hittat en <b>{0}</b>!"
+	"YouFoundA": "Du har hittat en <b>{0}</b>!",
+	"Success": "Klart",
+	"MessageSentWithSuccess": "Meddelandet har skickats och vi kommer att svara dig så snart som möjligt.",
+	"MessageNotDelivered": "Meddelandet kunde inte skickas.",
+	"Error": "Fel",
+	"AccountDeactivated": "Ditt konto har inaktiverats. För att återaktivera det, kontakta vårt supportteam på <a href='mailto:support@300sf.se'>support@300sf.se</a>.",
+	"InvalidEmailOrPassword": "Det verkar som om din <b>Epost-adress</b> eller <b>Lösenord</b> du angav inte är giltigt."
 }
