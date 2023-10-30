@@ -284,6 +284,7 @@ class HomePage extends Page {
 			r.process(function(status: any, data: Responses.SingleItemDataResponse) {
 				const content = data.data as Responses.AuthenticationResponse;
 				setCookie("x300sf_at", content.access_token, stayLoggedIn ? null : content.expires_at);
+				setCookie("lang", content.lang, stayLoggedIn ? null : content.expires_at);
 				const url = new URL(window.location.href);
 				const redirectParam = url.searchParams.get("redirect");
 				if (redirectParam) {

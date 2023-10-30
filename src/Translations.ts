@@ -95,6 +95,7 @@ class Translations {
         Error: "Error",
         AccountDeactivated: "Your account has been deactivated. To reactivate it, please contact our support team at <a href='mailto:support@300sf.se'>support@300sf.se</a>.",
         InvalidEmailOrPassword: "It seems that the <b>email</b> or <b>password</b> you entered is not valid.",
+        Sighting: "Sighting",
     }
     static sv = {
         SignIn: "Logga in",
@@ -192,6 +193,7 @@ class Translations {
         Error: "Fel",
         AccountDeactivated: "Ditt konto har inaktiverats. För att återaktivera det, kontakta vårt supportteam på <a href='mailto:support@300sf.se'>support@300sf.se</a>.",
         InvalidEmailOrPassword: "Det verkar som om din <b>Epost-adress</b> eller <b>Lösenord</b> du angav inte är giltigt.",
+        Sighting: "Fynd",
     }
     static de = {
         SignIn: "Anmelden",
@@ -289,5 +291,6 @@ class Translations {
         Error: "Error",
         AccountDeactivated: "Your account has been deactivated. To reactivate it, please contact our support team at <a href='mailto:support@300sf.se'>support@300sf.se</a>.",
         InvalidEmailOrPassword: "It seems that the <b>email</b> or <b>password</b> you entered is not valid.",
+        Sighting: "Sighting",
     }
 }

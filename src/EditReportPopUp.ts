@@ -11,8 +11,7 @@
 
 class EditReportPopUp {
 	private mReportButton: HTMLButtonElement;
-	private mChecklistContainer: Ui.Div;
-	private mLocation = L.latLng;
+	private mChecklistContainer: Ui.Div;d
 	private mPopUp: Ui.PopUp;
 
 	constructor(report: Models.Report, closeCallback: () => void) {
@@ -27,7 +26,7 @@ class EditReportPopUp {
 		this.mChecklistContainer.style.position = "relative";
 	
 		const name = document.createElement("h1");
-		name.innerHTML = App.translations.Sightings;
+		name.innerHTML = App.translations.Sighting;
 		name.style.margin = "unset";
 		content.container.appendChild(name);
 	

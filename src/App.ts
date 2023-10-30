@@ -93,6 +93,7 @@ class App implements IAppListener {
 		me.process(function(status: any, data: any) {
 			const d = data as Responses.UsersMe;
 			App.setUser(d.user);
+			App.setLanguage(d.user.language.code);
 		});
 	}
 

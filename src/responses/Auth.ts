@@ -4,5 +4,6 @@ namespace Responses {
 		access_token: string;
 		expires_at: number;
 		max_age: number;
+		lang: string;
 	}
 }

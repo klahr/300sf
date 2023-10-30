@@ -41,11 +41,6 @@ class HttpRequest {
 			async: self.mAsync,
 			url: AppConfig.ApiEndpoint + self.mUrl,
 			success: function(data, _textStatus, xhr) {
-				const cl = xhr.getResponseHeader('Content-Language');
-				if (cl && cl.length > 0) {
-					setCookie("lang", cl);
-					App.setLanguage(cl);
-				}
 				success(xhr.status, data);
 			},
 			error: function(xhr, _textStatus, errorThrown) {
