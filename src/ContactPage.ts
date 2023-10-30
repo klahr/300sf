@@ -70,7 +70,7 @@ class ContactPage extends Page {
 	}
 
 	private verify(): void {
-		this.mSendButton.disabled = this.mSubject.value.length < 4 || this.mMessage.value.length < 16;
+		this.mSendButton.disabled = this.mMessage.value.length < 8;
 	}
 
 	public get id(): string {

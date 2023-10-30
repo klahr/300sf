@@ -42,7 +42,7 @@ class HttpRequest {
 			url: AppConfig.ApiEndpoint + self.mUrl,
 			success: function(data, _textStatus, xhr) {
 				const cl = xhr.getResponseHeader('Content-Language');
-				if (cl) {
+				if (cl && cl.length > 0) {
 					setCookie("lang", cl);
 					App.setLanguage(cl);
 				}
