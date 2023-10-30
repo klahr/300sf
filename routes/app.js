@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const request = require('request');
+const axios = require('axios');
 const config = require('./config');
 const i18n = require('i18n');
 const nm = require('./network-manager');
@@ -100,17 +100,25 @@ router.get('/compare', function(req, res) {
 	}, JSON.stringify(r));
 });
 
-router.all('/api/*', (req, res) => {
+router.all('/api/*', async (req, res) => {
 	const apiUrl = config.ApiEndpoint + req.originalUrl.substring(4);
 
 	req.headers['X-Api-Key'] = config.ApiKey;
 
-	const options = {
-		url: apiUrl,
-		method: req.method,
-		headers: req.headers,
-		body: JSON.stringify(req.body),
-	};
+	try {
+		const axiosConfig = {
+			method: req.method,
+			url: apiUrl,
+			headers: req.headers,
+			data: req.body,
+		};
 
-	request(options).pipe(res);
+		const response = await axios(axiosConfig);
+
+		res.status(response.status).json(response.data);
+	} catch (error) {
+		console.error('Request error:', error.message);
+		res.status(500).json({ error: 'Internal Server Error' });
+		// TODO: Show an error page here with a retry button.
+	}
 });
