@@ -100,5 +100,7 @@
 	"ConnectionError": "Anslutningsproblem",
 	"ConnectionErrorDescription": "Vi beklagar, men webbplatsen kan för närvarande inte upprätta en anslutning till servern. Detta kan bero på ett tillfälligt nätverksproblem eller serverns otillgänglighet. Kontrollera din internetanslutning och försök igen senare.",
 	"ExportMyData": "Exportera mina data",
-	"ExportMyDataDescription": "Klicka på knappen för att ladda ner en kopia på alla dina data."
+	"ExportMyDataDescription": "Klicka på knappen för att ladda ner en kopia på alla dina data.",
+	"SessionExpired": "Sessionen har löpt ut",
+	"SessionExpiredDescription": "Din session har löpt ut. För att säkerställa din säkerhet upphör våra sessioner efter en viss användningstid. Logga in igen för att fortsätta använda våra tjänster."
 }

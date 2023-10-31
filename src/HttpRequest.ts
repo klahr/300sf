@@ -51,14 +51,11 @@ class HttpRequest {
 					if (response) {
 						switch (response.code) {
 							case Responses.ErrorCode.ErrorLoggedOut:
-							default:
 								if (response.code === Responses.ErrorCode.ErrorLoggedOut) {
-									let url = window.location.href;
-									if (url.indexOf("?redirect=") < 0) {
-										url = "/?redirect=" + url;
-									}
-									window.open(url, "_self");
+									new SignInBox(App.translations.SessionExpired, App.translations.SessionExpiredDescription, null, "var(--success-color)", () => {}, () => {}, App.translations.SignIn, App.translations.Cancel);
 								}
+								return;
+							default:
 							break;
 						}
 					}

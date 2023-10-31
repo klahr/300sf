@@ -9,4 +9,9 @@ namespace Responses {
 		last_reports: Array<Models.Report>;
 		user: Models.User;
 	}
+
+	export class UsersWhoAmI {
+		message: string;
+		data: Models.User;
+	}
 }

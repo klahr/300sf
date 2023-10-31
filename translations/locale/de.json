@@ -100,5 +100,7 @@
 	"ConnectionError": "Connection Error",
 	"ConnectionErrorDescription": "We're sorry, but the website is currently unable to establish a connection with the server. This may be due to a temporary network issue or server unavailability. Please check your internet connection and try again later.",
 	"ExportMyData": "Export my data",
-	"ExportMyDataDescription": "Click the button to download a copy of your data."
+	"ExportMyDataDescription": "Click the button to download a copy of your data.",
+	"SessionExpired": "Session expired",
+	"SessionExpiredDescription": "Your session has expired. To ensure your security, our sessions expire after a certain duration of usage. Please log in again to continue using our services."
 }

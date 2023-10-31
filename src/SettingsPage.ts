@@ -2,6 +2,8 @@
 /// <reference path="Page.ts"/>
 /// <reference path="DownloadFile.ts"/>
 /// <reference path="ui/Input.ts"/>
+/// <reference path="ui/MessageBox.ts"/>
+/// <reference path="App.ts"/>
 
 class SettingsPage extends Page {
 	private mEmail: Ui.Input;

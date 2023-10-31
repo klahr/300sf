@@ -61,15 +61,7 @@ class App implements IAppListener {
 		const self = this;
 		document.addEventListener("visibilitychange", () => {
 			if (document.visibilityState === "visible") {
-				if (App.isLoggedIn()) {
-					self.fetchUser();
-				} else {
-					let url = window.location.href;
-					if (url.indexOf("?redirect=") < 0) {
-						url = "/?redirect=" + url;
-					}
-					window.open(url, "_self");
-				}
+				self.fetchUser();
 			}
 		});
 
@@ -88,12 +80,12 @@ class App implements IAppListener {
 	}
 
 	private fetchUser(): void {
-		const me = new HttpRequest("GET", "/v1/users/me");
+		const me = new HttpRequest("GET", "/v1/users/whoami");
 		me.setSync();
 		me.process(function(status: any, data: any) {
-			const d = data as Responses.UsersMe;
-			App.setUser(d.user);
-			App.setLanguage(d.user.language.code);
+			const user = data as Responses.UsersWhoAmI;
+			App.setUser(user.data);
+			App.setLanguage(user.data.language.code);
 		});
 	}
 

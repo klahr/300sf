@@ -294,9 +294,9 @@ class HomePage extends Page {
 				}
 			}, function(status: any, data: Responses.GeneralErrorResponse, err: any) {
 				if (data.code === Responses.ErrorCode.ErrorAccountDeactivated) {
-					new Ui.MessageBox(App.translations.Error, App.translations.AccountDeactivated, "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
+					new Ui.MessageBox(App.translations.Error, App.translations.AccountDeactivated, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
 				} else {
-					new Ui.MessageBox(App.translations.Error, App.translations.InvalidEmailOrPassword, "img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
+					new Ui.MessageBox(App.translations.Error, App.translations.InvalidEmailOrPassword, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
 				}
 			});
 		});

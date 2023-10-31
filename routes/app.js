@@ -129,7 +129,10 @@ router.all('/api/*', async (req, res) => {
 
 		res.status(response.status).json(response.data);
 	} catch (error) {
-		console.error('Request error:', error.message);
-		res.status(503).json({ error: 'Service Unavailable' });
+		if (error.response) {
+			res.status(error.response.status).json(error.response.data ? error.response.data : {});
+		} else {
+			res.status(503).json({});
+		}
 	}
 });

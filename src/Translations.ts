@@ -102,6 +102,8 @@ class Translations {
         ConnectionErrorDescription: "We're sorry, but the website is currently unable to establish a connection with the server. This may be due to a temporary network issue or server unavailability. Please check your internet connection and try again later.",
         ExportMyData: "Export my data",
         ExportMyDataDescription: "Click the button to download a copy of your data.",
+        SessionExpired: "Session expired",
+        SessionExpiredDescription: "Your session has expired. To ensure your security, our sessions expire after a certain duration of usage. Please log in again to continue using our services.",
     }
     static sv = {
         SignIn: "Logga in",
@@ -206,6 +208,8 @@ class Translations {
         ConnectionErrorDescription: "Vi beklagar, men webbplatsen kan för närvarande inte upprätta en anslutning till servern. Detta kan bero på ett tillfälligt nätverksproblem eller serverns otillgänglighet. Kontrollera din internetanslutning och försök igen senare.",
         ExportMyData: "Exportera mina data",
         ExportMyDataDescription: "Klicka på knappen för att ladda ner en kopia på alla dina data.",
+        SessionExpired: "Sessionen har löpt ut",
+        SessionExpiredDescription: "Din session har löpt ut. För att säkerställa din säkerhet upphör våra sessioner efter en viss användningstid. Logga in igen för att fortsätta använda våra tjänster.",
     }
     static de = {
         SignIn: "Anmelden",
@@ -310,5 +314,7 @@ class Translations {
         ConnectionErrorDescription: "We're sorry, but the website is currently unable to establish a connection with the server. This may be due to a temporary network issue or server unavailability. Please check your internet connection and try again later.",
         ExportMyData: "Export my data",
         ExportMyDataDescription: "Click the button to download a copy of your data.",
+        SessionExpired: "Session expired",
+        SessionExpiredDescription: "Your session has expired. To ensure your security, our sessions expire after a certain duration of usage. Please log in again to continue using our services.",
     }
 }

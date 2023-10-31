@@ -1,3 +1,5 @@
+/// <reference path="MessageBox.ts"/>
+
 namespace Ui {
 	export class ConfirmBox extends MessageBox {
 		constructor(title: string, message: string, image: string | null, color: string, yesCallback:() => void, closeCallback: () => void, yesText: string, cancelText: string) {
