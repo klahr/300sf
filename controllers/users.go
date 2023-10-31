@@ -301,7 +301,23 @@ func UsersWhoAmI(c *gin.Context) {
 }
 
 func UsersExportData(c *gin.Context) {
-	c.JSON(http.StatusTeapot, nil)
+	var user models.User
+	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	type exportedUserData struct {
+		User models.User `json:"user"`
+	}
+
+	c.Header("Content-Disposition", "attachment; filename=data.json")
+	c.JSON(http.StatusOK, exportedUserData{
+		User: user,
+	})
 }
 
 func UsersMigrate(c *gin.Context) {
