@@ -153,14 +153,18 @@ class App implements IAppListener {
 	}
 
 	showPage(id: string, data: any): void {
+		let page: Page | null = null;
 		this.mPages.forEach(e => {
 			if (e.id === id) {
-				e.setVisible(true);
-				e.setData(data);
+				page = e;
 			} else {
 				e.setVisible(false);
 			}
 		});
+		if (page) {
+			(page as Page).setVisible(true);
+			(page as Page).setData(data);
+		}
 		this.mMainMenu.close();
 	}
 }

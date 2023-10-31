@@ -98,6 +98,8 @@ class Translations {
         ThankYou: "Thank you!",
         PrivacyPolicy: "Privacy policy",
         TermsOfService: "Terms of service",
+        ConnectionError: "Connection Error",
+        ConnectionErrorDescription: "We're sorry, but the website is currently unable to establish a connection with the server. This may be due to a temporary network issue or server unavailability. Please check your internet connection and try again later.",
     }
     static sv = {
         SignIn: "Logga in",
@@ -198,6 +200,8 @@ class Translations {
         ThankYou: "Tack!",
         PrivacyPolicy: "Integritetspolicy",
         TermsOfService: "Användarvillkor",
+        ConnectionError: "Anslutningsproblem",
+        ConnectionErrorDescription: "Vi beklagar, men webbplatsen kan för närvarande inte upprätta en anslutning till servern. Detta kan bero på ett tillfälligt nätverksproblem eller serverns otillgänglighet. Kontrollera din internetanslutning och försök igen senare.",
     }
     static de = {
         SignIn: "Anmelden",
@@ -298,5 +302,7 @@ class Translations {
         ThankYou: "Thank you!",
         PrivacyPolicy: "Privacy policy",
         TermsOfService: "Terms of service",
+        ConnectionError: "Connection Error",
+        ConnectionErrorDescription: "We're sorry, but the website is currently unable to establish a connection with the server. This may be due to a temporary network issue or server unavailability. Please check your internet connection and try again later.",
     }
 }

@@ -130,7 +130,6 @@ router.all('/api/*', async (req, res) => {
 		res.status(response.status).json(response.data);
 	} catch (error) {
 		console.error('Request error:', error.message);
-		res.status(500).json({ error: 'Internal Server Error' });
-		// TODO: Show an error page here with a retry button.
+		res.status(503).json({ error: 'Service Unavailable' });
 	}
 });

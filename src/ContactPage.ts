@@ -1,6 +1,8 @@
 /// <reference path="utils/Date.ts"/>
 /// <reference path="Page.ts"/>
+/// <reference path="App.ts"/>
 /// <reference path="ui/Input.ts"/>
+/// <reference path="ui/MessageBox.ts"/>
 
 class ContactPage extends Page {
 	private mSubject: Ui.Input;

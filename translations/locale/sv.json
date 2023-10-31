@@ -96,5 +96,7 @@
 	"Sighting": "Fynd",
 	"ThankYou": "Tack!",
 	"PrivacyPolicy": "Integritetspolicy",
-	"TermsOfService": "Användarvillkor"
+	"TermsOfService": "Användarvillkor",
+	"ConnectionError": "Anslutningsproblem",
+	"ConnectionErrorDescription": "Vi beklagar, men webbplatsen kan för närvarande inte upprätta en anslutning till servern. Detta kan bero på ett tillfälligt nätverksproblem eller serverns otillgänglighet. Kontrollera din internetanslutning och försök igen senare."
 }

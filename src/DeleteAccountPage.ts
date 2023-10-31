@@ -1,3 +1,6 @@
+/// <reference path="Page.ts"/>
+/// <reference path="App.ts"/>
+
 class DeleteAccountPage extends Page {
 	constructor(appListener: IAppListener) {
 		super(appListener);
