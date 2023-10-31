@@ -13,6 +13,7 @@ import (
 	"git.sr.ht/~klahr/300sf/utils"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/guregu/null.v4/zero"
+	"gorm.io/gorm/clause"
 )
 
 func Users(c *gin.Context) {
@@ -301,23 +302,170 @@ func UsersWhoAmI(c *gin.Context) {
 }
 
 func UsersExportData(c *gin.Context) {
+	type exportUser struct {
+		Uuid          string      `json:"uuid"`
+		DisplayName   string      `json:"display_name"`
+		Email         string      `json:"-"`
+		Permissions   int64       `json:"permissions"`
+		Notifications int64       `json:"notifications"`
+		LastSeenAt    zero.Time   `json:"last_seen_at"`
+		Language      string      `json:"language"`
+		Portrait      zero.String `json:"portrait"`
+	}
+	type exportReport struct {
+		Uuid      string             `json:"uuid"`
+		Species   models.Translation `json:"species"`
+		From      string             `json:"from"`
+		Until     string             `json:"until"`
+		Latitude  zero.Float         `json:"latitude"`
+		Longitude zero.Float         `json:"longitude"`
+		Quantity  zero.Int           `json:"quantity"`
+		Age       models.Translation `json:"age"`
+		Activity  models.Translation `json:"activity"`
+		Gender    models.Translation `json:"gender"`
+		Method    models.Translation `json:"method"`
+		Comment   string             `json:"comment"`
+		Archived  string             `json:"archived"`
+		Lists     []string           `json:"lists"`
+		Tags      []string           `json:"tags"`
+	}
+	type exportList struct {
+		Uuid       string             `json:"uuid"`
+		Name       models.Translation `json:"name"`
+		From       string             `json:"from"`
+		Until      string             `json:"until"`
+		Visibility int64              `json:"visibility"`
+		Archived   string             `json:"-"`
+		Species    []string           `json:"species" gorm:"many2many:list_species"`
+		Color      zero.String        `json:"color"`
+	}
+	type exportedUserData struct {
+		User    exportUser      `json:"user"`
+		Reports []exportReport  `json:"reports"`
+		ApiKeys []models.ApiKey `json:"api_keys"`
+		Lists   []exportList    `json:"lists"`
+		Tags    []models.Tag    `json:"tags"`
+	}
+	var res exportedUserData
+
 	var user models.User
-	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+	if err := models.DB.Preload(clause.Associations).Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    -10001,
+			"code":    ErrorInternalServerError,
 			"message": err.Error(),
 		})
 		return
 	}
 
-	type exportedUserData struct {
-		User models.User `json:"user"`
+	res.User = exportUser{
+		Uuid:          user.Uuid,
+		DisplayName:   user.DisplayName,
+		Email:         user.Email,
+		Permissions:   user.Permissions,
+		Notifications: user.Notifications,
+		LastSeenAt:    user.LastSeenAt,
+		Language:      user.Language.Code,
+		Portrait:      user.Portrait,
 	}
 
-	c.Header("Content-Disposition", "attachment; filename=data.json")
-	c.JSON(http.StatusOK, exportedUserData{
-		User: user,
-	})
+	var reports []models.Report
+	if err := models.DB.Preload(clause.Associations).Preload("Species.Name").Preload("Age.Name").Preload("Activity.Name").Preload("Gender.Name").Preload("Method.Name").Where("user_id=?", user.Id).Find(&reports).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorInternalServerError,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	for _, r := range reports {
+		rep := exportReport{
+			Uuid:      r.Uuid,
+			Species:   r.Species.Name,
+			Latitude:  r.Latitude,
+			Longitude: r.Longitude,
+			Quantity:  r.Quantity,
+			Comment:   r.Comment.Text,
+		}
+
+		if r.From.Valid {
+			rep.From = r.From.Time.String()
+		}
+		if r.Until.Valid {
+			rep.Until = r.Until.Time.String()
+		}
+		if r.Age != nil {
+			rep.Age = r.Age.Name
+		}
+		if r.Activity != nil {
+			rep.Activity = r.Activity.Name
+		}
+		if r.Gender != nil {
+			rep.Gender = r.Gender.Name
+		}
+		if r.Method != nil {
+			rep.Method = r.Method.Name
+		}
+		for _, l := range r.Lists {
+			rep.Lists = append(rep.Lists, l.Uuid)
+		}
+		for _, t := range r.Tags {
+			rep.Tags = append(rep.Tags, t.Uuid)
+		}
+
+		res.Reports = append(res.Reports, rep)
+	}
+
+	if err := models.DB.Preload(clause.Associations).Where("user_id=?", user.Id).Find(&res.ApiKeys).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorInternalServerError,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var lists []models.List
+	if err := models.DB.Preload(clause.Associations).Where("user_id=?", user.Id).Find(&lists).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorInternalServerError,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	for _, l := range lists {
+		li := exportList{
+			Uuid:       l.Uuid,
+			Name:       l.Name,
+			Visibility: l.Visibility,
+			Color:      l.Color,
+		}
+
+		if l.From.Valid {
+			li.From = l.From.Time.String()
+		}
+		if l.Until.Valid {
+			li.Until = l.Until.Time.String()
+		}
+		if l.Archived.Valid {
+			li.Archived = l.Archived.Time.String()
+		}
+
+		for _, s := range l.Species {
+			li.Species = append(li.Species, s.Uuid)
+		}
+
+		res.Lists = append(res.Lists, li)
+	}
+
+	if err := models.DB.Preload(clause.Associations).Where("user_id=?", user.Id).Find(&res.Tags).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorInternalServerError,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
 }
 
 func UsersMigrate(c *gin.Context) {

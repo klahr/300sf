@@ -50,11 +50,11 @@ func NotificationsComment(c *gin.Context) {
 
 	comment := models.Comment{
 		Model: models.Model{
-			Uuid: utils.GenerateShortUuid(),
+			Uuid:      utils.GenerateShortUuid(),
+			Timestamp: time.Now(),
 		},
-		Timestamp: time.Now(),
-		UserId:    user.Id,
-		Text:      r.Text,
+		UserId: user.Id,
+		Text:   r.Text,
 	}
 
 	if err := tx.Create(&comment).Error; err != nil {
