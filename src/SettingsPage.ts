@@ -1,5 +1,6 @@
 /// <reference path="utils/Date.ts"/>
 /// <reference path="Page.ts"/>
+/// <reference path="DownloadFile.ts"/>
 /// <reference path="ui/Input.ts"/>
 
 class SettingsPage extends Page {
@@ -76,6 +77,30 @@ class SettingsPage extends Page {
 		});
 
 		this.container.appendChild(this.mImportButton);
+
+		const exportDataLbl = document.createElement("h2");
+		exportDataLbl.innerHTML = App.translations.ExportMyData;
+		this.container.appendChild(exportDataLbl);
+
+		const exportDataDescription = document.createElement("p");
+		exportDataDescription.innerHTML = App.translations.ExportMyDataDescription;
+		this.container.appendChild(exportDataDescription);
+
+		const exportDataButton = document.createElement("button");
+		exportDataButton.innerHTML = App.translations.ExportMyData;
+		exportDataButton.addEventListener("click", function() {
+			exportDataButton.disabled = true;
+			const r = new HttpRequest("GET", "/v1/users/export");
+			r.process(function(status: any, data: any) {
+				DownloadFile("data.json", JSON.stringify(data));
+			}, function() {
+				new Ui.MessageBox("Oh, no!", "Something went wrong.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
+			}, function() {
+				exportDataButton.disabled = false;
+			});
+		});
+
+		this.container.appendChild(exportDataButton);
 
 		const deleteAccountLbl = document.createElement("h2");
 		deleteAccountLbl.innerHTML = App.translations.PermanentlyDeleteAccount;

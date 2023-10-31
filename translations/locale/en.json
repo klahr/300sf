@@ -98,5 +98,7 @@
 	"PrivacyPolicy": "Privacy policy",
 	"TermsOfService": "Terms of service",
 	"ConnectionError": "Connection Error",
-	"ConnectionErrorDescription": "We're sorry, but the website is currently unable to establish a connection with the server. This may be due to a temporary network issue or server unavailability. Please check your internet connection and try again later."
+	"ConnectionErrorDescription": "We're sorry, but the website is currently unable to establish a connection with the server. This may be due to a temporary network issue or server unavailability. Please check your internet connection and try again later.",
+	"ExportMyData": "Export my data",
+	"ExportMyDataDescription": "Click the button to download a copy of your data."
 }
