@@ -305,7 +305,7 @@ func UsersExportData(c *gin.Context) {
 	type exportUser struct {
 		Uuid          string      `json:"uuid"`
 		DisplayName   string      `json:"display_name"`
-		Email         string      `json:"-"`
+		Email         string      `json:"email"`
 		Permissions   int64       `json:"permissions"`
 		Notifications int64       `json:"notifications"`
 		LastSeenAt    zero.Time   `json:"last_seen_at"`
@@ -335,8 +335,8 @@ func UsersExportData(c *gin.Context) {
 		From       string             `json:"from"`
 		Until      string             `json:"until"`
 		Visibility int64              `json:"visibility"`
-		Archived   string             `json:"-"`
-		Species    []string           `json:"species" gorm:"many2many:list_species"`
+		Archived   string             `json:"archived"`
+		Species    []string           `json:"species"`
 		Color      zero.String        `json:"color"`
 	}
 	type exportedUserData struct {
