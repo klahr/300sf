@@ -84,6 +84,10 @@ class ListPage extends Page {
 		return "list";
 	}
 
+	public requireSignIn(): boolean {
+		return true;
+	}
+
 	public onBecomeVisible(): void {
 		super.onBecomeVisible();
 		this.refresh();

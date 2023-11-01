@@ -79,6 +79,10 @@ class ContactPage extends Page {
 		return "contact";
 	}
 
+	public requireSignIn(): boolean {
+		return true;
+	}
+
 	public onBecomeVisible(): void {
 		super.onBecomeVisible();
 		this.refresh();

@@ -58,13 +58,6 @@ class App implements IAppListener {
 			this.fetchUser();
 		}
 
-		const self = this;
-		document.addEventListener("visibilitychange", () => {
-			if (document.visibilityState === "visible") {
-				self.fetchUser();
-			}
-		});
-
 		this.showPage(redirect === "" ? "home" : redirect, queryParameters);
 	}
 
@@ -73,10 +66,13 @@ class App implements IAppListener {
 		this.mLayerManager.addToLayer("base", page);
 	}
 
-	public logOut(): void {
+	public logOut(redirect = ""): void {
 		setCookie("x300sf_at", "", 0);
 		setCookie("lang", "", 0);
-		window.open("/", "_self");
+		if (redirect !== "") {
+			redirect = "?redirect=" + redirect;
+		}
+		window.open("/" + redirect, "_self");
 	}
 
 	private fetchUser(): void {
@@ -154,8 +150,13 @@ class App implements IAppListener {
 			}
 		});
 		if (page) {
-			(page as Page).setVisible(true);
-			(page as Page).setData(data);
+			const p =  page as Page;
+			if (p.requireSignIn() && !App.isLoggedIn()) {
+				this.logOut(id);
+			} else {
+				p.setVisible(true);
+				p.setData(data);
+			}
 		}
 		this.mMainMenu.close();
 	}

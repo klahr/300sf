@@ -152,6 +152,10 @@ class SettingsPage extends Page {
 		return "settings";
 	}
 
+	public requireSignIn(): boolean {
+		return true;
+	}
+
 	public onBecomeVisible(): void {
 		super.onBecomeVisible();
 		this.refresh();

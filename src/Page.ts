@@ -46,6 +46,10 @@ class Page extends Ui.Widget {
 		}
 	}
 
+	public requireSignIn(): boolean {
+		return false;
+	}
+
 	protected onBecomeVisible(): void {}
 
 	protected addProfile(): void {

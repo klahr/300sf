@@ -98,6 +98,10 @@ class ManageCheckListsPage extends Page {
 		return "checklists";
 	}
 
+	public requireSignIn(): boolean {
+		return true;
+	}
+
 	public onBecomeVisible(): void {
 		super.onBecomeVisible();
 		this.refresh();

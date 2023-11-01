@@ -73,6 +73,10 @@ class ManageTagsPage extends Page {
 		return "tags";
 	}
 
+	public requireSignIn(): boolean {
+		return true;
+	}
+
 	public onBecomeVisible(): void {
 		super.onBecomeVisible();
 		this.refresh();
