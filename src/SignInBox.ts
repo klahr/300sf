@@ -9,11 +9,23 @@ class SignInBox extends Ui.MessageBox {
 		email.container.addEventListener("click", (event) => {
 			event.stopPropagation();
 		});
+		email.container.addEventListener("keydown", function(e) {
+			if (e.key == "Enter") {
+				e.preventDefault();
+				password.select();
+			}
+		});
 		this.popUp().attach(email);
 		const password = new Ui.Input("password");
 		password.setPlaceHolder(App.translations.Password);
 		password.container.addEventListener("click", (event) => {
 			event.stopPropagation();
+		});
+		password.container.addEventListener("keydown", function(e) {
+			if (e.key == "Enter") {
+				e.preventDefault();
+				signInButton.click();
+			}
 		});
 		this.popUp().attach(password);
 

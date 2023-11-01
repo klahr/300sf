@@ -45,7 +45,7 @@ class HttpRequest {
 			},
 			error: function(xhr, _textStatus, errorThrown) {
 				if (xhr.status === 503 || xhr.status === 0) {
-					new Ui.MessageBox(App.translations.ConnectionError, App.translations.ConnectionErrorDescription, "/img/error.png", "var(--error-color)", () => void {});
+					new Ui.MessageBox(App.translations.ConnectionError, App.translations.ConnectionErrorDescription, null, "var(--error-color)", () => void {});
 				} else {
 					const response = xhr.responseJSON as Responses.GeneralErrorResponse;
 					if (response) {
