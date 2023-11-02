@@ -1,4 +1,3 @@
-/// <reference path="Cookie.ts"/>
 /// <reference path="App.ts"/>
 /// <reference path="responses/Error.ts"/>
 /// <reference path="AppConfig.ts"/>
