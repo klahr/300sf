@@ -70,8 +70,10 @@ class ProfilePopUp {
 				};
 				const r = new HttpRequest("POST", "/v1/users/language", d);
 				r.process(function(status: any, data: any) {
+					// TODO: This is a bug. lang should have an expire time.
 					App.setLanguage(value);
-					setCookie("lang", value);
+					const ks = new LocalStorage();
+					ks.set("lang", value, 0);
 					location.reload();
 				});
 			}

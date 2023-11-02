@@ -1,6 +1,7 @@
 /// <reference path="utils/Date.ts"/>
 /// <reference path="Page.ts"/>
 /// <reference path="ui/Input.ts"/>
+/// <reference path="App.ts"/>
 
 class DonationPage extends Page {
 	constructor(appListener: IAppListener) {

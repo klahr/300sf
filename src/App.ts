@@ -16,6 +16,7 @@
 /// <reference path="Translations.ts"/>
 /// <reference path="models/Translation.ts"/>
 /// <reference path="models/User.ts"/>
+/// <reference path="LocalStorage.ts"/>
 
 interface IAppListener {
 	openMainMenu(): void;
@@ -32,7 +33,8 @@ class App implements IAppListener {
 	private static sUser: Models.User;
 
 	constructor(language: string, redirect: string, queryParameters: object) {
-		const lang = getCookie("lang");
+		const ks = new LocalStorage();
+		const lang = ks.get("lang") as string;
 		App.setLanguage(lang !== "" ? lang : language);
 
 		this.mLayerManager.addLayer("base");
@@ -67,8 +69,8 @@ class App implements IAppListener {
 	}
 
 	public logOut(redirect = ""): void {
-		setCookie("x300sf_at", "", 0);
-		setCookie("lang", "", 0);
+		const ks = new LocalStorage();
+		ks.clear();
 		if (redirect !== "") {
 			redirect = "?redirect=" + redirect;
 		}
@@ -86,7 +88,8 @@ class App implements IAppListener {
 	}
 
 	public static isLoggedIn(): boolean {
-		return getCookie("x300sf_at") !== "";
+		const ks = new LocalStorage();
+		return ks.get("x300sf_at") !== null;
 	}
 
 	public static getTranslation(translation: Models.Translation): string {

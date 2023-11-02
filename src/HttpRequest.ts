@@ -14,7 +14,8 @@ class HttpRequest {
 		this.setHeader("Accept", "application/json");
 		this.setHeader("Content-Type", "application/json");
 		this.setHeader("X-App-Language", App.language);
-		const accessToken = getCookie("x300sf_at");
+		const ks = new LocalStorage();
+		const accessToken = ks.get("x300sf_at");
 		if (accessToken != null && accessToken != "") {
 			this.setHeader("X-Access-Token", accessToken);
 		}
