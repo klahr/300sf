@@ -157,7 +157,7 @@ class Translations {
         Name: "Namn",
         SelectTemplate: "Välj mall",
         CreateChecklist: "Skapa krysslista",
-        NoProvidedInfo: "Ingen information har angetts.",
+        NoProvidedInfo: "Ingen information har angivits.",
         Contribute: "Bidra",
         Sightings: "Fynd",
         SubmitSighting: "Rapportera fynd",
