@@ -1,4 +1,6 @@
 /// <reference path="ui/MessageBox.ts"/>
+/// <reference path="ui/Input.ts"/>
+/// <reference path="App.ts"/>
 
 class SignInBox extends Ui.MessageBox {
 	constructor(title: string, message: string, image: string | null, color: string, yesCallback:() => void, closeCallback: () => void, yesText: string, cancelText: string) {

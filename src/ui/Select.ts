@@ -216,12 +216,12 @@ namespace Ui {
 		public setDisabled(disabled: boolean): void {
 			if (disabled) {
 				this.mResult.style.pointerEvents = "none";
-				this.mResult.style.color = "gray";
-				this.mOpenArrow.style.color = "gray";	
+				this.mOpenArrow.style.color = "gray";
+				this.mContainer.style.boxShadow = "0 0 0 1px inset var(--secondary-color)";
 			} else {
 				this.mResult.style.pointerEvents = "unset";
-				this.mResult.style.color = "unset";
-				this.mOpenArrow.style.color = "unset";	
+				this.mOpenArrow.style.color = "unset";
+				this.mContainer.style.boxShadow = "unset";
 			}
 		}
 

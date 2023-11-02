@@ -201,6 +201,7 @@ class ReportPopUp {
 				if (species && species.uuid === e.uuid) {
 					option.click();
 					self.mSpeciesList.hide();
+					self.mSpeciesList.setDisabled(true);
 				}
 			});
 

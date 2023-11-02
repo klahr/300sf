@@ -2,6 +2,7 @@
 /// <reference path="App.ts"/>
 /// <reference path="responses/Error.ts"/>
 /// <reference path="AppConfig.ts"/>
+/// <reference path="SignInBox.ts"/>
 
 declare let $: any;
 
