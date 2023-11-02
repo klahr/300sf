@@ -170,6 +170,7 @@ class ReportPopUp {
 
 		this.mTagsContainer = new Ui.Div();
 		this.mTagsContainer.style.position = "relative";
+		this.mTagsContainer.style.margin = "var(--small-distance)";
 		content.attach(this.mTagsContainer);
 
 		const listsLbl = document.createElement("h3");

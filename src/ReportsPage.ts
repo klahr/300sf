@@ -50,6 +50,7 @@ class ReportsPage extends Page {
 
 		this.mFilterTags = new Ui.Div();
 		this.mFilterTags.style.position = "relative";
+		this.mFilterTags.style.margin = "var(--small-distance)";
 		filter.attach(this.mFilterTags);
 	}
 

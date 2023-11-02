@@ -22,6 +22,7 @@ class ManageTagsPage extends Page {
 
 		this.mTags = new Ui.Div();
 		this.mTags.style.position = "relative";
+		this.mTags.style.margin = "var(--small-distance)";
 		this.attach(this.mTags);
 
 		const newTagLbl = document.createElement("h2");
