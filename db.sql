@@ -932,8 +932,36 @@ ADD CONSTRAINT `fk_subscription_species_1`
   ON DELETE CASCADE
   ON UPDATE NO ACTION;
 
--->
 
 ALTER TABLE `300sf`.`emails` 
 ADD COLUMN `reply_email` VARCHAR(254) NOT NULL AFTER `checksum`,
 ADD COLUMN `reply_name` VARCHAR(128) NOT NULL AFTER `reply_email`;
+
+-->
+
+CREATE TABLE `300sf`.`announcement` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `timestamp` DATETIME NOT NULL,
+  `uuid` VARCHAR(32) NOT NULL,
+  `name` VARCHAR(128) NOT NULL,
+  `content_id` INT NOT NULL,
+  `from` DATETIME NULL,
+  `until` DATETIME NULL,
+  `priority` INT NOT NULL,
+  `user_id` INT NULL,
+  `on_hold` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) VISIBLE,
+  INDEX `index3` (`uuid` ASC) VISIBLE,
+  INDEX `fk_announcement_1_idx` (`user_id` ASC) VISIBLE,
+  INDEX `fk_announcement_2_idx` (`content_id` ASC) VISIBLE,
+  CONSTRAINT `fk_announcement_1`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `300sf`.`users` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_announcement_2`
+    FOREIGN KEY (`content_id`)
+    REFERENCES `300sf`.`translations` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
