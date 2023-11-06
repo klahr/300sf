@@ -310,17 +310,12 @@ class HomePage extends Page {
 		const self = this;
 		const noAccountYet = document.createElement("p");
 		noAccountYet.innerHTML = App.translations.NoAccountYet;
-		noAccountYet.addEventListener("click", function() {
-			self.appListener.showPage("sign-up", null);
-		});
 		this.container.appendChild(noAccountYet);
 
 		const forgot = document.createElement("a");
 		forgot.innerHTML = App.translations.ForgotYourPassword;
 		forgot.style.margin = "var(--small-distance)";
-		forgot.addEventListener("click", function() {
-			self.appListener.showPage("forgot", null);
-		});
+		forgot.href = "/forgot";
 		this.container.appendChild(forgot);
 	}
 }

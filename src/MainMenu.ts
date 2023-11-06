@@ -35,6 +35,7 @@ class MainMenu extends Ui.Widget {
 		logo.style.width = "100%";
 		logo.style.marginTop = "29px";
 		logo.style.cursor = "pointer";
+		logo.alt = App.translations.AppName;
 		logo.setAttribute("height", "36");
 		logo.addEventListener("click", function() {
 			self.mAppListener.showPage("home", null);
