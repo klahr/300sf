@@ -6,7 +6,7 @@
     "display": "standalone",
     "background_color": "#fff",
     "description": "A 300 Swedish Birds client.",
-    "theme_color": "#b40d81",
+    "theme_color": "#1a1a1a",
     "icons": [
       {
         "src": "img/logo-256x256.png",
