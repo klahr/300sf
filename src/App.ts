@@ -5,6 +5,7 @@
 /// <reference path="SettingsPage.ts"/>
 /// <reference path="DonationPage.ts"/>
 /// <reference path="ForgotPage.ts"/>
+/// <reference path="AdminPage.ts"/>
 /// <reference path="ManageTagsPage.ts"/>
 /// <reference path="ReportsPage.ts"/>
 /// <reference path="MainMenu.ts"/>
@@ -41,6 +42,7 @@ class App implements IAppListener {
 		this.mLayerManager.showLayer("base");
 
 		this.addPage(new HomePage(this));
+		this.addPage(new AdminPage(this));
 		this.addPage(new SignUpPage(this));
 		this.addPage(new ForgotPage(this));
 		this.addPage(new ListPage(this));
@@ -144,6 +146,9 @@ class App implements IAppListener {
 	}
 
 	showPage(id: string, data: any): void {
+		if (id === "admin" && !App.user) {
+			id = "home";
+		}
 		let page: Page | null = null;
 		this.mPages.forEach(e => {
 			if (e.id === id) {
@@ -155,7 +160,7 @@ class App implements IAppListener {
 		if (page) {
 			const p =  page as Page;
 			if (p.requireSignIn() && !App.isLoggedIn()) {
-				this.logOut(id);
+				this.logOut(window.location.pathname);
 			} else {
 				p.setVisible(true);
 				p.setData(data);
