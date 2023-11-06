@@ -232,4 +232,9 @@ func setupPrivateRoutes(r *gin.Engine) {
 
 	// Emails
 	r.GET("/v1/emails/send_all", adminMiddleware, controllers.EmailsSendAll)
+
+	// Announcements
+	r.POST("/v1/announcements", adminMiddleware, controllers.Announcements)
+	r.PUT("/v1/announcements/:uuid/hold", adminMiddleware, controllers.AnnouncementsHold)
+	r.DELETE("/v1/announcements/:uuid", adminMiddleware, controllers.AnnouncementsDelete)
 }
