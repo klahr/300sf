@@ -113,3 +113,46 @@ func AnnouncementsDelete(c *gin.Context) {
 		Message: "success",
 	})
 }
+
+func AnnouncementsRead(c *gin.Context) {
+	var announcement models.Announcement
+	if err := models.DB.Where("uuid=?", c.Param("uuid")).First(&announcement).Error; err != nil {
+		c.JSON(http.StatusBadRequest, GeneralErrorResponse{
+			Message: err.Error(),
+			Code:    ErrorRecordNotFound,
+		})
+		return
+	}
+
+	var user models.User
+	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, GeneralErrorResponse{
+			Message: err.Error(),
+			Code:    ErrorRecordNotFound,
+		})
+		return
+	}
+
+	if err := models.DB.Table(table.Announcements).Where("uuid=?", c.Param("uuid")).UpdateColumn("on_hold", nil).Error; err != nil {
+		c.JSON(http.StatusBadRequest, GeneralErrorResponse{
+			Message: err.Error(),
+			Code:    ErrorRecordNotFound,
+		})
+		return
+	}
+
+	if err := models.DB.Create(&models.AnnouncementUser{
+		AnnouncementId: announcement.Id,
+		UserId:         user.Id,
+	}).Error; err != nil {
+		c.JSON(http.StatusBadRequest, GeneralErrorResponse{
+			Message: err.Error(),
+			Code:    ErrorInsert,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, GeneralSuccessResponse{
+		Message: "success",
+	})
+}

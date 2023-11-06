@@ -939,7 +939,7 @@ ADD COLUMN `reply_name` VARCHAR(128) NOT NULL AFTER `reply_email`;
 
 -->
 
-CREATE TABLE `300sf`.`announcement` (
+CREATE TABLE `300sf`.`announcements` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `timestamp` DATETIME NOT NULL,
   `uuid` VARCHAR(32) NOT NULL,
@@ -953,15 +953,38 @@ CREATE TABLE `300sf`.`announcement` (
   PRIMARY KEY (`id`),
   UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) VISIBLE,
   INDEX `index3` (`uuid` ASC) VISIBLE,
-  INDEX `fk_announcement_1_idx` (`user_id` ASC) VISIBLE,
-  INDEX `fk_announcement_2_idx` (`content_id` ASC) VISIBLE,
-  CONSTRAINT `fk_announcement_1`
+  INDEX `fk_announcements_1_idx` (`user_id` ASC) VISIBLE,
+  INDEX `fk_announcements_2_idx` (`content_id` ASC) VISIBLE,
+  CONSTRAINT `fk_announcements_1`
     FOREIGN KEY (`user_id`)
     REFERENCES `300sf`.`users` (`id`)
     ON DELETE CASCADE
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_announcement_2`
+  CONSTRAINT `fk_announcements_2`
     FOREIGN KEY (`content_id`)
     REFERENCES `300sf`.`translations` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
+
+
+CREATE TABLE `300sf`.`announcement_users` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `announcement_id` INT NOT NULL,
+  `user_id` INT NOT NULL,
+  PRIMARY KEY (`id`));
+
+ALTER TABLE `300sf`.`announcement_users` 
+ADD INDEX `fk_announcement_users_1_idx` (`announcement_id` ASC) VISIBLE,
+ADD INDEX `fk_announcement_users_2_idx` (`user_id` ASC) VISIBLE;
+;
+ALTER TABLE `300sf`.`announcement_users` 
+ADD CONSTRAINT `fk_announcement_users_1`
+  FOREIGN KEY (`announcement_id`)
+  REFERENCES `300sf`.`announcements` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION,
+ADD CONSTRAINT `fk_announcement_users_2`
+  FOREIGN KEY (`user_id`)
+  REFERENCES `300sf`.`users` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
