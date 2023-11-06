@@ -235,6 +235,7 @@ func setupPrivateRoutes(r *gin.Engine) {
 
 	// Announcements
 	r.POST("/v1/announcements", adminMiddleware, controllers.Announcements)
-	r.PUT("/v1/announcements/:uuid/hold", adminMiddleware, controllers.AnnouncementsHold)
+	r.PUT("/v1/announcements/:uuid/pause", adminMiddleware, controllers.AnnouncementsPause)
+	r.PUT("/v1/announcements/:uuid/resume", adminMiddleware, controllers.AnnouncementsResume)
 	r.DELETE("/v1/announcements/:uuid", adminMiddleware, controllers.AnnouncementsDelete)
 }

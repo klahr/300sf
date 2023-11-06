@@ -2,6 +2,7 @@
 package table
 
 const (
+	Announcements          = "announcements"
 	ApiKeys                = "api_keys"
 	ChangePasswordRequests = "change_password_requests"
 	Comments               = "comments"

@@ -26,7 +26,6 @@ func Species(c *gin.Context) {
 
 	var r request
 	if err := c.ShouldBindJSON(&r); err != nil {
-		fmt.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "could not parse request",
 			"code":    ErrorParse,
