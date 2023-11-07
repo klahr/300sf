@@ -31,20 +31,20 @@ class ForgotPage extends Page {
 
 		const reset = document.createElement("button");
 		reset.innerHTML = App.translations.SendResetLink;
-		reset.addEventListener("click", function() {
+		reset.addEventListener("click", function () {
 			email.setDisabled(true);
 			const r = new HttpRequest("POST", "/v1/users/reset_password", {
 				email: email.value,
 			});
-			r.process(function(status: any, data: any) {
+			r.process(function (status: any, data: any) {
 				email.setDisabled(false);
 				email.value = "";
-				new Ui.MessageBox("Reset Password", "Check your email inbox for further instructions.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {
+				new Ui.MessageBox("Reset Password", "Check your email inbox for further instructions.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function () {
 					appListener.showPage("home", null);
 				});
 			});
 		});
-		email.container.addEventListener("keydown", function(e) {
+		email.container.addEventListener("keydown", function (e) {
 			if (e.key == "Enter") {
 				e.preventDefault();
 				reset.click();

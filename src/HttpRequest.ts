@@ -28,11 +28,11 @@ class HttpRequest {
 		this.mAsync = false;
 	}
 
-	public process(success: (status: any, data: any) => void = function() {}, fail: (status: any, data: Responses.GeneralErrorResponse, error: any) => void = function() {}, complete: () => void = function() {}): void {
+	public process(success: (status: any, data: any) => void = function () { }, fail: (status: any, data: Responses.GeneralErrorResponse, error: any) => void = function () { }, complete: () => void = function () { }): void {
 		const self = this;
 
 		$.ajax({
-			beforeSend: function(xhr) {
+			beforeSend: function (xhr) {
 				for (const [key, value] of self.mHeaders.entries()) {
 					xhr.setRequestHeader(key, value);
 				}
@@ -41,10 +41,10 @@ class HttpRequest {
 			data: JSON.stringify(self.mData),
 			async: self.mAsync,
 			url: AppConfig.ApiEndpoint + self.mUrl,
-			success: function(data, _textStatus, xhr) {
+			success: function (data, _textStatus, xhr) {
 				success(xhr.status, data);
 			},
-			error: function(xhr, _textStatus, errorThrown) {
+			error: function (xhr, _textStatus, errorThrown) {
 				if (xhr.status === 503 || xhr.status === 0) {
 					new Ui.MessageBox(App.translations.ConnectionError, App.translations.ConnectionErrorDescription, null, "var(--error-color)", () => void {});
 				} else {
@@ -53,11 +53,11 @@ class HttpRequest {
 						switch (response.code) {
 							case Responses.ErrorCode.ErrorLoggedOut:
 								if (response.code === Responses.ErrorCode.ErrorLoggedOut) {
-									new SignInBox(App.translations.SessionExpired, App.translations.SessionExpiredDescription, null, "var(--success-color)", () => {}, () => {}, App.translations.SignIn, App.translations.Cancel);
+									new SignInBox(App.translations.SessionExpired, App.translations.SessionExpiredDescription, null, "var(--success-color)", () => { }, () => { }, App.translations.SignIn, App.translations.Cancel);
 								}
 								return;
 							default:
-							break;
+								break;
 						}
 					}
 					fail(xhr.status, xhr.responseJSON, errorThrown);
@@ -66,7 +66,7 @@ class HttpRequest {
 			timeout: 60000,
 			dataType: "json",
 			contentType: "application/json",
-			complete: function() {
+			complete: function () {
 				complete();
 			},
 		});

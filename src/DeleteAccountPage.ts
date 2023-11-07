@@ -29,22 +29,22 @@ class DeleteAccountPage extends Page {
 		const self = this;
 		const set = document.createElement("button");
 		set.innerHTML = "Delete Account";
-		set.addEventListener("click", function() {
+		set.addEventListener("click", function () {
 			password.setDisabled(true);
 			const r = new HttpRequest("DELETE", "/v1/users/confirm_delete/" + self.data.token, {
 				password: password.value
 			});
-			r.process(function(status: any, data: any) {
+			r.process(function (status: any, data: any) {
 				password.setDisabled(false);
 				password.value = ""
 				const ks = new LocalStorage();
 				ks.clear();
-				new Ui.MessageBox("Account Deleted", "Your account has been inactivated or will be permanently deleted in 7 days. If you change your mind you must contact support@300sf.se within a week.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {
+				new Ui.MessageBox("Account Deleted", "Your account has been inactivated or will be permanently deleted in 7 days. If you change your mind you must contact support@300sf.se within a week.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function () {
 					appListener.logOut();
 				});
 			});
 		});
-		password.container.addEventListener("keydown", function(e) {
+		password.container.addEventListener("keydown", function (e) {
 			if (e.key == "Enter") {
 				e.preventDefault();
 				set.click();

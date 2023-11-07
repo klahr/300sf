@@ -11,7 +11,7 @@ namespace Ui {
 		private mOpenArrow: HTMLSpanElement;
 		private mSelectCallback: (value: string | null) => void | null;
 
-		constructor(placeholder: string, searchText: string, selectCallback: (value: string | null) => void = function() {}) {
+		constructor(placeholder: string, searchText: string, selectCallback: (value: string | null) => void = function () { }) {
 			super();
 
 			this.mSelectCallback = selectCallback;
@@ -26,7 +26,7 @@ namespace Ui {
 			this.mResult.style.cursor = "pointer";
 			this.mResult.style.color = "var(--black-or-white-color)";
 			this.mResult.innerHTML = placeholder;
-			this.mResult.addEventListener("click", function() {
+			this.mResult.addEventListener("click", function () {
 				self.toggleVisible();
 			});
 			this.mContainer.appendChild(this.mResult);
@@ -61,7 +61,7 @@ namespace Ui {
 			this.mSearch.style.borderBottomLeftRadius = "0";
 			this.mSearch.style.borderBottomRightRadius = "0";
 
-			this.mSearch.container.addEventListener("keydown", function(e) {
+			this.mSearch.container.addEventListener("keydown", function (e) {
 				const allOptionsSource = self.mDropDown.getElementsByTagName("p");
 				const allOptions = Array<HTMLParagraphElement>();
 				for (let i = 0; i < allOptionsSource.length; ++i) {
@@ -82,18 +82,18 @@ namespace Ui {
 							if (e.key === "ArrowDown") {
 								if (i < allOptions.length - 1) {
 									allOptions[i].classList.remove("selected");
-									allOptions[i+1].classList.add("selected");
-									selected = allOptions[i+1];
+									allOptions[i + 1].classList.add("selected");
+									selected = allOptions[i + 1];
 									++i;
 								} else {
 									selected = allOptions[i];
 								}
 							} else {
 								if (i > 0) {
-									if (allOptions[i-1].getAttribute("value") !== "") {
+									if (allOptions[i - 1].getAttribute("value") !== "") {
 										allOptions[i].classList.remove("selected");
-										allOptions[i-1].classList.add("selected");
-										selected = allOptions[i-1];
+										allOptions[i - 1].classList.add("selected");
+										selected = allOptions[i - 1];
 									}
 								}
 							}
@@ -123,7 +123,7 @@ namespace Ui {
 				}
 			});
 
-			(this.mSearch.container as HTMLInputElement).addEventListener("keyup", function() {
+			(this.mSearch.container as HTMLInputElement).addEventListener("keyup", function () {
 				const filter = this.value.toLowerCase();
 				const options = self.mDropDown.getElementsByTagName("p");
 				for (let i = 0; i < options.length; i++) {
@@ -150,7 +150,7 @@ namespace Ui {
 			} else {
 				this.show();
 			}
- 		}
+		}
 
 		public show(): void {
 			this.mExpandable.setVisible(true);
@@ -177,7 +177,7 @@ namespace Ui {
 			option.className = "uix-option";
 			option.innerHTML = name;
 			option.setAttribute("value", value);
-			option.addEventListener("click", function() {
+			option.addEventListener("click", function () {
 				self.mResult.innerHTML = this.innerHTML;
 				self.mResult.setAttribute("value", this.getAttribute("value")!);
 				const allOptionsSource = self.mDropDown.getElementsByTagName("p");
@@ -203,7 +203,7 @@ namespace Ui {
 			}
 		}
 
-		public getOption(value: string): HTMLParagraphElement  | null {
+		public getOption(value: string): HTMLParagraphElement | null {
 			const options = this.mDropDown.getElementsByClassName("uix-option");
 			for (let i = 0; i < options.length; ++i) {
 				if (options[i].getAttribute("value") === value) {

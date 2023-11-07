@@ -38,8 +38,8 @@ class HomePage extends Page {
 		reportButton.style.cssFloat = "right";
 		reportButton.style.borderRadius = "inherit";
 		reportButton.style.backgroundColor = "var(--primary-color)";
-		reportButton.addEventListener("click", function() {
-			openReportPopUp(null, null, function() {
+		reportButton.addEventListener("click", function () {
+			openReportPopUp(null, null, function () {
 				self.refresh();
 			});
 		});
@@ -70,7 +70,7 @@ class HomePage extends Page {
 		const self = this;
 
 		const me = new HttpRequest("GET", "/v1/users/me");
-		me.process(function(status: any, data: any) {
+		me.process(function (status: any, data: any) {
 			const d = data as Responses.UsersMe;
 			App.setUser(d.user);
 			self.mProfile.setImage("/img/portraits/" + d.user.portrait);
@@ -81,7 +81,7 @@ class HomePage extends Page {
 				const d = new Ui.Div();
 				d.container.className = "progress-box";
 				d.container.style.cursor = "pointer";
-				d.container.addEventListener("click", function() {
+				d.container.addEventListener("click", function () {
 					self.appListener.showPage("list", e.list);
 				});
 				self.mProgressBoxes.attach(d);
@@ -123,7 +123,7 @@ class HomePage extends Page {
 				const d = e as Models.Report;
 				const species = e.species as Models.Species;
 				const entry = document.createElement("div");
-				entry.addEventListener("click", function() {
+				entry.addEventListener("click", function () {
 					openEditReportPopUp(e);
 				});
 				entry.className = "list-entry";
@@ -134,7 +134,7 @@ class HomePage extends Page {
 				name.style.color = "var(--success-color)";
 				name.style.width = "fit-content";
 				entry.appendChild(name);
-				name.addEventListener("click", function(event) {
+				name.addEventListener("click", function (event) {
 					event.stopPropagation();
 					openSpeciesPopUp(e.species);
 				});
@@ -198,7 +198,7 @@ class HomePage extends Page {
 				self.mTable.addRow([noRecent]);
 			}
 
-		}, function(status: any, data: Responses.GeneralErrorResponse, error: any) {
+		}, function (status: any, data: Responses.GeneralErrorResponse, error: any) {
 			console.log(data);
 		});
 	}
@@ -210,7 +210,7 @@ class HomePage extends Page {
 			if (data.email) {
 				if (this.mEmail) {
 					this.mEmail.value = data.email;
-					new Ui.MessageBox("Welcome " + data.display_name, "Your account has been successfully created, and you can now proceed to sign in!", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
+					new Ui.MessageBox("Welcome " + data.display_name, "Your account has been successfully created, and you can now proceed to sign in!", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function () { });
 				}
 			}
 		}
@@ -240,7 +240,7 @@ class HomePage extends Page {
 
 		this.mEmail.style.position = "relative";
 		this.mEmail.setPlaceHolder(App.translations.Email);
-		this.mEmail.container.addEventListener("keydown", function(e) {
+		this.mEmail.container.addEventListener("keydown", function (e) {
 			if (e.key == "Enter") {
 				e.preventDefault();
 				self.mPassword.select();
@@ -250,7 +250,7 @@ class HomePage extends Page {
 
 		this.mPassword.style.position = "relative";
 		this.mPassword.setPlaceHolder(App.translations.Password);
-		this.mPassword.container.addEventListener("keydown", function(e) {
+		this.mPassword.container.addEventListener("keydown", function (e) {
 			if (e.key == "Enter") {
 				e.preventDefault();
 				signIn.click();
@@ -275,13 +275,13 @@ class HomePage extends Page {
 		this.container.appendChild(help);
 
 		signIn.innerHTML = App.translations.SignIn;
-		signIn.addEventListener("click", function() {
+		signIn.addEventListener("click", function () {
 			const authorization = 'Basic ' + btoa(self.mEmail.value + ':' + self.mPassword.value);
 			const stayLoggedIn = (staySignedIn.container as HTMLInputElement).checked;
 
 			const r = new HttpRequest("PUT", "/v1/auth");
 			r.setHeader("Authorization", authorization);
-			r.process(function(status: any, data: Responses.SingleItemDataResponse) {
+			r.process(function (status: any, data: Responses.SingleItemDataResponse) {
 				const content = data.data as Responses.AuthenticationResponse;
 				const ks = new LocalStorage();
 				ks.set("x300sf_at", content.access_token, stayLoggedIn ? 0 : content.max_age);
@@ -293,11 +293,11 @@ class HomePage extends Page {
 				} else {
 					location.reload();
 				}
-			}, function(status: any, data: Responses.GeneralErrorResponse, err: any) {
+			}, function (status: any, data: Responses.GeneralErrorResponse, err: any) {
 				if (data.code === Responses.ErrorCode.ErrorAccountDeactivated) {
-					new Ui.MessageBox(App.translations.Error, App.translations.AccountDeactivated, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
+					new Ui.MessageBox(App.translations.Error, App.translations.AccountDeactivated, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
 				} else {
-					new Ui.MessageBox(App.translations.Error, App.translations.InvalidEmailOrPassword, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
+					new Ui.MessageBox(App.translations.Error, App.translations.InvalidEmailOrPassword, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
 				}
 			});
 		});

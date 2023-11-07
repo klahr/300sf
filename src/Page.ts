@@ -18,13 +18,13 @@ class Page extends Ui.Widget {
 		this.mContent.style.width = "100%";
 		this.attach(this.mContent);
 
-		const menu =  document.createElement("span");
+		const menu = document.createElement("span");
 		menu.className = "material-symbols-outlined menu";
 		menu.style.cursor = "pointer";
 		menu.innerHTML = "menu";
 		this.mContainer.appendChild(menu);
 		const self = this;
-		menu.addEventListener("click", function() {
+		menu.addEventListener("click", function () {
 			self.mAppListener.openMainMenu();
 		});
 
@@ -50,13 +50,13 @@ class Page extends Ui.Widget {
 		return false;
 	}
 
-	protected onBecomeVisible(): void {}
+	protected onBecomeVisible(): void { }
 
 	protected addProfile(): void {
 		this.mProfile = new Ui.Image("", "48px", "48px");
 		this.mProfile.addClass("portrait");
-		this.mProfile.container.addEventListener("click", function() {
-			openProfilePopUp(function() {
+		this.mProfile.container.addEventListener("click", function () {
+			openProfilePopUp(function () {
 			});
 		});
 		this.attach(this.mProfile);
@@ -75,7 +75,7 @@ class Page extends Ui.Widget {
 		history.pushState({}, "", "/" + this.id + window.location.search);
 	}
 
-	protected onCreateLoggedIn(): void {}
+	protected onCreateLoggedIn(): void { }
 
-	protected onCreateLoggedOut(): void {}
+	protected onCreateLoggedOut(): void { }
 }

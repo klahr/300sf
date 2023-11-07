@@ -1,13 +1,13 @@
 <%- contentFor('body') %>
 
-<script type="text/javascript" src="/js/app.js"></script>
-<script type="text/javascript">
-	window.onpopstate = function(event) {
-		window.location.reload();
-	};
+	<script type="text/javascript" src="/js/app.js"></script>
+	<script type="text/javascript">
+		window.onpopstate = function (event) {
+			window.location.reload();
+		};
 
-	function onAppStart() {
-		new App("<%- data.language %>", "<%- data.redirect %>", '<%- data.queryParameters %>' !== "" ? JSON.parse('<%- data.queryParameters %>') : {});
-	}
-	onAppStart();
-</script>
+		function onAppStart() {
+			new App("<%- data.language %>", "<%- data.redirect %>", '<%- data.queryParameters %>' !== "" ? JSON.parse('<%- data.queryParameters %>') : {});
+		}
+		onAppStart();
+	</script>

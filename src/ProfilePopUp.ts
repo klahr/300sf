@@ -14,8 +14,8 @@ class ProfilePopUp {
 		content.style.position = "relative";
 
 		const portraitSelect = new Ui.DivSelect((value) => {
-			const r = new HttpRequest("POST", "/v1/users/portrait", {"portrait": value});
-			r.process(function(status: any, data: any) {
+			const r = new HttpRequest("POST", "/v1/users/portrait", { "portrait": value });
+			r.process(function (status: any, data: any) {
 				App.user.portrait = value!;
 				location.reload();
 			});
@@ -63,13 +63,13 @@ class ProfilePopUp {
 				break;
 		}
 
-		const languageList = new Ui.Select(lang, App.translations.Search, function(value: string | null) {
+		const languageList = new Ui.Select(lang, App.translations.Search, function (value: string | null) {
 			if (value) {
 				const d = {
 					"language_code": value
 				};
 				const r = new HttpRequest("POST", "/v1/users/language", d);
-				r.process(function(status: any, data: any) {
+				r.process(function (status: any, data: any) {
 					// TODO: This is a bug. lang should have an expire time.
 					App.setLanguage(value);
 					const ks = new LocalStorage();
@@ -85,19 +85,19 @@ class ProfilePopUp {
 		content.attach(languageList);
 
 		const me = new HttpRequest("GET", "/v1/users/me");
-		me.process(function(status: any, data: any) {
+		me.process(function (status: any, data: any) {
 			const d = data as Responses.UsersMe;
 			displayName.innerHTML = d.user.display_name;
 			uuid.value = d.user.uuid;
 			portraitSelect.select(d.user.portrait);
 		});
 
-		this.mPopUp = new Ui.PopUp(content.container, function() {
+		this.mPopUp = new Ui.PopUp(content.container, function () {
 			closeCallback();
 		});
 	}
 }
 
-function openProfilePopUp(closeCallback: () => void = function() {}): void {
+function openProfilePopUp(closeCallback: () => void = function () { }): void {
 	new ProfilePopUp(closeCallback);
 }

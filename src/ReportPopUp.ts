@@ -32,7 +32,7 @@ class ReportPopUp {
 		name.innerHTML = App.translations.SubmitSighting;
 		name.style.margin = "unset";
 		content.container.appendChild(name);
-	
+
 		const locationLbl = document.createElement("h3");
 		locationLbl.className = "title";
 		locationLbl.innerHTML = App.translations.ObservationLocation;
@@ -44,45 +44,45 @@ class ReportPopUp {
 		mapDiv.style.position = "relative";
 		mapDiv.style.borderRadius = "var(--small-distance)";
 		content.attach(mapDiv);
-	
+
 		const locateButton = document.createElement("button");
 		locateButton.innerHTML = App.translations.FindMyLocation;
 		locateButton.style.borderRadius = "8px";
 		locateButton.style.backgroundColor = "var(--success-color)";
 		content.container.appendChild(locateButton);
-	
-		setTimeout(function() {
+
+		setTimeout(function () {
 			const map = L.map('map').setView([58.1801188016368, 13.959220108737176], 13);
 			L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				maxZoom: 19,
 				attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 			}).addTo(map);
-			map.locate({setView: true, maxZoom: 19});
+			map.locate({ setView: true, maxZoom: 19 });
 			const markerGroup = L.layerGroup().addTo(map);
-			map.on("click", function(e) {
+			map.on("click", function (e) {
 				markerGroup.clearLayers();
 				L.marker(e.latlng).addTo(markerGroup);
 				self.mLocation = e.latlng;
 			});
-			map.on('locationfound', function(e) {
+			map.on('locationfound', function (e) {
 				markerGroup.clearLayers();
 				L.marker(e.latlng).addTo(markerGroup);
 				self.mLocation = e.latlng;
 				map.setZoom(16);
 			});
-	
-			locateButton.addEventListener("click", function() {
-				map.locate({setView: true, maxZoom: 19});
+
+			locateButton.addEventListener("click", function () {
+				map.locate({ setView: true, maxZoom: 19 });
 			});
 		}, 10);
 
-		this.mSpeciesList = new Ui.Select(App.translations.SelectSpecies + "...", App.translations.Search, function(species: string | null) {
+		this.mSpeciesList = new Ui.Select(App.translations.SelectSpecies + "...", App.translations.Search, function (species: string | null) {
 			const r = new HttpRequest("GET", "/v1/lists/species/" + species);
-			r.process(function(status: any, data: any) {
+			r.process(function (status: any, data: any) {
 				const d = data as Responses.ListsSpecies;
 				self.mChecklistContainer.detachAll();
 				self.mChecklistContainer.container.innerHTML = "";
-	
+
 				d.result.forEach(e => {
 					const dd = new Ui.Div();
 					dd.style.position = "relative";
@@ -90,7 +90,7 @@ class ReportPopUp {
 					self.mChecklistContainer.attach(dd);
 					const c = new Ui.Input("checkbox");
 					c.container.setAttribute("name", e.list.uuid);
-					c.container.addEventListener("click", function() {
+					c.container.addEventListener("click", function () {
 						self.validate();
 					});
 
@@ -113,7 +113,7 @@ class ReportPopUp {
 			});
 		});
 		content.attach(this.mSpeciesList);
-	
+
 		const ageList = new Ui.Select(App.translations.SelectAge + "...", App.translations.Search);
 		content.attach(ageList);
 
@@ -125,7 +125,7 @@ class ReportPopUp {
 
 		const activityList = new Ui.Select(App.translations.SelectActivity + "...", App.translations.Search);
 		content.attach(activityList);
-	
+
 		const quantityLbl = document.createElement("h3");
 		quantityLbl.className = "title";
 		quantityLbl.innerHTML = App.translations.Quantity;
@@ -135,7 +135,7 @@ class ReportPopUp {
 		quantity.container.setAttribute("step", "1");
 		quantity.value = "1";
 		content.attach(quantity);
-	
+
 		const fromLbl = document.createElement("h3");
 		fromLbl.className = "title";
 		fromLbl.innerHTML = App.translations.ObservedFrom;
@@ -154,7 +154,7 @@ class ReportPopUp {
 		content.container.appendChild(untilLbl);
 		const until = new Ui.Input("datetime-local");
 		content.attach(until);
-	
+
 		const privateCommentLbl = document.createElement("h3");
 		privateCommentLbl.className = "title";
 		privateCommentLbl.innerHTML = App.translations.PrivateComment;
@@ -178,11 +178,11 @@ class ReportPopUp {
 		listsLbl.innerHTML = App.translations.AvailableChecklists;
 		content.container.appendChild(listsLbl);
 		content.attach(self.mChecklistContainer);
-	
+
 		const r = new HttpRequest("GET", "/v1/reports/basis");
-		r.process(function(status: any, data: any) {
+		r.process(function (status: any, data: any) {
 			const d = data as Responses.ReportsBasis;
-	
+
 			d.species.sort(Utils.sortByNameOnCurrentLanguage);
 			d.species.forEach(e => {
 				if (list) {
@@ -254,7 +254,7 @@ class ReportPopUp {
 		this.mReportButton.style.borderRadius = "8px";
 		this.mReportButton.style.backgroundColor = "var(--success-color)";
 		this.mReportButton.disabled = true;
-		this.mReportButton.addEventListener("click", function() {
+		this.mReportButton.addEventListener("click", function () {
 			const r = new Requests.Reports();
 			r.species_uuid = self.mSpeciesList.value!;
 			if (from.value !== "") {
@@ -264,7 +264,7 @@ class ReportPopUp {
 			}
 			if (until.value !== "") {
 				const localUntilData = new Date(until.value);
-				r.until = new Date(localUntilData.getTime()).toISOString();	
+				r.until = new Date(localUntilData.getTime()).toISOString();
 				r.until = r.until.slice(0, r.until.lastIndexOf(".")) + 'Z';
 			}
 
@@ -304,14 +304,14 @@ class ReportPopUp {
 			// TODO: Tags and notifications.
 
 			const rr = new HttpRequest("POST", "/v1/reports", r);
-			rr.process(function(status: any, data: any) {
-				new Ui.MessageBox(App.translations.Congratulations, App.translations.YouFoundA.replace("{0}", self.mSpeciesList.getOption(self.mSpeciesList.value!)?.innerHTML!), null, "var(--success-color)", function() {});
+			rr.process(function (status: any, data: any) {
+				new Ui.MessageBox(App.translations.Congratulations, App.translations.YouFoundA.replace("{0}", self.mSpeciesList.getOption(self.mSpeciesList.value!)?.innerHTML!), null, "var(--success-color)", function () { });
 				self.mPopUp.close();
 			});
 		});
 		content.container.appendChild(this.mReportButton);
 
-		this.mPopUp = new Ui.PopUp(content.container, function() {
+		this.mPopUp = new Ui.PopUp(content.container, function () {
 			closeCallback();
 		});
 	}
@@ -339,6 +339,6 @@ class ReportPopUp {
 	}
 }
 
-function openReportPopUp(species: Models.Species | null, list: Models.List | null, closeCallback: () => void = function() {}): void {
+function openReportPopUp(species: Models.Species | null, list: Models.List | null, closeCallback: () => void = function () { }): void {
 	new ReportPopUp(species, list, closeCallback);
 }

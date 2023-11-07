@@ -33,26 +33,26 @@ class EditListPopUp {
 		this.mArchiveButton.style.cssFloat = "right";
 		this.mArchiveButton.style.borderRadius = "8px";
 		this.mArchiveButton.style.backgroundColor = "#a11f1f";
-		this.mArchiveButton.addEventListener("click", function() {
-			new Ui.ConfirmBox(App.translations.ArchiveChecklist, App.translations.ConfirmArchiveChecklist, null, "var(--success-color)", function() {
+		this.mArchiveButton.addEventListener("click", function () {
+			new Ui.ConfirmBox(App.translations.ArchiveChecklist, App.translations.ConfirmArchiveChecklist, null, "var(--success-color)", function () {
 				const r = new HttpRequest("POST", "/v1/lists/" + list.uuid + "/archive");
-				r.process(function(status: any, data: any) {
+				r.process(function (status: any, data: any) {
 					self.mPopUp.close();
 					setTimeout(() => {
 						location.reload();
 					}, 150);
 				});
-			}, function() {
+			}, function () {
 			}, App.translations.ArchiveChecklist, App.translations.Cancel);
 		});
 		content.container.appendChild(this.mArchiveButton);
 
-		this.mPopUp = new Ui.PopUp(content.container, function() {
+		this.mPopUp = new Ui.PopUp(content.container, function () {
 			closeCallback();
 		});
 	}
 }
 
-function openEditListPopUp(list: Models.List, closeCallback: () => void = function() {}): void {
+function openEditListPopUp(list: Models.List, closeCallback: () => void = function () { }): void {
 	new EditListPopUp(list, closeCallback);
 }

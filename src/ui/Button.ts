@@ -1,4 +1,5 @@
 /// <reference path="Widget.ts"/>
+/// <reference path="Image.ts"/>
 
 namespace Ui {
 	export class Button extends Widget {

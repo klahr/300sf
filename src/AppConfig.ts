@@ -1,3 +1,3 @@
 class AppConfig {
-    static ApiEndpoint: string;
+	static ApiEndpoint: string;
 }

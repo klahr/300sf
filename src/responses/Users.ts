@@ -1,3 +1,7 @@
+/// <reference path="../models/List.ts"/>
+/// <reference path="../models/Report.ts"/>
+/// <reference path="../models/User.ts"/>
+
 namespace Responses {
 	export class ListReport {
 		list: Models.List;

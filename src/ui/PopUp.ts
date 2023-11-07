@@ -19,7 +19,7 @@ namespace Ui {
 
 			const self = this;
 
-			setTimeout(function() {
+			setTimeout(function () {
 				self.addClass("uix-popup-background");
 			}, 50);
 
@@ -41,14 +41,14 @@ namespace Ui {
 			c.container.style.textAlign = "left";
 			this.mPopup.attach(c);
 
-			const close =  document.createElement("span");
+			const close = document.createElement("span");
 			close.className = "material-symbols-outlined close";
 			close.style.cssFloat = "right";
 			close.style.cursor = "pointer";
 			close.style.fontSize = "48px";
 			close.style.color = "var(--secondary-color)";
 			close.innerHTML = "close";
-			close.addEventListener("click", function() {
+			close.addEventListener("click", function () {
 				self.close();
 			});
 			c.container.appendChild(close);
@@ -62,11 +62,11 @@ namespace Ui {
 			this.mPopup.addClass("animate__bounceOut");
 			this.mPopup.style.setProperty('--animate-duration', '500ms');
 
-			setTimeout(function() {
+			setTimeout(function () {
 				self.removeClass("uix-popup-background");
 			}, 250);
 
-			setTimeout(function() {
+			setTimeout(function () {
 				self.mRoot.removeChild(self.mContainer);
 			}, 500);
 

@@ -36,15 +36,15 @@ class ReportsPage extends Page {
 		this.mFilterInput = new Ui.Input("text");
 		this.mFilterInput.setPlaceHolder(App.translations.Search + "...");
 		filter.attach(this.mFilterInput);
-		this.mFilterInput.container.addEventListener("focus", function() {
+		this.mFilterInput.container.addEventListener("focus", function () {
 			self.mFilterInput.select();
 		});
-		(this.mFilterInput.container as HTMLInputElement).addEventListener("keydown", function(e) {
+		(this.mFilterInput.container as HTMLInputElement).addEventListener("keydown", function (e) {
 			if (e.key === "Enter") {
 				this.blur();
 			}
 		});
-		(this.mFilterInput.container as HTMLInputElement).addEventListener("keyup", function() {
+		(this.mFilterInput.container as HTMLInputElement).addEventListener("keyup", function () {
 			self.filter();
 		});
 
@@ -126,7 +126,7 @@ class ReportsPage extends Page {
 	private updateLists(): void {
 		const self = this;
 		const t = new HttpRequest("GET", "/v1/tags/list");
-		t.process(function(status: any, data: any) {
+		t.process(function (status: any, data: any) {
 			self.mFilterTags.clear();
 			data.result.forEach(e => {
 				const tag = document.createElement("div");
@@ -151,13 +151,13 @@ class ReportsPage extends Page {
 		});
 
 		const r = new HttpRequest("GET", "/v1/reports/list");
-		r.process(function(status: any, data: any) {
+		r.process(function (status: any, data: any) {
 			self.mTable.clear();
 			const reports = data.result as Models.Report[];
 			self.mProgressLbl.innerHTML = reports.length.toString();
 			reports.forEach(e => {
 				const entry = document.createElement("div");
-				entry.addEventListener("click", function() {
+				entry.addEventListener("click", function () {
 					openEditReportPopUp(e);
 				});
 				entry.className = "list-entry";
@@ -168,7 +168,7 @@ class ReportsPage extends Page {
 				name.style.color = "var(--success-color)";
 				name.style.width = "fit-content";
 				entry.appendChild(name);
-				name.addEventListener("click", function(event) {
+				name.addEventListener("click", function (event) {
 					event.stopPropagation();
 					openSpeciesPopUp(e.species);
 				});

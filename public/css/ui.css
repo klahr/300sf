@@ -6,11 +6,11 @@ div#root {
 }
 
 *.visible {
-	display: inline-block!important;
+	display: inline-block !important;
 }
 
 *.hidden {
-	display: none!important;
+	display: none !important;
 }
 
 *.shadow {
@@ -148,12 +148,12 @@ div.uix-button {
 }
 
 div.uix-button.disabled {
-	background-color: gray!important;
+	background-color: gray !important;
 	pointer-events: none;
 	transition: all 250ms;
 }
 
-div.uix-button > p {
+div.uix-button>p {
 	font-size: 4vw;
 }
 

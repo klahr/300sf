@@ -10,7 +10,7 @@ namespace Ui {
 			this.mContainer = document.createElement("div");
 			this.mContainer.className = "uix-div";
 
-			this.mContainer.addEventListener("click", function(event: any) {
+			this.mContainer.addEventListener("click", function (event: any) {
 				self.onClick(event);
 			});
 		}

@@ -1,3 +1,5 @@
+/// <reference path="../models/Translation.ts"/>
+
 namespace Requests {
 	export class Lists {
 		public name: Models.Translation;

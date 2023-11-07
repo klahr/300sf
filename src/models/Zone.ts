@@ -1,3 +1,5 @@
+/// <reference path="Translation.ts"/>
+
 namespace Models {
 	export class Zone {
 		uuid: string;

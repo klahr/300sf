@@ -7,11 +7,9 @@
 /// <reference path="HttpRequest.ts"/>
 /// <reference path="utils/Sort.ts"/>
 
-//declare const L;
-
 class EditReportPopUp {
 	private mReportButton: HTMLButtonElement;
-	private mChecklistContainer: Ui.Div;d
+	private mChecklistContainer: Ui.Div;
 	private mPopUp: Ui.PopUp;
 
 	constructor(report: Models.Report, closeCallback: () => void) {
@@ -21,15 +19,15 @@ class EditReportPopUp {
 		content.style.textAlign = "left";
 		content.style.width = "100%";
 		content.style.position = "relative";
-	
+
 		this.mChecklistContainer = new Ui.Div();
 		this.mChecklistContainer.style.position = "relative";
-	
+
 		const name = document.createElement("h1");
 		name.innerHTML = App.translations.Sighting;
 		name.style.margin = "unset";
 		content.container.appendChild(name);
-	
+
 		if (report.latitude !== 0 && report.longitude !== 0) {
 			const locationLbl = document.createElement("h3");
 			locationLbl.className = "title";
@@ -43,7 +41,7 @@ class EditReportPopUp {
 			mapDiv.style.borderRadius = "var(--small-distance)";
 			content.attach(mapDiv);
 
-			setTimeout(function() {
+			setTimeout(function () {
 				const latLng = [report.latitude, report.longitude];
 				const map = L.map('map').setView(latLng, 13);
 				L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -64,30 +62,30 @@ class EditReportPopUp {
 			const ageList = new Ui.Input("text");
 			ageList.value = App.getTranslation(report.age.name);
 			ageList.setDisabled(true);
-			content.attach(ageList);	
+			content.attach(ageList);
 		}
 
 		if (report.gender) {
 			const genderList = new Ui.Input("text");
 			genderList.value = App.getTranslation(report.gender.name);
 			genderList.setDisabled(true);
-			content.attach(genderList);	
+			content.attach(genderList);
 		}
 
 		if (report.method) {
 			const methodList = new Ui.Input("text");
 			methodList.value = App.getTranslation(report.method.name);
 			methodList.setDisabled(true);
-			content.attach(methodList);	
+			content.attach(methodList);
 		}
 
 		if (report.activity) {
 			const activityList = new Ui.Input("text");
 			activityList.value = App.getTranslation(report.activity.name);
 			activityList.setDisabled(true);
-			content.attach(activityList);	
+			content.attach(activityList);
 		}
-	
+
 		const quantityLbl = document.createElement("h3");
 		quantityLbl.className = "title";
 		quantityLbl.innerHTML = App.translations.Quantity;
@@ -128,9 +126,9 @@ class EditReportPopUp {
 			privateComment.style.height = "128px";
 			privateComment.disabled = true;
 			privateComment.innerHTML = report.comment.text;
-			content.container.appendChild(privateComment);	
+			content.container.appendChild(privateComment);
 		}
-	
+
 		const listsLbl = document.createElement("h3");
 		listsLbl.className = "title";
 		listsLbl.innerHTML = App.translations.Checklists;
@@ -158,11 +156,11 @@ class EditReportPopUp {
 			tagsLbl.className = "title";
 			tagsLbl.innerHTML = App.translations.Tags;
 			content.container.appendChild(tagsLbl);
-	
+
 			const tagsContainer = new Ui.Div();
 			tagsContainer.style.position = "relative";
 			content.attach(tagsContainer);
-	
+
 			report.tags.forEach(e => {
 				const tag = document.createElement("div");
 				tag.className = "tag";
@@ -182,26 +180,26 @@ class EditReportPopUp {
 		this.mReportButton.style.cssFloat = "right";
 		this.mReportButton.style.borderRadius = "8px";
 		this.mReportButton.style.backgroundColor = "#a11f1f";
-		this.mReportButton.addEventListener("click", function() {
-			new Ui.ConfirmBox(App.translations.ArchiveSighting, App.translations.ConfirmArchiveSighting, null, "var(--success-color)", function() {
+		this.mReportButton.addEventListener("click", function () {
+			new Ui.ConfirmBox(App.translations.ArchiveSighting, App.translations.ConfirmArchiveSighting, null, "var(--success-color)", function () {
 				const r = new HttpRequest("POST", "/v1/reports/" + report.uuid + "/archive");
-				r.process(function(status: any, data: any) {
+				r.process(function (status: any, data: any) {
 					self.mPopUp.close();
 					setTimeout(() => {
 						location.reload();
 					}, 150);
 				});
-			}, function() {
+			}, function () {
 			}, App.translations.ArchiveSighting, App.translations.Cancel);
 		});
 		content.container.appendChild(this.mReportButton);
 
-		this.mPopUp = new Ui.PopUp(content.container, function() {
+		this.mPopUp = new Ui.PopUp(content.container, function () {
 			closeCallback();
 		});
 	}
 }
 
-function openEditReportPopUp(report: Models.Report, closeCallback: () => void = function() {}): void {
+function openEditReportPopUp(report: Models.Report, closeCallback: () => void = function () { }): void {
 	new EditReportPopUp(report, closeCallback);
 }

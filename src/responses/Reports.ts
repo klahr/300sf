@@ -1,3 +1,11 @@
+/// <reference path="../models/Species.ts"/>
+/// <reference path="../models/Age.ts"/>
+/// <reference path="../models/Gender.ts"/>
+/// <reference path="../models/Method.ts"/>
+/// <reference path="../models/Activity.ts"/>
+/// <reference path="../models/List.ts"/>
+/// <reference path="../models/Tag.ts"/>
+
 namespace Responses {
 	export class ReportsBasis {
 		public species: Array<Models.Species>;

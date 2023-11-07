@@ -46,15 +46,15 @@ class ListPage extends Page {
 		this.mFilterInput = new Ui.Input("text");
 		this.mFilterInput.setPlaceHolder(App.translations.Search + "...");
 		filter.attach(this.mFilterInput);
-		this.mFilterInput.container.addEventListener("focus", function() {
+		this.mFilterInput.container.addEventListener("focus", function () {
 			self.mFilterInput.select();
 		});
-		(this.mFilterInput.container as HTMLInputElement).addEventListener("keydown", function(e) {
+		(this.mFilterInput.container as HTMLInputElement).addEventListener("keydown", function (e) {
 			if (e.key === "Enter") {
 				this.blur();
 			}
 		});
-		(this.mFilterInput.container as HTMLInputElement).addEventListener("keyup", function() {
+		(this.mFilterInput.container as HTMLInputElement).addEventListener("keyup", function () {
 			const listEntries = self.mTable.container.getElementsByTagName("tr");
 			const value = this.value.toLowerCase();
 			let previousOrder: HTMLTableRowElement | null = null;
@@ -104,8 +104,8 @@ class ListPage extends Page {
 			// TODO: Optimize this call that returns more then necessary.
 			const r = new HttpRequest("GET", "/v1/lists/list");
 			const superSetData = super.setData;
-			r.process(function(status: any, data: any) {
-				data.result.forEach( e => {
+			r.process(function (status: any, data: any) {
+				data.result.forEach(e => {
 					if (e.uuid === self.data.uuid) {
 						superSetData.call(self, e);
 						self.updateLists();
@@ -129,7 +129,7 @@ class ListPage extends Page {
 		const self = this;
 
 		const r = new HttpRequest("GET", "/v1/lists/" + (this.data as Models.List).uuid + "/reports");
-		r.process(function(status: any, data: any) {
+		r.process(function (status: any, data: any) {
 			self.mTitle.innerHTML = App.getTranslation((self.data as Models.List).name);
 			const reports = data.result as Models.Report[];
 			let lastOrder: Models.Order;
@@ -141,7 +141,7 @@ class ListPage extends Page {
 					entry.style.textAlign = "center";
 					entry.style.backgroundColor = "var(--background-color)";
 					entry.className = "list-entry";
-	
+
 					const name = document.createElement("p");
 					name.innerHTML = App.getTranslation(e.order.name).toUpperCase();
 					name.style.cursor = "pointer";
@@ -149,9 +149,9 @@ class ListPage extends Page {
 					name.style.fontStyle = "initial";
 					name.style.color = "var(--primary-variant-color)";
 					entry.appendChild(name);
-					name.addEventListener("click", function() {
+					name.addEventListener("click", function () {
 						const r = new HttpRequest("GET", "/v1/orders/" + e.order.uuid);
-						r.process(function(status: any, data: any) {
+						r.process(function (status: any, data: any) {
 							console.log(data);
 						});
 					});
@@ -168,7 +168,7 @@ class ListPage extends Page {
 				name.innerHTML = App.getTranslation(e.name);
 				name.style.cursor = "pointer";
 				entry.appendChild(name);
-				entry.addEventListener("click", function() {
+				entry.addEventListener("click", function () {
 					openSpeciesPopUp(e);
 				});
 
@@ -185,9 +185,9 @@ class ListPage extends Page {
 				check.innerHTML = "check_circle";
 				check.style.color = "var(--secondary-color)";
 				check.style.cursor = "pointer";
-				check.addEventListener("click", function(event) {
+				check.addEventListener("click", function (event) {
 					event.stopPropagation();
-					openReportPopUp(e, self.data, function() {
+					openReportPopUp(e, self.data, function () {
 						self.setData(self.data);
 					});
 				});
@@ -208,7 +208,7 @@ class ListPage extends Page {
 
 				self.mTable.addRow([entry]);
 			});
-		}, function(status: any, data: any) {
+		}, function (status: any, data: any) {
 			console.log(data);
 		});
 	}

@@ -16,7 +16,7 @@ function renderPage(req, res) {
 	});
 }
 
-router.get('/', function(req, res) {
+router.get('/', function (req, res) {
 	res.render('pages/app', {
 		data: {
 			language: i18n.getLocale(req),
@@ -25,92 +25,92 @@ router.get('/', function(req, res) {
 	});
 });
 
-router.get('/home', function(req, res) {
+router.get('/home', function (req, res) {
 	renderPage(req, res);
 });
 
-router.get('/sign-up', function(req, res) {
+router.get('/sign-up', function (req, res) {
 	renderPage(req, res);
 });
 
-router.get('/forgot', function(req, res) {
+router.get('/forgot', function (req, res) {
 	renderPage(req, res);
 });
 
-router.get('/settings', function(req, res) {
+router.get('/settings', function (req, res) {
 	renderPage(req, res);
 });
 
-router.get('/checklists', function(req, res) {
+router.get('/checklists', function (req, res) {
 	renderPage(req, res);
 });
 
-router.get('/contribute', function(req, res) {
+router.get('/contribute', function (req, res) {
 	renderPage(req, res);
 });
 
-router.get('/donation', function(req, res) {
+router.get('/donation', function (req, res) {
 	renderPage(req, res);
 });
 
-router.get('/contact', function(req, res) {
+router.get('/contact', function (req, res) {
 	renderPage(req, res);
 });
 
-router.get('/tags', function(req, res) {
+router.get('/tags', function (req, res) {
 	renderPage(req, res);
 });
 
-router.get('/reports', function(req, res) {
+router.get('/reports', function (req, res) {
 	renderPage(req, res);
 });
 
-router.get('/set-password', function(req, res) {
+router.get('/set-password', function (req, res) {
 	renderPage(req, res);
 });
 
-router.get('/delete-account', function(req, res) {
+router.get('/delete-account', function (req, res) {
 	renderPage(req, res);
 });
 
-router.get('/admin', function(req, res) {
+router.get('/admin', function (req, res) {
 	renderPage(req, res);
 });
 
-router.get('/list/:uuid', function(req, res) {
+router.get('/list/:uuid', function (req, res) {
 	res.render('pages/app', {
 		data: {
 			language: i18n.getLocale(req),
 			redirect: "list",
-			queryParameters: JSON.stringify({uuid: req.params.uuid})
+			queryParameters: JSON.stringify({ uuid: req.params.uuid })
 		}
 	});
 });
 
-router.get('/compare', function(req, res) {
+router.get('/compare', function (req, res) {
 	if (!req.query.uuids) {
 		res.redirect(200, req.baseUrl);
 	}
 	const r = {
 		uuids: req.query.uuids.split(',')
 	}
-	nm.request('POST', '/v1/lists/compare', {}, function(data, statusCode) {
+	nm.request('POST', '/v1/lists/compare', {}, function (data, statusCode) {
 		res.render('pages/compare', {
 			data: data
 		});
-	}, function(err, statusCode) {
+	}, function (err, statusCode) {
 		console.log(err);
 		res.redirect(200, req.baseUrl);
 	}, JSON.stringify(r));
 });
 
-router.get('/terms', function(req, res) {
+router.get('/terms', function (req, res) {
 	res.render('pages/terms', {
 		layout: false
 	});
 });
 
-router.get('/privacy-policy', function(req, res) {
+router.get('/privacy-policy', function (req, res) {
 	res.render('pages/privacy-policy', {
 		layout: false
 	});

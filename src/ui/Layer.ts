@@ -1,3 +1,6 @@
+/// <reference path="Widget.ts"/>
+/// <reference path="Div.ts"/>
+
 namespace Ui {
 	export class Layer {
 		private mView = new Div();

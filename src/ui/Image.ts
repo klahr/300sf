@@ -13,7 +13,7 @@ namespace Ui {
 			this.mContainer.style.width = width;
 			this.mContainer.style.height = height;
 
-			this.mContainer.addEventListener("click", function(event: any) {
+			this.mContainer.addEventListener("click", function (event: any) {
 				self.onClick(event);
 			});
 		}

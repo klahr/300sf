@@ -1,8 +1,10 @@
+/// <reference path="Widget.ts"/>
+
 namespace Ui {
 	export class DivSelect extends Widget {
 		private mSelectCallback: (value: string | null) => void | null;
 
-		constructor(selectCallback: (value: string | null) => void = function() {}) {
+		constructor(selectCallback: (value: string | null) => void = function () { }) {
 			super();
 
 			this.mSelectCallback = selectCallback;
@@ -38,7 +40,7 @@ namespace Ui {
 			const option = document.createElement("div");
 			option.className = "uix-option";
 			option.setAttribute("value", value);
-			option.addEventListener("click", function() {
+			option.addEventListener("click", function () {
 				const allOptionsSource = self.container.getElementsByClassName("uix-option");
 				for (let i = 0; i < allOptionsSource.length; ++i) {
 					allOptionsSource[i].classList.remove("selected");

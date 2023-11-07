@@ -31,26 +31,26 @@ class EditTagPopUp {
 		this.mArchiveButton.style.cssFloat = "right";
 		this.mArchiveButton.style.borderRadius = "8px";
 		this.mArchiveButton.style.backgroundColor = "#a11f1f";
-		this.mArchiveButton.addEventListener("click", function() {
-			new Ui.ConfirmBox(App.translations.ArchiveLabel, App.translations.ConfirmArchiveLabel, null, "var(--success-color)", function() {
+		this.mArchiveButton.addEventListener("click", function () {
+			new Ui.ConfirmBox(App.translations.ArchiveLabel, App.translations.ConfirmArchiveLabel, null, "var(--success-color)", function () {
 				const r = new HttpRequest("POST", "/v1/tags/" + tag.uuid + "/archive");
-				r.process(function(status: any, data: any) {
+				r.process(function (status: any, data: any) {
 					self.mPopUp.close();
 					setTimeout(() => {
 						location.reload();
 					}, 150);
 				});
-			}, function() {
+			}, function () {
 			}, App.translations.ArchiveLabel, App.translations.Cancel);
 		});
 		content.container.appendChild(this.mArchiveButton);
 
-		this.mPopUp = new Ui.PopUp(content.container, function() {
+		this.mPopUp = new Ui.PopUp(content.container, function () {
 			closeCallback();
 		});
 	}
 }
 
-function openEditTagPopUp(tag: Models.Tag, closeCallback: () => void = function() {}): void {
+function openEditTagPopUp(tag: Models.Tag, closeCallback: () => void = function () { }): void {
 	new EditTagPopUp(tag, closeCallback);
 }

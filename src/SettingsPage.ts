@@ -35,7 +35,7 @@ class SettingsPage extends Page {
 
 		this.mEmail.style.position = "relative";
 		this.mEmail.setPlaceHolder(App.translations.Email);
-		this.mEmail.container.addEventListener("keydown", function(e) {
+		this.mEmail.container.addEventListener("keydown", function (e) {
 			if (e.key == "Enter") {
 				e.preventDefault();
 				self.mPassword.select();
@@ -45,7 +45,7 @@ class SettingsPage extends Page {
 
 		this.mPassword.style.position = "relative";
 		this.mPassword.setPlaceHolder(App.translations.Password);
-		this.mPassword.container.addEventListener("keydown", function(e) {
+		this.mPassword.container.addEventListener("keydown", function (e) {
 			if (e.key == "Enter") {
 				e.preventDefault();
 				self.mImportButton.click();
@@ -54,7 +54,7 @@ class SettingsPage extends Page {
 		this.attach(this.mPassword);
 
 		this.mImportButton.innerHTML = "Import";
-		this.mImportButton.addEventListener("click", function() {
+		this.mImportButton.addEventListener("click", function () {
 			const d = {
 				old_password: self.mPassword.value,
 				old_username: self.mEmail.value
@@ -65,16 +65,16 @@ class SettingsPage extends Page {
 			self.mEmail.container.setAttribute("disabled", "");
 			self.mPassword.container.setAttribute("disabled", "");
 			const r = new HttpRequest("POST", "/v1/users/migrate", d);
-			r.process(function(status: any, data: any) {
+			r.process(function (status: any, data: any) {
 				self.refresh();
-				new Ui.MessageBox("Success", "All your submissions have successfully been imported!", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
+				new Ui.MessageBox("Success", "All your submissions have successfully been imported!", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function () { });
 				self.mPassword.container.innerHTML = "";
-			}, function() {
+			}, function () {
 				self.mImportButton.disabled = false;
 				self.mImportButton.innerHTML = "Import";
 				self.mEmail.container.removeAttribute("disabled");
 				self.mPassword.container.removeAttribute("disabled");
-				new Ui.MessageBox("Oh, no!", "It appears that the <b>email</b> or <b>password</b> you entered is invalid.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
+				new Ui.MessageBox("Oh, no!", "It appears that the <b>email</b> or <b>password</b> you entered is invalid.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
 			});
 		});
 
@@ -90,14 +90,14 @@ class SettingsPage extends Page {
 
 		const exportDataButton = document.createElement("button");
 		exportDataButton.innerHTML = App.translations.ExportMyData;
-		exportDataButton.addEventListener("click", function() {
+		exportDataButton.addEventListener("click", function () {
 			exportDataButton.disabled = true;
 			const r = new HttpRequest("GET", "/v1/users/export");
-			r.process(function(status: any, data: any) {
+			r.process(function (status: any, data: any) {
 				DownloadFile("data.json", JSON.stringify(data));
-			}, function() {
-				new Ui.MessageBox("Oh, no!", "Something went wrong.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
-			}, function() {
+			}, function () {
+				new Ui.MessageBox("Oh, no!", "Something went wrong.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
+			}, function () {
 				exportDataButton.disabled = false;
 			});
 		});
@@ -117,7 +117,7 @@ class SettingsPage extends Page {
 
 		deleteAccountPassword.style.position = "relative";
 		deleteAccountPassword.setPlaceHolder(App.translations.Password);
-		deleteAccountPassword.container.addEventListener("keydown", function(e) {
+		deleteAccountPassword.container.addEventListener("keydown", function (e) {
 			if (e.key == "Enter") {
 				e.preventDefault();
 				deleteAccountButton.click();
@@ -127,21 +127,21 @@ class SettingsPage extends Page {
 
 		deleteAccountButton.innerHTML = App.translations.DeleteAccount;
 		deleteAccountButton.style.backgroundColor = "red";
-		deleteAccountButton.addEventListener("click", function() {
+		deleteAccountButton.addEventListener("click", function () {
 			deleteAccountButton.disabled = true;
 			deleteAccountPassword.container.setAttribute("disabled", "");
 			const d = {
 				password: deleteAccountPassword.value
 			}
 			const r = new HttpRequest("POST", "/v1/users/request_delete", d);
-			r.process(function(status: any, data: any) {
+			r.process(function (status: any, data: any) {
 				self.refresh();
-				new Ui.MessageBox("All right", "Check your email inbox for further instructions.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {});
+				new Ui.MessageBox("All right", "Check your email inbox for further instructions.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function () { });
 				deleteAccountPassword.container.innerHTML = "";
-			}, function() {
+			}, function () {
 				deleteAccountButton.disabled = false;
 				deleteAccountPassword.container.removeAttribute("disabled");
-				new Ui.MessageBox("Oh, no!", "Something went wrong.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function() {});
+				new Ui.MessageBox("Oh, no!", "Something went wrong.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
 			});
 		});
 
@@ -165,7 +165,7 @@ class SettingsPage extends Page {
 		const self = this;
 		this.mProfile.setImage("/img/portraits/" + App.user.portrait);
 		const me = new HttpRequest("GET", "/v1/users/me");
-		me.process(function(status: any, data: any) {
+		me.process(function (status: any, data: any) {
 			const d = data as Responses.UsersMe;
 			if (Utils.isValidDate(d.user.imported_at)) {
 				self.mImportButton.disabled = true;

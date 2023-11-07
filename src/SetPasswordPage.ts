@@ -1,3 +1,5 @@
+/// <reference path="App.ts"/>
+
 class SetPasswordPage extends Page {
 	constructor(appListener: IAppListener) {
 		super(appListener);
@@ -26,20 +28,20 @@ class SetPasswordPage extends Page {
 		const self = this;
 		const set = document.createElement("button");
 		set.innerHTML = "Set Password";
-		set.addEventListener("click", function() {
+		set.addEventListener("click", function () {
 			password.setDisabled(true);
 			const r = new HttpRequest("POST", "/v1/users/set_password/" + self.data.token, {
 				password: password.value,
 			});
-			r.process(function(status: any, data: any) {
+			r.process(function (status: any, data: any) {
 				password.setDisabled(false);
 				password.value = "";
-				new Ui.MessageBox("New Password Set", "You have successfully updated your password!", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function() {
+				new Ui.MessageBox("New Password Set", "You have successfully updated your password!", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function () {
 					appListener.showPage("home", null);
 				});
 			});
 		});
-		password.container.addEventListener("keydown", function(e) {
+		password.container.addEventListener("keydown", function (e) {
 			if (e.key == "Enter") {
 				e.preventDefault();
 				set.click();

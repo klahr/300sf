@@ -1,4 +1,5 @@
 /// <reference path="Page.ts"/>
+/// <reference path="App.ts"/>
 
 class AdminPage extends Page {
 	constructor(appListener: IAppListener) {
@@ -11,6 +12,14 @@ class AdminPage extends Page {
 		const title = document.createElement("h1");
 		title.innerHTML = "Admin";
 		this.container.appendChild(title);
+
+		const speciesLbl = document.createElement("h2");
+		speciesLbl.innerHTML = "Species";
+		this.container.appendChild(speciesLbl);
+
+		const announcementsLbl = document.createElement("h2");
+		announcementsLbl.innerHTML = "Announcements";
+		this.container.appendChild(announcementsLbl);
 	}
 
 	public get id(): string {

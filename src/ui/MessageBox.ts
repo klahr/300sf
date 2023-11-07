@@ -19,7 +19,7 @@ namespace Ui {
 			this.mRoot = document.getElementById("root") as HTMLDivElement;
 			this.mRoot.appendChild(this.mContainer);
 
-			setTimeout(function() {
+			setTimeout(function () {
 				self.addClass("uix-popup-background");
 			}, 50);
 
@@ -62,8 +62,8 @@ namespace Ui {
 			m.innerHTML = message;
 			c.container.appendChild(m);
 
-			setTimeout(function() {
-				self.mContainer.addEventListener("click", function() {
+			setTimeout(function () {
+				self.mContainer.addEventListener("click", function () {
 					self.close();
 				});
 			}, 500);
@@ -75,11 +75,11 @@ namespace Ui {
 			this.mPopup.addClass("animate__backOutUp");
 			this.mPopup.style.setProperty('--animate-duration', '1s');
 
-			setTimeout(function() {
+			setTimeout(function () {
 				self.removeClass("uix-popup-background");
 			}, 250);
 
-			setTimeout(function() {
+			setTimeout(function () {
 				self.mRoot.removeChild(self.mContainer);
 			}, 500);
 

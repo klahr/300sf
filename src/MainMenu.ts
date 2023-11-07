@@ -16,7 +16,7 @@ class MainMenu extends Ui.Widget {
 
 		this.mContainer = document.createElement("div");
 		this.mContainer.className = "uix-div main-menu-background";
-		this.mContainer.addEventListener("click", function() {
+		this.mContainer.addEventListener("click", function () {
 			self.close();
 		});
 
@@ -25,7 +25,7 @@ class MainMenu extends Ui.Widget {
 		this.mContainer.appendChild(this.mMainMenu);
 
 		this.mContent.addClass("content");
-		this.mContent.container.addEventListener("click", function(event) {
+		this.mContent.container.addEventListener("click", function (event) {
 			event.stopPropagation();
 		});
 		this.mMainMenu.appendChild(this.mContent.container);
@@ -37,7 +37,7 @@ class MainMenu extends Ui.Widget {
 		logo.style.cursor = "pointer";
 		logo.alt = App.translations.AppName;
 		logo.setAttribute("height", "36");
-		logo.addEventListener("click", function() {
+		logo.addEventListener("click", function () {
 			self.mAppListener.showPage("home", null);
 		});
 		this.mContent.container.appendChild(logo);
@@ -61,23 +61,23 @@ class MainMenu extends Ui.Widget {
 		this.mMainMenu.classList.remove("open");
 	}
 
-	private createLoggedIn(): void  {
+	private createLoggedIn(): void {
 		const self = this;
 
 		this.addSection(App.translations.AppName);
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>home</span> " + App.translations.Dashboard, function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>home</span> " + App.translations.Dashboard, function () {
 			self.mAppListener.showPage("home", null);
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>raven</span> " + App.translations.Sightings, function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>raven</span> " + App.translations.Sightings, function () {
 			self.mAppListener.showPage("reports", null);
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>edit_note</span>  " + App.translations.Checklists, function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>edit_note</span>  " + App.translations.Checklists, function () {
 			self.mAppListener.showPage("checklists", null);
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>label</span>  " + App.translations.Tags, function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>label</span>  " + App.translations.Tags, function () {
 			self.mAppListener.showPage("tags", null);
 		});
 
@@ -87,7 +87,7 @@ class MainMenu extends Ui.Widget {
 		this.mContent.container.appendChild(checklists);
 
 		const r = new HttpRequest("GET", "/v1/lists/list");
-		r.process(function(status: any, data: any) {
+		r.process(function (status: any, data: any) {
 			data.result.forEach(e => {
 				const c = document.createElement("p");
 				c.className = "entry";
@@ -97,42 +97,42 @@ class MainMenu extends Ui.Widget {
 				}
 				c.innerHTML = "<span style='font-size: 1rem; color: " + color + ";' class='material-symbols-outlined'>trip_origin</span> " + App.getTranslation(e.name);
 				checklists.appendChild(c);
-				c.addEventListener("click", function() {
+				c.addEventListener("click", function () {
 					self.mAppListener.showPage("list", e);
 				});
 			});
 		});
 
 		this.addSection(App.translations.Support);
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>mail</span> " + App.translations.Contact, function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>mail</span> " + App.translations.Contact, function () {
 			self.mAppListener.showPage("contact", null);
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>support</span> " + App.translations.Contribute, function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>support</span> " + App.translations.Contribute, function () {
 			self.mAppListener.showPage("contribute", null);
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>volunteer_activism</span> " + App.translations.Donation, function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>volunteer_activism</span> " + App.translations.Donation, function () {
 			self.mAppListener.showPage("donation", null);
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>policy</span> " + App.translations.PrivacyPolicy, function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>policy</span> " + App.translations.PrivacyPolicy, function () {
 			window.open("/privacy-policy", "_blank");
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>handshake</span> " + App.translations.TermsOfService, function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>handshake</span> " + App.translations.TermsOfService, function () {
 			window.open("/terms", "_blank");
 		});
 
 		this.addSection(App.translations.Account);
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>manage_accounts</span> " + App.translations.Account, function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>manage_accounts</span> " + App.translations.Account, function () {
 			self.mAppListener.showPage("settings", null);
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>logout</span> " + App.translations.LogOut, function() {
-			new Ui.ConfirmBox(App.translations.LogOut, App.translations.ConfirmLogOut, null, "var(--success-color)", function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>logout</span> " + App.translations.LogOut, function () {
+			new Ui.ConfirmBox(App.translations.LogOut, App.translations.ConfirmLogOut, null, "var(--success-color)", function () {
 				self.mAppListener.logOut();
-			}, function() {
+			}, function () {
 			}, App.translations.LogOut, App.translations.Cancel);
 		});
 	}
@@ -141,24 +141,24 @@ class MainMenu extends Ui.Widget {
 		const self = this;
 		this.addSection(App.translations.Support);
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>support</span> " + App.translations.Contribute, function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>support</span> " + App.translations.Contribute, function () {
 			self.mAppListener.showPage("contribute", null);
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>volunteer_activism</span> " + App.translations.Donation, function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>volunteer_activism</span> " + App.translations.Donation, function () {
 			self.mAppListener.showPage("donation", null);
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>policy</span> " + App.translations.PrivacyPolicy, function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>policy</span> " + App.translations.PrivacyPolicy, function () {
 			window.open("/privacy-policy", "_blank");
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>handshake</span> " + App.translations.TermsOfService, function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>handshake</span> " + App.translations.TermsOfService, function () {
 			window.open("/terms", "_blank");
 		});
 
 		this.addSection(App.translations.Account);
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>join</span> " + App.translations.SignUp, function() {
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>join</span> " + App.translations.SignUp, function () {
 			window.open("/sign-up", "_self");
 		});
 	}
@@ -175,7 +175,7 @@ class MainMenu extends Ui.Widget {
 		const entry = document.createElement("p");
 		entry.className = "entry";
 		entry.innerHTML = name;
-		entry.addEventListener("click", function() {
+		entry.addEventListener("click", function () {
 			callback();
 		});
 		this.mContent.container.appendChild(entry);

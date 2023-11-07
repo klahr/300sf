@@ -82,7 +82,7 @@ class App implements IAppListener {
 	private fetchUser(): void {
 		const me = new HttpRequest("GET", "/v1/users/whoami");
 		me.setSync();
-		me.process(function(status: any, data: any) {
+		me.process(function (status: any, data: any) {
 			const user = data as Responses.UsersWhoAmI;
 			App.setUser(user.data);
 			App.setLanguage(user.data.language.code);
@@ -158,7 +158,7 @@ class App implements IAppListener {
 			}
 		});
 		if (page) {
-			const p =  page as Page;
+			const p = page as Page;
 			if (p.requireSignIn() && !App.isLoggedIn()) {
 				this.logOut(window.location.pathname);
 			} else {

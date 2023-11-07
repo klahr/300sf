@@ -58,14 +58,15 @@ textarea:disabled {
 	box-shadow: 0 0 0 1px inset var(--secondary-color);
 }
 
-p,label {
+p,
+label {
 	color: var(--black-or-white-color);
 	font-size: 1rem;
 	line-height: 1.5rem;
 }
 
 p.success {
-	color: var(--success-color)!important;
+	color: var(--success-color) !important;
 	text-align: center;
 }
 
@@ -123,13 +124,13 @@ div.card {
 	margin-top: var(--medium-distance);
 }
 
-div.card > div {
+div.card>div {
 	width: 100%;
 	height: 36px;
 	position: relative;
 }
 
-div.card > div > p {
+div.card>div>p {
 	text-align: right;
 	position: absolute;
 	right: 0;
@@ -140,7 +141,7 @@ div.card > div > p {
 	font-weight: bold;
 }
 
-div.card > div > div {
+div.card>div>div {
 	height: 8px;
 	background-color: #7f7f7f;
 	width: 65%;
@@ -151,7 +152,7 @@ div.card > div > div {
 	transform: translateY(-50%);
 }
 
-div.card > div > div > div {
+div.card>div>div>div {
 	height: 100%;
 	border-radius: inherit;
 }
@@ -170,16 +171,16 @@ div.list-entry:hover {
 	background-color: var(--widget-color);
 }
 
-div.list-entry > p {
+div.list-entry>p {
 	font-size: 0.8rem;
 	font-style: italic;
 }
 
-div.list-entry > h3:hover {
+div.list-entry>h3:hover {
 	text-decoration: underline;
 }
 
-div.list-entry > span {
+div.list-entry>span {
 	font-size: 32px;
 	position: absolute;
 	right: 4px;
@@ -219,25 +220,27 @@ div.main-menu-background.open {
 	transition: background-color 250ms;
 }
 
-div.main-menu > div.content > p.section {
+div.main-menu>div.content>p.section {
 	font-size: 0.8rem;
 	font-weight: bold;
 	padding: 8px 16px;
 	opacity: 0.5;
 }
 
-div.main-menu > div.content > div,* > p.entry {
+div.main-menu>div.content>div,
+*>p.entry {
 	padding: 8px 16px;
 	color: white;
 	cursor: pointer;
 	font-size: 1rem;
 }
 
-div.main-menu > div.content > div,* > p.entry:hover {
+div.main-menu>div.content>div,
+*>p.entry:hover {
 	color: var(--primary-variant-color);
 }
 
-div.main-menu > div.content {
+div.main-menu>div.content {
 	width: 100%;
 	background-color: var(--surface-color);
 	height: 100%;
@@ -249,7 +252,8 @@ div.main-menu.open {
 	transition: transform 250ms;
 }
 
-div.surface > p,h1 {
+div.surface>p,
+h1 {
 	margin: var(--small-distance);
 	color: var(--black-or-white-color);
 }
@@ -280,7 +284,7 @@ div.tag.selected {
 	box-shadow: inset 0 0 0 2px #ffffffad;
 }
 
-div.tag > p {
+div.tag>p {
 	color: white;
 	font-weight: bold;
 	font-size: 0.8rem;
@@ -305,7 +309,7 @@ div.progress-box:hover {
 	transition: transform 100ms;
 }
 
-div.progress-box > p {
+div.progress-box>p {
 	padding: var(--small-distance);
 	font-size: 1rem;
 	font-weight: bold;
@@ -357,7 +361,7 @@ button {
 	border: none;
 	border-radius: 24px;
 	padding: 16px;
-	color:  white;
+	color: white;
 	font-weight: bold;
 	font-size: 1rem;
 	width: calc(100% - var(--small-distance)*2);
@@ -369,7 +373,7 @@ button {
 }
 
 button:disabled {
-	background-color: var(--secondary-color)!important;
+	background-color: var(--secondary-color) !important;
 }
 
 hr {

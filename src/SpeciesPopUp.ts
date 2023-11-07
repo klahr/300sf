@@ -28,7 +28,7 @@ function openSpeciesPopUp(species: Models.Species) {
 	content.container.appendChild(recordings);
 
 	const r = new HttpRequest("GET", "/v1/species/" + species.uuid);
-	r.process(function(status: any, data: any) {
+	r.process(function (status: any, data: any) {
 		summary.innerHTML = data.wikipedia.summary;
 
 		const p = document.createElement("p");
@@ -44,7 +44,7 @@ function openSpeciesPopUp(species: Models.Species) {
 			data.wikipedia.images.forEach(e => {
 				const url = getThumbnailFromUrl(e, "190px");
 				const img = new Image();
-				img.onload = function() {
+				img.onload = function () {
 					const i = document.createElement("div");
 					i.style.background = "url(" + url + ")";
 					i.style.width = "123px";
@@ -56,7 +56,7 @@ function openSpeciesPopUp(species: Models.Species) {
 					i.style.borderRadius = "8px";
 					images.appendChild(i);
 				}
-				img.onerror = function() {
+				img.onerror = function () {
 					console.warn("could not load: " + img.src);
 				}
 
@@ -87,11 +87,11 @@ function openSpeciesPopUp(species: Models.Species) {
 			p.style.fontSize = "0.8rem";
 			p.style.fontWeight = "bold";
 			p.style.textAlign = "right";
-			recordings.appendChild(p);	
+			recordings.appendChild(p);
 		}
 	});
 
-	new Ui.PopUp(content.container, function() {
+	new Ui.PopUp(content.container, function () {
 	});
 }
 

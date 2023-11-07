@@ -4,7 +4,7 @@ namespace Ui {
 		protected mContainer: HTMLElement;
 		protected mData: any;
 
-		protected constructor() {}
+		protected constructor() { }
 
 		public onDestroy(): void {
 			this.mChildren.forEach(e => {
@@ -12,13 +12,13 @@ namespace Ui {
 			});
 			this.mChildren = Array();
 		}
-	
+
 		public attach(child: Widget): void {
 			this.mChildren.push(child);
 			this.mContainer.appendChild(child.mContainer);
 			child.onAttachedToParent(this);
 		}
-	
+
 		public detach(child: Widget): void {
 			const index = this.mChildren.indexOf(child);
 			if (index > -1) {
@@ -27,7 +27,7 @@ namespace Ui {
 				this.mChildren.splice(index, 1);
 			}
 		}
-	
+
 		public detachAll(): void {
 			const self = this;
 			this.mChildren.forEach(child => {
@@ -37,9 +37,9 @@ namespace Ui {
 			this.mChildren.splice(0, this.mChildren.length);
 		}
 
-		protected onDetachFromParent(): void {}
-	
-		protected onAttachedToParent(_parent: Widget): void {}
+		protected onDetachFromParent(): void { }
+
+		protected onAttachedToParent(_parent: Widget): void { }
 
 		public get style(): CSSStyleDeclaration {
 			return this.container.style;
@@ -86,7 +86,7 @@ namespace Ui {
 			return this.mData;
 		}
 
-		protected onClick(_event: any): void {}
+		protected onClick(_event: any): void { }
 
 		public onEnterForground(): void {
 			this.mChildren.forEach(child => {

@@ -31,7 +31,7 @@ class ManageTagsPage extends Page {
 
 		this.mName = new Ui.Input("text");
 		this.mName.setPlaceHolder(App.translations.Name);
-		this.mName.container.addEventListener("input", function() {
+		this.mName.container.addEventListener("input", function () {
 			self.updateCreateButtonStatus();
 		});
 		this.attach(this.mName);
@@ -59,12 +59,12 @@ class ManageTagsPage extends Page {
 		this.mCreateButton.style.backgroundColor = "var(--success-color)";
 		this.mCreateButton.disabled = true;
 		this.container.appendChild(this.mCreateButton);
-		this.mCreateButton.addEventListener("click", function() {
+		this.mCreateButton.addEventListener("click", function () {
 			const r = new Requests.Tags();
 			r.name = self.mName.value;
 			r.color = colorSelect.value!;
 			const req = new HttpRequest("POST", "/v1/tags", r);
-			req.process(function(status: any, data: any) {
+			req.process(function (status: any, data: any) {
 				location.reload();
 			});
 		});
@@ -84,7 +84,7 @@ class ManageTagsPage extends Page {
 	}
 
 	private updateCreateButtonStatus(): void {
-		if(this.mName.value === "") {
+		if (this.mName.value === "") {
 			this.mCreateButton.disabled = true;
 			return;
 		}
@@ -95,7 +95,7 @@ class ManageTagsPage extends Page {
 		this.mProfile.setImage("/img/portraits/" + App.user.portrait);
 		const self = this;
 		const r = new HttpRequest("GET", "/v1/tags/list");
-		r.process(function(status: any, data: any) {
+		r.process(function (status: any, data: any) {
 			self.mTags.clear();
 			data.result.forEach(e => {
 				const t = e as Models.Tag;
@@ -108,7 +108,7 @@ class ManageTagsPage extends Page {
 				c.innerHTML = t.name;
 				tag.appendChild(c);
 				self.mTags.container.appendChild(tag);
-				c.addEventListener("click", function() {
+				c.addEventListener("click", function () {
 					openEditTagPopUp(e);
 				});
 			});
