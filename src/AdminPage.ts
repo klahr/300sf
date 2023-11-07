@@ -1,5 +1,6 @@
 /// <reference path="Page.ts"/>
 /// <reference path="App.ts"/>
+/// <reference path="AdminSpeciesPopUp.ts"/>
 
 class AdminPage extends Page {
 	constructor(appListener: IAppListener) {

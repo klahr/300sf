@@ -18,6 +18,8 @@ class HomePage extends Page {
 	private mEmail: Ui.Input;
 	private mPassword: Ui.Input;
 	private mProgressBoxes: Ui.Div;
+	private mSpecies: Array<Models.Species>;
+	private mSpeciesList: Ui.Select;
 
 	public get id(): string {
 		return "home";
@@ -32,18 +34,15 @@ class HomePage extends Page {
 		title.innerHTML = App.translations.WelcomeMessage;
 		this.container.appendChild(title);
 
-		const reportButton = document.createElement("button");
-		reportButton.innerHTML = App.translations.SubmitSighting;
-		reportButton.style.width = "auto";
-		reportButton.style.cssFloat = "right";
-		reportButton.style.borderRadius = "inherit";
-		reportButton.style.backgroundColor = "var(--primary-color)";
-		reportButton.addEventListener("click", function () {
-			openReportPopUp(null, null, function () {
-				self.refresh();
+		this.mSpeciesList = new Ui.Select(App.translations.Search, "", (value) => {
+			self.mSpecies.forEach(e => {
+				if (e.uuid === value) {
+					openSpeciesPopUp(e);
+					return;
+				}
 			});
 		});
-		this.container.appendChild(reportButton);
+		this.attach(this.mSpeciesList);
 
 		this.mProgressBoxes = new Ui.Div();
 		this.mProgressBoxes.style.position = "relative";
@@ -197,10 +196,21 @@ class HomePage extends Page {
 				noRecent.innerHTML = App.translations.NoRecentSightings;
 				self.mTable.addRow([noRecent]);
 			}
-
 		}, function (status: any, data: Responses.GeneralErrorResponse, error: any) {
 			console.log(data);
 		});
+
+		const species = new HttpRequest("GET", "/v1/species/list", null);
+		species.process((status: any, data: any) => {
+			self.mSpecies = data.result;
+			self.mSpecies.sort(Utils.sortByNameOnCurrentLanguage);
+			self.mSpeciesList.clear();
+			self.mSpecies.forEach(e => {
+				const s = e as Models.Species;
+				self.mSpeciesList.addOption(App.getTranslation(s.name), s.uuid);
+			});
+		}, (status: any, data: Responses.GeneralErrorResponse, error: any) => {
+		}, undefined);
 	}
 
 	public setData(data: any): void {

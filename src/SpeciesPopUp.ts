@@ -6,6 +6,7 @@ function openSpeciesPopUp(species: Models.Species) {
 	const content = new Ui.Div();
 	content.style.textAlign = "left";
 	content.style.position = "relative";
+	content.style.width = "100%";
 
 	const name = document.createElement("h1");
 	name.innerHTML = App.getTranslation(species.name);
@@ -17,8 +18,23 @@ function openSpeciesPopUp(species: Models.Species) {
 	subName.style.fontStyle = "italic";
 	content.container.appendChild(subName);
 
+	const buttonContainer = document.createElement("div");
+	buttonContainer.style.width = "100%";
+	buttonContainer.style.textAlign = "right";
+	content.container.appendChild(buttonContainer);
+	
+	const reportButton = document.createElement("button");
+	reportButton.innerHTML = App.translations.SubmitSighting;
+	reportButton.style.width = "auto";
+	reportButton.style.borderRadius = "8px";
+	reportButton.style.backgroundColor = "var(--primary-color)";
+	reportButton.addEventListener("click", function () {
+		openReportPopUp(species, null, function () {
+		});
+	});
+	buttonContainer.appendChild(reportButton);
+
 	const summary = document.createElement("p");
-	summary.style.margin = "16px 16px 0 16px";
 	content.container.appendChild(summary);
 
 	const images = document.createElement("div");

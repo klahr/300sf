@@ -30,7 +30,7 @@ class AdminSpeciesPopUp {
 					openSpeciesPopUp(e);
 					return;
 				}
-			})
+			});
 		});
 
 		content.attach(this.mSpeciesList);
@@ -80,7 +80,7 @@ class AdminSpeciesPopUp {
 		this.mAddButton.innerHTML = App.translations.AddSpecies;
 		this.mAddButton.disabled = true;
 		content.container.appendChild(this.mAddButton);
-		this.mAddButton.addEventListener("click", function() {
+		this.mAddButton.addEventListener("click", function () {
 			self.mAddButton.disabled = true;
 			self.mAddButton.innerHTML = App.translations.PleaseWait;
 			self.mEnglish.setDisabled(true);
