@@ -9,8 +9,11 @@ class AdminSpeciesPopUp {
 	private mSwedish: Ui.Input;
 	private mGerman: Ui.Input;
 	private mLatin: Ui.Input;
+	private mSpecies: Array<Models.Species> = new Array();
 
 	constructor(closeCallback: () => void) {
+		const self = this;
+
 		const content = new Ui.Div();
 		content.style.textAlign = "left";
 		content.style.width = "100%";
@@ -22,7 +25,12 @@ class AdminSpeciesPopUp {
 		content.container.appendChild(name);
 
 		this.mSpeciesList = new Ui.Select(App.translations.AllSpecies, "", (value: string | null) => {
-			console.log(value);
+			self.mSpecies.forEach(e => {
+				if (e.uuid === value) {
+					openSpeciesPopUp(e);
+					return;
+				}
+			})
 		});
 
 		content.attach(this.mSpeciesList);
@@ -30,8 +38,6 @@ class AdminSpeciesPopUp {
 		this.mPopUp = new Ui.PopUp(content.container, function () {
 			closeCallback();
 		});
-
-		const self = this;
 
 		const addSpeciesLbl = document.createElement("h2");
 		addSpeciesLbl.innerHTML = App.translations.AddSpecies;
@@ -122,9 +128,10 @@ class AdminSpeciesPopUp {
 		const species = new HttpRequest("GET", "/v1/species/list", null);
 		const self = this;
 		species.process((status: any, data: any) => {
+			self.mSpecies = data.result;
+			self.mSpecies.sort(Utils.sortByNameOnCurrentLanguage);
 			self.mSpeciesList.clear();
-			data.result.sort(Utils.sortByNameOnCurrentLanguage);
-			data.result.forEach(e => {
+			self.mSpecies.forEach(e => {
 				const s = e as Models.Species;
 				self.mSpeciesList.addOption(App.getTranslation(s.name), s.uuid);
 			});
