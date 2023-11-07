@@ -102,5 +102,15 @@
 	"ExportMyData": "Exportera mina data",
 	"ExportMyDataDescription": "Klicka på knappen för att ladda ner en kopia på alla dina data.",
 	"SessionExpired": "Sessionen har löpt ut",
-	"SessionExpiredDescription": "Din session har löpt ut. För att säkerställa din säkerhet upphör våra sessioner efter en viss användningstid. Logga in igen för att fortsätta använda våra tjänster."
+	"SessionExpiredDescription": "Din session har löpt ut. För att säkerställa din säkerhet upphör våra sessioner efter en viss användningstid. Logga in igen för att fortsätta använda våra tjänster.",
+	"ConfirmSpeciesAddition": "Bekräfta ny art",
+	"ConfirmSpeciesAdditionBody": "Bekräfta att du vill lägga till en ny art. Detta går inte att ångra.",
+	"AddSpecies": "Lägg till art",
+	"SpeciesPlural": "Arter",
+	"Order": "Ordning",
+	"AllSpecies": "Alla arter",
+	"English": "Engelska",
+	"Swedish": "Svenska",
+	"Latin": "Latin",
+	"German": "Tyska"
 }

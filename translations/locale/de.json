@@ -102,5 +102,15 @@
 	"ExportMyData": "Export my data",
 	"ExportMyDataDescription": "Click the button to download a copy of your data.",
 	"SessionExpired": "Session expired",
-	"SessionExpiredDescription": "Your session has expired. To ensure your security, our sessions expire after a certain duration of usage. Please log in again to continue using our services."
+	"SessionExpiredDescription": "Your session has expired. To ensure your security, our sessions expire after a certain duration of usage. Please log in again to continue using our services.",
+	"ConfirmSpeciesAddition": "Confirm species addition",
+	"ConfirmSpeciesAdditionBody": "Please confirm that you want to add a new species. This action cannot be undone.",
+	"AddSpecies": "Add species",
+	"SpeciesPlural": "Species",
+	"Order": "Order",
+	"AllSpecies": "All species",
+	"English": "English",
+	"Swedish": "Swedish",
+	"Latin": "Latin",
+	"German": "German"
 }
