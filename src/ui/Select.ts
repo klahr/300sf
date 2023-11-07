@@ -109,7 +109,6 @@ namespace Ui {
 					}
 					if (selected) {
 						self.updateScroll(selected);
-						self.mSelectCallback(selected.getAttribute("value"));
 					}
 				} else if (e.key == "Enter") {
 					for (let i = 0; i < allOptions.length; ++i) {
@@ -117,18 +116,28 @@ namespace Ui {
 							self.mResult.innerHTML = allOptions[i].innerHTML;
 							self.mResult.setAttribute("value", allOptions[i].getAttribute("value")!);
 							self.toggleVisible();
+							self.mSelectCallback(allOptions[i].getAttribute("value"));
 							break;
 						}
 					}
 				}
 			});
 
-			(this.mSearch.container as HTMLInputElement).addEventListener("keyup", function () {
+			(this.mSearch.container as HTMLInputElement).addEventListener("keyup", function (event) {
+				if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+					return;
+				}
 				const filter = this.value.toLowerCase();
 				const options = self.mDropDown.getElementsByTagName("p");
 				for (let i = 0; i < options.length; i++) {
 					if (options[i].innerHTML.toLowerCase().indexOf(filter) > -1) {
 						options[i].style.display = "";
+						if (options[i].innerHTML.toLowerCase() === filter) {
+							self.updateScroll(options[i]);
+							options[i].classList.add("selected");
+						} else {
+							options[i].classList.remove("selected");
+						}
 					} else {
 						options[i].style.display = "none";
 					}
