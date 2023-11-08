@@ -69,8 +69,13 @@ function openSpeciesPopUp(species: Models.Species) {
 					i.style.backgroundPosition = "center";
 					i.style.display = "inline-block";
 					i.style.margin = "8px";
+					i.style.cursor = "pointer";
 					i.style.borderRadius = "8px";
 					images.appendChild(i);
+					i.addEventListener("click", function() {
+						new ImageViewer(e, () => {
+						});
+					});
 				}
 				img.onerror = function () {
 					console.warn("could not load: " + img.src);

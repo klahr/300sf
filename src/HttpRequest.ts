@@ -52,9 +52,10 @@ class HttpRequest {
 					if (response) {
 						switch (response.code) {
 							case Responses.ErrorCode.ErrorLoggedOut:
-								if (response.code === Responses.ErrorCode.ErrorLoggedOut) {
-									new SignInBox(App.translations.SessionExpired, App.translations.SessionExpiredDescription, null, "var(--success-color)", () => { }, () => { }, App.translations.SignIn, App.translations.Cancel);
-								}
+								new SignInBox(App.translations.SessionExpired, App.translations.SessionExpiredDescription, null, "var(--success-color)", () => { }, () => { }, App.translations.SignIn, App.translations.Cancel);
+								return;
+							case Responses.ErrorCode.ErrorInvalidApiKey:
+								//new Ui.MessageBox(App.translations.InvalidApiKey, App.translations.InvalidApiKeyDescription, null, "var(--error-color)", () => { });
 								return;
 							default:
 								break;

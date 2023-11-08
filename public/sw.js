@@ -1,10 +1,10 @@
 const VERSION = "v1";
 
-window.addEventListener("install", (event) => {
+self.addEventListener("install", (event) => {
 });
 
-window.addEventListener("activate", (event) => {
+self.addEventListener("activate", (event) => {
 });
 
-window.addEventListener("fetch", (event) => {
+self.addEventListener("fetch", (event) => {
 });
