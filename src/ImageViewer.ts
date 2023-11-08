@@ -3,6 +3,7 @@
 class ImageViewer extends Ui.Div {
 	private mRoot: HTMLDivElement;
 	private mCloseCallback: () => void;
+	private mImg: HTMLImageElement;
 
 	constructor(image: string, closeCallback: () => void) {
 		super();
@@ -20,13 +21,14 @@ class ImageViewer extends Ui.Div {
 			self.addClass("uix-popup-background");
 		}, 50);
 
-		const img = document.createElement("img");
-		img.src = image;
-		img.style.maxWidth = "100%";
-		img.style.maxHeight = "100%";
-		img.style.marginTop = "50vh";
-		img.style.transform = "translateY(-50%)";
-		this.mContainer.appendChild(img);
+		this.mImg = document.createElement("img");
+		this.mImg.src = image;
+		this.mImg.style.maxWidth = "100%";
+		this.mImg.style.maxHeight = "100%";
+		this.mImg.style.marginTop = "50vh";
+		this.mImg.style.transform = "translateY(-50%)";
+		this.mImg.style.transition = "opacity 250ms";
+		this.mContainer.appendChild(this.mImg);
 
 		const close = document.createElement("span");
 		close.className = "material-symbols-outlined close";
@@ -48,6 +50,7 @@ class ImageViewer extends Ui.Div {
 
 		setTimeout(function () {
 			self.removeClass("uix-popup-background");
+			this.mImg.addClass("fade");
 		}, 250);
 
 		setTimeout(function () {
