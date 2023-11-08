@@ -9,17 +9,17 @@
   "theme_color": "#1a1a1a",
   "icons": [
     {
-      "src": "img/logo-256x256.png",
+      "src": "img/birds-256.png",
       "sizes": "256x256",
       "type": "image/png"
     },
     {
-      "src": "img/856ff37d-1d00-497d-b493-d45794dca191.png",
+      "src": "img/birds-1024.png",
       "sizes": "1024x1024",
       "type": "image/png"
     },
     {
-      "src": "img/maskable_icon.png",
+      "src": "img/birds-256.png",
       "sizes": "256x256",
       "type": "image/png",
       "purpose": "maskable"
