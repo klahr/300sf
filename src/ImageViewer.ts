@@ -22,9 +22,9 @@ class ImageViewer extends Ui.Div {
 
 		const img = document.createElement("img");
 		img.src = image;
-		img.style.width = "100%";
+		img.style.maxWidth = "100%";
 		img.style.maxHeight = "100%";
-		img.style.marginTop = "50%";
+		img.style.marginTop = "50vh";
 		img.style.transform = "translateY(-50%)";
 		this.mContainer.appendChild(img);
 
