@@ -193,7 +193,7 @@ div.surface {
 	border-radius: var(--medium-radius);
 	padding: var(--medium-distance);
 	max-width: 735px;
-	max-height: calc(100% - var(--medium-distance) * 4);
+	height: calc(100% - var(--medium-distance) * 4);
 	width: calc(100% - var(--medium-distance) * 4);
 	margin: var(--medium-distance);
 	transition: all 250ms;
