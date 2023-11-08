@@ -14,7 +14,7 @@
 	"ForgotPassword": "Glömt lösenord",
 	"SendResetLink": "Återställ lösenord",
 	"DisplayName": "Visningsnamn",
-	"AcceptTerms": "Acceptera villkor",
+	"AcceptTerms": "Acceptera användarvillkor",
 	"SignUp": "Skapa konto",
 	"AlreadyHaveAnAccount": "Har du redan ett konto? <a href='/home'>Logga in här.</a>",
 	"GoToArticle": "Gå till artikeln",

@@ -47,9 +47,14 @@ class SignUpPage extends Page {
 		acceptTermsLbl.innerHTML = App.translations.AcceptTerms;
 		this.container.appendChild(acceptTermsLbl);
 
-		const help = document.createElement("p");
-		help.className = "details";
-		help.innerHTML = App.translations.MarkSignInCheckbox;
+		this.container.appendChild(document.createElement("br"));
+		const help = document.createElement("a");
+		help.style.fontSize = "0.8rem";
+		help.style.margin = "var(--small-distance)";
+		help.style.display = "block";
+		help.target = "_blank";
+		help.innerHTML = App.translations.TermsOfService;
+		help.href = "/terms";
 		this.container.appendChild(help);
 
 		const signUp = document.createElement("button");
