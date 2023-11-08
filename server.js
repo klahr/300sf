@@ -1,5 +1,4 @@
 var express        = require('express');
-var session        = require('express-session');
 var expressLayouts = require('express-ejs-layouts');
 var bodyParser     = require('body-parser');
 var i18n           = require("i18n");
@@ -8,7 +7,6 @@ var port           = 8080;
 
 i18n.configure({
 	locales: ['en', 'sv'],
-	cookie: "lang",
 	queryParameter: "lang",
 	updateFiles: false,
 	directory: __dirname + '/translations/locale'
