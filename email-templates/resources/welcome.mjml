@@ -1,0 +1,17 @@
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-image width="100px" src="https://app.300sf.se/img/300sf-black.svg"></mj-image>
+        <mj-divider border-color="#b40d81"></mj-divider>
+        <mj-text font-size="20px" font-family="helvetica">Dear ${DISPLAY_NAME},</mj-text>
+        <mj-text font-size="14px"><span style="line-height:20px">Welcome to our vibrant community of nature enthusiasts and bird lovers! We're thrilled to have you on board with the 300 Swedish Bird web-app. Get ready to embark on an exciting journey of discovery as you explore the world of avian wonders.</span></mj-text>
+        <mj-text font-size="14px"><span style="line-height:20px">Whether you're a seasoned birder or a newcomer to the world of feathered friends, our web-app is designed to elevate your bird watching experience. With a wealth of features, you'll have the tools and support you need to fully immerse yourself in the beauty of birdlife.</span></mj-text>
+        <mj-text font-size="14px"><span style="line-height:20px">To get started, simply <a href="https://app.300sf.se">sign in</a> and dive into the world of bird watching like never before. Thank you for choosing 300 Swedish Birds as your birding companion.</span></mj-text>
+        <mj-text font-size="14px"><span style="line-height:20px">Happy birding!</span></mj-text>
+        <mj-text font-size="14px"><span style="line-height:20px">Warm regards,</span></mj-text>
+        <mj-text font-size="14px"><span style="line-height:20px">Joachim Klahr</span></mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
