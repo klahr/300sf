@@ -576,19 +576,10 @@ func UsersResetPassword(c *gin.Context) {
 	}
 
 	var user models.User
-	if err := models.DB.Where("email=?", r.Email).First(&user).Error; err != nil {
+	if err := models.DB.Preload("Language").Where("email=?", r.Email).First(&user).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
 			"message": err.Error(),
-		})
-		return
-	}
-
-	var language models.Language
-	if err := models.DB.Where("code=?", c.GetString("app_language")).First(&language).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    ErrorSignUpTermsNotAccepted,
-			"message": "invalid language",
 		})
 		return
 	}
@@ -603,7 +594,7 @@ func UsersResetPassword(c *gin.Context) {
 		UserId:   user.Id,
 	}
 
-	et, err := utils.GetEmailTemplate("set_password", language.Code)
+	et, err := utils.GetEmailTemplate("set_password", user.Language.Code)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
