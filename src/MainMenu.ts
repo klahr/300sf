@@ -161,6 +161,10 @@ class MainMenu extends Ui.Widget {
 		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>join</span> " + App.translations.SignUp, function () {
 			window.open("/sign-up", "_self");
 		});
+
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>login</span> " + App.translations.SignIn, function () {
+			window.open("/", "_self");
+		});
 	}
 
 	private addSection(name: string): HTMLParagraphElement {
