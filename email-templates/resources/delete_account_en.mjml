@@ -1,0 +1,16 @@
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-image width="100px" src="https://app.300sf.se/img/300sf-black.svg"></mj-image>
+        <mj-divider border-color="#b40d81"></mj-divider>
+        <mj-text font-size="20px">Delete account</mj-text>
+        <mj-text font-size="14px"><span style="line-height: 20px">Please use this link to delete your account: <a href='${LINK}'>${LINK}</a></span></mj-text>
+        <mj-text font-size="14px"><span style="line-height: 20px">If you did not request to delete your account, please disregard this email.</span></mj-text>
+        <mj-text font-size="14px"><span style="line-height: 20px">- 300 Swedish Birds</span></mj-text>
+        <mj-divider border-color="#b40d81"></mj-divider>
+        <mj-text color="gray">Angels' Ware</mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
