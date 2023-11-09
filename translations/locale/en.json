@@ -112,5 +112,9 @@
 	"English": "English",
 	"Swedish": "Swedish",
 	"Latin": "Latin",
-	"German": "German"
+	"German": "German",
+	"InvalidApiKey": "Invalid API key",
+	"InvalidApiKeyDescription": "Contact the administrator.",
+	"Welcome": "Welcome",
+	"ProceedToSignIn": "Your account has been successfully created, and you can now proceed to sign in!"
 }

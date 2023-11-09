@@ -55,7 +55,7 @@ class HttpRequest {
 								new SignInBox(App.translations.SessionExpired, App.translations.SessionExpiredDescription, null, "var(--success-color)", () => { }, () => { }, App.translations.SignIn, App.translations.Cancel);
 								return;
 							case Responses.ErrorCode.ErrorInvalidApiKey:
-								//new Ui.MessageBox(App.translations.InvalidApiKey, App.translations.InvalidApiKeyDescription, null, "var(--error-color)", () => { });
+								new Ui.MessageBox(App.translations.InvalidApiKey, App.translations.InvalidApiKeyDescription, null, "var(--error-color)", () => { });
 								return;
 							default:
 								break;

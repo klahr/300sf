@@ -112,5 +112,9 @@
 	"English": "Engelska",
 	"Swedish": "Svenska",
 	"Latin": "Latin",
-	"German": "Tyska"
+	"German": "Tyska",
+	"InvalidApiKey": "Ogiltig API-nyckel",
+	"InvalidApiKeyDescription": "Kontakta administratören.",
+	"Welcome": "Välkommen",
+	"ProceedToSignIn": "Ditt konto har skapats och du kan nu logga in!"
 }

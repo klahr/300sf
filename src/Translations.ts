@@ -114,6 +114,10 @@ class Translations {
         Swedish: "Swedish",
         Latin: "Latin",
         German: "German",
+        InvalidApiKey: "Invalid API key",
+        InvalidApiKeyDescription: "Contact the administrator.",
+        Welcome: "Welcome",
+        ProceedToSignIn: "Your account has been successfully created, and you can now proceed to sign in!",
     }
     static sv = {
         SignIn: "Logga in",
@@ -230,6 +234,10 @@ class Translations {
         Swedish: "Svenska",
         Latin: "Latin",
         German: "Tyska",
+        InvalidApiKey: "Ogiltig API-nyckel",
+        InvalidApiKeyDescription: "Kontakta administratören.",
+        Welcome: "Välkommen",
+        ProceedToSignIn: "Ditt konto har skapats och du kan nu logga in!",
     }
     static de = {
         SignIn: "Anmelden",
@@ -346,5 +354,9 @@ class Translations {
         Swedish: "Swedish",
         Latin: "Latin",
         German: "German",
+        InvalidApiKey: "Invalid API key",
+        InvalidApiKeyDescription: "Contact the administrator.",
+        Welcome: "Welcome",
+        ProceedToSignIn: "Your account has been successfully created, and you can now proceed to sign in!",
     }
 }
