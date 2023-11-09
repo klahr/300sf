@@ -36,7 +36,7 @@ class App implements IAppListener {
 	constructor(language: string, redirect: string, queryParameters: object) {
 		const ks = new LocalStorage();
 		const lang = ks.get("lang") as string;
-		App.setLanguage(lang !== "" ? lang : language);
+		App.setLanguage(lang !== null && lang !== "" ? lang : language);
 
 		this.mLayerManager.addLayer("base");
 		this.mLayerManager.showLayer("base");
@@ -113,6 +113,7 @@ class App implements IAppListener {
 	}
 
 	public static setLanguage(language: string): void {
+		console.log(language);
 		switch (language) {
 			case "sv":
 				App.translations = Translations.sv;
