@@ -116,5 +116,7 @@
 	"InvalidApiKey": "Ogiltig API-nyckel",
 	"InvalidApiKeyDescription": "Kontakta administratören.",
 	"Welcome": "Välkommen",
-	"ProceedToSignIn": "Ditt konto har skapats och du kan nu logga in!"
+	"ProceedToSignIn": "Ditt konto har skapats och du kan nu logga in!",
+	"Raised": "insamlat",
+	"RaisedDescription": "Detta representerar den årliga kostnaden för att underhålla tjänsten och hålla den i drift."
 }

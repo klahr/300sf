@@ -118,6 +118,8 @@ class Translations {
         InvalidApiKeyDescription: "Contact the administrator.",
         Welcome: "Welcome",
         ProceedToSignIn: "Your account has been successfully created, and you can now proceed to sign in!",
+        Raised: "raised",
+        RaisedDescription: "This represents the yearly expense to maintain the service and keep it operational.",
     }
     static sv = {
         SignIn: "Logga in",
@@ -238,6 +240,8 @@ class Translations {
         InvalidApiKeyDescription: "Kontakta administratören.",
         Welcome: "Välkommen",
         ProceedToSignIn: "Ditt konto har skapats och du kan nu logga in!",
+        Raised: "insamlat",
+        RaisedDescription: "Detta representerar den årliga kostnaden för att underhålla tjänsten och hålla den i drift.",
     }
     static de = {
         SignIn: "Anmelden",
@@ -358,5 +362,7 @@ class Translations {
         InvalidApiKeyDescription: "Contact the administrator.",
         Welcome: "Welcome",
         ProceedToSignIn: "Your account has been successfully created, and you can now proceed to sign in!",
+        Raised: "raised",
+        RaisedDescription: "This represents the yearly expense to maintain the service and keep it operational.",
     }
 }
