@@ -15,6 +15,7 @@ class SignUpPage extends Page {
 		logo.alt = "TODO";
 		logo.style.width = "192px";
 		logo.style.borderRadius = "50%";
+		logo.classList.add("shadow");
 		content.container.appendChild(logo);
 
 		const title = document.createElement("h1");
