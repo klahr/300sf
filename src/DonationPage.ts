@@ -23,7 +23,7 @@ class DonationPage extends Page {
 		d.style.position = "relative";
 		d.style.width = "100%";
 		d.style.textAlign = "center";
-		d.container.innerHTML = "<stripe-buy-button buy-button-id='buy_btn_1NyLAFJ2tiNkkhn0oBh7Zgpd' publishable-key='pk_live_51NyKuFJ2tiNkkhn0iHvdFGi21x3wg6lC7FJqZfyReNXgfTFTWVMeRCpHYsP4qtoQRwyNF7R23QMuJnSgRQMgsTHb001DGQqqV8'></stripe-buy-button>";
+		d.container.innerHTML = "<stripe-buy-button buy-button-id='buy_btn_1OAYnZJ2tiNkkhn0NLHP63kn' publishable-key='pk_live_51NyKuFJ2tiNkkhn0iHvdFGi21x3wg6lC7FJqZfyReNXgfTFTWVMeRCpHYsP4qtoQRwyNF7R23QMuJnSgRQMgsTHb001DGQqqV8'></stripe-buy-button>";
 		this.attach(d);
 	}
 
