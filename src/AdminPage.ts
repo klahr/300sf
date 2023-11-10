@@ -13,7 +13,7 @@ class AdminPage extends Page {
 		this.container.appendChild(title);
 
 		this.addEntry(App.translations.SpeciesPlural, "raven", openAdminSpeciesPopUp);
-		this.addEntry("Announcements", "campaign", () => {});
+		this.addEntry("Announcements", "campaign", openAdminAnnouncementsPopUp);
 	}
 
 	public get id(): string {
