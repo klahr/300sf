@@ -1,7 +1,6 @@
 /// <reference path="App.ts"/>
 
 class AdminSpeciesPopUp {
-	private mPopUp: Ui.PopUp;
 	private mSpeciesList: Ui.Select;
 	private mOrdersList: Ui.Select;
 	private mAddButton: HTMLButtonElement;
@@ -35,7 +34,7 @@ class AdminSpeciesPopUp {
 
 		content.attach(this.mSpeciesList);
 
-		this.mPopUp = new Ui.PopUp(content.container, function () {
+		new Ui.PopUp(content.container, function () {
 			closeCallback();
 		});
 
@@ -82,7 +81,7 @@ class AdminSpeciesPopUp {
 		content.container.appendChild(this.mAddButton);
 		this.mAddButton.addEventListener("click", function () {
 			self.mAddButton.disabled = true;
-			self.mAddButton.innerHTML = App.translations.PleaseWait;
+			self.mAddButton.innerHTML = App.translations.PleaseWait + "...";
 			self.mEnglish.setDisabled(true);
 			self.mSwedish.setDisabled(true);
 			self.mGerman.setDisabled(true);
@@ -125,9 +124,9 @@ class AdminSpeciesPopUp {
 	}
 
 	private refresh(): void {
-		const species = new HttpRequest("GET", "/v1/species/list", null);
+		const r = new HttpRequest("GET", "/v1/species/list", null);
 		const self = this;
-		species.process((status: any, data: any) => {
+		r.process((status: any, data: any) => {
 			self.mSpecies = data.result;
 			self.mSpecies.sort(Utils.sortByNameOnCurrentLanguage);
 			self.mSpeciesList.clear();
