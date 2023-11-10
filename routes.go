@@ -215,6 +215,7 @@ func SetupRoutes(r *gin.Engine) {
 
 	// Announcements
 	r.PUT("/v1/announcements/:uuid/read", apiKeyMiddleware, controllers.AnnouncementsRead)
+	r.GET("/v1/announcements/list", apiKeyMiddleware, controllers.AnnouncementsList)
 
 	setupPrivateRoutes(r)
 }

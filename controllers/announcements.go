@@ -156,3 +156,26 @@ func AnnouncementsRead(c *gin.Context) {
 		Message: "success",
 	})
 }
+
+func AnnouncementsList(c *gin.Context) {
+	var user models.User
+	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var announcements []models.Announcement
+	if err := models.DB.Table(table.Announcements).Preload("Content").Where("on_hold IS NULL").Where("`from` IS NULL OR `from`<=NOW()").Where("until IS NULL OR until>=NOW()").Where("announcement_users.announcement_id IS NULL").Joins("LEFT JOIN announcement_users ON announcement_users.announcement_id=announcements.id").Order("priority DESC").Find(&announcements).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, GeneralSuccessResponse{
+		Message: "success",
+		Data:    announcements,
+	})
+}
