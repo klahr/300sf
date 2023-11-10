@@ -18,6 +18,7 @@ func Announcements(c *gin.Context) {
 		From     zero.Time          `json:"from"`
 		Until    zero.Time          `json:"until"`
 		Priority int                `json:"priority"`
+		OnHold   bool               `json:"on_hold"`
 	}
 
 	var r request
@@ -53,6 +54,10 @@ func Announcements(c *gin.Context) {
 		From:     r.From,
 		Until:    r.Until,
 		Priority: r.Priority,
+	}
+
+	if r.OnHold {
+		announcement.OnHold = zero.TimeFrom(time.Now())
 	}
 
 	if err := tx.Create(&announcement).Error; err != nil {
@@ -168,6 +173,21 @@ func AnnouncementsList(c *gin.Context) {
 
 	var announcements []models.Announcement
 	if err := models.DB.Table(table.Announcements).Preload("Content").Where("on_hold IS NULL").Where("`from` IS NULL OR `from`<=NOW()").Where("until IS NULL OR until>=NOW()").Where("announcement_users.announcement_id IS NULL").Joins("LEFT JOIN announcement_users ON announcement_users.announcement_id=announcements.id").Order("priority DESC").Find(&announcements).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, GeneralSuccessResponse{
+		Message: "success",
+		Data:    announcements,
+	})
+}
+
+func AnnouncementsAll(c *gin.Context) {
+	var announcements []models.Announcement
+	if err := models.DB.Table(table.Announcements).Preload("Content").Find(&announcements).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
