@@ -258,14 +258,10 @@ class ReportPopUp {
 			const r = new Requests.Reports();
 			r.species_uuid = self.mSpeciesList.value!;
 			if (from.value !== "") {
-				const localFromDate = new Date(from.value);
-				r.from = new Date(localFromDate.getTime()).toISOString();
-				r.from = r.from.slice(0, r.from.lastIndexOf(".")) + 'Z';
+				r.from = Utils.toISODate(new Date(from.value));
 			}
 			if (until.value !== "") {
-				const localUntilData = new Date(until.value);
-				r.until = new Date(localUntilData.getTime()).toISOString();
-				r.until = r.until.slice(0, r.until.lastIndexOf(".")) + 'Z';
+				r.until = Utils.toISODate(new Date(until.value));
 			}
 
 			r.latitude = self.mLocation.lat;

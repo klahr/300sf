@@ -1,4 +1,5 @@
 /// <reference path="App.ts"/>
+/// <reference path="models/Announcement.ts"/>
 
 class AdminAnnouncementsPopUp {
 	private mAddButton: HTMLButtonElement;
@@ -7,6 +8,7 @@ class AdminAnnouncementsPopUp {
 	private mGermanContent: HTMLTextAreaElement;
 	private mName: Ui.Input;
 	private mPriority: Ui.Select;
+	private mAnnouncementsDiv: Ui.Div;
 
 	constructor(closeCallback: () => void) {
 		const self = this;
@@ -24,6 +26,11 @@ class AdminAnnouncementsPopUp {
 		new Ui.PopUp(content.container, function () {
 			closeCallback();
 		});
+
+		this.mAnnouncementsDiv = new Ui.Div();
+		this.mAnnouncementsDiv.style.position = "relative";
+		this.mAnnouncementsDiv.style.width = "100%";
+		content.attach(this.mAnnouncementsDiv);
 
 		const addAnnouncementLbl = document.createElement("h2");
 		addAnnouncementLbl.innerHTML = "Add announcement";
@@ -43,6 +50,16 @@ class AdminAnnouncementsPopUp {
 		this.mEnglishContent.addEventListener("input", () => {
 			self.verify();
 		});
+
+		this.mSwedishContent = document.createElement("textarea");
+		this.mSwedishContent.placeholder = App.translations.Message + " (swedish)";
+		this.mSwedishContent.style.height = "128px";
+		content.container.appendChild(this.mSwedishContent);
+
+		this.mGermanContent = document.createElement("textarea");
+		this.mGermanContent.placeholder = App.translations.Message + " (german)";
+		this.mGermanContent.style.height = "128px";
+		content.container.appendChild(this.mGermanContent);
 
 		this.mPriority = new Ui.Select("Priority", "", (value: string | null) => {
 			self.verify();
@@ -70,11 +87,12 @@ class AdminAnnouncementsPopUp {
 		onHold.style.position = "relative";
 		onHold.container.setAttribute("name", "on_hold");
 		onHold.container.id = "on_hold";
+		(onHold.container as HTMLInputElement).checked = true;
 		content.attach(onHold);
 
 		const onHoldLbl = document.createElement("label");
 		onHoldLbl.setAttribute("for", onHold.container.id);
-		onHoldLbl.innerHTML = "On hold";
+		onHoldLbl.innerHTML = "Draft";
 		content.container.appendChild(onHoldLbl);
 
 		this.mAddButton = document.createElement("button");
@@ -93,14 +111,22 @@ class AdminAnnouncementsPopUp {
 				name: self.mName.value,
 				content: {
 					en: self.mEnglishContent.value,
+					sv: self.mSwedishContent.value,
+					de: self.mGermanContent.value
 				},
-				from: from.value,
-				until: until.value,
-				on_hold: onHold.value === "on",
-				priority: parseInt(self.mPriority.value!)
+				on_hold: (onHold.container as HTMLInputElement).checked,
+				priority: parseInt(self.mPriority.value!),
+				from: "",
+				until: ""
 			};
+			if (from.value !== "") {
+				d.from = Utils.toISODate(new Date(from.value));
+			}
+			if (until.value !== "") {
+				d.until = Utils.toISODate(new Date(until.value));
+			}
 			new Ui.ConfirmBox("Confirm announcement addition", "Are you sure?", null, "var(--success-color)", function () {
-				const r = new HttpRequest("POST", "/v1/announcement", d);
+				const r = new HttpRequest("POST", "/v1/announcements", d);
 				r.process((status: AnalyserNode, data: any) => {
 					new Ui.MessageBox(App.translations.Success, "", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function () { });
 					self.refresh();
@@ -133,7 +159,99 @@ class AdminAnnouncementsPopUp {
 		const r = new HttpRequest("GET", "/v1/announcements/all", null);
 		const self = this;
 		r.process((status: any, data: any) => {
-			console.log(data);
+			self.mAnnouncementsDiv.clear();
+			const announcements = data.data as Array<Models.Announcement>;
+			announcements.forEach(e => {
+				const n = document.createElement("h2");
+				n.innerHTML = e.name;
+				self.mAnnouncementsDiv.container.appendChild(n);
+
+				if (Utils.isValidDate(e.from) || Utils.isValidDate(e.until)) {
+					const timespan = document.createElement("p");
+					timespan.innerHTML = "";
+					self.mAnnouncementsDiv.container.appendChild(timespan);
+					if (Utils.isValidDate(e.from)) {
+						timespan.innerHTML = Utils.toYYYY_MM_DD(e.from);
+					}
+					if (Utils.isValidDate(e.until)) {
+						timespan.innerHTML += " ⮕ " + Utils.toYYYY_MM_DD(e.until);
+					}
+				}
+
+				const p = document.createElement("span");
+				p.className = "material-symbols-outlined";
+				p.style.cursor = "pointer";
+				p.style.fontSize = "32px";
+
+				if (Utils.isValidDate(e.on_hold)) {
+					p.style.color = "var(--error-color)";
+					p.innerHTML = "play_arrow";
+					p.addEventListener("click", function () {
+						const r = new HttpRequest("PUT", "/v1/announcements/" + e.uuid + "/resume");
+						r.process((status: any, data: any) => {
+							self.refresh();
+						});
+					});
+				} else {
+					p.style.color = "var(--success-color)";
+					p.innerHTML = "pause";
+					p.addEventListener("click", function () {
+						const r = new HttpRequest("PUT", "/v1/announcements/" + e.uuid + "/pause");
+						r.process((status: any, data: any) => {
+							self.refresh();
+						});
+					});
+				}
+				self.mAnnouncementsDiv.container.appendChild(p);
+
+				const t = document.createElement("span");
+				t.className = "material-symbols-outlined";
+				t.style.cursor = "pointer";
+				t.style.fontSize = "32px";
+				t.style.cssFloat = "right";
+				t.style.color = "var(--secondary-color)";
+				t.innerHTML = "delete_forever";
+				t.addEventListener("click", function () {
+					console.log("trash");
+				});
+				self.mAnnouncementsDiv.container.appendChild(t);
+
+				const a = document.createElement("div");
+				a.className = "announcement";
+				self.mAnnouncementsDiv.container.appendChild(a);
+				const img = document.createElement("p");
+				switch (e.priority) {
+					case 0:
+						img.innerHTML = "<span style='font-size: 2rem; color: var(--success-color);' class='material-symbols-outlined'>brand_awareness</span>";
+						a.style.boxShadow = "inset 0 0 0px 1px var(--success-color)";
+						break;
+					case 1:
+						img.innerHTML = "<span style='font-size: 2rem; color: var(--primary-variant-color);' class='material-symbols-outlined'>assignment_late</span>";
+						a.style.boxShadow = "inset 0 0 0px 1px var(--primary-variant-color)";
+						break;
+					default:
+						img.innerHTML = "<span style='font-size: 2rem; color: var(--error-color);' class='material-symbols-outlined'>release_alert</span>";
+						a.style.boxShadow = "inset 0 0 0px 1px var(--error-color)";
+						break;
+				}
+
+				a.appendChild(img);
+
+				const close = document.createElement("span");
+				close.className = "material-symbols-outlined close";
+				close.style.position = "absolute";
+				close.style.cursor = "pointer";
+				close.style.fontSize = "24px";
+				close.style.right = "var(--small-distance)";
+				close.style.top = "var(--small-distance)";
+				close.style.color = "var(--secondary-color)";
+				close.innerHTML = "close";
+				a.appendChild(close);
+
+				const c = document.createElement("p");
+				c.innerHTML = App.getTranslation(e.content);
+				a.appendChild(c);
+			});
 		}, (status: any, data: Responses.GeneralErrorResponse, error: any) => {
 
 		}, undefined);

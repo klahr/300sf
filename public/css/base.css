@@ -157,6 +157,17 @@ div.card>div>div>div {
 	border-radius: inherit;
 }
 
+div.announcement {
+	width: calc(100% - var(--small-distance)*2);
+	border-radius: var(--small-distance);
+	margin-bottom: 16px;
+	padding: 8px;
+	position: relative;
+}
+div.announcement>p>h2 {
+	margin-top: unset;
+}
+
 div.list-entry {
 	width: 100%;
 	background-color: var(--secondary-variant-color);
