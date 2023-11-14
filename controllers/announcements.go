@@ -15,8 +15,8 @@ func Announcements(c *gin.Context) {
 	type request struct {
 		Name     string             `json:"name"`
 		Content  models.Translation `json:"content"`
-		From     zero.Time          `json:"from"`
-		Until    zero.Time          `json:"until"`
+		From     zero.Time          `json:"from" time_format:"2006-01-02T15:04Z"`
+		Until    zero.Time          `json:"until" time_format:"2006-01-02T15:04Z"`
 		Priority int                `json:"priority"`
 		OnHold   bool               `json:"on_hold"`
 	}
