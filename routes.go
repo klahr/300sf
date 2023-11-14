@@ -214,8 +214,8 @@ func SetupRoutes(r *gin.Engine) {
 	r.POST("/v1/contact", apiKeyMiddleware, basicMiddleware, controllers.Contact)
 
 	// Announcements
-	r.PUT("/v1/announcements/:uuid/read", apiKeyMiddleware, controllers.AnnouncementsRead)
-	r.GET("/v1/announcements/list", apiKeyMiddleware, controllers.AnnouncementsList)
+	r.PUT("/v1/announcements/:uuid/read", apiKeyMiddleware, basicMiddleware, controllers.AnnouncementsRead)
+	r.GET("/v1/announcements/list", apiKeyMiddleware, basicMiddleware, controllers.AnnouncementsList)
 
 	setupPrivateRoutes(r)
 }
