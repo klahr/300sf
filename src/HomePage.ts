@@ -225,20 +225,8 @@ class HomePage extends Page {
 				a.className = "announcement";
 				self.mAnnouncements.container.appendChild(a);
 				const img = document.createElement("p");
-				switch (e.priority) {
-					case 0:
-						img.innerHTML = "<span style='font-size: 2rem; color: var(--success-color);' class='material-symbols-outlined'>brand_awareness</span>";
-						a.style.boxShadow = "inset 0 0 0px 1px var(--success-color)";
-						break;
-					case 1:
-						img.innerHTML = "<span style='font-size: 2rem; color: var(--primary-variant-color);' class='material-symbols-outlined'>assignment_late</span>";
-						a.style.boxShadow = "inset 0 0 0px 1px var(--primary-variant-color)";
-						break;
-					default:
-						img.innerHTML = "<span style='font-size: 2rem; color: var(--error-color);' class='material-symbols-outlined'>release_alert</span>";
-						a.style.boxShadow = "inset 0 0 0px 1px var(--error-color)";
-						break;
-				}
+				img.innerHTML = "<span style='font-size: 2rem; color: " + e.color + ";' class='material-symbols-outlined'>" + e.icon + "</span>";
+				a.style.boxShadow = "inset 0 0 0px 1px " + e.color;
 
 				a.appendChild(img);
 

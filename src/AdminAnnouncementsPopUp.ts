@@ -7,7 +7,7 @@ class AdminAnnouncementsPopUp {
 	private mSwedishContent: HTMLTextAreaElement;
 	private mGermanContent: HTMLTextAreaElement;
 	private mName: Ui.Input;
-	private mPriority: Ui.Select;
+	private mIcon: Ui.Input;
 	private mAnnouncementsDiv: Ui.Div;
 
 	constructor(closeCallback: () => void) {
@@ -43,6 +43,13 @@ class AdminAnnouncementsPopUp {
 			self.verify();
 		});
 
+		this.mIcon = new Ui.Input("text");
+		this.mIcon.setPlaceHolder("Material Design icon");
+		content.attach(this.mIcon);
+		this.mIcon.container.addEventListener("input", () => {
+			self.verify();
+		});
+
 		this.mEnglishContent = document.createElement("textarea");
 		this.mEnglishContent.placeholder = App.translations.Message + " (english)";
 		this.mEnglishContent.style.height = "128px";
@@ -61,14 +68,6 @@ class AdminAnnouncementsPopUp {
 		this.mGermanContent.style.height = "128px";
 		content.container.appendChild(this.mGermanContent);
 
-		this.mPriority = new Ui.Select("Priority", "", (value: string | null) => {
-			self.verify();
-		});
-		this.mPriority.addOption("Low", "0");
-		this.mPriority.addOption("Normal", "1");
-		this.mPriority.addOption("High", "2");
-		content.attach(this.mPriority);
-
 		const fromLbl = document.createElement("h3");
 		fromLbl.className = "title";
 		fromLbl.innerHTML = "From";
@@ -82,6 +81,16 @@ class AdminAnnouncementsPopUp {
 		content.container.appendChild(untilLbl);
 		const until = new Ui.Input("date");
 		content.attach(until);
+
+		const colorSelect = new Ui.DivSelect();
+		colorSelect.addOption("", "#8227ac").style.backgroundColor = "#8227ac";
+		colorSelect.addOption("", "#0d81b4").style.backgroundColor = "#0d81b4";
+		colorSelect.addOption("", "#75b98e").style.backgroundColor = "#75b98e";
+		colorSelect.addOption("", "#68e060").style.backgroundColor = "#68e060";
+		colorSelect.addOption("", "#e06868").style.backgroundColor = "#e06868";
+		colorSelect.addOption("", "#ac7827").style.backgroundColor = "#ac7827";
+		content.attach(colorSelect);
+		colorSelect.select("#0d81b4");
 
 		const onHold = new Ui.Input("checkbox");
 		onHold.style.position = "relative";
@@ -115,7 +124,8 @@ class AdminAnnouncementsPopUp {
 					de: self.mGermanContent.value
 				},
 				on_hold: (onHold.container as HTMLInputElement).checked,
-				priority: parseInt(self.mPriority.value!),
+				icon: self.mIcon.value,
+				color: colorSelect.value,
 				from: "",
 				until: ""
 			};
@@ -225,20 +235,8 @@ class AdminAnnouncementsPopUp {
 				a.className = "announcement";
 				self.mAnnouncementsDiv.container.appendChild(a);
 				const img = document.createElement("p");
-				switch (e.priority) {
-					case 0:
-						img.innerHTML = "<span style='font-size: 2rem; color: var(--success-color);' class='material-symbols-outlined'>brand_awareness</span>";
-						a.style.boxShadow = "inset 0 0 0px 1px var(--success-color)";
-						break;
-					case 1:
-						img.innerHTML = "<span style='font-size: 2rem; color: var(--primary-variant-color);' class='material-symbols-outlined'>assignment_late</span>";
-						a.style.boxShadow = "inset 0 0 0px 1px var(--primary-variant-color)";
-						break;
-					default:
-						img.innerHTML = "<span style='font-size: 2rem; color: var(--error-color);' class='material-symbols-outlined'>release_alert</span>";
-						a.style.boxShadow = "inset 0 0 0px 1px var(--error-color)";
-						break;
-				}
+				img.innerHTML = "<span style='font-size: 2rem; color: " + e.color + ";' class='material-symbols-outlined'>" + e.icon + "</span>";
+				a.style.boxShadow = "inset 0 0 0px 1px " + e.color;
 
 				a.appendChild(img);
 
@@ -263,7 +261,7 @@ class AdminAnnouncementsPopUp {
 	}
 
 	private verify(): void {
-		this.mAddButton.disabled = this.mPriority.value === null || this.mEnglishContent.value.length < 4 || this.mName.value.length < 4;
+		this.mAddButton.disabled = this.mEnglishContent.value.length < 4 || this.mName.value.length < 4;
 	}
 }
 

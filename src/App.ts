@@ -113,7 +113,6 @@ class App implements IAppListener {
 	}
 
 	public static setLanguage(language: string): void {
-		console.log(language);
 		switch (language) {
 			case "sv":
 				App.translations = Translations.sv;

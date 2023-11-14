@@ -7,7 +7,8 @@ namespace Models {
 		content: Translation;
 		from: Date;
 		until: Date;
-		priority: number;
+		color: string;
+		icon: string;
 		on_hold: Date;
 	}
 }
