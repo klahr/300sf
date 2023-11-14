@@ -212,7 +212,12 @@ class AdminAnnouncementsPopUp {
 				t.style.color = "var(--secondary-color)";
 				t.innerHTML = "delete_forever";
 				t.addEventListener("click", function () {
-					console.log("trash");
+					new Ui.ConfirmBox("Really?", "Are you sure?", null, "var(--success-color)", function() {
+						const r = new HttpRequest("DELETE", "/v1/announcements/" + e.uuid);
+						r.process((status: any, data: any) => {
+							self.refresh();
+						});	
+					}, function() {}, "Yes", App.translations.Cancel);
 				});
 				self.mAnnouncementsDiv.container.appendChild(t);
 
