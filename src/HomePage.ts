@@ -243,7 +243,10 @@ class HomePage extends Page {
 				close.addEventListener("click", function() {
 					const r = new HttpRequest("PUT", "/v1/announcements/" + e.uuid + "/read");
 					r.process((status: any, data: any) => {
-						self.mAnnouncements.container.removeChild(a);
+						a.classList.add("fade-out");
+						setTimeout(function() {
+							self.mAnnouncements.container.removeChild(a);
+						}, 500);
 					});	
 				});
 

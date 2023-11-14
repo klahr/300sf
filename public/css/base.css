@@ -295,6 +295,11 @@ div.tag.selected {
 	box-shadow: inset 0 0 0 2px #ffffffad;
 }
 
+div.fade-out {
+	opacity: 0;
+	transition: opacity 500ms;
+}
+
 div.tag>p {
 	color: white;
 	font-weight: bold;
