@@ -20,6 +20,7 @@ class HomePage extends Page {
 	private mProgressBoxes: Ui.Div;
 	private mSpecies: Array<Models.Species>;
 	private mSpeciesList: Ui.Select;
+	private mAnnouncements: Ui.Div;
 
 	public get id(): string {
 		return "home";
@@ -33,6 +34,11 @@ class HomePage extends Page {
 		const title = document.createElement("h1");
 		title.innerHTML = App.translations.WelcomeMessage;
 		this.container.appendChild(title);
+
+		this.mAnnouncements = new Ui.Div();
+		this.mAnnouncements.style.position = "relative";
+		this.mAnnouncements.style.width = "100%";
+		this.attach(this.mAnnouncements);
 
 		this.mSpeciesList = new Ui.Select(App.translations.Search, "", (value) => {
 			self.mSpecies.forEach(e => {
@@ -54,8 +60,6 @@ class HomePage extends Page {
 
 		this.mTable = new Ui.Table();
 		this.attach(this.mTable);
-
-		//this.refresh();
 	}
 
 	public setVisible(visible: boolean): void {
@@ -208,6 +212,56 @@ class HomePage extends Page {
 			self.mSpecies.forEach(e => {
 				const s = e as Models.Species;
 				self.mSpeciesList.addOption(App.getTranslation(s.name), s.uuid);
+			});
+		}, (status: any, data: Responses.GeneralErrorResponse, error: any) => {
+		}, undefined);
+
+		const announcements = new HttpRequest("GET", "/v1/announcements/list", null);
+		announcements.process((status: any, data: any) => {
+			const an = data.data as Array<Models.Announcement>;
+			self.mAnnouncements.clear();
+			an.forEach(e => {
+				const a = document.createElement("div");
+				a.className = "announcement";
+				self.mAnnouncements.container.appendChild(a);
+				const img = document.createElement("p");
+				switch (e.priority) {
+					case 0:
+						img.innerHTML = "<span style='font-size: 2rem; color: var(--success-color);' class='material-symbols-outlined'>brand_awareness</span>";
+						a.style.boxShadow = "inset 0 0 0px 1px var(--success-color)";
+						break;
+					case 1:
+						img.innerHTML = "<span style='font-size: 2rem; color: var(--primary-variant-color);' class='material-symbols-outlined'>assignment_late</span>";
+						a.style.boxShadow = "inset 0 0 0px 1px var(--primary-variant-color)";
+						break;
+					default:
+						img.innerHTML = "<span style='font-size: 2rem; color: var(--error-color);' class='material-symbols-outlined'>release_alert</span>";
+						a.style.boxShadow = "inset 0 0 0px 1px var(--error-color)";
+						break;
+				}
+
+				a.appendChild(img);
+
+				const close = document.createElement("span");
+				close.className = "material-symbols-outlined close";
+				close.style.position = "absolute";
+				close.style.cursor = "pointer";
+				close.style.fontSize = "24px";
+				close.style.right = "var(--small-distance)";
+				close.style.top = "var(--small-distance)";
+				close.style.color = "var(--secondary-color)";
+				close.innerHTML = "close";
+				a.appendChild(close);
+				close.addEventListener("click", function() {
+					const r = new HttpRequest("PUT", "/v1/announcements/" + e.uuid + "/read");
+					r.process((status: any, data: any) => {
+						self.mAnnouncements.container.removeChild(a);
+					});	
+				});
+
+				const c = document.createElement("p");
+				c.innerHTML = App.getTranslation(e.content);
+				a.appendChild(c);
 			});
 		}, (status: any, data: Responses.GeneralErrorResponse, error: any) => {
 		}, undefined);
