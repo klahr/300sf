@@ -937,7 +937,6 @@ ALTER TABLE `300sf`.`emails`
 ADD COLUMN `reply_email` VARCHAR(254) NOT NULL AFTER `checksum`,
 ADD COLUMN `reply_name` VARCHAR(128) NOT NULL AFTER `reply_email`;
 
--->
 
 CREATE TABLE `300sf`.`announcements` (
   `id` INT NOT NULL AUTO_INCREMENT,
@@ -988,3 +987,36 @@ ADD CONSTRAINT `fk_announcement_users_2`
   REFERENCES `300sf`.`users` (`id`)
   ON DELETE NO ACTION
   ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`announcement_users` 
+DROP FOREIGN KEY `fk_announcement_users_1`;
+ALTER TABLE `300sf`.`announcement_users` 
+ADD CONSTRAINT `fk_announcement_users_1`
+  FOREIGN KEY (`announcement_id`)
+  REFERENCES `300sf`.`announcements` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`announcement_users` 
+DROP FOREIGN KEY `fk_announcement_users_2`;
+ALTER TABLE `300sf`.`announcement_users` 
+ADD CONSTRAINT `fk_announcement_users_2`
+  FOREIGN KEY (`user_id`)
+  REFERENCES `300sf`.`users` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`translations` 
+CHANGE COLUMN `en` `en` VARCHAR(512) NULL DEFAULT NULL ,
+CHANGE COLUMN `sv` `sv` VARCHAR(512) NULL DEFAULT NULL ,
+CHANGE COLUMN `la` `la` VARCHAR(512) NULL DEFAULT NULL ,
+CHANGE COLUMN `de` `de` VARCHAR(512) NULL DEFAULT NULL ;
+
+-->
+
+ALTER TABLE `300sf`.`announcements` 
+DROP COLUMN `priority`;
+
+ALTER TABLE `300sf`.`announcements` 
+ADD COLUMN `color` VARCHAR(16) NOT NULL AFTER `on_hold`,
+ADD COLUMN `icon` VARCHAR(32) NOT NULL AFTER `color`;

@@ -9,7 +9,8 @@ type Announcement struct {
 	Content   Translation `json:"content"`
 	From      zero.Time   `json:"from"`
 	Until     zero.Time   `json:"until"`
-	Priority  int         `json:"priority"`
 	UserId    zero.Int    `json:"-"`
 	OnHold    zero.Time   `json:"on_hold"`
+	Icon      string      `json:"icon"`
+	Color     string      `json:"color"`
 }

@@ -13,12 +13,13 @@ import (
 
 func Announcements(c *gin.Context) {
 	type request struct {
-		Name     string             `json:"name"`
-		Content  models.Translation `json:"content"`
-		From     zero.Time          `json:"from" time_format:"2006-01-02T15:04Z"`
-		Until    zero.Time          `json:"until" time_format:"2006-01-02T15:04Z"`
-		Priority int                `json:"priority"`
-		OnHold   bool               `json:"on_hold"`
+		Name    string             `json:"name"`
+		Content models.Translation `json:"content"`
+		From    zero.Time          `json:"from" time_format:"2006-01-02T15:04Z"`
+		Until   zero.Time          `json:"until" time_format:"2006-01-02T15:04Z"`
+		Icon    string             `json:"icon"`
+		Color   string             `json:"color"`
+		OnHold  bool               `json:"on_hold"`
 	}
 
 	var r request
@@ -49,11 +50,12 @@ func Announcements(c *gin.Context) {
 			Timestamp: time.Now(),
 			Uuid:      utils.GenerateShortUuid(),
 		},
-		Name:     r.Name,
-		Content:  content,
-		From:     r.From,
-		Until:    r.Until,
-		Priority: r.Priority,
+		Name:    r.Name,
+		Content: content,
+		From:    r.From,
+		Until:   r.Until,
+		Icon:    r.Icon,
+		Color:   r.Color,
 	}
 
 	if r.OnHold {
@@ -172,7 +174,7 @@ func AnnouncementsList(c *gin.Context) {
 	}
 
 	var announcements []models.Announcement
-	if err := models.DB.Table(table.Announcements).Preload("Content").Where("on_hold IS NULL").Where("`from` IS NULL OR `from`<=NOW()").Where("until IS NULL OR until>=NOW()").Where("announcement_users.announcement_id IS NULL").Joins("LEFT JOIN announcement_users ON announcement_users.announcement_id=announcements.id").Order("priority DESC").Find(&announcements).Error; err != nil {
+	if err := models.DB.Table(table.Announcements).Preload("Content").Where("on_hold IS NULL").Where("`from` IS NULL OR `from`<=NOW()").Where("until IS NULL OR until>=NOW()").Where("announcement_users.announcement_id IS NULL").Joins("LEFT JOIN announcement_users ON announcement_users.announcement_id=announcements.id").Find(&announcements).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
