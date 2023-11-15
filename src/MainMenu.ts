@@ -130,10 +130,7 @@ class MainMenu extends Ui.Widget {
 		});
 
 		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>logout</span> " + App.translations.LogOut, function () {
-			new Ui.ConfirmBox(App.translations.LogOut, App.translations.ConfirmLogOut, null, "var(--success-color)", function () {
-				self.mAppListener.logOut();
-			}, function () {
-			}, App.translations.LogOut, App.translations.Cancel);
+			self.mAppListener.logOut();
 		});
 	}
 
