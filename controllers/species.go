@@ -254,6 +254,12 @@ func SpeciesDetails(c *gin.Context) {
 		})
 	}
 
+	if lang == "sv" && !result.Name.Sv.Valid {
+		lang = "en"
+	} else if lang == "de" && !result.Name.De.Valid {
+		lang = "en"
+	}
+
 	r := response{
 		Result:     result,
 		Recordings: recs,
