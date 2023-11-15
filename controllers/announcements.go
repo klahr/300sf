@@ -174,7 +174,8 @@ func AnnouncementsList(c *gin.Context) {
 	}
 
 	var announcements []models.Announcement
-	if err := models.DB.Table(table.Announcements).Preload("Content").Where("on_hold IS NULL").Where("`from` IS NULL OR `from`<=NOW()").Where("until IS NULL OR until>=NOW()").Where("announcement_users.announcement_id IS NULL").Joins("LEFT JOIN announcement_users ON announcement_users.announcement_id=announcements.id").Find(&announcements).Error; err != nil {
+	//	select * from announcements LEFT JOIN announcement_users ON announcement_users.announcement_id=announcements.id and announcement_users.user_id=2 where announcement_users.id IS NULL and on_hold IS NULL and `from` IS NULL OR `from`<=NOW() and until IS NULL OR until>=NOW();
+	if err := models.DB.Table(table.Announcements).Preload("Content").Where("announcement_users.id IS NULL").Where("on_hold IS NULL").Where("`from` IS NULL OR `from`<=NOW()").Where("`until` IS NULL OR `until`>=NOW()").Where("announcement_users.announcement_id IS NULL").Joins("LEFT JOIN announcement_users ON announcement_users.announcement_id=announcements.id AND announcement_users.user_id=?", user.Id).Find(&announcements).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
