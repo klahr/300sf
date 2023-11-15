@@ -22,6 +22,12 @@ type Recording struct {
 	File     string `json:"file"`
 	Filename string `json:"file-name"`
 	Sono     Sono   `json:"sono"`
+	Rec      string `json:"rec"`
+	Cnt      string `json:"cnt"`
+	Loc      string `json:"loc"`
+	Lat      string `json:"lat"`
+	Lng      string `json:"lng"`
+	Alt      string `json:"alt"`
 }
 
 type RecordingsResponse struct {

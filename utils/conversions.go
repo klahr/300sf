@@ -11,6 +11,11 @@ func Str2Int(str string) int64 {
 	return int64(i)
 }
 
+func Str2Float(str string) float64 {
+	f, _ := strconv.ParseFloat(str, 64)
+	return f
+}
+
 func Str2Time(str string) time.Time {
 	if t, err := time.Parse(time.DateOnly, str); err != nil {
 		return time.Time{}

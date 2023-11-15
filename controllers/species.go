@@ -244,13 +244,18 @@ func SpeciesDetails(c *gin.Context) {
 			break
 		}
 		recs = append(recs, models.Recording{
-			Url:      r.File,
-			Filename: r.Filename,
-			Type:     r.Type,
-			Sex:      r.Sex,
-			Stage:    r.Stage,
-			Method:   r.Method,
-			Sono:     r.Sono.Small,
+			Url:       r.File,
+			Filename:  r.Filename,
+			Type:      r.Type,
+			Sex:       r.Sex,
+			Stage:     r.Stage,
+			Method:    r.Method,
+			Sono:      r.Sono.Small,
+			Recorder:  r.Rec,
+			Country:   r.Cnt,
+			Location:  r.Loc,
+			Latitude:  utils.Str2Float(r.Lat),
+			Longitude: utils.Str2Float(r.Lng),
 		})
 	}
 
