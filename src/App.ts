@@ -147,7 +147,7 @@ class App implements IAppListener {
 
 	showPage(id: string, data: any): void {
 		if (id === "admin") {
-			if (!App.user || App.user.permissions < 3) {
+			if (!App.user || (App.user.permissions & 2) !== 2) {
 				id = "home";
 			}
 		}
