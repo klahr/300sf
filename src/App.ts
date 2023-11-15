@@ -146,8 +146,10 @@ class App implements IAppListener {
 	}
 
 	showPage(id: string, data: any): void {
-		if (id === "admin" && !App.user) {
-			id = "home";
+		if (id === "admin") {
+			if (!App.user || App.user.permissions < 3) {
+				id = "home";
+			}
 		}
 		let page: Page | null = null;
 		this.mPages.forEach(e => {
