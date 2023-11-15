@@ -240,14 +240,14 @@ class HomePage extends Page {
 				close.style.color = "var(--secondary-color)";
 				close.innerHTML = "close";
 				a.appendChild(close);
-				close.addEventListener("click", function() {
+				close.addEventListener("click", function () {
 					const r = new HttpRequest("PUT", "/v1/announcements/" + e.uuid + "/read");
 					r.process((status: any, data: any) => {
 						a.classList.add("fade-out");
-						setTimeout(function() {
+						setTimeout(function () {
 							self.mAnnouncements.container.removeChild(a);
 						}, 500);
-					});	
+					});
 				});
 
 				const c = document.createElement("p");
