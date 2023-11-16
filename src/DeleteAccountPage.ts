@@ -18,7 +18,7 @@ class DeleteAccountPage extends Page {
 		content.container.appendChild(logo);
 
 		const title = document.createElement("h1");
-		title.innerHTML = "Delete Account";
+		title.innerHTML = App.translations.DeleteAccount;
 		this.container.appendChild(title);
 
 		const password = new Ui.Input("password");
@@ -28,7 +28,7 @@ class DeleteAccountPage extends Page {
 
 		const self = this;
 		const set = document.createElement("button");
-		set.innerHTML = "Delete Account";
+		set.innerHTML = App.translations.DeleteAccount;
 		set.addEventListener("click", function () {
 			password.setDisabled(true);
 			const r = new HttpRequest("DELETE", "/v1/users/confirm_delete/" + self.data.token, {
@@ -39,7 +39,7 @@ class DeleteAccountPage extends Page {
 				password.value = ""
 				const ks = new LocalStorage();
 				ks.clear();
-				new Ui.MessageBox("Account Deleted", "Your account has been inactivated or will be permanently deleted in 7 days. If you change your mind you must contact support@300sf.se within a week.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function () {
+				new Ui.MessageBox(App.translations.AccountDeleted, App.translations.AccountDeletedDescription, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function () {
 					appListener.logOut();
 				});
 			});

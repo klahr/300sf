@@ -36,7 +36,7 @@ class SetPasswordPage extends Page {
 			r.process(function (status: any, data: any) {
 				password.setDisabled(false);
 				password.value = "";
-				new Ui.MessageBox("New Password Set", "You have successfully updated your password!", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function () {
+				new Ui.MessageBox(App.translations.NewPasswordSet, App.translations.SuccessfullyResetPassword, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function () {
 					appListener.showPage("home", null);
 				});
 			});

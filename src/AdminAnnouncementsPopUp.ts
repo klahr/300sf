@@ -135,23 +135,13 @@ class AdminAnnouncementsPopUp {
 			if (until.value !== "") {
 				d.until = Utils.toISODate(new Date(until.value));
 			}
-			new Ui.ConfirmBox("Confirm announcement addition", "Are you sure?", null, "var(--success-color)", function () {
-				const r = new HttpRequest("POST", "/v1/announcements", d);
-				r.process((status: AnalyserNode, data: any) => {
-					new Ui.MessageBox(App.translations.Success, "", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function () { });
-					self.refresh();
-				}, (status: any, data: Responses.GeneralErrorResponse, error: any) => {
-					new Ui.MessageBox(App.translations.Error, error, "", "var(--error-color)", function () { });
-				}, () => {
-					self.mAddButton.disabled = false;
-					self.mAddButton.innerHTML = "Add announcement";
-					self.mName.setDisabled(false);
-					self.mEnglishContent.disabled = false;
-					from.setDisabled(false);
-					until.setDisabled(false);
-					onHold.setDisabled(false);
-				});
-			}, function () {
+			const r = new HttpRequest("POST", "/v1/announcements", d);
+			r.process((status: AnalyserNode, data: any) => {
+				new Ui.MessageBox(App.translations.Success, "", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function () { });
+				self.refresh();
+			}, (status: any, data: Responses.GeneralErrorResponse, error: any) => {
+				new Ui.MessageBox(App.translations.Error, error, "", "var(--error-color)", function () { });
+			}, () => {
 				self.mAddButton.disabled = false;
 				self.mAddButton.innerHTML = "Add announcement";
 				self.mName.setDisabled(false);
@@ -159,7 +149,7 @@ class AdminAnnouncementsPopUp {
 				from.setDisabled(false);
 				until.setDisabled(false);
 				onHold.setDisabled(false);
-			}, "Add announcement", App.translations.Cancel);
+			});
 		});
 
 		this.refresh();

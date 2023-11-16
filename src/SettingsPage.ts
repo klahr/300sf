@@ -67,14 +67,14 @@ class SettingsPage extends Page {
 			const r = new HttpRequest("POST", "/v1/users/migrate", d);
 			r.process(function (status: any, data: any) {
 				self.refresh();
-				new Ui.MessageBox("Success", "All your submissions have successfully been imported!", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function () { });
+				new Ui.MessageBox(App.translations.Success, App.translations.SightingsImportSuccess, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function () { });
 				self.mPassword.container.innerHTML = "";
 			}, function () {
 				self.mImportButton.disabled = false;
 				self.mImportButton.innerHTML = "Import";
 				self.mEmail.container.removeAttribute("disabled");
 				self.mPassword.container.removeAttribute("disabled");
-				new Ui.MessageBox("Oh, no!", "It appears that the <b>email</b> or <b>password</b> you entered is invalid.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
+				new Ui.MessageBox(App.translations.Error, App.translations.WrongImportCredentials, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
 			});
 		});
 
@@ -96,7 +96,7 @@ class SettingsPage extends Page {
 			r.process(function (status: any, data: any) {
 				DownloadFile("data.json", JSON.stringify(data));
 			}, function () {
-				new Ui.MessageBox("Oh, no!", "Something went wrong.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
+				new Ui.MessageBox(App.translations.Error, App.translations.SomethingWentWrong, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
 			}, function () {
 				exportDataButton.disabled = false;
 			});
@@ -136,12 +136,12 @@ class SettingsPage extends Page {
 			const r = new HttpRequest("POST", "/v1/users/request_delete", d);
 			r.process(function (status: any, data: any) {
 				self.refresh();
-				new Ui.MessageBox("All right", "Check your email inbox for further instructions.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function () { });
+				new Ui.MessageBox(App.translations.Success, App.translations.CheckEmailInstructions, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function () { });
 				deleteAccountPassword.container.innerHTML = "";
 			}, function () {
 				deleteAccountButton.disabled = false;
 				deleteAccountPassword.container.removeAttribute("disabled");
-				new Ui.MessageBox("Oh, no!", "Something went wrong.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
+				new Ui.MessageBox(App.translations.Error, App.translations.SomethingWentWrong, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
 			});
 		});
 

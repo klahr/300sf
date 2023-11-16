@@ -118,5 +118,18 @@
 	"Welcome": "Welcome",
 	"ProceedToSignIn": "Your account has been successfully created, and you can now proceed to sign in!",
 	"Raised": "raised",
-	"RaisedDescription": "This represents the yearly expense to maintain the service and keep it operational."
+	"RaisedDescription": "This represents the yearly expense to maintain the service and keep it operational.",
+	"AccountDeleted": "Account deleted",
+	"AccountDeletedDescription": "Your account has been inactivated and will be permanently deleted in 7 days. If you change your mind you must contact support@300sf.se within a week.",
+	"ResetPassword": "Reset password",
+	"CheckEmailInstructions": "Check your email inbox for further instructions.",
+	"NewPasswordSet": "New password set",
+	"SuccessfullyResetPassword": "You have successfully reset your password!",
+	"SightingsImportSuccess": "All your sightings have successfully been imported!",
+	"WrongImportCredentials": "It appears that the <b>email</b> or <b>password</b> you entered is invalid.",
+	"SomethingWentWrong": "Something went wrong.",
+	"InvalidDisplayName": "Your <b>Display name</b> appears to be invalid.",
+	"InvalidEmail": "Your <b>Email</b> appears to be invalid.",
+	"InvalidPassword": "Your <b>Password</b> appears to be invalid.",
+	"InvalidAcceptTerms": "You must accept the <b>terms</b>."
 }

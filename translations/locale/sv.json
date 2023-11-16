@@ -118,5 +118,18 @@
 	"Welcome": "Välkommen",
 	"ProceedToSignIn": "Ditt konto har skapats och du kan nu logga in!",
 	"Raised": "insamlat",
-	"RaisedDescription": "Detta representerar den årliga kostnaden för att underhålla tjänsten och hålla den i drift."
+	"RaisedDescription": "Detta representerar den årliga kostnaden för att underhålla tjänsten och hålla den i drift.",
+	"AccountDeleted": "Kontot har raderats",
+	"AccountDeletedDescription": "Ditt konto har inaktiverats och kommer att raderas permanent om 7 dagar. Om du ändrar dig måste du kontakta support@300sf.se inom en vecka.",
+	"ResetPassword": "Återställ lösenord",
+	"CheckEmailInstructions": "Kolla din e-post för instruktioner.",
+	"NewPasswordSet": "Lösenordet har återställts",
+	"SuccessfullyResetPassword": "Du har nu återställt ditt lösenord!",
+	"SightingsImportSuccess": "Alla dina fynd har importerats!",
+	"WrongImportCredentials": "Det verkar som om <b>e-post</b> eller <b>lösenord</b> är ogiltigt.",
+	"SomethingWentWrong": "Ett oväntat fel har inträffat.",
+	"InvalidDisplayName": "Ditt <b>Visningsnamn</b> verkar vara ogiltigt.",
+	"InvalidEmail": "Din <b>e-post</b> verkar vara ogiltig.",
+	"InvalidPassword": "Ditt <b>Lösenord</b> verkar vara ogiltigt.",
+	"InvalidAcceptTerms": "Du måste godkänna <b>villkoren</b>."
 }

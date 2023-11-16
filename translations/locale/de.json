@@ -68,7 +68,7 @@
 	"PermanentlyDeleteAccount": "Konto dauerhaft löschen",
 	"Support": "Kundendienst",
 	"ImportData": "Einreichungen importieren",
-	"ImportDataDescription": "Migrieren Sie Ihre Daten nahtlos von der 300 Swedish Birdsl-App auf unsere neue Webseite. Geben Sie einfach Ihren App-Benutzernamen und Ihr Passwort ein und klicken Sie auf die Schaltfläche \"Importieren\". Wir werden Ihre Daten sicher übertragen, um einen reibungslosen Übergang zu unserer aktualisierten Plattform zu gewährleisten. Ihre Privatsphäre und Datensicherheit sind unsere obersten Prioritäten.",
+	"ImportDataDescription": "Migrieren Sie Ihre Daten nahtlos von der 300 Swedish Birdsl-App auf unsere neue Webseite. Geben Sie einfach Ihren App-Benutzernamen und Ihr Passwort ein und klicken Sie auf die Schaltfläche 'Importieren'. Wir werden Ihre Daten sicher übertragen, um einen reibungslosen Übergang zu unserer aktualisierten Plattform zu gewährleisten. Ihre Privatsphäre und Datensicherheit sind unsere obersten Prioritäten.",
 	"ContributionDescription": "Unser Projekt ist Open-Source, was bedeutet, dass wir Beiträge aus der Community begrüßen. Egal, ob Sie Entwickler oder Übersetzer sind, Ihre Hilfe ist wertvoll.\n\nCode-Beiträge: Wenn du Entwickler bist, kannst du Code beisteuern, indem du unser Projektarchiv auf SourceHut anschaust und Merge-Anfragen einreichst. Wir freuen uns über Ihr technisches Know-how.\n\nÜbersetzungen: Wenn Sie an Übersetzungen interessiert sind, können Sie dazu beitragen, das Projekt in verschiedenen Sprachen zugänglich zu machen.\n\nVielen Dank, dass Sie erwägen, zu 300sf beizutragen. Ihre Beiträge helfen uns, zu wachsen und zu verbessern.",
 	"Contact": "Problem melden",
 	"ContactDescription": "Kontaktieren Sie uns hier, um mit uns in Kontakt zu treten, Fragen zu stellen oder Feedback zu geben.",
@@ -118,5 +118,18 @@
 	"Welcome": "Willkommen",
 	"ProceedToSignIn": "Ihr Benutzerkonto wurde erfolgreich aktiviert. Sie können sich jetzt einloggen!",
 	"Raised": "eingenommen",
-	"RaisedDescription": "Dies stellt die jährlichen Kosten für die Aufrechterhaltung und Aufrechterhaltung des Dienstes dar."
+	"RaisedDescription": "Dies stellt die jährlichen Kosten für die Aufrechterhaltung und Aufrechterhaltung des Dienstes dar.",
+	"AccountDeleted": "Account deleted",
+	"AccountDeletedDescription": "Your account has been inactivated and will be permanently deleted in 7 days. If you change your mind you must contact support@300sf.se within a week.",
+	"ResetPassword": "Reset password",
+	"CheckEmailInstructions": "Check your email inbox for further instructions.",
+	"NewPasswordSet": "New password set",
+	"SuccessfullyResetPassword": "You have successfully reset your password!",
+	"SightingsImportSuccess": "All your sightings have successfully been imported!",
+	"WrongImportCredentials": "It appears that the <b>email</b> or <b>password</b> you entered is invalid.",
+	"SomethingWentWrong": "Something went wrong.",
+	"InvalidDisplayName": "Your <b>Display name</b> appears to be invalid.",
+	"InvalidEmail": "Your <b>Email</b> appears to be invalid.",
+	"InvalidPassword": "Your <b>Password</b> appears to be invalid.",
+	"InvalidAcceptTerms": "You must accept the <b>terms</b>."
 }

@@ -78,19 +78,19 @@ class SignUpPage extends Page {
 			}, function (status: any, data: Responses.GeneralErrorResponse, error: any) {
 				switch (data.code) {
 					case Responses.ErrorCode.ErrorSignUpInvalidDisplayName:
-						new Ui.MessageBox("Oh, no!", "Your <b>Display name</b> appears to be invalid.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
+						new Ui.MessageBox(App.translations.Error, App.translations.InvalidDisplayName, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
 						break;
 					case Responses.ErrorCode.ErrorSignUpInvalidEmail:
-						new Ui.MessageBox("Oh, no!", "Your <b>Email</b> appears to be invalid.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
+						new Ui.MessageBox(App.translations.Error, App.translations.InvalidEmail, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
 						break;
 					case Responses.ErrorCode.ErrorSignUpInvalidPassword:
-						new Ui.MessageBox("Oh, no!", "Your <b>Password</b> appears to be invalid.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
+						new Ui.MessageBox(App.translations.Error, App.translations.InvalidPassword, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
 						break;
 					case Responses.ErrorCode.ErrorSignUpTermsNotAccepted:
-						new Ui.MessageBox("Oh, no!", "You must accept the <b>terms</b>.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
+						new Ui.MessageBox(App.translations.Error, App.translations.InvalidAcceptTerms, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
 						break;
 					default:
-						new Ui.MessageBox("Oh, no!", "It appears that the <b>email</b> or <b>password</b> you entered is invalid.", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
+						new Ui.MessageBox(App.translations.Error, App.translations.SomethingWentWrong, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
 						break;
 				}
 			});
