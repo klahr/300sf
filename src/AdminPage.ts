@@ -15,6 +15,18 @@ class AdminPage extends Page {
 
 		this.addEntry(App.translations.SpeciesPlural, "raven", openAdminSpeciesPopUp);
 		this.addEntry("Announcements", "campaign", openAdminAnnouncementsPopUp);
+
+		const inviteEmail = new Ui.Input("email");
+		inviteEmail.style.position = "relative";
+		this.attach(inviteEmail);
+
+		const inviteButton = document.createElement("button");
+		inviteButton.innerHTML = "Send invite";
+		this.container.appendChild(inviteButton);
+		inviteButton.addEventListener("click", function() {
+			const r = new HttpRequest("POST", "/v1/invite", {email: inviteEmail.value, language_code: "sv"}).process((status: any, data: any) => {
+			});
+		});
 	}
 
 	public get id(): string {
