@@ -11,13 +11,13 @@ declare const L;
 
 class ReportPopUp {
 	private mReportButton: HTMLButtonElement;
-	private mSpeciesList: Ui.Select;
+	private mSpeciesList: Ui.Input;
 	private mChecklistContainer: Ui.Div;
 	private mTagsContainer: Ui.Div;
 	private mLocation = L.latLng;
 	private mPopUp: Ui.PopUp;
 
-	constructor(species: Models.Species | null, list: Models.List | null, closeCallback: () => void) {
+	constructor(species: Models.Species, list: Models.List | null, closeCallback: () => void) {
 		const self = this;
 
 		const content = new Ui.Div();
@@ -76,43 +76,45 @@ class ReportPopUp {
 			});
 		}, 10);
 
-		this.mSpeciesList = new Ui.Select(App.translations.SelectSpecies + "...", App.translations.Search, function (species: string | null) {
-			const r = new HttpRequest("GET", "/v1/lists/species/" + species);
-			r.process(function (status: any, data: any) {
-				const d = data as Responses.ListsSpecies;
-				self.mChecklistContainer.detachAll();
-				self.mChecklistContainer.container.innerHTML = "";
+		this.mSpeciesList = new Ui.Input("text");
+		this.mSpeciesList.setDisabled(true);
+		this.mSpeciesList.value = App.getTranslation(species.name);
+		this.mSpeciesList.setData(species);
+		content.attach(this.mSpeciesList);
 
-				d.result.forEach(e => {
-					const dd = new Ui.Div();
-					dd.style.position = "relative";
-					dd.style.width = "100%";
-					self.mChecklistContainer.attach(dd);
-					const c = new Ui.Input("checkbox");
-					c.container.setAttribute("name", e.list.uuid);
-					c.container.addEventListener("click", function () {
-						self.validate();
-					});
+		new HttpRequest("GET", "/v1/lists/species/" + species.uuid).process(function (status: any, data: any) {
+			const d = data as Responses.ListsSpecies;
+			self.mChecklistContainer.detachAll();
+			self.mChecklistContainer.container.innerHTML = "";
 
-					dd.attach(c);
-					const cLbl = document.createElement("label");
-					cLbl.setAttribute("for", c.container.getAttribute("name")!);
-					cLbl.innerHTML = App.getTranslation(e.list.name);
-					dd.container.appendChild(cLbl);
-
-					if (!e.available) {
-						c.container.setAttribute("disabled", "");
-						cLbl.style.color = "var(--secondary-color)";
-					} else if (list && e.list.uuid === list.uuid) {
-						(c.container as HTMLInputElement).checked = true;
-						(c.container as HTMLInputElement).disabled = true;
-					}
+			d.result.forEach(e => {
+				const dd = new Ui.Div();
+				dd.style.position = "relative";
+				dd.style.width = "100%";
+				self.mChecklistContainer.attach(dd);
+				const c = new Ui.Input("checkbox");
+				c.container.setAttribute("name", e.list.uuid);
+				c.container.addEventListener("click", function () {
+					self.validate();
 				});
 
-				self.validate();
+				dd.attach(c);
+				const cLbl = document.createElement("label");
+				cLbl.setAttribute("for", c.container.getAttribute("name")!);
+				cLbl.innerHTML = App.getTranslation(e.list.name);
+				dd.container.appendChild(cLbl);
+
+				if (!e.available) {
+					c.container.setAttribute("disabled", "");
+					cLbl.style.color = "var(--secondary-color)";
+				} else if (list && e.list.uuid === list.uuid) {
+					(c.container as HTMLInputElement).checked = true;
+					(c.container as HTMLInputElement).disabled = true;
+				}
 			});
+
+			self.validate();
 		});
-		content.attach(this.mSpeciesList);
 
 		const ageList = new Ui.Select(App.translations.SelectAge + "...", App.translations.Search);
 		content.attach(ageList);
@@ -179,32 +181,22 @@ class ReportPopUp {
 		content.container.appendChild(listsLbl);
 		content.attach(self.mChecklistContainer);
 
-		const r = new HttpRequest("GET", "/v1/reports/basis");
+		const r = new HttpRequest("PUT", "/v1/reports/basis", {species_uuid: species.uuid});
 		r.process(function (status: any, data: any) {
 			const d = data as Responses.ReportsBasis;
 
-			d.species.sort(Utils.sortByNameOnCurrentLanguage);
-			d.species.forEach(e => {
-				if (list) {
-					let found = false;
-					for (let i = 0; i < list.species.length; ++i) {
-						if (list.species[i].uuid === e.uuid) {
-							found = true;
-							break;
-						}
-					}
-					if (!found) {
-						return;
+			if (list) {
+				let found = false;
+				for (let i = 0; i < list.species.length; ++i) {
+					if (list.species[i].uuid === d.species.uuid) {
+						found = true;
+						break;
 					}
 				}
-
-				const option = self.mSpeciesList.addOption(App.getTranslation(e.name), e.uuid);
-				if (species && species.uuid === e.uuid) {
-					option.click();
-					self.mSpeciesList.hide();
-					self.mSpeciesList.setDisabled(true);
+				if (!found) {
+					return;
 				}
-			});
+			}
 
 			d.ages.sort(Utils.sortByNameOnCurrentLanguage);
 			d.ages.forEach(e => {
@@ -256,7 +248,7 @@ class ReportPopUp {
 		this.mReportButton.disabled = true;
 		this.mReportButton.addEventListener("click", function () {
 			const r = new Requests.Reports();
-			r.species_uuid = self.mSpeciesList.value!;
+			r.species_uuid = self.mSpeciesList.data.uuid;
 			if (from.value !== "") {
 				r.from = Utils.toISODate(new Date(from.value));
 			}
@@ -301,7 +293,7 @@ class ReportPopUp {
 
 			const rr = new HttpRequest("POST", "/v1/reports", r);
 			rr.process(function (status: any, data: any) {
-				new Ui.MessageBox(App.translations.Congratulations, App.translations.YouFoundA.replace("{0}", self.mSpeciesList.getOption(self.mSpeciesList.value!)?.innerHTML!), null, "var(--success-color)", function () { });
+				new Ui.MessageBox(App.translations.Congratulations, App.translations.YouFoundA.replace("{0}", self.mSpeciesList.value), null, "var(--success-color)", function () { });
 				self.mPopUp.close();
 			});
 		});
@@ -314,10 +306,6 @@ class ReportPopUp {
 
 	private validate(): void {
 		this.mReportButton.disabled = false;
-		if (this.mSpeciesList.value === "") {
-			this.mReportButton.disabled = true;
-			return;
-		}
 
 		const checklists = this.mChecklistContainer.container.getElementsByTagName("input");
 		let isAnyChecked = false;
@@ -335,6 +323,6 @@ class ReportPopUp {
 	}
 }
 
-function openReportPopUp(species: Models.Species | null, list: Models.List | null, closeCallback: () => void = function () { }): void {
+function openReportPopUp(species: Models.Species, list: Models.List | null, closeCallback: () => void = function () { }): void {
 	new ReportPopUp(species, list, closeCallback);
 }

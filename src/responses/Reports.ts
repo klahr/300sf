@@ -8,7 +8,7 @@
 
 namespace Responses {
 	export class ReportsBasis {
-		public species: Array<Models.Species>;
+		public species: Models.Species;
 		public ages: Array<Models.Age>;
 		public genders: Array<Models.Gender>;
 		public methods: Array<Models.Method>;
