@@ -1,8 +1,7 @@
 <%- contentFor('body') %>
 
 	<div class="surface" style="max-height: none;">
-		<a href="/"><img style="border-radius: 50%; float: left; margin-right: 16px;" width="64"
-				src="/img/birds-256.png" alt="TODO" /></a>
+		<a href="/"><img style="border-radius: 50%; float: left; margin-right: 16px;" width="64" src="/img/birds-256.png" alt="TODO" /></a>
 		<h1><%- data.reference_list.name.sv %></h1>
 		<table>
 			<tr>
@@ -37,4 +36,6 @@
 			</tr>
 			<% } %>
 		</table>
+		<input id="list-id" placeholder="ID">
+		<button onclick="window.open(window.location + ',' + document.getElementById('list-id').value, '_self');">Lägg till</button>
 	</div>
