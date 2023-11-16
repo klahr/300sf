@@ -439,14 +439,27 @@ func ReportsRemoveTag(c *gin.Context) {
 }
 
 func ReportsBasis(c *gin.Context) {
+	type request struct {
+		SpeciesUuid string `json:"species_uuid"`
+	}
+
 	type response struct {
-		Species    []models.Species  `json:"species"`
+		Species    models.Species    `json:"species"`
 		Ages       []models.Age      `json:"ages"`
 		Genders    []models.Gender   `json:"genders"`
 		Methods    []models.Method   `json:"methods"`
 		Activities []models.Activity `json:"activities"`
 		Lists      []models.List     `json:"lists"`
 		Tags       []models.Tag      `json:"tags"`
+	}
+
+	var r request
+	if err := c.ShouldBindJSON(&r); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		return
 	}
 
 	var user models.User
@@ -460,7 +473,7 @@ func ReportsBasis(c *gin.Context) {
 
 	var resp response
 
-	if err := models.DB.Preload("Name").Find(&resp.Species).Error; err != nil {
+	if err := models.DB.Preload("Name").Where("uuid=?", r.SpeciesUuid).First(&resp.Species).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
