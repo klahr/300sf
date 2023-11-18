@@ -61,7 +61,7 @@ class SettingsPage extends Page {
 			};
 
 			self.mImportButton.disabled = true;
-			self.mImportButton.innerHTML = "Please wait...";
+			self.mImportButton.innerHTML = App.translations.PleaseWait;
 			self.mEmail.container.setAttribute("disabled", "");
 			self.mPassword.container.setAttribute("disabled", "");
 			const r = new HttpRequest("POST", "/v1/users/migrate", d);
