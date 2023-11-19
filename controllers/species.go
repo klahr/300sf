@@ -272,7 +272,7 @@ func SpeciesDetails(c *gin.Context) {
 	}
 
 	if cached, err := json.Marshal(r); err == nil {
-		models.Cache.Set(cacheKey, cached, time.Second*time.Duration(config.AppConfig.CacheDuration))
+		models.Cache.Set(cacheKey, cached, time.Second*time.Duration(config.AppConfig.WikipediaCacheDuration))
 	}
 
 	c.JSON(http.StatusOK, r)
