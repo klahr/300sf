@@ -78,7 +78,6 @@ func Users(c *gin.Context) {
 		DisplayName:     r.DisplayName,
 		Password:        p.Value,
 		PasswordSalt:    p.Salt,
-		Permissions:     1,
 		Notifications:   8,
 		AcceptedTermsAt: zero.TimeFrom(time.Now()),
 		Portrait:        zero.StringFrom(r.Portrait),
@@ -306,7 +305,7 @@ func UsersExportData(c *gin.Context) {
 		Uuid          string      `json:"uuid"`
 		DisplayName   string      `json:"display_name"`
 		Email         string      `json:"email"`
-		Permissions   int64       `json:"permissions"`
+		Scopes        string      `json:"scopes"`
 		Notifications int64       `json:"notifications"`
 		LastSeenAt    zero.Time   `json:"last_seen_at"`
 		Language      string      `json:"language"`
@@ -361,7 +360,7 @@ func UsersExportData(c *gin.Context) {
 		Uuid:          user.Uuid,
 		DisplayName:   user.DisplayName,
 		Email:         user.Email,
-		Permissions:   user.Permissions,
+		Scopes:        user.Scopes,
 		Notifications: user.Notifications,
 		LastSeenAt:    user.LastSeenAt,
 		Language:      user.Language.Code,

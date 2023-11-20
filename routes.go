@@ -15,39 +15,6 @@ import (
 	"git.sr.ht/~klahr/300sf/utils"
 )
 
-/*func requirePermission(c *gin.Context, requiredPermission int64) {
-	// TODO: Cache this value and also use in ws.
-	publicKey, _ := os.ReadFile(config.AppConfig.PublicKeyFilename)
-
-	xAccessToken := c.Request.Header.Get("X-Access-Token")
-	accessToken := auth.Token{}
-	if requiredPermission != auth.AuthPermissionNone {
-		if xAccessToken != "" {
-			if err := auth.ParseToken(xAccessToken, &accessToken, publicKey); err != nil {
-				c.JSON(http.StatusUnauthorized, gin.H{"message": "logged out", "code": controllers.ErrorLoggedOut})
-				c.Abort()
-				return
-			}
-		} else {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "logged out", "code": controllers.ErrorLoggedOut})
-			c.Abort()
-			return
-		}
-	}
-
-	xAppLanguage := c.Request.Header.Get("X-App-Language")
-	c.Set("app_language", xAppLanguage)
-
-	if accessToken.Permissions&requiredPermission == requiredPermission {
-		c.Set("uuid", accessToken.Uuid)
-		c.Set("permissions", accessToken.Permissions)
-		c.Next()
-	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "missing permission", "code": controllers.ErrorMissingPermission})
-		c.Abort()
-	}
-}*/
-
 func parseToken(accessToken string) *jwt.Token {
 	v := strings.Split(accessToken, " ")
 	if len(v) != 2 || v[0] != "Bearer" {
@@ -148,9 +115,7 @@ func Health(c *gin.Context) {
 
 func SetupRoutes(r *gin.Engine) {
 	// Authenticate
-	r.PUT("/v1/auth", controllers.Auth)
 	r.POST("/v1/oauth2", controllers.Oauth2)
-	r.GET("/v1/oauth2test", controllers.Oath2Test)
 
 	// Users
 	r.POST("/v1/users", noneMiddleware, controllers.Users)

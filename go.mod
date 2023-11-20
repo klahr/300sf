@@ -1,10 +1,9 @@
 module git.sr.ht/~klahr/300sf
 
-go 1.18
+go 1.21.4
 
 require (
 	github.com/badoux/checkmail v1.2.1
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-contrib/gzip v0.0.6
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-redis/redis v6.15.9+incompatible

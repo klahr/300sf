@@ -121,8 +121,8 @@ components:
         display_name:
           type: string
           example: "John Doe"
-        permissions:
-          type: integer
+        scopes:
+          type: string
           example: 1
         notifications:
           type: integer

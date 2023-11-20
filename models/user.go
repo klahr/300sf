@@ -13,7 +13,6 @@ type User struct {
 	Email                  string      `json:"-"`
 	Password               string      `json:"-"`
 	PasswordSalt           string      `json:"-"`
-	Permissions            int64       `json:"permissions"`
 	Notifications          int64       `json:"notifications"`
 	LastSeenAt             zero.Time   `json:"last_seen_at"`
 	Confirmed_at           zero.Time   `json:"confirmed_at"`
