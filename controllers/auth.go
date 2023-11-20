@@ -90,13 +90,13 @@ func Auth(c *gin.Context) {
 
 func ValidateToken(token string) (*jwt.Token, error) {
 	t, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
-		secretKey := []byte("YOUR_SECRET_KEY")
+		secretKey := []byte(config.AppConfig.HashingSecret)
 		return secretKey, nil
 	})
 	if err != nil {
 		return nil, err
 	}
-	if _, ok := t.Claims.(jwt.Claims); !ok || !t.Valid {
+	if !t.Valid {
 		return nil, nil
 	}
 	return t, nil
@@ -129,7 +129,7 @@ func Oauth2(c *gin.Context) {
 				"message": err.Error(),
 			})
 			t, _ := jwt.Parse(r.RefreshToken, func(token *jwt.Token) (interface{}, error) {
-				secretKey := []byte("YOUR_SECRET_KEY")
+				secretKey := []byte(config.AppConfig.HashingSecret)
 				return secretKey, nil
 			})
 			claims := t.Claims.(jwt.MapClaims)
@@ -230,7 +230,7 @@ func generateToken(userUuid, clientId string, scopes []string, expiry int64) (st
 	claims["exp"] = expiry
 	claims["scope"] = scopes
 	claims["aud"] = clientId
-	secretKey := []byte("YOUR_SECRET_KEY")
+	secretKey := []byte(config.AppConfig.HashingSecret)
 	t, err := token.SignedString(secretKey)
 	if err != nil {
 		return "", err
