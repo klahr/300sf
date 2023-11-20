@@ -53,7 +53,7 @@ class SettingsPage extends Page {
 		});
 		this.attach(this.mPassword);
 
-		this.mImportButton.innerHTML = "Import";
+		this.mImportButton.innerHTML = App.translations.Import;
 		this.mImportButton.addEventListener("click", function () {
 			const d = {
 				old_password: self.mPassword.value,
@@ -61,7 +61,7 @@ class SettingsPage extends Page {
 			};
 
 			self.mImportButton.disabled = true;
-			self.mImportButton.innerHTML = "Please wait...";
+			self.mImportButton.innerHTML = App.translations.PleaseWait;
 			self.mEmail.container.setAttribute("disabled", "");
 			self.mPassword.container.setAttribute("disabled", "");
 			const r = new HttpRequest("POST", "/v1/users/migrate", d);

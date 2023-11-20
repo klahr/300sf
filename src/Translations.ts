@@ -133,6 +133,7 @@ class Translations {
         InvalidEmail: "Your <b>Email</b> appears to be invalid.",
         InvalidPassword: "Your <b>Password</b> appears to be invalid.",
         InvalidAcceptTerms: "You must accept the <b>terms</b>.",
+        Import: "Import",
     }
     static sv = {
         SignIn: "Logga in",
@@ -268,6 +269,7 @@ class Translations {
         InvalidEmail: "Din <b>e-post</b> verkar vara ogiltig.",
         InvalidPassword: "Ditt <b>Lösenord</b> verkar vara ogiltigt.",
         InvalidAcceptTerms: "Du måste godkänna <b>villkoren</b>.",
+        Import: "Importera",
     }
     static de = {
         SignIn: "Anmelden",
@@ -403,5 +405,6 @@ class Translations {
         InvalidEmail: "Your <b>Email</b> appears to be invalid.",
         InvalidPassword: "Your <b>Password</b> appears to be invalid.",
         InvalidAcceptTerms: "You must accept the <b>terms</b>.",
+        Import: "Import",
     }
 }

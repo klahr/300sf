@@ -131,5 +131,6 @@
 	"InvalidDisplayName": "Your <b>Display name</b> appears to be invalid.",
 	"InvalidEmail": "Your <b>Email</b> appears to be invalid.",
 	"InvalidPassword": "Your <b>Password</b> appears to be invalid.",
-	"InvalidAcceptTerms": "You must accept the <b>terms</b>."
+	"InvalidAcceptTerms": "You must accept the <b>terms</b>.",
+	"Import": "Import"
 }
