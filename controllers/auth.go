@@ -4,6 +4,7 @@ package controllers
 import (
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"git.sr.ht/~klahr/300sf/auth"
@@ -142,6 +143,32 @@ func Oauth2(c *gin.Context) {
 		return
 	}
 
+	if r.ClientId == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "missing client_id", "code": ErrorMissingApiKey})
+		c.Abort()
+		return
+	}
+	v := strings.Split(r.ClientSecret, ".")
+	if len(v) != 2 {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid client_secret", "code": ErrorInvalidApiKey})
+		c.Abort()
+		return
+	}
+
+	var apiKey models.ApiKey
+	hashedOrignalKey := utils.ComputeHmac256(v[1], config.AppConfig.HashingSecret)
+	if err := models.DB.Where("hash=?", hashedOrignalKey).Where("prefix=?", v[0]).Where("client_id=?", r.ClientId).First(&apiKey).Error; err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid api key", "code": ErrorInvalidApiKey})
+		c.Abort()
+		return
+	}
+
+	if apiKey.RevokedAt.Valid {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "api key has been revoked", "code": ErrorInvalidApiKey})
+		c.Abort()
+		return
+	}
+
 	// TODO: Support refresh token.
 	userUuid = userUuid
 
@@ -172,7 +199,7 @@ func Oauth2(c *gin.Context) {
 		return
 	}
 
-	accessToken, err := generateToken(user.Uuid, []string{}, time.Now().Add(time.Minute*15).Unix())
+	accessToken, err := generateToken(user.Uuid, r.ClientId, []string{}, time.Now().Add(time.Minute*15).Unix())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    ErrorUnknown,
@@ -180,7 +207,7 @@ func Oauth2(c *gin.Context) {
 		})
 		return
 	}
-	refreshToken, err := generateToken(user.Uuid, []string{}, time.Now().Add(time.Hour*7*24).Unix())
+	refreshToken, err := generateToken(user.Uuid, r.ClientId, []string{}, time.Now().Add(time.Hour*7*24).Unix())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    ErrorUnknown,
@@ -199,12 +226,13 @@ func Oauth2(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func generateToken(userUuid string, scopes []string, expiry int64) (string, error) {
+func generateToken(userUuid, clientId string, scopes []string, expiry int64) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 	claims["sub"] = userUuid
 	claims["exp"] = expiry
 	claims["scope"] = scopes
+	claims["aud"] = clientId
 	secretKey := []byte("YOUR_SECRET_KEY")
 	t, err := token.SignedString(secretKey)
 	if err != nil {

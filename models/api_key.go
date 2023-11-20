@@ -7,6 +7,7 @@ type ApiKey struct {
 	Model
 	Name      string    `json:"name"`
 	Prefix    string    `json:"prefix"`
+	ClientId  string    `json:"client_id"`
 	Hash      string    `json:"-"`
 	Scopes    int64     `json:"scopes"`
 	SoftLimit int64     `json:"soft_limit"`
@@ -18,6 +19,7 @@ type ApiKey struct {
 type ApiKeyClean struct {
 	Name      string    `json:"name"`
 	Prefix    string    `json:"prefix"`
+	ClientId  string    `json:"client_id"`
 	Hash      string    `json:"-"`
 	Scopes    int64     `json:"scopes"`
 	SoftLimit int64     `json:"soft_limit"`

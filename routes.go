@@ -10,7 +10,6 @@ import (
 	"github.com/golang-jwt/jwt"
 
 	"git.sr.ht/~klahr/300sf/auth"
-	"git.sr.ht/~klahr/300sf/config"
 	"git.sr.ht/~klahr/300sf/controllers"
 	"git.sr.ht/~klahr/300sf/models"
 	"git.sr.ht/~klahr/300sf/utils"
@@ -49,25 +48,26 @@ import (
 	}
 }*/
 
+func parseToken(accessToken string) *jwt.Token {
+	v := strings.Split(accessToken, " ")
+	if len(v) != 2 || v[0] != "Bearer" {
+		return nil
+	}
+	var token *jwt.Token
+	if token, _ = controllers.ValidateToken(v[1]); token == nil {
+		return nil
+	}
+	return token
+}
+
 func requirePermission(c *gin.Context, requiredPermission int64) {
 	xAccessToken := c.Request.Header.Get("Authorization")
-	v := strings.Split(xAccessToken, " ")
 
 	xAppLanguage := c.Request.Header.Get("X-App-Language")
 	c.Set("app_language", xAppLanguage)
 
 	if requiredPermission != auth.AuthPermissionNone {
-		if len(v) != 2 || v[0] != "Bearer" {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid Authorization header", "code": controllers.ErrorInvalidApiKey})
-			c.Abort()
-			return
-		}
-		var token *jwt.Token
-		if token, _ = controllers.ValidateToken(v[1]); token == nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "logged out", "code": controllers.ErrorLoggedOut})
-			c.Abort()
-			return
-		}
+		token := parseToken(xAccessToken)
 
 		claims := token.Claims.(jwt.MapClaims)
 		c.Set("uuid", claims["sub"])
@@ -100,22 +100,12 @@ func adminMiddleware(c *gin.Context) {
 }
 
 func apiKeyMiddleware(c *gin.Context) {
-	xApiKey := c.Request.Header.Get("X-Api-Key")
-	if xApiKey == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "missing api key", "code": controllers.ErrorMissingApiKey})
-		c.Abort()
-		return
-	}
-	v := strings.Split(xApiKey, ".")
-	if len(v) != 2 {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid api key", "code": controllers.ErrorInvalidApiKey})
-		c.Abort()
-		return
-	}
+	token := parseToken(c.Request.Header.Get("Authorization"))
+
+	claims := token.Claims.(jwt.MapClaims)
 
 	var apiKey models.ApiKey
-	hashedOrignalKey := utils.ComputeHmac256(v[1], config.AppConfig.HashingSecret)
-	if err := models.DB.Where("hash=?", hashedOrignalKey).Where("prefix=?", v[0]).First(&apiKey).Error; err != nil {
+	if err := models.DB.Where("client_id=?", claims["aud"]).First(&apiKey).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid api key", "code": controllers.ErrorInvalidApiKey})
 		c.Abort()
 		return
@@ -127,7 +117,7 @@ func apiKeyMiddleware(c *gin.Context) {
 		return
 	}
 
-	callCounter, _ := models.Cache.Get(v[0]).Result()
+	callCounter, _ := models.Cache.Get(apiKey.Uuid).Result()
 	iCallCounter := utils.Str2Int(callCounter)
 	if iCallCounter >= apiKey.HardLimit {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "too many calls on api key", "code": controllers.ErrorTooManyApiCalls})
@@ -135,7 +125,7 @@ func apiKeyMiddleware(c *gin.Context) {
 		return
 	}
 
-	models.Cache.Set(v[0], iCallCounter+1, time.Hour*24)
+	models.Cache.Set(apiKey.Uuid, iCallCounter+1, time.Hour*24)
 
 	c.Next()
 }
@@ -164,7 +154,7 @@ func SetupRoutes(r *gin.Engine) {
 	// Users
 	r.POST("/v1/users", noneMiddleware, controllers.Users)
 	r.GET("/v1/users/list", adminMiddleware, controllers.UsersGetUsers)
-	r.GET("/v1/users/me", basicMiddleware, controllers.UsersMe)
+	r.GET("/v1/users/me", apiKeyMiddleware, basicMiddleware, controllers.UsersMe)
 	r.GET("/v1/users/:uuid", adminMiddleware, controllers.UsersGetUser)
 	r.GET("/v1/users/whoami", apiKeyMiddleware, basicMiddleware, controllers.UsersWhoAmI)
 	r.POST("/v1/users/migrate", apiKeyMiddleware, basicMiddleware, controllers.UsersMigrate)
@@ -184,20 +174,20 @@ func SetupRoutes(r *gin.Engine) {
 	r.POST("/v1/lists/:uuid/archive", apiKeyMiddleware, basicMiddleware, controllers.ListsArchive)
 	r.POST("/v1/lists/:uuid/rename", apiKeyMiddleware, basicMiddleware, controllers.ListsRename)
 	r.POST("/v1/lists/:uuid/timespan", apiKeyMiddleware, basicMiddleware, controllers.ListsTimespan)
-	r.GET("/v1/lists/:uuid", apiKeyMiddleware, controllers.ListsDetails)
+	r.GET("/v1/lists/:uuid", apiKeyMiddleware, basicMiddleware, controllers.ListsDetails)
 	r.GET("/v1/lists/:uuid/reports", apiKeyMiddleware, basicMiddleware, controllers.ListsReports)
 	r.GET("/v1/lists/species/:species_uuid", apiKeyMiddleware, basicMiddleware, controllers.ListsForSpecies)
 	r.POST("/v1/lists/compare", noneMiddleware, controllers.ListsCompare)
 
 	// List templates
-	r.GET("/v1/list_templates/list", apiKeyMiddleware, noneMiddleware, controllers.ListTemplatesList)
+	r.GET("/v1/list_templates/list", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesList)
 	r.POST("/v1/list_templates", apiKeyMiddleware, basicMiddleware, controllers.ListTemplates)
 	r.POST("/v1/list_templates/:uuid/archive", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesArchive)
 	r.POST("/v1/list_templates/:uuid/add_species", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesAddSpecies)
 	r.POST("/v1/list_templates/:uuid/remove_species", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesRemoveSpecies)
 	r.POST("/v1/list_templates/:uuid/name", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesName)
 	r.POST("/v1/list_templates/:uuid/description", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesDescription)
-	r.GET("/v1/list_templates/:uuid", apiKeyMiddleware, noneMiddleware, controllers.ListTemplatesDetails)
+	r.GET("/v1/list_templates/:uuid", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesDetails)
 
 	// Tags
 	r.GET("/v1/tags/list", apiKeyMiddleware, basicMiddleware, controllers.TagsList)
@@ -227,21 +217,21 @@ func SetupRoutes(r *gin.Engine) {
 	r.PUT("/v1/reports/basis", apiKeyMiddleware, basicMiddleware, controllers.ReportsBasis)
 
 	// Activities
-	r.GET("/v1/activities/list", apiKeyMiddleware, controllers.NamedRecordList[models.Activity])
+	r.GET("/v1/activities/list", apiKeyMiddleware, basicMiddleware, controllers.NamedRecordList[models.Activity])
 
 	// Methods
-	r.GET("/v1/methods/list", apiKeyMiddleware, controllers.NamedRecordList[models.Method])
+	r.GET("/v1/methods/list", apiKeyMiddleware, basicMiddleware, controllers.NamedRecordList[models.Method])
 
 	// Genders
-	r.GET("/v1/genders/:uuid", apiKeyMiddleware, controllers.NamedRecordDetails[models.Gender])
-	r.GET("/v1/genders/list", apiKeyMiddleware, controllers.NamedRecordList[models.Gender])
+	r.GET("/v1/genders/:uuid", apiKeyMiddleware, basicMiddleware, controllers.NamedRecordDetails[models.Gender])
+	r.GET("/v1/genders/list", apiKeyMiddleware, basicMiddleware, controllers.NamedRecordList[models.Gender])
 
 	// Orders
-	r.GET("/v1/orders/list", apiKeyMiddleware, controllers.NamedRecordList[models.Order])
-	r.GET("/v1/orders/:uuid", apiKeyMiddleware, noneMiddleware, controllers.OrderDetails)
+	r.GET("/v1/orders/list", apiKeyMiddleware, basicMiddleware, controllers.NamedRecordList[models.Order])
+	r.GET("/v1/orders/:uuid", apiKeyMiddleware, basicMiddleware, controllers.OrderDetails)
 
 	// Ages
-	r.GET("/v1/ages/list", apiKeyMiddleware, controllers.NamedRecordList[models.Age])
+	r.GET("/v1/ages/list", apiKeyMiddleware, basicMiddleware, controllers.NamedRecordList[models.Age])
 
 	// Zones
 	r.GET("/v1/zones/list", adminMiddleware, controllers.ZonesList)

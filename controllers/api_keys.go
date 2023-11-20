@@ -46,6 +46,7 @@ func ApiKeys(c *gin.Context) {
 			Uuid:      utils.GenerateShortUuid(),
 		},
 		Name:      r.Name,
+		ClientId:  utils.GenerateUuidWithFixedLength(32),
 		Prefix:    prefix,
 		Hash:      hashedOriginalKey,
 		UserId:    user.Id,

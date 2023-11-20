@@ -1020,3 +1020,9 @@ ADD COLUMN `color` VARCHAR(16) NOT NULL AFTER `on_hold`,
 ADD COLUMN `icon` VARCHAR(32) NOT NULL AFTER `color`;
 
 -->
+
+ALTER TABLE `300sf`.`api_keys` 
+ADD COLUMN `client_id` VARCHAR(32) NOT NULL AFTER `name`;
+ALTER TABLE `300sf`.`api_keys` 
+ADD UNIQUE INDEX `client_id_UNIQUE` (`client_id` ASC) VISIBLE;
+;
