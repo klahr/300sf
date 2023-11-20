@@ -12,6 +12,7 @@ import (
 	"git.sr.ht/~klahr/300sf/table"
 	"git.sr.ht/~klahr/300sf/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 )
 
 func Auth(c *gin.Context) {
@@ -84,4 +85,142 @@ func Auth(c *gin.Context) {
 	c.JSON(http.StatusOK, SingleItemDataResponse{
 		Data: authenticationResponse,
 	})
+}
+
+func ValidateToken(token string) (*jwt.Token, error) {
+	t, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		secretKey := []byte("YOUR_SECRET_KEY")
+		return secretKey, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if _, ok := t.Claims.(jwt.Claims); !ok || !t.Valid {
+		return nil, nil
+	}
+	return t, nil
+}
+
+func Oauth2(c *gin.Context) {
+	type request struct {
+		GrantType    string `json:"grant_type"`
+		ClientId     string `json:"client_id"`
+		ClientSecret string `json:"client_secret"`
+		Email        string `json:"email"`
+		Password     string `json:"password"`
+		RefreshToken string `json:"refresh_token"`
+	}
+
+	var r request
+	if err := c.ShouldBindJSON(&r); err != nil {
+		c.JSON(http.StatusBadRequest, GeneralErrorResponse{
+			Message: err.Error(),
+			Code:    ErrorParse,
+		})
+		return
+	}
+
+	var userUuid string
+	if r.GrantType == "refresh_token" {
+		if token, err := ValidateToken(r.RefreshToken); token == nil {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"code":    ErrorAuthInvalid,
+				"message": err.Error(),
+			})
+			t, _ := jwt.Parse(r.RefreshToken, func(token *jwt.Token) (interface{}, error) {
+				secretKey := []byte("YOUR_SECRET_KEY")
+				return secretKey, nil
+			})
+			claims := t.Claims.(jwt.MapClaims)
+			userUuid = claims["sub"].(string)
+		}
+	} else if r.GrantType != "password" {
+		c.JSON(http.StatusBadRequest, GeneralErrorResponse{
+			Message: "invalid grant_type",
+			Code:    ErrorInvalidRequest,
+		})
+		return
+	}
+
+	// TODO: Support refresh token.
+	userUuid = userUuid
+
+	var user models.User
+	if err := models.DB.Where("email=?", r.Email).Preload("Language").First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorAuthInvalid,
+			"message": "invalid email or password",
+		})
+		return
+	}
+
+	if user.DeactivatedAt.Valid {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorAccountDeactivated,
+			"message": "account is deactivated",
+		})
+		return
+	}
+
+	// TODO: Support refresh token.
+	p := utils.Password{}
+	if !p.IsMatching(r.Password, user.Password, user.PasswordSalt) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorAuthInvalid,
+			"message": "invalid email or password",
+		})
+		return
+	}
+
+	accessToken, err := generateToken(user.Uuid, []string{}, time.Now().Add(time.Minute*15).Unix())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    ErrorUnknown,
+			"message": err.Error(),
+		})
+		return
+	}
+	refreshToken, err := generateToken(user.Uuid, []string{}, time.Now().Add(time.Hour*7*24).Unix())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    ErrorUnknown,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	response := struct {
+		AccessToken  string `json:"access_token"`
+		RefreshToken string `json:"refresh_token"`
+	}{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}
+	c.JSON(http.StatusOK, response)
+}
+
+func generateToken(userUuid string, scopes []string, expiry int64) (string, error) {
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = userUuid
+	claims["exp"] = expiry
+	claims["scope"] = scopes
+	secretKey := []byte("YOUR_SECRET_KEY")
+	t, err := token.SignedString(secretKey)
+	if err != nil {
+		return "", err
+	}
+	return t, nil
+}
+
+func Oath2Test(c *gin.Context) {
+	/*	accessToken := c.Request.Header.Get("Authorization")
+		if ok, err := validateToken(accessToken); !ok {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    ErrorUnknown,
+				"message": err.Error(),
+			})
+			return
+		}*/
+	c.JSON(http.StatusOK, nil)
 }

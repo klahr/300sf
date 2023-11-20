@@ -3,11 +3,11 @@ package main
 
 import (
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 
 	"git.sr.ht/~klahr/300sf/auth"
 	"git.sr.ht/~klahr/300sf/config"
@@ -16,7 +16,7 @@ import (
 	"git.sr.ht/~klahr/300sf/utils"
 )
 
-func requirePermission(c *gin.Context, requiredPermission int64) {
+/*func requirePermission(c *gin.Context, requiredPermission int64) {
 	// TODO: Cache this value and also use in ws.
 	publicKey, _ := os.ReadFile(config.AppConfig.PublicKeyFilename)
 
@@ -47,6 +47,44 @@ func requirePermission(c *gin.Context, requiredPermission int64) {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "missing permission", "code": controllers.ErrorMissingPermission})
 		c.Abort()
 	}
+}*/
+
+func requirePermission(c *gin.Context, requiredPermission int64) {
+	xAccessToken := c.Request.Header.Get("Authorization")
+	v := strings.Split(xAccessToken, " ")
+
+	xAppLanguage := c.Request.Header.Get("X-App-Language")
+	c.Set("app_language", xAppLanguage)
+
+	if requiredPermission != auth.AuthPermissionNone {
+		if len(v) != 2 || v[0] != "Bearer" {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid Authorization header", "code": controllers.ErrorInvalidApiKey})
+			c.Abort()
+			return
+		}
+		var token *jwt.Token
+		if token, _ = controllers.ValidateToken(v[1]); token == nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "logged out", "code": controllers.ErrorLoggedOut})
+			c.Abort()
+			return
+		}
+
+		claims := token.Claims.(jwt.MapClaims)
+		c.Set("uuid", claims["sub"])
+		c.Next()
+	} else {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "missing permission", "code": controllers.ErrorMissingPermission})
+		c.Abort()
+	}
+
+	/*if accessToken.Permissions&requiredPermission == requiredPermission {
+		c.Set("uuid", accessToken.Uuid)
+		c.Set("permissions", accessToken.Permissions)
+		c.Next()
+	} else {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "missing permission", "code": controllers.ErrorMissingPermission})
+		c.Abort()
+	}*/
 }
 
 func noneMiddleware(c *gin.Context) {
@@ -120,6 +158,8 @@ func Health(c *gin.Context) {
 func SetupRoutes(r *gin.Engine) {
 	// Authenticate
 	r.PUT("/v1/auth", controllers.Auth)
+	r.POST("/v1/oauth2", controllers.Oauth2)
+	r.GET("/v1/oauth2test", controllers.Oath2Test)
 
 	// Users
 	r.POST("/v1/users", noneMiddleware, controllers.Users)
