@@ -135,7 +135,60 @@ func Oauth2(c *gin.Context) {
 			claims := t.Claims.(jwt.MapClaims)
 			userUuid = claims["sub"].(string)
 		}
-	} else if r.GrantType != "password" {
+	} else if r.GrantType == "password" {
+		if r.ClientId == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "missing client_id", "code": ErrorMissingApiKey})
+			c.Abort()
+			return
+		}
+		v := strings.Split(r.ClientSecret, ".")
+		if len(v) != 2 {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid client_secret", "code": ErrorInvalidApiKey})
+			c.Abort()
+			return
+		}
+
+		var apiKey models.ApiKey
+		hashedOrignalKey := utils.ComputeHmac256(v[1], config.AppConfig.HashingSecret)
+		if err := models.DB.Where("hash=?", hashedOrignalKey).Where("prefix=?", v[0]).Where("client_id=?", r.ClientId).First(&apiKey).Error; err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid api key", "code": ErrorInvalidApiKey})
+			c.Abort()
+			return
+		}
+
+		if apiKey.RevokedAt.Valid {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "api key has been revoked", "code": ErrorInvalidApiKey})
+			c.Abort()
+			return
+		}
+
+		var user models.User
+		if err := models.DB.Where("email=?", r.Email).Preload("Language").First(&user).Error; err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    ErrorAuthInvalid,
+				"message": "invalid email or password",
+			})
+			return
+		}
+
+		if user.DeactivatedAt.Valid {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    ErrorAccountDeactivated,
+				"message": "account is deactivated",
+			})
+			return
+		}
+
+		p := utils.Password{}
+		if !p.IsMatching(r.Password, user.Password, user.PasswordSalt) {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    ErrorAuthInvalid,
+				"message": "invalid email or password",
+			})
+			return
+		}
+		userUuid = user.Uuid
+	} else {
 		c.JSON(http.StatusBadRequest, GeneralErrorResponse{
 			Message: "invalid grant_type",
 			Code:    ErrorInvalidRequest,
@@ -143,63 +196,7 @@ func Oauth2(c *gin.Context) {
 		return
 	}
 
-	if r.ClientId == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "missing client_id", "code": ErrorMissingApiKey})
-		c.Abort()
-		return
-	}
-	v := strings.Split(r.ClientSecret, ".")
-	if len(v) != 2 {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid client_secret", "code": ErrorInvalidApiKey})
-		c.Abort()
-		return
-	}
-
-	var apiKey models.ApiKey
-	hashedOrignalKey := utils.ComputeHmac256(v[1], config.AppConfig.HashingSecret)
-	if err := models.DB.Where("hash=?", hashedOrignalKey).Where("prefix=?", v[0]).Where("client_id=?", r.ClientId).First(&apiKey).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid api key", "code": ErrorInvalidApiKey})
-		c.Abort()
-		return
-	}
-
-	if apiKey.RevokedAt.Valid {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "api key has been revoked", "code": ErrorInvalidApiKey})
-		c.Abort()
-		return
-	}
-
-	// TODO: Support refresh token.
-	userUuid = userUuid
-
-	var user models.User
-	if err := models.DB.Where("email=?", r.Email).Preload("Language").First(&user).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    ErrorAuthInvalid,
-			"message": "invalid email or password",
-		})
-		return
-	}
-
-	if user.DeactivatedAt.Valid {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    ErrorAccountDeactivated,
-			"message": "account is deactivated",
-		})
-		return
-	}
-
-	// TODO: Support refresh token.
-	p := utils.Password{}
-	if !p.IsMatching(r.Password, user.Password, user.PasswordSalt) {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    ErrorAuthInvalid,
-			"message": "invalid email or password",
-		})
-		return
-	}
-
-	accessToken, err := generateToken(user.Uuid, r.ClientId, []string{}, time.Now().Add(time.Minute*15).Unix())
+	accessToken, err := generateToken(userUuid, r.ClientId, []string{}, time.Now().Add(time.Minute*15).Unix())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    ErrorUnknown,
@@ -207,7 +204,7 @@ func Oauth2(c *gin.Context) {
 		})
 		return
 	}
-	refreshToken, err := generateToken(user.Uuid, r.ClientId, []string{}, time.Now().Add(time.Hour*7*24).Unix())
+	refreshToken, err := generateToken(userUuid, r.ClientId, []string{}, time.Now().Add(time.Hour*7*24).Unix())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    ErrorUnknown,
