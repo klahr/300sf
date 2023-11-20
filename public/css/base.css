@@ -318,6 +318,8 @@ div.progress-box {
 	position: relative;
 	transition: transform 100ms;
 	vertical-align: top;
+	flex-grow: 1;
+	max-width: 272px;
 }
 
 div.progress-box:hover {

@@ -52,6 +52,8 @@ class HomePage extends Page {
 
 		this.mProgressBoxes = new Ui.Div();
 		this.mProgressBoxes.style.position = "relative";
+		this.mProgressBoxes.style.display = "flex";
+		this.mProgressBoxes.style.flexWrap = "wrap";
 		this.attach(this.mProgressBoxes);
 
 		const lastReportsLbl = document.createElement("h2");
