@@ -143,7 +143,7 @@ func Oauth2(c *gin.Context) {
 		return
 	}
 
-	accessToken, err := generateToken(userUuid, r.ClientId, scopes, time.Now().Add(time.Minute*15).Unix())
+	accessToken, err := generateToken(userUuid, r.ClientId, scopes, time.Now().Add(time.Second*time.Duration(config.AppConfig.AccessTokenLifetime)).Unix())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    ErrorUnknown,
@@ -151,7 +151,7 @@ func Oauth2(c *gin.Context) {
 		})
 		return
 	}
-	refreshToken, err := generateToken(userUuid, r.ClientId, scopes, time.Now().Add(time.Hour*7*24).Unix())
+	refreshToken, err := generateToken(userUuid, r.ClientId, scopes, time.Now().Add(time.Second*time.Duration(config.AppConfig.RefreshTokenLifetime)).Unix())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    ErrorUnknown,

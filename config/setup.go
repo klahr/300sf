@@ -11,6 +11,7 @@ type App struct {
 	DataSource             string   `yaml:"data-source"`
 	Address                string   `yaml:"address"`
 	AccessTokenLifetime    int64    `yaml:"access-token-lifetime"`
+	RefreshTokenLifetime   int64    `yaml:"refresh_token_lifetime"`
 	PrivateKeyFilename     string   `yaml:"private-key-filename"`
 	PublicKeyFilename      string   `yaml:"public-key-filename"`
 	HashingSecret          string   `yaml:"hashing-secret"`
