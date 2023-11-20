@@ -2,6 +2,8 @@
 package models
 
 import (
+	"strings"
+
 	"gopkg.in/guregu/null.v4/zero"
 )
 
@@ -23,4 +25,15 @@ type User struct {
 	Language               Language    `json:"language"`
 	Portrait               zero.String `json:"portrait"`
 	DeleteAccountRequestId zero.Int    `json:"-"`
+	Scopes                 string      `json:"scopes"`
+}
+
+func (u *User) HasScope(scope string) bool {
+	s := strings.Split(u.Scopes, " ")
+	for i := range s {
+		if s[i] == scope {
+			return true
+		}
+	}
+	return false
 }

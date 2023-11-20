@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 package models
 
-import "gopkg.in/guregu/null.v4/zero"
+import (
+	"strings"
+
+	"gopkg.in/guregu/null.v4/zero"
+)
 
 type ApiKey struct {
 	Model
@@ -9,7 +13,7 @@ type ApiKey struct {
 	Prefix    string    `json:"prefix"`
 	ClientId  string    `json:"client_id"`
 	Hash      string    `json:"-"`
-	Scopes    int64     `json:"scopes"`
+	Scopes    string    `json:"scopes"`
 	SoftLimit int64     `json:"soft_limit"`
 	HardLimit int64     `json:"hard_limit"`
 	UserId    int64     `json:"-"`
@@ -21,8 +25,18 @@ type ApiKeyClean struct {
 	Prefix    string    `json:"prefix"`
 	ClientId  string    `json:"client_id"`
 	Hash      string    `json:"-"`
-	Scopes    int64     `json:"scopes"`
+	Scopes    string    `json:"scopes"`
 	SoftLimit int64     `json:"soft_limit"`
 	HardLimit int64     `json:"hard_limit"`
 	RevokedAt zero.Time `json:"revoked_at"`
+}
+
+func (a *ApiKey) HasScope(scope string) bool {
+	s := strings.Split(a.Scopes, " ")
+	for i := range s {
+		if s[i] == scope {
+			return true
+		}
+	}
+	return false
 }

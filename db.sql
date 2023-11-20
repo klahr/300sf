@@ -1026,3 +1026,12 @@ ADD COLUMN `client_id` VARCHAR(32) NOT NULL AFTER `name`;
 ALTER TABLE `300sf`.`api_keys` 
 ADD UNIQUE INDEX `client_id_UNIQUE` (`client_id` ASC) VISIBLE;
 ;
+
+ALTER TABLE `300sf`.`users` 
+ADD COLUMN `scopes` TEXT NOT NULL AFTER `delete_account_request_id`;
+
+ALTER TABLE `300sf`.`api_keys` 
+DROP COLUMN `scopes`;
+
+ALTER TABLE `300sf`.`api_keys` 
+ADD COLUMN `scopes` TEXT NOT NULL AFTER `revoked_at`;

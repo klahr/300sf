@@ -2,7 +2,7 @@
 package auth
 
 const (
-	AuthPermissionNone  = 0
-	AuthPermissionBasic = 1
-	AuthPermissionAdmin = 2
+	AuthScopeNone  = ""
+	AuthScopeUser  = "user"
+	AuthScopeAdmin = "admin"
 )

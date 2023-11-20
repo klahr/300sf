@@ -14,11 +14,11 @@ const (
 	ErrorMissingFile = 2003
 	ErrorUnknown     = 2004
 
-	ErrorLoggedOut         = 3001
-	ErrorMissingApiKey     = 3002
-	ErrorInvalidApiKey     = 3003
-	ErrorTooManyApiCalls   = 3004
-	ErrorMissingPermission = 3005
+	ErrorLoggedOut       = 3001
+	ErrorMissingApiKey   = 3002
+	ErrorInvalidApiKey   = 3003
+	ErrorTooManyApiCalls = 3004
+	ErrorMissingScope    = 3005
 
 	ErrorSignUpInvalidDisplayName = 4001
 	ErrorSignUpInvalidEmail       = 4002

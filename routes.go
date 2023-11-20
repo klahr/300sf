@@ -60,43 +60,44 @@ func parseToken(accessToken string) *jwt.Token {
 	return token
 }
 
-func requirePermission(c *gin.Context, requiredPermission int64) {
+func requireScope(c *gin.Context, requiredScope string) {
 	xAccessToken := c.Request.Header.Get("Authorization")
 
 	xAppLanguage := c.Request.Header.Get("X-App-Language")
 	c.Set("app_language", xAppLanguage)
 
-	if requiredPermission != auth.AuthPermissionNone {
-		token := parseToken(xAccessToken)
+	token := parseToken(xAccessToken)
 
-		claims := token.Claims.(jwt.MapClaims)
-		c.Set("uuid", claims["sub"])
-		c.Next()
-	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "missing permission", "code": controllers.ErrorMissingPermission})
+	claims := token.Claims.(jwt.MapClaims)
+	c.Set("uuid", claims["sub"])
+
+	ok := false
+	scopes := strings.Split(claims["scopes"].(string), " ")
+	for _, s := range scopes {
+		if s == requiredScope {
+			ok = true
+			break
+		}
+	}
+
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "missing scope", "code": controllers.ErrorMissingScope})
 		c.Abort()
 	}
 
-	/*if accessToken.Permissions&requiredPermission == requiredPermission {
-		c.Set("uuid", accessToken.Uuid)
-		c.Set("permissions", accessToken.Permissions)
-		c.Next()
-	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "missing permission", "code": controllers.ErrorMissingPermission})
-		c.Abort()
-	}*/
+	c.Next()
 }
 
 func noneMiddleware(c *gin.Context) {
-	requirePermission(c, auth.AuthPermissionNone)
+	requireScope(c, auth.AuthScopeNone)
 }
 
 func basicMiddleware(c *gin.Context) {
-	requirePermission(c, auth.AuthPermissionBasic)
+	requireScope(c, auth.AuthScopeUser)
 }
 
 func adminMiddleware(c *gin.Context) {
-	requirePermission(c, auth.AuthPermissionAdmin)
+	requireScope(c, auth.AuthScopeAdmin)
 }
 
 func apiKeyMiddleware(c *gin.Context) {

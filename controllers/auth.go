@@ -104,12 +104,13 @@ func ValidateToken(token string) (*jwt.Token, error) {
 
 func Oauth2(c *gin.Context) {
 	type request struct {
-		GrantType    string `json:"grant_type"`
-		ClientId     string `json:"client_id"`
-		ClientSecret string `json:"client_secret"`
-		Email        string `json:"email"`
-		Password     string `json:"password"`
-		RefreshToken string `json:"refresh_token"`
+		GrantType    string   `json:"grant_type"`
+		ClientId     string   `json:"client_id"`
+		ClientSecret string   `json:"client_secret"`
+		Email        string   `json:"email"`
+		Password     string   `json:"password"`
+		RefreshToken string   `json:"refresh_token"`
+		Scopes       []string `json:"scopes"`
 	}
 
 	var r request
@@ -122,6 +123,7 @@ func Oauth2(c *gin.Context) {
 	}
 
 	var userUuid string
+	var scopes string
 	if r.GrantType == "refresh_token" {
 		if token, err := ValidateToken(r.RefreshToken); token == nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
@@ -188,6 +190,26 @@ func Oauth2(c *gin.Context) {
 			return
 		}
 		userUuid = user.Uuid
+
+		apiKeyScopes := strings.Split(apiKey.Scopes, " ")
+		userScopes := strings.Split(user.Scopes, " ")
+		var first = true
+		for _, s := range r.Scopes {
+			for _, t := range userScopes {
+				if s == t {
+					for _, u := range apiKeyScopes {
+						if s == u {
+							if first {
+								first = false
+							} else {
+								scopes += " "
+							}
+							scopes += s
+						}
+					}
+				}
+			}
+		}
 	} else {
 		c.JSON(http.StatusBadRequest, GeneralErrorResponse{
 			Message: "invalid grant_type",
@@ -196,7 +218,7 @@ func Oauth2(c *gin.Context) {
 		return
 	}
 
-	accessToken, err := generateToken(userUuid, r.ClientId, []string{}, time.Now().Add(time.Minute*15).Unix())
+	accessToken, err := generateToken(userUuid, r.ClientId, scopes, time.Now().Add(time.Minute*15).Unix())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    ErrorUnknown,
@@ -204,7 +226,7 @@ func Oauth2(c *gin.Context) {
 		})
 		return
 	}
-	refreshToken, err := generateToken(userUuid, r.ClientId, []string{}, time.Now().Add(time.Hour*7*24).Unix())
+	refreshToken, err := generateToken(userUuid, r.ClientId, scopes, time.Now().Add(time.Hour*7*24).Unix())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    ErrorUnknown,
@@ -223,12 +245,12 @@ func Oauth2(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func generateToken(userUuid, clientId string, scopes []string, expiry int64) (string, error) {
+func generateToken(userUuid, clientId string, scopes string, expiry int64) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 	claims["sub"] = userUuid
 	claims["exp"] = expiry
-	claims["scope"] = scopes
+	claims["scp"] = scopes
 	claims["aud"] = clientId
 	secretKey := []byte(config.AppConfig.HashingSecret)
 	t, err := token.SignedString(secretKey)
