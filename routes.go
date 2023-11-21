@@ -78,6 +78,11 @@ func adminMiddleware(c *gin.Context) {
 
 func apiKeyMiddleware(c *gin.Context) {
 	token := parseToken(c.Request.Header.Get("Authorization"))
+	if token == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "unauthorized", "code": controllers.ErrorAuthInvalid})
+		c.Abort()
+		return
+	}
 
 	claims := token.Claims.(jwt.MapClaims)
 
