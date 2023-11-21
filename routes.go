@@ -34,16 +34,25 @@ func requireScope(c *gin.Context, requiredScope string) {
 	c.Set("app_language", xAppLanguage)
 
 	token := parseToken(xAccessToken)
+	if token == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "missing scope", "code": controllers.ErrorAuthInvalid})
+		c.Abort()
+		return
+	}
 
 	claims := token.Claims.(jwt.MapClaims)
 	c.Set("uuid", claims["sub"])
 
 	ok := false
-	scopes := strings.Split(claims["scopes"].(string), " ")
-	for _, s := range scopes {
-		if s == requiredScope {
-			ok = true
-			break
+	if requiredScope == "" {
+		ok = true
+	} else {
+		scopes := strings.Split(claims["scp"].(string), " ")
+		for _, s := range scopes {
+			if s == requiredScope {
+				ok = true
+				break
+			}
 		}
 	}
 
@@ -168,7 +177,7 @@ func SetupRoutes(r *gin.Engine) {
 	r.POST("/v1/api_keys/:prefix/revoke", basicMiddleware, controllers.ApiKeysRevoke)
 
 	// Species
-	r.GET("/v1/species/list", apiKeyMiddleware, controllers.SpeciesList)
+	r.GET("/v1/species/list", apiKeyMiddleware, basicMiddleware, controllers.SpeciesList)
 	r.GET("/v1/species/:uuid", apiKeyMiddleware, noneMiddleware, controllers.SpeciesDetails)
 	r.POST("/v1/species/:uuid/set_rarity", adminMiddleware, controllers.SpeciesSetRarity)
 

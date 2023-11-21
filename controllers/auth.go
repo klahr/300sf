@@ -48,19 +48,41 @@ func Auth(c *gin.Context) {
 	}
 
 	var userUuid string
+	var lang string
 	var scopes string
 	if r.GrantType == "refresh_token" {
-		if token, err := ValidateToken(r.RefreshToken); token == nil {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"code":    ErrorAuthInvalid,
-				"message": err.Error(),
-			})
+		if token, err := ValidateToken(r.RefreshToken); token != nil {
 			t, _ := jwt.Parse(r.RefreshToken, func(token *jwt.Token) (interface{}, error) {
 				secretKey := []byte(config.AppConfig.HashingSecret)
 				return secretKey, nil
 			})
 			claims := t.Claims.(jwt.MapClaims)
 			userUuid = claims["sub"].(string)
+			scopes = claims["scp"].(string)
+
+			var user models.User
+			if err := models.DB.Where("uuid=?", userUuid).Preload("Language").First(&user).Error; err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"code":    ErrorAuthInvalid,
+					"message": "invalid email or password",
+				})
+				return
+			}
+
+			if user.DeactivatedAt.Valid {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"code":    ErrorAccountDeactivated,
+					"message": "account is deactivated",
+				})
+				return
+			}
+
+			lang = user.Language.Code
+		} else {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"code":    ErrorAuthInvalid,
+				"message": err.Error(),
+			})
 		}
 	} else if r.GrantType == "password" {
 		if r.ClientId == "" {
@@ -115,6 +137,7 @@ func Auth(c *gin.Context) {
 			return
 		}
 		userUuid = user.Uuid
+		lang = user.Language.Code
 
 		apiKeyScopes := strings.Split(apiKey.Scopes, " ")
 		userScopes := strings.Split(user.Scopes, " ")
@@ -163,9 +186,17 @@ func Auth(c *gin.Context) {
 	response := struct {
 		AccessToken  string `json:"access_token"`
 		RefreshToken string `json:"refresh_token"`
+		TokenType    string `json:"token_type"`
+		ExpiresIn    int64  `json:"expires_in"`
+		Scope        string `json:"scope"`
+		Lang         string `json:"lang"`
 	}{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
+		TokenType:    "Bearer",
+		ExpiresIn:    config.AppConfig.AccessTokenLifetime,
+		Scope:        scopes,
+		Lang:         lang,
 	}
 	c.JSON(http.StatusOK, response)
 }
