@@ -76,8 +76,8 @@ class SignInBox extends Ui.MessageBox {
 			r.process(function(status: any, data: Responses.SingleItemDataResponse) {
 				const content = data.data as Responses.AuthenticationResponse;
 				const ks = new LocalStorage();
-				ks.set("x300sf_at", content.access_token, stayLoggedIn ? 0 : content.max_age);
-				ks.set("lang", content.lang, stayLoggedIn ? 0 : content.max_age);
+				ks.set("x300sf_at", content.access_token, stayLoggedIn ? 0 : content.expires_in);
+				ks.set("lang", content.lang, stayLoggedIn ? 0 : content.expires_in);
 				self.container.click();
 			}, function(status: any, data: Responses.GeneralErrorResponse, err: any) {
 				if (data.code === Responses.ErrorCode.ErrorAccountDeactivated) {
