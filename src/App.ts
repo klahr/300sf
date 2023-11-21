@@ -169,10 +169,10 @@ class App implements IAppListener {
 					refresh_token: ks.get("x300sf_rt")
 				}
 				const r = new HttpRequest("POST", "/v1/auth", d);
-				r.process(function (status: any, data: Responses.AuthenticationResponse) {
-					ks.set("x300sf_at", data.access_token, data.expires_in);
-					ks.set("x300sf_rt", data.refresh_token, 3600 * 7 * 60);
-					ks.set("lang", data.lang, data.expires_in);
+				r.process(function (status: any, token: Responses.AuthenticationResponse) {
+					ks.set("x300sf_at", token.access_token, token.expires_in);
+					ks.set("x300sf_rt", token.refresh_token, 3600 * 7 * 60);
+					ks.set("lang", token.lang, token.expires_in);
 					self.showPage(id, data);
 				}, function (status: any, data: Responses.GeneralErrorResponse, err: any) {
 					self.logOut(window.location.pathname);

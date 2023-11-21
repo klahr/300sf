@@ -53,7 +53,7 @@ class HttpRequest {
 						grant_type: "refresh_token",
 						refresh_token: ks.get("x300sf_rt")
 					}
-					const r = new HttpRequest("POST", "/v1/auth", d);
+					const r = new HttpRequest("POST", "/v1/autd", d);
 					r.process(function (status: any, data: Responses.AuthenticationResponse) {
 						ks.set("x300sf_at", data.access_token, data.expires_in);
 						ks.set("x300sf_rt", data.refresh_token, 3600 * 7 * 60);
@@ -62,7 +62,7 @@ class HttpRequest {
 						self.process(success, fail, complete);
 					}, function (status: any, data: Responses.GeneralErrorResponse, err: any) {
 						ks.clear();
-						window.open(window.location.pathname);
+						window.open("/", "_self");
 					});
 				} else {
 					const response = xhr.responseJSON as Responses.GeneralErrorResponse;
