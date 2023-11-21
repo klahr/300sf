@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"git.sr.ht/~klahr/300sf/auth"
 	"git.sr.ht/~klahr/300sf/config"
 	"git.sr.ht/~klahr/300sf/models"
 	"git.sr.ht/~klahr/300sf/table"
@@ -52,6 +53,7 @@ func ApiKeys(c *gin.Context) {
 		UserId:    user.Id,
 		SoftLimit: config.AppConfig.DefaultApiSoftLimit,
 		HardLimit: config.AppConfig.DefaultApiHardLimit,
+		Scopes:    auth.AuthScopeUser,
 	}
 
 	if err := models.DB.Create(&apiKey).Error; err != nil {

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"git.sr.ht/~klahr/300sf/auth"
 	"git.sr.ht/~klahr/300sf/config"
 	"git.sr.ht/~klahr/300sf/models"
 	"git.sr.ht/~klahr/300sf/table"
@@ -81,6 +82,7 @@ func Users(c *gin.Context) {
 		Notifications:   8,
 		AcceptedTermsAt: zero.TimeFrom(time.Now()),
 		Portrait:        zero.StringFrom(r.Portrait),
+		Scopes:          auth.AuthScopeUser,
 	}
 
 	var language models.Language
