@@ -1,6 +1,6 @@
 module git.sr.ht/~klahr/300sf
 
-go 1.21.4
+go 1.21
 
 require (
 	github.com/badoux/checkmail v1.2.1
