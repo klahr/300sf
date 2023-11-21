@@ -115,7 +115,7 @@ func Health(c *gin.Context) {
 
 func SetupRoutes(r *gin.Engine) {
 	// Authenticate
-	r.POST("/v1/oauth2", controllers.Oauth2)
+	r.POST("/v1/auth", controllers.Auth)
 
 	// Users
 	r.POST("/v1/users", noneMiddleware, controllers.Users)

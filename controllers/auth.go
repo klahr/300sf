@@ -27,7 +27,7 @@ func ValidateToken(token string) (*jwt.Token, error) {
 	return t, nil
 }
 
-func Oauth2(c *gin.Context) {
+func Auth(c *gin.Context) {
 	type request struct {
 		GrantType    string   `json:"grant_type"`
 		ClientId     string   `json:"client_id"`
