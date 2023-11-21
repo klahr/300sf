@@ -1,7 +1,6 @@
 /// <reference path="App.ts"/>
 /// <reference path="responses/Error.ts"/>
 /// <reference path="AppConfig.ts"/>
-/// <reference path="SignInBox.ts"/>
 
 declare let $: any;
 
@@ -58,6 +57,7 @@ class HttpRequest {
 						ks.set("x300sf_at", data.access_token, data.expires_in);
 						ks.set("x300sf_rt", data.refresh_token, 3600 * 7 * 60);
 						ks.set("lang", data.lang, data.expires_in);
+						ks.set("scope", data.scope, data.expires_in);
 						self.setHeader("Authorization", "Bearer " + data.access_token);
 						self.process(success, fail, complete);
 					}, function (status: any, data: Responses.GeneralErrorResponse, err: any) {
@@ -65,19 +65,6 @@ class HttpRequest {
 						window.open("/", "_self");
 					});
 				} else {
-					const response = xhr.responseJSON as Responses.GeneralErrorResponse;
-					if (response) {
-						switch (response.code) {
-							case Responses.ErrorCode.ErrorLoggedOut:
-								new SignInBox(App.translations.SessionExpired, App.translations.SessionExpiredDescription, null, "var(--success-color)", () => { }, () => { }, App.translations.SignIn, App.translations.Cancel);
-								return;
-							case Responses.ErrorCode.ErrorInvalidApiKey:
-								new Ui.MessageBox(App.translations.InvalidApiKey, App.translations.InvalidApiKeyDescription, null, "var(--error-color)", () => { });
-								return;
-							default:
-								break;
-						}
-					}
 					fail(xhr.status, xhr.responseJSON, errorThrown);
 				}
 			},

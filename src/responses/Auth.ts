@@ -5,5 +5,6 @@ namespace Responses {
 		refresh_token: string;
 		expires_in: number;
 		lang: string;
+		scope: string;
 	}
 }

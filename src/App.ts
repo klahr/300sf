@@ -147,7 +147,8 @@ class App implements IAppListener {
 
 	showPage(id: string, data: any): void {
 		if (id === "admin") {
-			if (!App.user || (App.user.permissions & 2) !== 2) {
+			const ls = new LocalStorage();
+			if (!App.user || !ls.get("scope")?.includes("admin")) {
 				id = "home";
 			}
 		}
@@ -173,6 +174,7 @@ class App implements IAppListener {
 					ks.set("x300sf_at", token.access_token, token.expires_in);
 					ks.set("x300sf_rt", token.refresh_token, 3600 * 7 * 60);
 					ks.set("lang", token.lang, token.expires_in);
+					ks.set("scope", token.scope, token.expires_in);
 					self.showPage(id, data);
 				}, function (status: any, data: Responses.GeneralErrorResponse, err: any) {
 					self.logOut(window.location.pathname);

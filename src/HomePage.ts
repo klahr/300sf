@@ -348,6 +348,7 @@ class HomePage extends Page {
 				ks.set("x300sf_at", data.access_token, stayLoggedIn ? 0 : data.expires_in);
 				ks.set("x300sf_rt", data.refresh_token, 3600 * 7 * 60);
 				ks.set("lang", data.lang, stayLoggedIn ? 0 : data.expires_in);
+				ks.set("scope", data.scope, data.expires_in);
 				const url = new URL(window.location.href);
 				const redirectParam = url.searchParams.get("redirect");
 				if (redirectParam) {
