@@ -116,6 +116,35 @@ router.get('/privacy-policy', function (req, res) {
 	});
 });
 
+router.post('/api/v1/auth', async (req, res) => {
+	const apiUrl = config.ApiEndpoint + req.originalUrl.substring(4);
+
+	req.body.client_id = config.ClientId;
+	req.body.client_secret = config.ClientSecret;
+
+	try {
+		const axiosConfig = {
+			method: req.method,
+			url: apiUrl,
+			headers: {
+				...req.headers,
+				'Content-Length': Buffer.byteLength(JSON.stringify(req.body))
+			},
+			data: req.body,
+		};
+
+		const response = await axios(axiosConfig);
+
+		res.status(response.status).json(response.data);
+	} catch (error) {
+		if (error.response) {
+			res.status(error.response.status).json(error.response.data ? error.response.data : {});
+		} else {
+			res.status(503).json({});
+		}
+	}
+});
+
 router.all('/api/*', async (req, res) => {
 	const apiUrl = config.ApiEndpoint + req.originalUrl.substring(4);
 

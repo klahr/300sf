@@ -336,13 +336,18 @@ class HomePage extends Page {
 			const authorization = 'Basic ' + btoa(self.mEmail.value + ':' + self.mPassword.value);
 			const stayLoggedIn = (staySignedIn.container as HTMLInputElement).checked;
 
-			const r = new HttpRequest("PUT", "/v1/auth");
-			r.setHeader("Authorization", authorization);
-			r.process(function (status: any, data: Responses.SingleItemDataResponse) {
-				const content = data.data as Responses.AuthenticationResponse;
+			const d = {
+				grant_type: "password",
+				email: self.mEmail.value,
+				password: self.mPassword.value,
+				scopes: ["user", "admin"]
+			}
+			const r = new HttpRequest("POST", "/v1/auth", d);
+			r.process(function (status: any, data: Responses.AuthenticationResponse) {
 				const ks = new LocalStorage();
-				ks.set("x300sf_at", content.access_token, stayLoggedIn ? 0 : content.max_age);
-				ks.set("lang", content.lang, stayLoggedIn ? 0 : content.max_age);
+				ks.set("x300sf_at", data.access_token, stayLoggedIn ? 0 : data.expires_in);
+				ks.set("x300sf_rt", data.refresh_token, 3600 * 7 * 60);
+				ks.set("lang", data.lang, stayLoggedIn ? 0 : data.expires_in);
 				const url = new URL(window.location.href);
 				const redirectParam = url.searchParams.get("redirect");
 				if (redirectParam) {

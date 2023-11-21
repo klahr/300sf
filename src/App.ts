@@ -162,7 +162,21 @@ class App implements IAppListener {
 		if (page) {
 			const p = page as Page;
 			if (p.requireSignIn() && !App.isLoggedIn()) {
-				this.logOut(window.location.pathname);
+				const self = this;
+				const ks = new LocalStorage();
+				const d = {
+					grant_type: "refresh_token",
+					refresh_token: ks.get("x300sf_rt")
+				}
+				const r = new HttpRequest("POST", "/v1/auth", d);
+				r.process(function (status: any, data: Responses.AuthenticationResponse) {
+					ks.set("x300sf_at", data.access_token, data.expires_in);
+					ks.set("x300sf_rt", data.refresh_token, 3600 * 7 * 60);
+					ks.set("lang", data.lang, data.expires_in);
+					self.showPage(id, data);
+				}, function (status: any, data: Responses.GeneralErrorResponse, err: any) {
+					self.logOut(window.location.pathname);
+				});
 			} else {
 				p.setVisible(true);
 				p.setData(data);

@@ -16,7 +16,7 @@ class HttpRequest {
 		const ks = new LocalStorage();
 		const accessToken = ks.get("x300sf_at");
 		if (accessToken != null && accessToken != "") {
-			this.setHeader("X-Access-Token", accessToken);
+			this.setHeader("Authorization", "Bearer " + accessToken);
 		}
 	}
 
