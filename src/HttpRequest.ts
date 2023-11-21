@@ -47,6 +47,23 @@ class HttpRequest {
 			error: function (xhr, _textStatus, errorThrown) {
 				if (xhr.status === 503 || xhr.status === 0) {
 					new Ui.MessageBox(App.translations.ConnectionError, App.translations.ConnectionErrorDescription, null, "var(--error-color)", () => void {});
+				} else if (xhr.status == 401) {
+					const ks = new LocalStorage();
+					const d = {
+						grant_type: "refresh_token",
+						refresh_token: ks.get("x300sf_rt")
+					}
+					const r = new HttpRequest("POST", "/v1/auth", d);
+					r.process(function (status: any, data: Responses.AuthenticationResponse) {
+						ks.set("x300sf_at", data.access_token, data.expires_in);
+						ks.set("x300sf_rt", data.refresh_token, 3600 * 7 * 60);
+						ks.set("lang", data.lang, data.expires_in);
+						self.setHeader("Authorization", "Bearer " + data.access_token);
+						self.process(success, fail, complete);
+					}, function (status: any, data: Responses.GeneralErrorResponse, err: any) {
+						ks.clear();
+						window.open(window.location.pathname);
+					});
 				} else {
 					const response = xhr.responseJSON as Responses.GeneralErrorResponse;
 					if (response) {

@@ -148,14 +148,12 @@ router.post('/api/v1/auth', async (req, res) => {
 router.all('/api/*', async (req, res) => {
 	const apiUrl = config.ApiEndpoint + req.originalUrl.substring(4);
 
-	req.headers['X-Api-Key'] = config.ApiKey;
-
 	try {
 		const axiosConfig = {
 			method: req.method,
 			url: apiUrl,
 			headers: req.headers,
-			data: req.body,
+			data: req.method == "GET" ? null : req.body,
 		};
 
 		const response = await axios(axiosConfig);

@@ -2,6 +2,7 @@
 /// <reference path="ui/Div.ts"/>
 /// <reference path="App.ts"/>
 /// <reference path="ImageViewer.ts"/>
+/// <reference path="models/Recording.ts"/>
 
 function openSpeciesPopUp(species: Models.Species) {
 	const content = new Ui.Div();
