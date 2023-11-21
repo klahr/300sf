@@ -14,6 +14,7 @@ class DeleteAccountPage extends Page {
 		logo.src = "/img/birds-256.png";
 		logo.alt = "TODO";
 		logo.width = 192;
+		logo.height = 192;
 		logo.style.borderRadius = "50%";
 		content.container.appendChild(logo);
 
