@@ -1,6 +1,6 @@
 <%- contentFor('body') %>
 
-<script type="text/javascript" src="/js/app.js"></script>
+<script defer type="text/javascript" src="/js/app.js"></script>
 <script type="text/javascript">
 	let promptEvent = null;
 
@@ -22,5 +22,5 @@
 		new App("<%- data.language %>", "<%- data.redirect %>", '<%- data.queryParameters %>' !== "" ? JSON.parse('<%- data.queryParameters %>') : {});
 	}
 
-	onAppStart();
+	document.querySelector('script[src="/js/app.js"]').onload = onAppStart;
 </script>
