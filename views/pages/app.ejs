@@ -2,6 +2,8 @@
 
 <script type="text/javascript" src="/js/app.js"></script>
 <script type="text/javascript">
+	let gInstallPrompt = null;
+
 	window.onpopstate = function (event) {
 		window.location.reload();
 	};
@@ -10,4 +12,20 @@
 		new App("<%- data.language %>", "<%- data.redirect %>", '<%- data.queryParameters %>' !== "" ? JSON.parse('<%- data.queryParameters %>') : {});
 	}
 	onAppStart();
+
+	function installApp() {
+		gInstallPrompt.prompt();
+		gInstallPrompt.userChoice.then((choiceResult) => {
+			if (choiceResult.outcome === 'accepted') {
+				console.log('User accepted the install prompt');
+			} else {
+				console.log('User dismissed the install prompt');
+			}
+		});
+	}
+
+	window.addEventListener('beforeinstallprompt', (event) => {
+		event.preventDefault();
+		gInstallPrompt = event;
+	});
 </script>

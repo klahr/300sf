@@ -2,6 +2,8 @@
 /// <reference path="App.ts"/>
 /// <reference path="ui/ConfirmBox.ts"/>
 
+declare let installApp: () => {};
+
 class MainMenu extends Ui.Widget {
 	private mContent = new Ui.Div();
 	private mMainMenu: HTMLDivElement;
@@ -161,6 +163,11 @@ class MainMenu extends Ui.Widget {
 
 		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>login</span> " + App.translations.SignIn, function () {
 			window.open("/", "_self");
+		});
+
+		this.addSection("App");
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>install_mobile</span> " + "Install", function () {
+			installApp();
 		});
 	}
 

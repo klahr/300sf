@@ -334,7 +334,6 @@ class HomePage extends Page {
 
 		signIn.innerHTML = App.translations.SignIn;
 		signIn.addEventListener("click", function () {
-			const authorization = 'Basic ' + btoa(self.mEmail.value + ':' + self.mPassword.value);
 			const stayLoggedIn = (staySignedIn.container as HTMLInputElement).checked;
 
 			const d = {
