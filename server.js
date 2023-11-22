@@ -2,6 +2,7 @@ const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
 const bodyParser = require('body-parser');
 const i18n = require('i18n');
+const compression = require('compression');
 const morgan = require('morgan');
 const app = express();
 const port = 3000;
@@ -16,6 +17,7 @@ i18n.configure({
 
 app.set('view engine', 'ejs');
 app.use(i18n.init);
+app.use(compression());
 app.use(bodyParser.json());
 app.use(expressLayouts);
 app.use(morgan('dev'));

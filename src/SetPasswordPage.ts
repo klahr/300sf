@@ -12,7 +12,8 @@ class SetPasswordPage extends Page {
 		const logo = document.createElement("img");
 		logo.src = "/img/birds-256.png";
 		logo.alt = "TODO";
-		logo.style.width = "192px";
+		logo.width = 192;
+		logo.height = 192;
 		logo.style.borderRadius = "50%";
 		content.container.appendChild(logo);
 
