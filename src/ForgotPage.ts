@@ -10,7 +10,7 @@ class ForgotPage extends Page {
 		content.style.textAlign = "center";
 		this.attach(content);
 		const logo = document.createElement("img");
-		logo.src = "/img/birds-256.png";
+		logo.src = "/img/birds-192.webp";
 		logo.alt = "TODO";
 		logo.width = 192;
 		logo.height = 192;

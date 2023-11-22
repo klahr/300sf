@@ -52,7 +52,7 @@ class HttpRequest {
 						grant_type: "refresh_token",
 						refresh_token: ks.get("x300sf_rt")
 					}
-					const r = new HttpRequest("POST", "/v1/autd", d);
+					const r = new HttpRequest("POST", "/v1/auth", d);
 					r.process(function (status: any, data: Responses.AuthenticationResponse) {
 						ks.set("x300sf_at", data.access_token, data.expires_in);
 						ks.set("x300sf_rt", data.refresh_token, 3600 * 7 * 60);

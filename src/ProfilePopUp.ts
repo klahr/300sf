@@ -20,16 +20,16 @@ class ProfilePopUp {
 				location.reload();
 			});
 		});
-		portraitSelect.addOption("", "1.png").style.backgroundImage = "url(/img/portraits/1.png)";
-		portraitSelect.addOption("", "2.png").style.backgroundImage = "url(/img/portraits/2.png)";
-		portraitSelect.addOption("", "3.png").style.backgroundImage = "url(/img/portraits/3.png)";
-		portraitSelect.addOption("", "4.png").style.backgroundImage = "url(/img/portraits/4.png)";
-		portraitSelect.addOption("", "5.png").style.backgroundImage = "url(/img/portraits/5.png)";
-		portraitSelect.addOption("", "6.png").style.backgroundImage = "url(/img/portraits/6.png)";
-		portraitSelect.addOption("", "7.png").style.backgroundImage = "url(/img/portraits/7.png)";
-		portraitSelect.addOption("", "8.png").style.backgroundImage = "url(/img/portraits/8.png)";
-		portraitSelect.addOption("", "9.png").style.backgroundImage = "url(/img/portraits/9.png)";
-		portraitSelect.addOption("", "10.png").style.backgroundImage = "url(/img/portraits/10.png)";
+		portraitSelect.addOption("", "1.webp").style.backgroundImage = "url(/img/portraits/1.webp)";
+		portraitSelect.addOption("", "2.webp").style.backgroundImage = "url(/img/portraits/2.webp)";
+		portraitSelect.addOption("", "3.webp").style.backgroundImage = "url(/img/portraits/3.webp)";
+		portraitSelect.addOption("", "4.webp").style.backgroundImage = "url(/img/portraits/4.webp)";
+		portraitSelect.addOption("", "5.webp").style.backgroundImage = "url(/img/portraits/5.webp)";
+		portraitSelect.addOption("", "6.webp").style.backgroundImage = "url(/img/portraits/6.webp)";
+		portraitSelect.addOption("", "7.webp").style.backgroundImage = "url(/img/portraits/7.webp)";
+		portraitSelect.addOption("", "8.webp").style.backgroundImage = "url(/img/portraits/8.webp)";
+		portraitSelect.addOption("", "9.webp").style.backgroundImage = "url(/img/portraits/9.webp)";
+		portraitSelect.addOption("", "10.webp").style.backgroundImage = "url(/img/portraits/10.webp)";
 		content.attach(portraitSelect);
 
 		const displayName = document.createElement("h1");
