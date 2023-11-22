@@ -99,7 +99,7 @@ func apiKeyMiddleware(c *gin.Context) {
 		return
 	}
 
-	callCounter, _ := models.Cache.Get(apiKey.Uuid).Result()
+	callCounter, _ := models.Cache.Get("/api-key/" + apiKey.Uuid).Result()
 	iCallCounter := utils.Str2Int(callCounter)
 	if iCallCounter >= apiKey.HardLimit {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "too many calls on api key", "code": controllers.ErrorTooManyApiCalls})
@@ -107,7 +107,7 @@ func apiKeyMiddleware(c *gin.Context) {
 		return
 	}
 
-	models.Cache.Set(apiKey.Uuid, iCallCounter+1, time.Hour*24)
+	models.Cache.Set("/api-key/"+apiKey.Uuid, iCallCounter+1, time.Hour*24)
 
 	c.Next()
 }
