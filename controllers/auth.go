@@ -83,6 +83,7 @@ func Auth(c *gin.Context) {
 				"code":    ErrorAuthInvalid,
 				"message": err.Error(),
 			})
+			return
 		}
 	} else if r.GrantType == "password" {
 		if r.ClientId == "" {
