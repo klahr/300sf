@@ -7,6 +7,7 @@ declare let $: any;
 class HttpRequest {
 	private mHeaders = new Map<string, string>();
 	private mAsync = true;
+	private static sNumRequests = 0;
 
 	constructor(private mMethod: string, private mUrl: string, private mData: any = {}) {
 		this.setHeader("Accept", "application/json");
@@ -34,6 +35,11 @@ class HttpRequest {
 			beforeSend: function (xhr) {
 				for (const [key, value] of self.mHeaders.entries()) {
 					xhr.setRequestHeader(key, value);
+				}
+				++HttpRequest.sNumRequests;
+				const loading = document.getElementById("loading");
+				if (loading) {
+					loading.style.display = "block";
 				}
 			},
 			type: self.mMethod,
@@ -77,6 +83,13 @@ class HttpRequest {
 			dataType: "json",
 			contentType: "application/json",
 			complete: function () {
+				--HttpRequest.sNumRequests;
+				if (HttpRequest.sNumRequests == 0) {
+					const loading = document.getElementById("loading");
+					if (loading) {
+						loading.style.display = "none";
+					}
+				}
 				complete();
 			},
 		});

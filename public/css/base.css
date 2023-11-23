@@ -308,6 +308,26 @@ div.tag>p {
 	text-shadow: 1px 1px #0000005e;
 }
 
+div.loading {
+	position: fixed;
+	width: 100%;
+	height: 4px;
+	z-index: 1;
+	animation: animate-loading 1s linear infinite;
+	background-image: linear-gradient(90deg, var(--primary-color),#030303, var(--primary-color));
+	background-size: 200% 100%;
+	display: none;
+}
+
+@keyframes animate-loading {
+	0% {
+		background-position: -100% 0%;
+	}
+	100% {
+		background-position: 100% 0%;
+	}
+}
+
 div.progress-box {
 	width: 128px;
 	height: 128px;
