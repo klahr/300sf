@@ -110,10 +110,10 @@ class MainMenu extends Ui.Widget {
 			self.mAppListener.showPage("contact", null);
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>support</span> " + App.translations.Contribute, function () {
+/*		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>support</span> " + App.translations.Contribute, function () {
 			self.mAppListener.showPage("contribute", null);
 		});
-
+*/
 		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>volunteer_activism</span> " + App.translations.Donation, function () {
 			self.mAppListener.showPage("donation", null);
 		});
@@ -139,11 +139,11 @@ class MainMenu extends Ui.Widget {
 	private createLoggedOut(): void {
 		const self = this;
 		this.addSection(App.translations.Support);
-
+/*
 		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>support</span> " + App.translations.Contribute, function () {
 			self.mAppListener.showPage("contribute", null);
 		});
-
+*/
 		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>volunteer_activism</span> " + App.translations.Donation, function () {
 			self.mAppListener.showPage("donation", null);
 		});
