@@ -40,7 +40,7 @@ class ForgotPage extends Page {
 			r.process(function (status: any, data: any) {
 				email.setDisabled(false);
 				email.value = "";
-				new Ui.MessageBox(App.translations.ResetPassword, App.translations.CheckEmailInstructions, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function () {
+				new Ui.MessageBox(App.translations.ResetPassword, App.translations.CheckEmailInstructions, "/img/messagebox-256.webp", "var(--success-color)", function () {
 					appListener.showPage("home", null);
 				});
 			});

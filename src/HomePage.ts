@@ -267,7 +267,7 @@ class HomePage extends Page {
 			if (data.email) {
 				if (this.mEmail) {
 					this.mEmail.value = data.email;
-					new Ui.MessageBox(App.translations.Welcome + " " + data.display_name, App.translations.ProceedToSignIn, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function () { });
+					new Ui.MessageBox(App.translations.Welcome + " " + data.display_name, App.translations.ProceedToSignIn, "/img/messagebox-256.webp", "var(--success-color)", function () { });
 				}
 			}
 		}
@@ -358,9 +358,9 @@ class HomePage extends Page {
 				}
 			}, function (status: any, data: Responses.GeneralErrorResponse, err: any) {
 				if (data.code === Responses.ErrorCode.ErrorAccountDeactivated) {
-					new Ui.MessageBox(App.translations.Error, App.translations.AccountDeactivated, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
+					new Ui.MessageBox(App.translations.Error, App.translations.AccountDeactivated, "/img/messagebox-256.webp", "var(--error-color)", function () { });
 				} else {
-					new Ui.MessageBox(App.translations.Error, App.translations.InvalidEmailOrPassword, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
+					new Ui.MessageBox(App.translations.Error, App.translations.InvalidEmailOrPassword, "/img/messagebox-256.webp", "var(--error-color)", function () { });
 				}
 			});
 		});

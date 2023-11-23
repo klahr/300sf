@@ -137,10 +137,10 @@ class AdminAnnouncementsPopUp {
 			}
 			const r = new HttpRequest("POST", "/v1/announcements", d);
 			r.process((status: AnalyserNode, data: any) => {
-				new Ui.MessageBox(App.translations.Success, "", "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function () { });
+				new Ui.MessageBox(App.translations.Success, "", "/img/messagebox-256.webp", "var(--success-color)", function () { });
 				self.refresh();
 			}, (status: any, data: Responses.GeneralErrorResponse, error: any) => {
-				new Ui.MessageBox(App.translations.Error, error, "", "var(--error-color)", function () { });
+				new Ui.MessageBox(App.translations.Error, error, "/img/messagebox-256.webp", "var(--error-color)", function () { });
 			}, () => {
 				self.mAddButton.disabled = false;
 				self.mAddButton.innerHTML = "Add announcement";

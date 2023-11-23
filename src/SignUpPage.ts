@@ -79,19 +79,19 @@ class SignUpPage extends Page {
 			}, function (status: any, data: Responses.GeneralErrorResponse, error: any) {
 				switch (data.code) {
 					case Responses.ErrorCode.ErrorSignUpInvalidDisplayName:
-						new Ui.MessageBox(App.translations.Error, App.translations.InvalidDisplayName, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
+						new Ui.MessageBox(App.translations.Error, App.translations.InvalidDisplayName, "/img/messagebox-256.webp", "var(--error-color)", function () { });
 						break;
 					case Responses.ErrorCode.ErrorSignUpInvalidEmail:
-						new Ui.MessageBox(App.translations.Error, App.translations.InvalidEmail, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
+						new Ui.MessageBox(App.translations.Error, App.translations.InvalidEmail, "/img/messagebox-256.webp", "var(--error-color)", function () { });
 						break;
 					case Responses.ErrorCode.ErrorSignUpInvalidPassword:
-						new Ui.MessageBox(App.translations.Error, App.translations.InvalidPassword, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
+						new Ui.MessageBox(App.translations.Error, App.translations.InvalidPassword, "/img/messagebox-256.webp", "var(--error-color)", function () { });
 						break;
 					case Responses.ErrorCode.ErrorSignUpTermsNotAccepted:
-						new Ui.MessageBox(App.translations.Error, App.translations.InvalidAcceptTerms, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
+						new Ui.MessageBox(App.translations.Error, App.translations.InvalidAcceptTerms, "/img/messagebox-256.webp", "var(--error-color)", function () { });
 						break;
 					default:
-						new Ui.MessageBox(App.translations.Error, App.translations.SomethingWentWrong, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--error-color)", function () { });
+						new Ui.MessageBox(App.translations.Error, App.translations.SomethingWentWrong, "/img/messagebox-256.webp", "var(--error-color)", function () { });
 						break;
 				}
 			});

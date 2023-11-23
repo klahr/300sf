@@ -40,7 +40,7 @@ class DeleteAccountPage extends Page {
 				password.value = ""
 				const ks = new LocalStorage();
 				ks.clear();
-				new Ui.MessageBox(App.translations.AccountDeleted, App.translations.AccountDeletedDescription, "/img/3f638133-a433-439b-919c-fdef170b882e.png", "var(--success-color)", function () {
+				new Ui.MessageBox(App.translations.AccountDeleted, App.translations.AccountDeletedDescription, "/img/messagebox-256.webp", "var(--success-color)", function () {
 					appListener.logOut();
 				});
 			});
