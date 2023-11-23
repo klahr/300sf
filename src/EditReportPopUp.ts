@@ -181,7 +181,7 @@ class EditReportPopUp {
 		this.mReportButton.style.borderRadius = "8px";
 		this.mReportButton.style.backgroundColor = "#a11f1f";
 		this.mReportButton.addEventListener("click", function () {
-			new Ui.ConfirmBox(App.translations.ArchiveSighting, App.translations.ConfirmArchiveSighting, null, "var(--success-color)", function () {
+			new Ui.ConfirmBox(App.translations.ArchiveSighting, App.translations.ConfirmArchiveSighting, "/img/messagebox-256.webp", "var(--success-color)", function () {
 				const r = new HttpRequest("POST", "/v1/reports/" + report.uuid + "/archive");
 				r.process(function (status: any, data: any) {
 					self.mPopUp.close();
