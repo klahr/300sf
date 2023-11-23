@@ -4,7 +4,7 @@
 /// <reference path="ImageViewer.ts"/>
 /// <reference path="models/Recording.ts"/>
 
-function openSpeciesPopUp(species: Models.Species) {
+function openSpeciesPopUp(species: Models.Species, list: Models.List | null) {
 	const content = new Ui.Div();
 	content.style.textAlign = "left";
 	content.style.position = "relative";
@@ -31,7 +31,7 @@ function openSpeciesPopUp(species: Models.Species) {
 	reportButton.style.borderRadius = "8px";
 	reportButton.style.backgroundColor = "var(--primary-color)";
 	reportButton.addEventListener("click", function () {
-		openReportPopUp(species, null, function () {
+		openReportPopUp(species, list, function () {
 		});
 	});
 	buttonContainer.appendChild(reportButton);

@@ -169,7 +169,7 @@ class ListPage extends Page {
 				name.style.cursor = "pointer";
 				entry.appendChild(name);
 				entry.addEventListener("click", function () {
-					openSpeciesPopUp(e);
+					openSpeciesPopUp(e, self.data);
 				});
 
 				const uniqueSpeciesInReports = Utils.numberOfUniqueSpeciesInReports(reports);

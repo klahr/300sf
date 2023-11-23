@@ -43,7 +43,7 @@ class HomePage extends Page {
 		this.mSpeciesList = new Ui.Select(App.translations.Search, "", (value) => {
 			self.mSpecies.forEach(e => {
 				if (e.uuid === value) {
-					openSpeciesPopUp(e);
+					openSpeciesPopUp(e, null);
 					return;
 				}
 			});
@@ -141,7 +141,7 @@ class HomePage extends Page {
 				entry.appendChild(name);
 				name.addEventListener("click", function (event) {
 					event.stopPropagation();
-					openSpeciesPopUp(e.species);
+					openSpeciesPopUp(e.species, null);
 				});
 
 				const subName = document.createElement("p");
