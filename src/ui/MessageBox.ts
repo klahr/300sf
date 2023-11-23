@@ -10,11 +10,17 @@ namespace Ui {
 		constructor(title: string, message: string, image: string | null, color: string, closeCallback: () => void) {
 			super();
 
+			var id = this.hashStr(title + message);
+			if (document.getElementById(id) !== null) {
+				return;
+			}
+
 			const self = this;
 
 			this.mCloseCallback = closeCallback;
 
 			this.addClass("uix-popup-base");
+			this.container.id = id;
 
 			this.mRoot = document.getElementById("root") as HTMLDivElement;
 			this.mRoot.appendChild(this.mContainer);
@@ -90,6 +96,15 @@ namespace Ui {
 
 		protected popUp(): Div {
 			return this.mPopup;
+		}
+
+		protected hashStr(str: string): string {
+			let hash = 0;
+			for (let i = 0; i < str.length; i++) {
+				const char = str.charCodeAt(i);
+				hash = (hash << 5) - hash + char;
+			}
+			return Math.abs(hash).toString();
 		}
 	}
 }
