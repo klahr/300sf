@@ -98,7 +98,7 @@ class ListPage extends Page {
 	}
 
 	public setData(data: any): void {
-		super.setData(data);
+		this.mData = data;
 		const self = this;
 		if (data.name === undefined) {
 			// TODO: Optimize this call that returns more then necessary.

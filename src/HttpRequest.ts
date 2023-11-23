@@ -48,6 +48,11 @@ class HttpRequest {
 					new Ui.MessageBox(App.translations.ConnectionError, App.translations.ConnectionErrorDescription, null, "var(--error-color)", () => void {});
 				} else if (xhr.status == 401) {
 					const ks = new LocalStorage();
+					if (xhr.responseJSON.code === 7001) {
+						ks.clear();
+						window.open("/", "_self");
+						return;
+					}
 					const d = {
 						grant_type: "refresh_token",
 						refresh_token: ks.get("x300sf_rt")
