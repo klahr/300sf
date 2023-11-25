@@ -32,7 +32,7 @@
 	"ObservedFrom": "Observationsdatum",
 	"ObservedUntil": "Slutdatum för observation",
 	"PrivateComment": "Privat kommentar",
-	"FindMyLocation": "Hitta Min Plats",
+	"FindMyLocation": "Hitta min plats",
 	"SelectSpecies": "Välj art",
 	"SelectAge": "Välj ålder",
 	"SelectGender": "Välj kön",
@@ -133,5 +133,6 @@
 	"InvalidPassword": "Ditt <b>Lösenord</b> verkar vara ogiltigt.",
 	"InvalidAcceptTerms": "Du måste godkänna <b>villkoren</b>.",
 	"Import": "Importera",
-	"Recorder": "Inspelare"
+	"Recorder": "Inspelare",
+	"YourLocationNotFound": "Din plats kunde inte hittas."
 }

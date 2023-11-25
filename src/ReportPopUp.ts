@@ -69,9 +69,18 @@ class ReportPopUp {
 				L.marker(e.latlng).addTo(markerGroup);
 				self.mLocation = e.latlng;
 				map.setZoom(16);
+				locateButton.disabled = false;
+				locateButton.innerHTML = App.translations.FindMyLocation;
+			});
+			map.on('locationerror', function () {
+				locateButton.disabled = false;
+				locateButton.innerHTML = App.translations.FindMyLocation;
+				new Ui.MessageBox(App.translations.Error, App.translations.YourLocationNotFound, "/img/messagebox-256.webp", "var(--error-color)", function () { });
 			});
 
 			locateButton.addEventListener("click", function () {
+				locateButton.innerHTML = App.translations.PleaseWait + "...";
+				locateButton.disabled = true;
 				map.locate({ setView: true, maxZoom: 19 });
 			});
 		}, 10);
@@ -181,7 +190,7 @@ class ReportPopUp {
 		content.container.appendChild(listsLbl);
 		content.attach(self.mChecklistContainer);
 
-		const r = new HttpRequest("PUT", "/v1/reports/basis", {species_uuid: species.uuid});
+		const r = new HttpRequest("PUT", "/v1/reports/basis", { species_uuid: species.uuid });
 		r.process(function (status: any, data: any) {
 			const d = data as Responses.ReportsBasis;
 

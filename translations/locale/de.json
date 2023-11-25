@@ -133,5 +133,6 @@
 	"InvalidPassword": "Your <b>Password</b> appears to be invalid.",
 	"InvalidAcceptTerms": "You must accept the <b>terms</b>.",
 	"Import": "Importieren",
-	"Recorder": "Rekorder"
+	"Recorder": "Rekorder",
+	"YourLocationNotFound": "Your location could not be found."
 }

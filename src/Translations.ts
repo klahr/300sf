@@ -33,7 +33,7 @@ class Translations {
         ObservedFrom: "Observed from",
         ObservedUntil: "Observed until",
         PrivateComment: "Private comment",
-        FindMyLocation: "Find My Location",
+        FindMyLocation: "Find my location",
         SelectSpecies: "Select species",
         SelectAge: "Select age",
         SelectGender: "Select gender",
@@ -135,6 +135,7 @@ class Translations {
         InvalidAcceptTerms: "You must accept the <b>terms</b>.",
         Import: "Import",
         Recorder: "Recorder",
+        YourLocationNotFound: "Your location could not be found.",
     }
     static sv = {
         SignIn: "Logga in",
@@ -170,7 +171,7 @@ class Translations {
         ObservedFrom: "Observationsdatum",
         ObservedUntil: "Slutdatum för observation",
         PrivateComment: "Privat kommentar",
-        FindMyLocation: "Hitta Min Plats",
+        FindMyLocation: "Hitta min plats",
         SelectSpecies: "Välj art",
         SelectAge: "Välj ålder",
         SelectGender: "Välj kön",
@@ -272,6 +273,7 @@ class Translations {
         InvalidAcceptTerms: "Du måste godkänna <b>villkoren</b>.",
         Import: "Importera",
         Recorder: "Inspelare",
+        YourLocationNotFound: "Din plats kunde inte hittas.",
     }
     static de = {
         SignIn: "Anmelden",
@@ -409,5 +411,6 @@ class Translations {
         InvalidAcceptTerms: "You must accept the <b>terms</b>.",
         Import: "Importieren",
         Recorder: "Rekorder",
+        YourLocationNotFound: "Your location could not be found.",
     }
 }
