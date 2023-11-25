@@ -3,6 +3,7 @@
 /// <reference path="App.ts"/>
 /// <reference path="ImageViewer.ts"/>
 /// <reference path="models/Recording.ts"/>
+/// <reference path="RecordingPopUp.ts"/>
 
 function openSpeciesPopUp(species: Models.Species, list: Models.List | null) {
 	const content = new Ui.Div();
@@ -113,6 +114,14 @@ function openSpeciesPopUp(species: Models.Species, list: Models.List | null) {
 				source.type = "audio/mpeg";
 				a.appendChild(source);
 				recordings.appendChild(a);
+
+				a.addEventListener('loadedmetadata', () => {
+					// Hide the volume control
+					const volumeControl = a.querySelector('[title="Volume Control"]') as HTMLElement;
+					if (volumeControl) {
+						volumeControl.style.display = 'none';
+					}
+				});
 			});
 
 			const p = document.createElement("p");
