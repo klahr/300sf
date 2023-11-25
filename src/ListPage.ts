@@ -150,10 +150,7 @@ class ListPage extends Page {
 					name.style.color = "var(--primary-variant-color)";
 					entry.appendChild(name);
 					name.addEventListener("click", function () {
-						const r = new HttpRequest("GET", "/v1/orders/" + e.order.uuid);
-						r.process(function (status: any, data: any) {
-							console.log(data);
-						});
+						openOrderPopUp(e.order);
 					});
 
 					const subName = document.createElement("p");

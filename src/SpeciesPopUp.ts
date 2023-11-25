@@ -24,7 +24,7 @@ function openSpeciesPopUp(species: Models.Species, list: Models.List | null) {
 	buttonContainer.style.width = "100%";
 	buttonContainer.style.textAlign = "right";
 	content.container.appendChild(buttonContainer);
-	
+
 	const reportButton = document.createElement("button");
 	reportButton.innerHTML = App.translations.SubmitSighting;
 	reportButton.style.width = "auto";
@@ -74,7 +74,7 @@ function openSpeciesPopUp(species: Models.Species, list: Models.List | null) {
 					i.style.cursor = "pointer";
 					i.style.borderRadius = "8px";
 					images.appendChild(i);
-					i.addEventListener("click", function() {
+					i.addEventListener("click", function () {
 						new ImageViewer(e, () => {
 						});
 					});
