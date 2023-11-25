@@ -3,8 +3,6 @@
 /// <reference path="App.ts"/>
 
 function openRecordingPopUp(species: Models.Species, recording: Models.Recording) {
-
-	console.log(recording);
 	const content = new Ui.Div();
 	content.style.textAlign = "left";
 	content.style.position = "relative";

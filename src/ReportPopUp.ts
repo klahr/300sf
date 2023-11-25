@@ -228,24 +228,10 @@ class ReportPopUp {
 			});
 
 			d.tags.forEach(e => {
-				const tag = document.createElement("div");
-				tag.className = "tag";
-				tag.setAttribute("uuid", e.uuid);
-				tag.addEventListener("click", () => {
-					if (tag.classList.contains("selected")) {
-						tag.classList.remove("selected");
-					} else {
-						tag.classList.add("selected");
-					}
-				});
-				if (e.color !== "") {
-					tag.style.backgroundColor = e.color;
-				}
-				const c = document.createElement("p");
-				c.innerHTML = e.name;
-				tag.appendChild(c);
-				self.mTagsContainer.container.appendChild(tag);
+				self.addTag(e);
 			});
+
+			self.addNewTagTag();
 		});
 
 		this.mReportButton = document.createElement("button");
@@ -311,6 +297,47 @@ class ReportPopUp {
 		this.mPopUp = new Ui.PopUp(content.container, function () {
 			closeCallback();
 		});
+	}
+
+	private addNewTagTag(): void {
+		const self = this;
+		const newTag = document.createElement("div");
+		newTag.id = "add-tag";
+		newTag.className = "tag";
+		newTag.addEventListener("click", () => {
+			new NewTagPopUp((tag: Models.Tag | null) => {
+				if (tag) {
+					document.getElementById("add-tag")?.remove();
+					self.addTag(tag);
+					self.addNewTagTag();
+				}
+			});
+		});
+
+		const c = document.createElement("p");
+		c.innerHTML = "+";
+		newTag.appendChild(c);
+		this.mTagsContainer.container.appendChild(newTag);
+	}
+
+	private addTag(e: Models.Tag): void {
+		const tag = document.createElement("div");
+		tag.className = "tag";
+		tag.setAttribute("uuid", e.uuid);
+		tag.addEventListener("click", () => {
+			if (tag.classList.contains("selected")) {
+				tag.classList.remove("selected");
+			} else {
+				tag.classList.add("selected");
+			}
+		});
+		if (e.color !== "") {
+			tag.style.backgroundColor = e.color;
+		}
+		const c = document.createElement("p");
+		c.innerHTML = e.name;
+		tag.appendChild(c);
+		this.mTagsContainer.container.appendChild(tag);
 	}
 
 	private validate(): void {
