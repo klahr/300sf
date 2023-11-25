@@ -46,7 +46,6 @@ function openSpeciesPopUp(species: Models.Species, list: Models.List | null) {
 	content.container.appendChild(recordings);
 
 	const r = new HttpRequest("GET", "/v1/species/" + species.uuid);
-	r.setHeader("Cache-Control", "public, max-age=3600");
 	r.process(function (status: any, data: any) {
 		summary.innerHTML = data.wikipedia.summary;
 
