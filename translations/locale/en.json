@@ -132,5 +132,6 @@
 	"InvalidEmail": "Your <b>Email</b> appears to be invalid.",
 	"InvalidPassword": "Your <b>Password</b> appears to be invalid.",
 	"InvalidAcceptTerms": "You must accept the <b>terms</b>.",
-	"Import": "Import"
+	"Import": "Import",
+	"Recorder": "Recorder"
 }

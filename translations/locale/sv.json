@@ -132,5 +132,6 @@
 	"InvalidEmail": "Din <b>e-post</b> verkar vara ogiltig.",
 	"InvalidPassword": "Ditt <b>Lösenord</b> verkar vara ogiltigt.",
 	"InvalidAcceptTerms": "Du måste godkänna <b>villkoren</b>.",
-	"Import": "Importera"
+	"Import": "Importera",
+	"Recorder": "Inspelare"
 }

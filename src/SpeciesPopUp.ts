@@ -91,11 +91,17 @@ function openSpeciesPopUp(species: Models.Species, list: Models.List | null) {
 			(data.recordings as Array<Models.Recording>).forEach(e => {
 				const p = document.createElement("p");
 				p.innerHTML = e.type.charAt(0).toUpperCase() + e.type.slice(1);
+				p.style.color = "var(--primary-variant-color)";
+				p.style.cursor = "pointer";
 				recordings.appendChild(p);
+				p.addEventListener("click", function() {
+					openRecordingPopUp(species, e);
+				});
 				const info = document.createElement("p");
 				info.style.fontSize = "0.8rem";
 				info.style.fontStyle = "italic";
 				info.innerHTML = e.recorder + ", " + e.location + ", " + e.country;
+
 				recordings.appendChild(info);
 				const a = document.createElement("audio");
 				a.style.width = "100%";

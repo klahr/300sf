@@ -134,6 +134,7 @@ class Translations {
         InvalidPassword: "Your <b>Password</b> appears to be invalid.",
         InvalidAcceptTerms: "You must accept the <b>terms</b>.",
         Import: "Import",
+        Recorder: "Recorder",
     }
     static sv = {
         SignIn: "Logga in",
@@ -270,6 +271,7 @@ class Translations {
         InvalidPassword: "Ditt <b>Lösenord</b> verkar vara ogiltigt.",
         InvalidAcceptTerms: "Du måste godkänna <b>villkoren</b>.",
         Import: "Importera",
+        Recorder: "Inspelare",
     }
     static de = {
         SignIn: "Anmelden",
@@ -400,11 +402,12 @@ class Translations {
         SuccessfullyResetPassword: "You have successfully reset your password!",
         SightingsImportSuccess: "All your sightings have successfully been imported!",
         WrongImportCredentials: "It appears that the <b>email</b> or <b>password</b> you entered is invalid.",
-        SomethingWentWrong: "Something went wrong.",
+        SomethingWentWrong: "Etwas ist schief gelaufen.",
         InvalidDisplayName: "Your <b>Display name</b> appears to be invalid.",
         InvalidEmail: "Your <b>Email</b> appears to be invalid.",
         InvalidPassword: "Your <b>Password</b> appears to be invalid.",
         InvalidAcceptTerms: "You must accept the <b>terms</b>.",
-        Import: "Import",
+        Import: "Importieren",
+        Recorder: "Rekorder",
     }
 }
