@@ -289,6 +289,8 @@ div.tag {
 	width: fit-content;
 	cursor: pointer;
 	display: inline-block;
+	text-align: center;
+	min-width: 16px;
 }
 
 div.tag.selected {
