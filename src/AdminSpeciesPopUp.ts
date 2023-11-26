@@ -26,7 +26,7 @@ class AdminSpeciesPopUp {
 		this.mSpeciesList = new Ui.Select(App.translations.AllSpecies, "", (value: string | null) => {
 			self.mSpecies.forEach(e => {
 				if (e.uuid === value) {
-					openSpeciesPopUp(e, null);
+					openSpeciesPopUp(e, null, (boolean) => { });
 					return;
 				}
 			});

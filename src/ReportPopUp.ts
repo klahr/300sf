@@ -17,9 +17,10 @@ class ReportPopUp {
 	private mLocation = L.latLng;
 	private mPopUp: Ui.PopUp;
 
-	constructor(species: Models.Species, list: Models.List | null, closeCallback: () => void) {
+	constructor(species: Models.Species, list: Models.List | null, closeCallback: (speciesAdded: boolean) => void) {
 		const self = this;
 
+		var speciesAdded = false;
 		const content = new Ui.Div();
 		content.style.textAlign = "left";
 		content.style.width = "100%";
@@ -289,13 +290,14 @@ class ReportPopUp {
 			const rr = new HttpRequest("POST", "/v1/reports", r);
 			rr.process(function (status: any, data: any) {
 				new Ui.MessageBox(App.translations.Congratulations, App.translations.YouFoundA.replace("{0}", self.mSpeciesList.value), null, "var(--success-color)", function () { });
+				speciesAdded = true;
 				self.mPopUp.close();
 			});
 		});
 		content.container.appendChild(this.mReportButton);
 
 		this.mPopUp = new Ui.PopUp(content.container, function () {
-			closeCallback();
+			closeCallback(speciesAdded);
 		});
 	}
 
@@ -359,6 +361,6 @@ class ReportPopUp {
 	}
 }
 
-function openReportPopUp(species: Models.Species, list: Models.List | null, closeCallback: () => void = function () { }): void {
+function openReportPopUp(species: Models.Species, list: Models.List | null, closeCallback: (speciesAdded: boolean) => void = function () { }): void {
 	new ReportPopUp(species, list, closeCallback);
 }

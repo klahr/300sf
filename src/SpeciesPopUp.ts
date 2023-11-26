@@ -5,11 +5,12 @@
 /// <reference path="models/Recording.ts"/>
 /// <reference path="RecordingPopUp.ts"/>
 
-function openSpeciesPopUp(species: Models.Species, list: Models.List | null) {
+function openSpeciesPopUp(species: Models.Species, list: Models.List | null, closeCallback: (speciesAdded: boolean) => void) {
 	const content = new Ui.Div();
 	content.style.textAlign = "left";
 	content.style.position = "relative";
 	content.style.width = "100%";
+	var speciesAdded = false;
 
 	const name = document.createElement("h1");
 	name.innerHTML = App.getTranslation(species.name);
@@ -32,7 +33,8 @@ function openSpeciesPopUp(species: Models.Species, list: Models.List | null) {
 	reportButton.style.borderRadius = "8px";
 	reportButton.style.backgroundColor = "var(--primary-color)";
 	reportButton.addEventListener("click", function () {
-		openReportPopUp(species, list, function () {
+		openReportPopUp(species, list, function (sa: boolean) {
+			speciesAdded = speciesAdded || sa;
 		});
 	});
 	buttonContainer.appendChild(reportButton);
@@ -114,14 +116,6 @@ function openSpeciesPopUp(species: Models.Species, list: Models.List | null) {
 				source.type = "audio/mpeg";
 				a.appendChild(source);
 				recordings.appendChild(a);
-
-				a.addEventListener('loadedmetadata', () => {
-					// Hide the volume control
-					const volumeControl = a.querySelector('[title="Volume Control"]') as HTMLElement;
-					if (volumeControl) {
-						volumeControl.style.display = 'none';
-					}
-				});
 			});
 
 			const p = document.createElement("p");
@@ -134,6 +128,7 @@ function openSpeciesPopUp(species: Models.Species, list: Models.List | null) {
 	});
 
 	new Ui.PopUp(content.container, function () {
+		closeCallback(speciesAdded);
 	});
 }
 

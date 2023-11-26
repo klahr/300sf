@@ -8,6 +8,7 @@
 /// <reference path="models/Report.ts"/>
 /// <reference path="models/List.ts"/>
 /// <reference path="SpeciesPopUp.ts"/>
+/// <reference path="OrderPopUp.ts"/>
 
 class ListPage extends Page {
 	private mTitle: HTMLHeadingElement;
@@ -166,7 +167,7 @@ class ListPage extends Page {
 				name.style.cursor = "pointer";
 				entry.appendChild(name);
 				entry.addEventListener("click", function () {
-					openSpeciesPopUp(e, self.data);
+					openSpeciesPopUp(e, self.data, (boolean) => { });
 				});
 
 				const uniqueSpeciesInReports = Utils.numberOfUniqueSpeciesInReports(reports);
