@@ -6,6 +6,7 @@
 /// <reference path="ui/Div.ts"/>
 /// <reference path="HttpRequest.ts"/>
 /// <reference path="utils/Sort.ts"/>
+/// <reference path="NewTagPopUp.ts"/>
 
 declare const L;
 
@@ -310,7 +311,7 @@ class ReportPopUp {
 			new NewTagPopUp((tag: Models.Tag | null) => {
 				if (tag) {
 					document.getElementById("add-tag")?.remove();
-					self.addTag(tag);
+					self.addTag(tag).click();
 					self.addNewTagTag();
 				}
 			});
@@ -322,7 +323,7 @@ class ReportPopUp {
 		this.mTagsContainer.container.appendChild(newTag);
 	}
 
-	private addTag(e: Models.Tag): void {
+	private addTag(e: Models.Tag): HTMLDivElement {
 		const tag = document.createElement("div");
 		tag.className = "tag";
 		tag.setAttribute("uuid", e.uuid);
@@ -340,6 +341,8 @@ class ReportPopUp {
 		c.innerHTML = e.name;
 		tag.appendChild(c);
 		this.mTagsContainer.container.appendChild(tag);
+
+		return tag;
 	}
 
 	private validate(): void {
