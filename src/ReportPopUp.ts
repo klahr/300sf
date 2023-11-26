@@ -59,7 +59,6 @@ class ReportPopUp {
 				maxZoom: 19,
 				attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 			}).addTo(map);
-			map.locate({ setView: true, maxZoom: 19 });
 			const markerGroup = L.layerGroup().addTo(map);
 			map.on("click", function (e) {
 				markerGroup.clearLayers();
@@ -85,6 +84,9 @@ class ReportPopUp {
 				locateButton.disabled = true;
 				map.locate({ setView: true, maxZoom: 19 });
 			});
+			setTimeout(function() {
+				locateButton.click();
+			}, 1000);
 		}, 10);
 
 		this.mSpeciesList = new Ui.Input("text");
