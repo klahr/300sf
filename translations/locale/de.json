@@ -134,5 +134,8 @@
 	"InvalidAcceptTerms": "You must accept the <b>terms</b>.",
 	"Import": "Importieren",
 	"Recorder": "Rekorder",
-	"YourLocationNotFound": "Your location could not be found."
+	"YourLocationNotFound": "Your location could not be found.",
+	"CreateTemplate": "Create template",
+	"Templates": "Templates",
+	"NewTemplate": "New template"
 }

@@ -134,5 +134,8 @@
 	"InvalidAcceptTerms": "Du måste godkänna <b>villkoren</b>.",
 	"Import": "Importera",
 	"Recorder": "Inspelare",
-	"YourLocationNotFound": "Din plats kunde inte hittas."
+	"YourLocationNotFound": "Din plats kunde inte hittas.",
+	"CreateTemplate": "Skapa mall",
+	"Templates": "Mallar",
+	"NewTemplate": "Ny mall"
 }

@@ -153,6 +153,18 @@ namespace Ui {
 			this.mExpandable.container.appendChild(this.mDropDown);
 		}
 
+		public setSelected(value: string): void {
+			const allOptions = this.mDropDown.getElementsByTagName("p");
+			for (var i = 0; i < allOptions.length; ++i) {
+				const v = allOptions[i].getAttribute("value")!;
+				if (v === value) {
+					allOptions[i].click();
+					this.hide();
+					break;
+				}
+			}
+		}
+
 		public toggleVisible(): void {
 			if (this.mExpandable.isVisible()) {
 				this.hide();

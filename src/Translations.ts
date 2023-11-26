@@ -136,6 +136,9 @@ class Translations {
         Import: "Import",
         Recorder: "Recorder",
         YourLocationNotFound: "Your location could not be found.",
+        CreateTemplate: "Create template",
+        Templates: "Templates",
+        NewTemplate: "New template",
     }
     static sv = {
         SignIn: "Logga in",
@@ -274,6 +277,9 @@ class Translations {
         Import: "Importera",
         Recorder: "Inspelare",
         YourLocationNotFound: "Din plats kunde inte hittas.",
+        CreateTemplate: "Skapa mall",
+        Templates: "Mallar",
+        NewTemplate: "Ny mall",
     }
     static de = {
         SignIn: "Anmelden",
@@ -412,5 +418,8 @@ class Translations {
         Import: "Importieren",
         Recorder: "Rekorder",
         YourLocationNotFound: "Your location could not be found.",
+        CreateTemplate: "Create template",
+        Templates: "Templates",
+        NewTemplate: "New template",
     }
 }
