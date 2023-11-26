@@ -124,6 +124,27 @@ func ListTemplatesList(c *gin.Context) {
 	})
 }
 
+func ListTemplatesListMe(c *gin.Context) {
+	var user models.User
+	models.DB.Where("uuid=?", c.GetString("uuid")).First(&user)
+
+	var listTemplates []models.ListTemplate
+	if err := models.DB.Table(table.ListTemplates).Where("user_id=?", user.Id).Where("archived IS NULL").Preload("Name").Preload("Description").Preload("Species").Find(&listTemplates).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	type response struct {
+		Result []models.ListTemplate `json:"result"`
+	}
+
+	c.JSON(http.StatusOK, response{
+		Result: listTemplates,
+	})
+}
+
 func ListTemplatesAddSpecies(c *gin.Context) {
 	type request struct {
 		SpeciesUuid string `json:"species_uuid"`
