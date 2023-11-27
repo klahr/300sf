@@ -73,6 +73,10 @@ router.get('/delete-account', function (req, res) {
 	renderPage(req, res);
 });
 
+router.get('/competitions', function (req, res) {
+	renderPage(req, res);
+});
+
 router.get('/admin', function (req, res) {
 	renderPage(req, res);
 });

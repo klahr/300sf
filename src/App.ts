@@ -10,6 +10,7 @@
 /// <reference path="ReportsPage.ts"/>
 /// <reference path="MainMenu.ts"/>
 /// <reference path="ManageChecklistsPage.ts"/>
+/// <reference path="ManageCompetitionsPage.ts"/>
 /// <reference path="ContributePage.ts"/>
 /// <reference path="SetPasswordPage.ts"/>
 /// <reference path="DeleteAccountPage.ts"/>
@@ -55,6 +56,7 @@ class App implements IAppListener {
 		this.addPage(new SetPasswordPage(this));
 		this.addPage(new DeleteAccountPage(this));
 		this.addPage(new ContactPage(this));
+		this.addPage(new ManageCompetitionsPage(this));
 
 		this.mLayerManager.addToLayer("base", this.mMainMenu);
 

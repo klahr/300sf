@@ -83,6 +83,10 @@ class MainMenu extends Ui.Widget {
 			self.mAppListener.showPage("tags", null);
 		});
 
+		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>military_tech</span>  " + App.translations.Competitions, function () {
+			self.mAppListener.showPage("competitions", null);
+		});
+
 		this.addSection(App.translations.Checklists);
 		const checklists = document.createElement("div");
 		checklists.style.padding = "0";

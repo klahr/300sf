@@ -134,11 +134,12 @@ class Translations {
         InvalidPassword: "Your <b>Password</b> appears to be invalid.",
         InvalidAcceptTerms: "You must accept the <b>terms</b>.",
         Import: "Import",
-        Recorder: "Recorder",
+        Recorder: "Recordist",
         YourLocationNotFound: "Your location could not be found.",
         CreateTemplate: "Create template",
         Templates: "Templates",
         NewTemplate: "New template",
+        Competitions: "Competitions",
     }
     static sv = {
         SignIn: "Logga in",
@@ -280,6 +281,7 @@ class Translations {
         CreateTemplate: "Skapa mall",
         Templates: "Mallar",
         NewTemplate: "Ny mall",
+        Competitions: "Tävlingar",
     }
     static de = {
         SignIn: "Anmelden",
@@ -421,5 +423,6 @@ class Translations {
         CreateTemplate: "Create template",
         Templates: "Templates",
         NewTemplate: "New template",
+        Competitions: "Competitions",
     }
 }
