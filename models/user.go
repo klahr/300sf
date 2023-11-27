@@ -11,6 +11,7 @@ type User struct {
 	Model
 	DisplayName            string      `json:"display_name"`
 	Email                  string      `json:"-"`
+	Username               string      `json:"username"`
 	Password               string      `json:"-"`
 	PasswordSalt           string      `json:"-"`
 	Notifications          int64       `json:"notifications"`

@@ -148,6 +148,15 @@ func SetupRoutes(r *gin.Engine) {
 
 	r.GET("/health", Health)
 
+	// Competitions
+	r.POST("/v1/competitions", apiKeyMiddleware, controllers.Competitions)
+	r.GET("/v1/competitions/list", apiKeyMiddleware, controllers.CompetitionsGetCompetitions)
+	r.GET("/v1/competitions/list/me", apiKeyMiddleware, controllers.CompetitionsListMe)
+	r.GET("/v1/competitions/:uuid", apiKeyMiddleware, controllers.CompetitionsDetails)
+	r.PUT("/v1/competitions/:uuid/invite", apiKeyMiddleware, controllers.CompetitionsInvite)
+	r.PUT("/v1/competitions/:uuid/archive", apiKeyMiddleware, controllers.CompetitionArchive)
+	r.GET("/v1/competitions/:uuid/result", noneMiddleware, controllers.CompetitionsResult)
+
 	// Lists
 	r.GET("/v1/lists/list", apiKeyMiddleware, basicMiddleware, controllers.ListsList)
 	r.POST("/v1/lists", apiKeyMiddleware, basicMiddleware, controllers.Lists)
