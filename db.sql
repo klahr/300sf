@@ -1062,7 +1062,7 @@ CREATE TABLE `300sf`.`competitions` (
   `visibility` INT NOT NULL,
   `join_from` DATETIME NOT NULL,
   `join_until` DATETIME NOT NULL,
-  `icon` VARCHAR(128) NOT NULL,
+  `icon` VARCHAR(32) NOT NULL,
   `color` VARCHAR(16) NOT NULL,
   `archived` DATETIME NULL,
   PRIMARY KEY (`id`),
