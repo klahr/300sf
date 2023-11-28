@@ -50,6 +50,7 @@ func Auth(c *gin.Context) {
 	var userUuid string
 	var lang string
 	var scopes string
+	var user models.User
 	if r.GrantType == "refresh_token" {
 		if token, err := ValidateToken(r.RefreshToken); token != nil {
 			t, _ := jwt.Parse(r.RefreshToken, func(token *jwt.Token) (interface{}, error) {
@@ -112,7 +113,6 @@ func Auth(c *gin.Context) {
 			return
 		}
 
-		var user models.User
 		if err := models.DB.Where("email=?", r.Email).Preload("Language").First(&user).Error; err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"code":    ErrorAuthInvalid,
@@ -183,6 +183,8 @@ func Auth(c *gin.Context) {
 		})
 		return
 	}
+
+	models.DB.Model(&user).UpdateColumn("last_seen_at", time.Now())
 
 	response := struct {
 		AccessToken  string `json:"access_token"`
