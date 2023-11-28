@@ -140,6 +140,7 @@ class Translations {
         Templates: "Templates",
         NewTemplate: "New template",
         Competitions: "Competitions",
+        Username: "Username",
     }
     static sv = {
         SignIn: "Logga in",
@@ -282,6 +283,7 @@ class Translations {
         Templates: "Mallar",
         NewTemplate: "Ny mall",
         Competitions: "Tävlingar",
+        Username: "Användarnamn",
     }
     static de = {
         SignIn: "Anmelden",
@@ -424,5 +426,6 @@ class Translations {
         Templates: "Templates",
         NewTemplate: "New template",
         Competitions: "Competitions",
+        Username: "Username",
     }
 }

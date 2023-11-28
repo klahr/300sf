@@ -2,6 +2,8 @@
 /// <reference path="ui/MessageBox.ts"/>
 
 class SignUpPage extends Page {
+	private mDisplayName: Ui.Input;
+
 	constructor(appListener: IAppListener) {
 		super(appListener);
 
@@ -23,10 +25,10 @@ class SignUpPage extends Page {
 		title.innerHTML = App.translations.SignUp;
 		this.container.appendChild(title);
 
-		const displayName = new Ui.Input("display_name");
-		displayName.style.position = "relative";
-		displayName.setPlaceHolder(App.translations.DisplayName);
-		this.attach(displayName);
+		this.mDisplayName = new Ui.Input("text");
+		this.mDisplayName.style.position = "relative";
+		this.mDisplayName.setPlaceHolder(App.translations.DisplayName);
+		this.attach(this.mDisplayName);
 
 		const email = new Ui.Input("email");
 		email.style.position = "relative";
@@ -66,7 +68,8 @@ class SignUpPage extends Page {
 			const termsAccepted = (acceptTerms.container as HTMLInputElement).checked;
 			const content = {
 				email: email.value,
-				display_name: displayName.value,
+				display_name: self.mDisplayName.value,
+				username: self.getUsername(),
 				password: password.value,
 				portrait: "3.webp",
 				accepted_terms: termsAccepted,
@@ -75,7 +78,7 @@ class SignUpPage extends Page {
 			const r = new HttpRequest("POST", "/v1/users", content);
 			r.process(function (status: any, data: any) {
 				password.value = "",
-					self.appListener.showPage("home", { "email": email.value, "display_name": displayName.value });
+					self.appListener.showPage("home", { "email": email.value, "display_name": self.mDisplayName.value });
 			}, function (status: any, data: Responses.GeneralErrorResponse, error: any) {
 				switch (data.code) {
 					case Responses.ErrorCode.ErrorSignUpInvalidDisplayName:
@@ -107,6 +110,12 @@ class SignUpPage extends Page {
 		const alreadyHaveAccount = document.createElement("p");
 		alreadyHaveAccount.innerHTML = App.translations.AlreadyHaveAnAccount;
 		this.container.appendChild(alreadyHaveAccount);
+	}
+
+	private getUsername(): string {
+		let username = this.mDisplayName.value.toLowerCase();
+		const randomNumber = Math.floor(Math.random() * (999 - 100 + 1)) + 100;
+		return username.replace(/ /g, "-") + "#" + randomNumber;
 	}
 
 	public get id(): string {

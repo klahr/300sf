@@ -45,6 +45,15 @@ class ProfilePopUp {
 		uuid.container.setAttribute("disabled", "");
 		content.attach(uuid);
 
+		const usernameLbl = document.createElement("h2");
+		usernameLbl.innerHTML = App.translations.Username;
+		usernameLbl.style.textAlign = "left";
+		content.container.appendChild(usernameLbl);
+
+		const username = new Ui.Input("text");
+		username.container.setAttribute("disabled", "");
+		content.attach(username);
+
 		const languageLbl = document.createElement("h2");
 		languageLbl.innerHTML = App.translations.Language;
 		languageLbl.style.textAlign = "left";
@@ -88,6 +97,7 @@ class ProfilePopUp {
 		me.process(function (status: any, data: any) {
 			const d = data as Responses.UsersMe;
 			displayName.innerHTML = d.user.display_name;
+			username.value = d.user.username;
 			uuid.value = d.user.uuid;
 			portraitSelect.select(d.user.portrait);
 		});

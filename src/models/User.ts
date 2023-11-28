@@ -4,6 +4,7 @@ namespace Models {
 	export class User {
 		uuid: string;
 		display_name: string;
+		username: string;
 		imported_at: Date;
 		language: Language;
 		portrait: string;
