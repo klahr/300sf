@@ -1034,4 +1034,14 @@ DROP COLUMN `scopes`;
 ALTER TABLE `300sf`.`api_keys` 
 ADD COLUMN `scopes` TEXT NOT NULL AFTER `revoked_at`;
 
+ALTER TABLE `300sf`.`users` 
+ADD COLUMN `username` VARCHAR(64) NOT NULL AFTER `email`;
+
+ALTER TABLE `300sf`.`users` 
+ADD UNIQUE INDEX `username_UNIQUE` (`username` ASC) VISIBLE;
+;
+
+ALTER TABLE `300sf`.`users` 
+DROP COLUMN `permissions`;
+
 -->
