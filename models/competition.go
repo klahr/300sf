@@ -22,10 +22,11 @@ type Competition struct {
 	Visibility       int64        `json:"visibility"`
 	JoinFrom         time.Time    `json:"join_from"`
 	JoinUntil        time.Time    `json:"join_until"`
-	InviteOnly       bool         `json:"invite_only"`
 	Icon             string       `json:"icon"`
 	Color            string       `json:"color"`
 	CompetitionZones []Zone       `json:"zones" gorm:"many2many:competition_zones"`
 	Archived         zero.Time    `json:"-"`
 	Participants     []User       `json:"participants" gorm:"many2many:competition_participants"`
+	Password         zero.String  `json:"password"`
+	PasswordSalt     zero.String  `json:"password_salt"`
 }

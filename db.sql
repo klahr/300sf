@@ -1062,7 +1062,6 @@ CREATE TABLE `300sf`.`competitions` (
   `visibility` INT NOT NULL,
   `join_from` DATETIME NOT NULL,
   `join_until` DATETIME NOT NULL,
-  `invite_only` TINYINT NOT NULL,
   `icon` VARCHAR(128) NOT NULL,
   `color` VARCHAR(16) NOT NULL,
   `archived` DATETIME NULL,
@@ -1209,3 +1208,7 @@ ADD CONSTRAINT `fk_competition_users_2`
   REFERENCES `300sf`.`users` (`id`)
   ON DELETE CASCADE
   ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`competitions` 
+ADD COLUMN `password` VARCHAR(64) NULL AFTER `archived`,
+ADD COLUMN `password_salt` VARCHAR(64) NULL AFTER `password`;
