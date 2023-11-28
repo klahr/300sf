@@ -2,6 +2,9 @@
 package utils
 
 import (
+	"fmt"
+	"regexp"
+
 	"git.sr.ht/~klahr/300sf/models"
 	"git.sr.ht/~klahr/300sf/table"
 	"github.com/badoux/checkmail"
@@ -9,6 +12,15 @@ import (
 
 func VerifyDisplayName(displayName string) bool {
 	return len(displayName) >= 4
+}
+
+func VerifyUsername(username string) bool {
+	regex, err := regexp.Compile(`^\w(?:[\w.#-]*\w){3,31}$`)
+	if err != nil {
+		fmt.Println("Error compiling regex:", err)
+		return false
+	}
+	return regex.MatchString(username)
 }
 
 func VerifyEmail(email string) bool {

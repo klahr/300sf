@@ -33,25 +33,27 @@ func requireScope(c *gin.Context, requiredScope string) {
 	xAppLanguage := c.Request.Header.Get("X-App-Language")
 	c.Set("app_language", xAppLanguage)
 
+	ok := requiredScope == auth.AuthScopeNone
 	token := parseToken(xAccessToken)
 	if token == nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "missing scope", "code": controllers.ErrorAuthInvalid})
-		c.Abort()
-		return
-	}
-
-	claims := token.Claims.(jwt.MapClaims)
-	c.Set("uuid", claims["sub"])
-
-	ok := false
-	if requiredScope == "" {
-		ok = true
+		if requiredScope != auth.AuthScopeNone {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "missing scope", "code": controllers.ErrorAuthInvalid})
+			c.Abort()
+			return
+		}
 	} else {
-		scopes := strings.Split(claims["scp"].(string), " ")
-		for _, s := range scopes {
-			if s == requiredScope {
-				ok = true
-				break
+		claims := token.Claims.(jwt.MapClaims)
+		c.Set("uuid", claims["sub"])
+
+		if requiredScope == "" {
+			ok = true
+		} else {
+			scopes := strings.Split(claims["scp"].(string), " ")
+			for _, s := range scopes {
+				if s == requiredScope {
+					ok = true
+					break
+				}
 			}
 		}
 	}

@@ -21,6 +21,7 @@ func Users(c *gin.Context) {
 	type request struct {
 		Email         string `json:"email"`
 		DisplayName   string `json:"display_name"`
+		Username      string `json:"username"`
 		Password      string `json:"password"`
 		AcceptedTerms bool   `json:"accepted_terms"`
 		Portrait      string `json:"portrait"`
@@ -39,6 +40,14 @@ func Users(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    ErrorSignUpInvalidDisplayName,
 			"message": "invalid display name",
+		})
+		return
+	}
+
+	if !utils.VerifyUsername(r.Username) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorSignUpInvalidUsername,
+			"message": "invalid username",
 		})
 		return
 	}
@@ -77,6 +86,7 @@ func Users(c *gin.Context) {
 		},
 		Email:           r.Email,
 		DisplayName:     r.DisplayName,
+		Username:        r.Username,
 		Password:        p.Value,
 		PasswordSalt:    p.Salt,
 		Notifications:   8,
