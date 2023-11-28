@@ -1045,3 +1045,167 @@ ALTER TABLE `300sf`.`users`
 DROP COLUMN `permissions`;
 
 -->
+
+CREATE TABLE `300sf`.`competitions` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `timestamp` DATETIME NOT NULL,
+  `uuid` VARCHAR(32) NOT NULL,
+  `name_id` INT NOT NULL,
+  `user_id` INT NULL,
+  `from` DATETIME NOT NULL,
+  `until` DATETIME NOT NULL,
+  `finished_at` DATETIME NULL,
+  `list_template_id` INT NULL,
+  `description_id` INT NOT NULL,
+  `end_on_reports` INT NULL,
+  `max_competitors` INT NULL,
+  `visibility` INT NOT NULL,
+  `join_from` DATETIME NOT NULL,
+  `join_until` DATETIME NOT NULL,
+  `invite_only` TINYINT NOT NULL,
+  `icon` VARCHAR(128) NOT NULL,
+  `color` VARCHAR(16) NOT NULL,
+  `archived` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) VISIBLE);
+
+ALTER TABLE `300sf`.`competitions` 
+ADD INDEX `index3` (`uuid` ASC) VISIBLE,
+ADD INDEX `fk_competitions_1_idx` (`name_id` ASC) VISIBLE,
+ADD INDEX `fk_competitions_2_idx` (`user_id` ASC) VISIBLE,
+ADD INDEX `fk_competitions_3_idx` (`list_template_id` ASC) VISIBLE,
+ADD INDEX `fk_competitions_4_idx` (`description_id` ASC) VISIBLE;
+;
+ALTER TABLE `300sf`.`competitions` 
+ADD CONSTRAINT `fk_competitions_1`
+  FOREIGN KEY (`name_id`)
+  REFERENCES `300sf`.`translations` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION,
+ADD CONSTRAINT `fk_competitions_2`
+  FOREIGN KEY (`user_id`)
+  REFERENCES `300sf`.`users` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION,
+ADD CONSTRAINT `fk_competitions_3`
+  FOREIGN KEY (`list_template_id`)
+  REFERENCES `300sf`.`list_templates` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION,
+ADD CONSTRAINT `fk_competitions_4`
+  FOREIGN KEY (`description_id`)
+  REFERENCES `300sf`.`translations` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`competitions` 
+DROP FOREIGN KEY `fk_competitions_2`,
+DROP FOREIGN KEY `fk_competitions_3`;
+ALTER TABLE `300sf`.`competitions` 
+ADD CONSTRAINT `fk_competitions_2`
+  FOREIGN KEY (`user_id`)
+  REFERENCES `300sf`.`users` (`id`)
+  ON DELETE SET NULL
+  ON UPDATE NO ACTION,
+ADD CONSTRAINT `fk_competitions_3`
+  FOREIGN KEY (`list_template_id`)
+  REFERENCES `300sf`.`list_templates` (`id`)
+  ON DELETE SET NULL
+  ON UPDATE NO ACTION;
+
+CREATE TABLE `300sf`.`competition_zones` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `competition_id` INT NOT NULL,
+  `zone_id` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `index2` (`competition_id` ASC, `zone_id` ASC) VISIBLE,
+  INDEX `fk_competition_zones_2_idx` (`zone_id` ASC) VISIBLE,
+  CONSTRAINT `fk_competition_zones_1`
+    FOREIGN KEY (`competition_id`)
+    REFERENCES `300sf`.`competitions` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_competition_zones_2`
+    FOREIGN KEY (`zone_id`)
+    REFERENCES `300sf`.`zones` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+CREATE TABLE `300sf`.`competition_users` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `competition_id` INT NOT NULL,
+  `user_id` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `index2` (`competition_id` ASC, `user_id` ASC) VISIBLE,
+  INDEX `fk_competition_users_2_idx` (`user_id` ASC) VISIBLE,
+  CONSTRAINT `fk_competition_users_1`
+    FOREIGN KEY (`competition_id`)
+    REFERENCES `300sf`.`competitions` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_competition_users_2`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `300sf`.`users` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+CREATE TABLE `300sf`.`competition_invite` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `timestamp` DATETIME NOT NULL,
+  `uuid` VARCHAR(32) NOT NULL,
+  `user_id` INT NOT NULL,
+  `competition_id` INT NOT NULL,
+  `accepted_at` DATETIME NULL,
+  `rejected_at` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) VISIBLE);
+
+ALTER TABLE `300sf`.`competition_invite` 
+ADD INDEX `index3` (`uuid` ASC) VISIBLE;
+;
+
+ALTER TABLE `300sf`.`competition_invite` 
+ADD INDEX `fk_competition_invite_1_idx` (`user_id` ASC) VISIBLE,
+ADD INDEX `fk_competition_invite_2_idx` (`competition_id` ASC) VISIBLE;
+;
+ALTER TABLE `300sf`.`competition_invite` 
+ADD CONSTRAINT `fk_competition_invite_1`
+  FOREIGN KEY (`user_id`)
+  REFERENCES `300sf`.`users` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION,
+ADD CONSTRAINT `fk_competition_invite_2`
+  FOREIGN KEY (`competition_id`)
+  REFERENCES `300sf`.`competitions` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`competition_zones` 
+DROP FOREIGN KEY `fk_competition_zones_1`,
+DROP FOREIGN KEY `fk_competition_zones_2`;
+ALTER TABLE `300sf`.`competition_zones` 
+ADD CONSTRAINT `fk_competition_zones_1`
+  FOREIGN KEY (`competition_id`)
+  REFERENCES `300sf`.`competitions` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION,
+ADD CONSTRAINT `fk_competition_zones_2`
+  FOREIGN KEY (`zone_id`)
+  REFERENCES `300sf`.`zones` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `300sf`.`competition_users` 
+DROP FOREIGN KEY `fk_competition_users_1`,
+DROP FOREIGN KEY `fk_competition_users_2`;
+ALTER TABLE `300sf`.`competition_users` 
+ADD CONSTRAINT `fk_competition_users_1`
+  FOREIGN KEY (`competition_id`)
+  REFERENCES `300sf`.`competitions` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION,
+ADD CONSTRAINT `fk_competition_users_2`
+  FOREIGN KEY (`user_id`)
+  REFERENCES `300sf`.`users` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;
