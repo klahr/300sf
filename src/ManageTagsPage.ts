@@ -42,6 +42,7 @@ class ManageTagsPage extends Page {
 		this.container.appendChild(colorLbl);
 
 		const colorSelect = new Ui.DivSelect();
+		colorSelect.style.width = "100%";
 		colorSelect.addOption("", "#8227ac").style.backgroundColor = "#8227ac";
 		colorSelect.addOption("", "#0d81b4").style.backgroundColor = "#0d81b4";
 		colorSelect.addOption("", "#75b98e").style.backgroundColor = "#75b98e";
