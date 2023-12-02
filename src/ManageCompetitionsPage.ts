@@ -1,6 +1,7 @@
 /// <reference path="Page.ts"/>
 /// <reference path="ui/Input.ts"/>
 /// <reference path="App.ts"/>
+/// <reference path="CreateCompetitionPopUp.ts"/>
 
 class ManageCompetitionsPage extends Page {
 	private mCreateButton: HTMLButtonElement;

@@ -1,7 +1,10 @@
 /// <reference path="ui/Div.ts"/>
 /// <reference path="ui/MultiInput.ts"/>
+/// <reference path="ui/MultiTextArea.ts"/>
 /// <reference path="HttpRequest.ts"/>
 /// <reference path="models/Competition.ts"/>
+/// <reference path="utils/Base64.ts"/>
+/// <reference path="responses/Competitions.ts"/>
 
 class CreateCompetitionPopUp {
 	constructor(closeCallback: (competition: Models.Competition | null) => void) {
@@ -112,6 +115,23 @@ class CreateCompetitionPopUp {
 		password.setPlaceHolder("None");
 		content.attach(password);
 
+		const mapLbl = document.createElement("h3");
+		mapLbl.innerHTML = "Locations";
+		content.container.appendChild(mapLbl);
+
+		const map = new MapSelect((zoneUuids: Array<string>) => {
+			if (zoneUuids.length > 0) {
+				place.innerHTML = "Observations are only permitted within the selected countries.";
+			} else {
+				place.innerHTML = "Observations are allowed anywhere.";
+			}
+		});
+		content.attach(map);
+
+		const place = document.createElement("p");
+		place.style.fontStyle = "italic";
+		content.container.appendChild(place);
+
 		const participateSelf = new Ui.Input("checkbox");
 		participateSelf.style.position = "relative";
 		participateSelf.container.setAttribute("name", "on_hold");
@@ -135,6 +155,17 @@ class CreateCompetitionPopUp {
 
 		const popUp = new Ui.PopUp(content.container, function () {
 			closeCallback(null);
+		});
+
+		const r = new HttpRequest("GET", "/v1/competitions/basis");
+		r.process(function (status: any, data: any) {
+			const d = data as Responses.CompetitionsBasis;
+			d.zones.forEach(e => {
+				map.addZone(e);
+				if (e.name.en === "Sweden") {
+					map.setZoneSelected(e.uuid);
+				}
+			})
 		});
 	}
 }
