@@ -26,7 +26,6 @@ namespace Ui {
 			for (let i = 0; i < children.length; ++i) {
 				const e = children[i];
 				if (e instanceof HTMLTextAreaElement) {
-					console.log("found");
 					const i = e as HTMLTextAreaElement;
 					i.style.display = i.getAttribute("data") === value ? "inline-block" : "none";
 				}
@@ -41,6 +40,31 @@ namespace Ui {
 			i.style.height = "128px";
 			this.mContainer.appendChild(i);
 			this.mSelect.addOption(name, value);
+		}
+
+		public getValue(value: string): string {
+			const children = this.mContainer.children;
+			for (let i = 0; i < children.length; ++i) {
+				const e = children[i];
+				if (e instanceof HTMLTextAreaElement) {
+					const i = e as HTMLTextAreaElement;
+					if (i.getAttribute("data") === value) {
+						return i.value;
+					}
+				}
+			};
+			return "";
+		}
+
+		public addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void {
+			const children = this.mContainer.children;
+			for (let i = 0; i < children.length; ++i) {
+				const e = children[i];
+				if (e instanceof HTMLTextAreaElement) {
+					const i = e as HTMLTextAreaElement;
+					i.addEventListener(type, listener);
+				}
+			};
 		}
 	}
 }

@@ -2,12 +2,20 @@
 /// <reference path="ui/MultiInput.ts"/>
 /// <reference path="ui/MultiTextArea.ts"/>
 /// <reference path="HttpRequest.ts"/>
+/// <reference path="MapSelect.ts"/>
 /// <reference path="models/Competition.ts"/>
 /// <reference path="utils/Base64.ts"/>
 /// <reference path="responses/Competitions.ts"/>
 
 class CreateCompetitionPopUp {
+	private mAddButton: HTMLButtonElement;
+	private mName: Ui.MultiInput;
+	private mDescription: Ui.MultiTextArea;
+	private mFrom: Ui.Input;
+	private mUntil: Ui.Input;
+
 	constructor(closeCallback: (competition: Models.Competition | null) => void) {
+		const self = this;
 		const content = new Ui.Div();
 		content.style.textAlign = "left";
 		content.style.width = "100%";
@@ -22,42 +30,56 @@ class CreateCompetitionPopUp {
 		nameLbl.innerHTML = App.translations.Name;
 		content.container.appendChild(nameLbl);
 
-		const name = new Ui.MultiInput("text");
-		content.attach(name);
-		name.addOption(App.translations.English, App.translations.Name, "en");
-		name.addOption(App.translations.Swedish, App.translations.Name, "sv");
-		name.addOption(App.translations.German, App.translations.Name, "de");
-		name.setSelected(App.language);
+		this.mName = new Ui.MultiInput("text");
+		content.attach(this.mName);
+		this.mName.addOption(App.translations.English, App.translations.Name, "en");
+		this.mName.addOption(App.translations.Swedish, App.translations.Name, "sv");
+		this.mName.addOption(App.translations.German, App.translations.Name, "de");
+		this.mName.setSelected(App.language);
+		this.mName.addEventListener("input", function() {
+			self.validate();
+		});
 
 		const descriptionLbl = document.createElement("h3");
 		descriptionLbl.innerHTML = "Description";
 		content.container.appendChild(descriptionLbl);
 
-		const description = new Ui.MultiTextArea();
-		content.attach(description);
-		description.addOption(App.translations.English, "Description", "en");
-		description.addOption(App.translations.Swedish, "Description", "sv");
-		description.addOption(App.translations.German, "Description", "de");
-		description.setSelected(App.language);
+		this.mDescription = new Ui.MultiTextArea();
+		content.attach(this.mDescription );
+		this.mDescription .addOption(App.translations.English, "Description", "en");
+		this.mDescription .addOption(App.translations.Swedish, "Description", "sv");
+		this.mDescription .addOption(App.translations.German, "Description", "de");
+		this.mDescription .setSelected(App.language);
+		this.mDescription.addEventListener("input", function() {
+			self.validate();
+		});
 
 		const fromLbl = document.createElement("h3");
 		fromLbl.className = "title";
 		fromLbl.innerHTML = "Starts at";
 		content.container.appendChild(fromLbl);
-		const from = new Ui.Input("datetime-local");
-		content.attach(from);
+		this.mFrom = new Ui.Input("datetime-local");
+		content.attach(this.mFrom);
 
 		const now = new Date();
 		now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
 		now.setSeconds(now.getMinutes());
-		from.value = now.toISOString().slice(0, -8);
+		this.mFrom.value = now.toISOString().slice(0, -8);
+		this.mFrom.container.addEventListener("input", function() {
+			self.validate();
+		});
 
 		const untilLbl = document.createElement("h3");
 		untilLbl.className = "title";
 		untilLbl.innerHTML = "Ends at";
 		content.container.appendChild(untilLbl);
-		const until = new Ui.Input("datetime-local");
-		content.attach(until);
+		this.mUntil = new Ui.Input("datetime-local");
+		now.setFullYear(now.getFullYear() + 1);
+		this.mUntil.value = now.toISOString().slice(0, -8);
+		content.attach(this.mUntil);
+		this.mUntil.container.addEventListener("input", function() {
+			self.validate();
+		});
 
 		const endOnReportsLbl = document.createElement("h3");
 		endOnReportsLbl.innerHTML = "End on reports";
@@ -144,16 +166,51 @@ class CreateCompetitionPopUp {
 		participateSelfLbl.innerHTML = "Jag deltar i tävlingen";
 		content.container.appendChild(participateSelfLbl);
 
-		const addButton = document.createElement("button");
-		addButton.innerHTML = "Create competition";
-		addButton.style.width = "auto";
-		addButton.style.cssFloat = "right";
-		addButton.style.borderRadius = "8px";
-		addButton.style.backgroundColor = "var(--success-color)";
-		addButton.disabled = true;
-		content.container.appendChild(addButton);
+		this.mAddButton = document.createElement("button");
+		this.mAddButton.innerHTML = "Create competition";
+		this.mAddButton.style.width = "auto";
+		this.mAddButton.style.cssFloat = "right";
+		this.mAddButton.style.borderRadius = "8px";
+		this.mAddButton.style.backgroundColor = "var(--success-color)";
+		this.mAddButton.disabled = true;
+		content.container.appendChild(this.mAddButton);
+		this.mAddButton.addEventListener("click", function() {
+			const r = new Requests.Competitions();
+			r.name = new Models.Translation();
+			r.name.en = self.mName.getValue("en");
+			r.name.sv = self.mName.getValue("sv");
+			r.name.de = self.mName.getValue("de");
+			r.list_template_uuid = ""; // TODO
+			r.description = new Models.Translation();
+			r.description.en = self.mDescription.getValue("en");
+			r.description.sv = self.mDescription.getValue("sv");
+			r.description.de = self.mDescription.getValue("de");
+			r.end_on_reports = Utils.toInt(endOnReports.value);
+			r.max_competitors = Utils.toInt(maxCompetitors.value);
+			r.visibility = 1; // TODO
+			r.color = colorSelect.value!;
+			r.competition_zones_uuids = map.getSelectedZoneUuids();
+			r.password = password.value;
+			r.creator_join = (participateSelf.container as HTMLInputElement).checked;
 
-		const popUp = new Ui.PopUp(content.container, function () {
+			if (self.mFrom.value !== "") {
+				r.from = Utils.toISODate(new Date(self.mFrom.value));
+			}
+			if (self.mUntil.value !== "") {
+				r.until = Utils.toISODate(new Date(self.mUntil.value));
+			}
+
+			if (joinFrom.value !== "") {
+				r.join_from = Utils.toISODate(new Date(joinFrom.value));
+			}
+			if (joinUntil.value !== "") {
+				r.join_until = Utils.toISODate(new Date(joinUntil.value));
+			}
+
+			console.log(r);
+		});
+
+		new Ui.PopUp(content.container, function () {
 			closeCallback(null);
 		});
 
@@ -167,5 +224,28 @@ class CreateCompetitionPopUp {
 				}
 			})
 		});
+	}
+
+	private validate(): void {
+		this.mAddButton.disabled = false;
+
+		if (this.mName.getValue("sv") === "" && this.mName.getValue("en") === "" && this.mName.getValue("de") === "") {
+			this.mAddButton.disabled = true;
+			console.log("1");
+			return;
+		}
+
+		if (this.mDescription.getValue("sv") === "" && this.mDescription.getValue("en") === "" && this.mDescription.getValue("de") === "") {
+			this.mAddButton.disabled = true;
+			console.log("2");
+			return;
+		}
+
+		if (this.mFrom.value === "" || this.mUntil.value === "") {
+			console.log("3");
+			this.mAddButton.disabled = true;
+			return;
+		}
+		console.log("ok");
 	}
 }

@@ -6,6 +6,7 @@
 /// <reference path="EditListPopUp.ts"/>
 /// <reference path="requests/Lists.ts"/>
 /// <reference path="models/Visibility.ts"/>
+/// <reference path="models/ListTemplate.ts"/>
 
 class ManageCheckListsPage extends Page {
 	private mTitle: HTMLHeadingElement;
@@ -215,10 +216,10 @@ class ManageCheckListsPage extends Page {
 				c.className = "entry";
 				var icon: string;
 				switch (e.visibility) {
-					case Visibility.Private:
+					case Models.Visibility.Private:
 						icon = "lock";
 						break;
-					case Visibility.Hidden:
+					case Models.Visibility.Hidden:
 						icon = "do_not_disturb_on_total_silence";
 						break;
 					default:

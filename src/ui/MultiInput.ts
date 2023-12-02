@@ -32,6 +32,20 @@ namespace Ui {
 			});
 		}
 
+		public getValue(value: string): string {
+			let result = "";
+			this.children.forEach(e => {
+				if (e instanceof Input) {
+					const i = e as Input;
+					if (i.data === value) {
+						result = i.value;
+						return;
+					}
+				}
+			});
+			return result;
+		}
+
 		public addOption(name: string, optionName: string, value: string): void {
 			const i = new Input(this.mType);
 			i.setData(value);
@@ -39,6 +53,15 @@ namespace Ui {
 			i.setVisible(false);
 			this.attach(i);
 			this.mSelect.addOption(name, value);
+		}
+
+		public addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void {
+			this.children.forEach(e => {
+				if (e instanceof Input) {
+					const i = e as Input;
+					i.container.addEventListener(type, listener);
+				}
+			});
 		}
 	}
 }
