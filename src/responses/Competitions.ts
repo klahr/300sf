@@ -2,6 +2,7 @@
 
 namespace Responses {
 	export class CompetitionsBasis {
-		public zones: Array<Models.Zone>;
+		zones: Array<Models.Zone>;
+		list_templates: Array<Models.ListTemplate>;
 	}
 }

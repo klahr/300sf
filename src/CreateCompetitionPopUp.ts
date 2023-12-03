@@ -13,6 +13,7 @@ class CreateCompetitionPopUp {
 	private mDescription: Ui.MultiTextArea;
 	private mFrom: Ui.Input;
 	private mUntil: Ui.Input;
+	private mTemplateSelect: Ui.Select;
 
 	constructor(closeCallback: (competition: Models.Competition | null) => void) {
 		const self = this;
@@ -53,6 +54,25 @@ class CreateCompetitionPopUp {
 		this.mDescription.addEventListener("input", function() {
 			self.validate();
 		});
+
+		const templateLbl = document.createElement("h3");
+		templateLbl.className = "title";
+		templateLbl.innerHTML = "Synlighet";
+		content.container.appendChild(templateLbl);
+		const visibility = new Ui.Select("Visibility" + "...", App.translations.Search);
+		visibility.addOption("Public", Models.Visibility.Public.toString());
+		visibility.addOption("Private", Models.Visibility.Private.toString());
+		visibility.setSelected(Models.Visibility.Private.toString());
+		content.attach(visibility);
+
+		const visibilityLbl = document.createElement("h3");
+		visibilityLbl.className = "title";
+		visibilityLbl.innerHTML = App.translations.Templates;
+		content.container.appendChild(visibilityLbl);
+		this.mTemplateSelect = new Ui.Select(App.translations.SelectTemplate + "...", App.translations.Search, function (value: string | null) {
+			self.validate();
+		});
+		content.attach(this.mTemplateSelect);
 
 		const fromLbl = document.createElement("h3");
 		fromLbl.className = "title";
@@ -180,14 +200,14 @@ class CreateCompetitionPopUp {
 			r.name.en = self.mName.getValue("en");
 			r.name.sv = self.mName.getValue("sv");
 			r.name.de = self.mName.getValue("de");
-			r.list_template_uuid = ""; // TODO
+			r.list_template_uuid = self.mTemplateSelect.value!;
 			r.description = new Models.Translation();
 			r.description.en = self.mDescription.getValue("en");
 			r.description.sv = self.mDescription.getValue("sv");
 			r.description.de = self.mDescription.getValue("de");
 			r.end_on_reports = Utils.toInt(endOnReports.value);
 			r.max_competitors = Utils.toInt(maxCompetitors.value);
-			r.visibility = 1; // TODO
+			r.visibility = Utils.toInt(visibility.value!);
 			r.color = colorSelect.value!;
 			r.competition_zones_uuids = map.getSelectedZoneUuids();
 			r.password = password.value;
@@ -222,7 +242,10 @@ class CreateCompetitionPopUp {
 				if (e.name.en === "Sweden") {
 					map.setZoneSelected(e.uuid);
 				}
-			})
+			});
+			d.list_templates.forEach(e => {
+				self.mTemplateSelect.addOption(App.getTranslation(e.name), e.uuid);
+			});
 		});
 	}
 
@@ -231,21 +254,22 @@ class CreateCompetitionPopUp {
 
 		if (this.mName.getValue("sv") === "" && this.mName.getValue("en") === "" && this.mName.getValue("de") === "") {
 			this.mAddButton.disabled = true;
-			console.log("1");
 			return;
 		}
 
 		if (this.mDescription.getValue("sv") === "" && this.mDescription.getValue("en") === "" && this.mDescription.getValue("de") === "") {
 			this.mAddButton.disabled = true;
-			console.log("2");
 			return;
 		}
 
 		if (this.mFrom.value === "" || this.mUntil.value === "") {
-			console.log("3");
 			this.mAddButton.disabled = true;
 			return;
 		}
-		console.log("ok");
+
+		if (this.mTemplateSelect.value === null) {
+			this.mAddButton.disabled = true;
+			return;
+		}
 	}
 }
