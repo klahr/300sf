@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"git.sr.ht/~klahr/300sf/models"
+	"git.sr.ht/~klahr/300sf/table"
 	"git.sr.ht/~klahr/300sf/utils"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/guregu/null.v4/zero"
@@ -165,4 +166,33 @@ func CompetitionArchive(c *gin.Context) {
 
 func CompetitionsResult(c *gin.Context) {
 	c.Abort()
+}
+
+func CompetitionsBasis(c *gin.Context) {
+	type response struct {
+		Zones         []models.Zone         `json:"zones"`
+		ListTemplates []models.ListTemplate `json:"list_templates"`
+	}
+
+	var r response
+
+	if err := models.DB.Preload("Name").Where("parent_zone_id IS NULL").Find(&r.Zones).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    -10001,
+			"message": "could not find zones",
+		})
+		return
+	}
+
+	var user models.User
+	models.DB.Where("uuid=?", c.GetString("uuid")).First(&user)
+
+	if err := models.DB.Table(table.ListTemplates).Where("user_id=? OR visibility=?", user.Id, models.VisibilityPublic).Where("archived IS NULL").Preload("Name").Preload("Description").Preload("Species").Find(&r.ListTemplates).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, r)
 }
