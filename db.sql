@@ -1044,7 +1044,6 @@ ADD UNIQUE INDEX `username_UNIQUE` (`username` ASC) VISIBLE;
 ALTER TABLE `300sf`.`users` 
 DROP COLUMN `permissions`;
 
--->
 
 CREATE TABLE `300sf`.`competitions` (
   `id` INT NOT NULL AUTO_INCREMENT,
@@ -1212,3 +1211,5 @@ ADD CONSTRAINT `fk_competition_users_2`
 ALTER TABLE `300sf`.`competitions` 
 ADD COLUMN `password` VARCHAR(64) NULL AFTER `archived`,
 ADD COLUMN `password_salt` VARCHAR(64) NULL AFTER `password`;
+
+-->
