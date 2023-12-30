@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 
 	"git.sr.ht/~klahr/300sf/auth"
 	"git.sr.ht/~klahr/300sf/controllers"
@@ -32,6 +33,7 @@ func requireScope(c *gin.Context, requiredScope string) {
 
 	xAppLanguage := c.Request.Header.Get("X-App-Language")
 	c.Set("app_language", xAppLanguage)
+	c.Set("request", uuid.New().String())
 
 	ok := requiredScope == auth.AuthScopeNone
 	token := parseToken(xAccessToken)

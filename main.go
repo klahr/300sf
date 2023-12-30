@@ -17,9 +17,8 @@ import (
 )
 
 func main() {
-	ctx := log.CreateContext()
 	log.Initialize()
-	log.Info(ctx, 0, "starting server")
+	log.Info(nil, 0, "starting server")
 
 	sigc := make(chan os.Signal, 1)
 	signal.Notify(sigc,
@@ -30,25 +29,25 @@ func main() {
 	go func() {
 		s := <-sigc
 		print(s.String())
-		log.Info(ctx, 0, s.String())
-		log.Info(ctx, 0, "bye")
+		log.Info(nil, 0, s.String())
+		log.Info(nil, 0, "bye")
 		os.Exit(0)
 	}()
 
 	configFilename := flag.String("config", "", "config filename")
 	flag.Parse()
 	if err := config.SetupAppConfig(*configFilename); err != nil {
-		log.Error(ctx, 0, err.Error())
+		log.Error(nil, 0, err.Error())
 		os.Exit(1)
 	}
 
-	if err := models.SetupDB(ctx, config.AppConfig.DataSource, config.GetLogLevelAsInt()); err != nil {
-		log.Error(ctx, 0, err.Error())
+	if err := models.SetupDB(config.AppConfig.DataSource, config.GetLogLevelAsInt()); err != nil {
+		log.Error(nil, 0, err.Error())
 		os.Exit(1)
 	}
 
-	if err := models.SetupCache(ctx, config.AppConfig.RedisHost); err != nil {
-		log.Error(ctx, 0, err.Error())
+	if err := models.SetupCache(config.AppConfig.RedisHost); err != nil {
+		log.Error(nil, 0, err.Error())
 		os.Exit(1)
 	}
 
@@ -73,11 +72,11 @@ func main() {
 	SetupRoutes(r)
 
 	if config.AppConfig.SendEmailInterval > 0 {
-		go services.SendAllEmails(ctx, config.AppConfig.SendEmailInterval)
+		go services.SendAllEmails(config.AppConfig.SendEmailInterval)
 	}
 
 	if config.AppConfig.DeleteAccountsInterval > 0 {
-		go services.DeleteAccounts(ctx, config.AppConfig.DeleteAccountsInterval)
+		go services.DeleteAccounts(config.AppConfig.DeleteAccountsInterval)
 	}
 
 	r.Run(config.AppConfig.Address)

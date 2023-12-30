@@ -20,6 +20,8 @@ import (
 )
 
 func Users(c *gin.Context) {
+	log.Info(c, 0, "Users")
+
 	type request struct {
 		Email         string `json:"email"`
 		DisplayName   string `json:"display_name"`
@@ -31,6 +33,7 @@ func Users(c *gin.Context) {
 
 	var r request
 	if err := c.ShouldBindJSON(&r); err != nil {
+		log.Error(c, -10001, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
 			"message": err.Error(),
@@ -39,6 +42,7 @@ func Users(c *gin.Context) {
 	}
 
 	if !utils.VerifyDisplayName(r.DisplayName) {
+		log.Error(c, ErrorSignUpInvalidDisplayName, "invalid display name")
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    ErrorSignUpInvalidDisplayName,
 			"message": "invalid display name",
@@ -47,6 +51,7 @@ func Users(c *gin.Context) {
 	}
 
 	if !utils.VerifyUsername(r.Username) {
+		log.Error(c, ErrorSignUpInvalidUsername, "invalid username")
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    ErrorSignUpInvalidUsername,
 			"message": "invalid username",
@@ -55,6 +60,7 @@ func Users(c *gin.Context) {
 	}
 
 	if !utils.VerifyEmail(r.Email) {
+		log.Error(c, ErrorSignUpInvalidEmail, "invalid email")
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    ErrorSignUpInvalidEmail,
 			"message": "invalid email",
@@ -63,6 +69,7 @@ func Users(c *gin.Context) {
 	}
 
 	if !utils.VerifyPassword(r.Password) {
+		log.Error(c, ErrorSignUpInvalidPassword, "invalid password")
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    ErrorSignUpInvalidPassword,
 			"message": "invalid password",
@@ -71,6 +78,7 @@ func Users(c *gin.Context) {
 	}
 
 	if !r.AcceptedTerms {
+		log.Error(c, ErrorSignUpTermsNotAccepted, "terms not accepted")
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    ErrorSignUpTermsNotAccepted,
 			"message": "terms not accepted",
@@ -80,6 +88,7 @@ func Users(c *gin.Context) {
 
 	p := utils.Password{}
 	if err := p.Create(r.Password); err != nil {
+		log.Error(c, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    ErrorInternalServerError,
 			"message": err.Error(),
@@ -105,8 +114,9 @@ func Users(c *gin.Context) {
 
 	var language models.Language
 	if err := models.DB.Where("code=?", c.GetString("app_language")).First(&language).Error; err != nil {
+		log.Error(c, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    ErrorSignUpTermsNotAccepted,
+			"code":    ErrorInternalServerError,
 			"message": "invalid language",
 		})
 		return
@@ -117,6 +127,7 @@ func Users(c *gin.Context) {
 	tx := models.DB.Begin()
 
 	if err := tx.Create(&user).Error; err != nil {
+		log.Error(c, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
@@ -128,6 +139,7 @@ func Users(c *gin.Context) {
 	for _, uuid := range defaultLists {
 		var listTemplate models.ListTemplate
 		if err := tx.Where("uuid=?", uuid).Preload("Name").First(&listTemplate).Error; err != nil {
+			log.Error(c, ErrorInternalServerError, err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),
 			})
@@ -142,6 +154,7 @@ func Users(c *gin.Context) {
 			La: listTemplate.Name.La,
 		}, models.VisibilityPrivate, user, zero.NewString("", false))
 		if err != nil {
+			log.Error(c, ErrorInternalServerError, err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),
 			})
@@ -150,6 +163,7 @@ func Users(c *gin.Context) {
 		}
 
 		if err := tx.Create(&list).Error; err != nil {
+			log.Error(c, ErrorInternalServerError, err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),
 			})
@@ -160,6 +174,7 @@ func Users(c *gin.Context) {
 
 	et, err := utils.GetEmailTemplate("welcome", language.Code)
 	if err != nil {
+		log.Error(c, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
@@ -189,6 +204,7 @@ func Users(c *gin.Context) {
 
 	email.Checksum = utils.ComputeHmac256(email.Subject+email.HtmlPart+email.SendAt.String(), config.AppConfig.HashingSecret)
 	if err := tx.Create(&email).Error; err != nil {
+		log.Error(c, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
@@ -202,6 +218,8 @@ func Users(c *gin.Context) {
 }
 
 func UsersMe(c *gin.Context) {
+	log.Info(c, 0, "UsersMe")
+
 	type listReports struct {
 		List    models.List     `json:"list"`
 		Reports []models.Report `json:"reports"`
@@ -216,6 +234,7 @@ func UsersMe(c *gin.Context) {
 
 	var user models.User
 	if err := tx.Where("uuid=?", c.GetString("uuid")).Where("deleted_at IS NULL").Preload("Language").First(&user).Error; err != nil {
+		log.Error(c, 0, err.Error())
 		tx.Rollback()
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
@@ -226,6 +245,7 @@ func UsersMe(c *gin.Context) {
 	oneWeekAgo := time.Now().AddDate(0, 0, -14)
 	var lastReports []models.Report
 	if err := tx.Where("user_id=?", user.Id).Where("timestamp>=?", oneWeekAgo).Where("archived IS NULL").Preload("Tags", "archived IS NULL").Preload("Species.Name").Preload("Zone.Name").Preload("Age.Name").Preload("Gender.Name").Preload("Method.Name").Preload("Comment").Preload("Lists.Name").Order("timestamp DESC").Order("`from` DESC").Limit(50).Find(&lastReports).Error; err != nil {
+		log.Error(c, 0, err.Error())
 		tx.Rollback()
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
@@ -235,6 +255,7 @@ func UsersMe(c *gin.Context) {
 
 	var lists []models.List
 	if err := tx.Where("user_id=?", user.Id).Where("archived IS NULL").Preload("Species.Order.Name").Preload("Name").Preload("Species.Name").Find(&lists).Error; err != nil {
+		log.Error(c, 0, err.Error())
 		tx.Rollback()
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
@@ -252,6 +273,7 @@ func UsersMe(c *gin.Context) {
 			List: list,
 		}
 		if err := tx.Table("list_reports").Select("reports.*").Where("reports.archived IS NULL").Where("list_id=?", list.Id).Joins("JOIN reports ON reports.id=report_id").Preload("Lists.Name").Preload("Species.Order.Name").Preload("Species.Name").Preload("Zone.Name").Preload("Age.Name").Preload("Gender.Name").Preload("Method.Name").Preload("Tags", "archived IS NULL").Find(&listReport.Reports).Error; err != nil {
+			log.Error(c, 0, err.Error())
 			tx.Rollback()
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": err.Error(),
@@ -267,6 +289,8 @@ func UsersMe(c *gin.Context) {
 }
 
 func UsersGetUser(c *gin.Context) {
+	log.Info(c, 0, "UsersGetUser")
+
 	type response struct {
 		User    models.User     `json:"user"`
 		Reports []models.Report `json:"reports"`
@@ -274,6 +298,7 @@ func UsersGetUser(c *gin.Context) {
 
 	var user models.User
 	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("deleted_at IS NULL").First(&user).Error; err != nil {
+		log.Error(c, 0, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -282,6 +307,7 @@ func UsersGetUser(c *gin.Context) {
 
 	var reports []models.Report
 	if err := models.DB.Where("user_id=?", user.Id).Where("archived IS NULL").Find(&reports).Error; err != nil {
+		log.Error(c, 0, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -295,8 +321,11 @@ func UsersGetUser(c *gin.Context) {
 }
 
 func UsersGetUsers(c *gin.Context) {
+	log.Info(c, 0, "UsersGetUsers")
+
 	var users []models.User
 	if err := models.DB.Where("deleted_at IS NULL").Find(&users).Error; err != nil {
+		log.Error(c, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -306,8 +335,11 @@ func UsersGetUsers(c *gin.Context) {
 }
 
 func UsersWhoAmI(c *gin.Context) {
+	log.Info(c, 0, "UsersWhoAmI")
+
 	var user models.User
 	if err := models.DB.Preload("Language").Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		log.Error(c, 0, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -321,6 +353,8 @@ func UsersWhoAmI(c *gin.Context) {
 }
 
 func UsersExportData(c *gin.Context) {
+	log.Info(c, 0, "UsersExportData")
+
 	type exportUser struct {
 		Uuid          string      `json:"uuid"`
 		DisplayName   string      `json:"display_name"`
@@ -369,6 +403,7 @@ func UsersExportData(c *gin.Context) {
 
 	var user models.User
 	if err := models.DB.Preload(clause.Associations).Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		log.Error(c, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    ErrorInternalServerError,
 			"message": err.Error(),
@@ -389,6 +424,7 @@ func UsersExportData(c *gin.Context) {
 
 	var reports []models.Report
 	if err := models.DB.Preload(clause.Associations).Preload("Species.Name").Preload("Age.Name").Preload("Activity.Name").Preload("Gender.Name").Preload("Method.Name").Where("user_id=?", user.Id).Find(&reports).Error; err != nil {
+		log.Error(c, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    ErrorInternalServerError,
 			"message": err.Error(),
@@ -435,6 +471,7 @@ func UsersExportData(c *gin.Context) {
 	}
 
 	if err := models.DB.Preload(clause.Associations).Where("user_id=?", user.Id).Find(&res.ApiKeys).Error; err != nil {
+		log.Error(c, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    ErrorInternalServerError,
 			"message": err.Error(),
@@ -444,6 +481,7 @@ func UsersExportData(c *gin.Context) {
 
 	var lists []models.List
 	if err := models.DB.Preload(clause.Associations).Where("user_id=?", user.Id).Find(&lists).Error; err != nil {
+		log.Error(c, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    ErrorInternalServerError,
 			"message": err.Error(),
@@ -477,6 +515,7 @@ func UsersExportData(c *gin.Context) {
 	}
 
 	if err := models.DB.Preload(clause.Associations).Where("user_id=?", user.Id).Find(&res.Tags).Error; err != nil {
+		log.Error(c, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    ErrorInternalServerError,
 			"message": err.Error(),
@@ -488,6 +527,8 @@ func UsersExportData(c *gin.Context) {
 }
 
 func UsersMigrate(c *gin.Context) {
+	log.Info(c, 0, "UsersMigrate")
+
 	type request struct {
 		OldUsername string `json:"old_username"`
 		OldPassword string `json:"old_password"`
@@ -495,6 +536,7 @@ func UsersMigrate(c *gin.Context) {
 
 	var r request
 	if err := c.ShouldBindJSON(&r); err != nil {
+		log.Error(c, -10001, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
 			"message": err.Error(),
@@ -504,6 +546,7 @@ func UsersMigrate(c *gin.Context) {
 
 	var user models.User
 	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		log.Error(c, -10001, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
 			"message": err.Error(),
@@ -513,6 +556,7 @@ func UsersMigrate(c *gin.Context) {
 
 	res, code, err := migrate(user, r.OldUsername, r.OldPassword)
 	if err != nil {
+		log.Error(c, int64(code), err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    code,
 			"message": err.Error(),
@@ -524,12 +568,15 @@ func UsersMigrate(c *gin.Context) {
 }
 
 func UsersLanguage(c *gin.Context) {
+	log.Info(c, 0, "UsersLanguage")
+
 	type request struct {
 		LanguageCode string `json:"language_code"`
 	}
 
 	var r request
 	if err := c.ShouldBindJSON(&r); err != nil {
+		log.Error(c, ErrorParse, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "could not parse request",
 			"code":    ErrorParse,
@@ -539,6 +586,7 @@ func UsersLanguage(c *gin.Context) {
 
 	var language models.Language
 	if err := models.DB.Where("code=?", r.LanguageCode).First(&language).Error; err != nil {
+		log.Error(c, ErrorRecordNotFound, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "could not find species",
 			"code":    ErrorRecordNotFound,
@@ -548,6 +596,7 @@ func UsersLanguage(c *gin.Context) {
 
 	var user models.User
 	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		log.Error(c, -10001, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
 			"message": err.Error(),
@@ -561,12 +610,15 @@ func UsersLanguage(c *gin.Context) {
 }
 
 func UsersPortrait(c *gin.Context) {
+	log.Info(c, 0, "UsersPortrait")
+
 	type request struct {
 		Portrait string `json:"portrait"`
 	}
 
 	var r request
 	if err := c.ShouldBindJSON(&r); err != nil {
+		log.Error(c, ErrorParse, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "could not parse request",
 			"code":    ErrorParse,
@@ -581,8 +633,7 @@ func UsersPortrait(c *gin.Context) {
 }
 
 func UsersResetPassword(c *gin.Context) {
-	ctx := c.Request.Context()
-	log.Info(&ctx, 0, "UsersResetPassword")
+	log.Info(c, 0, "UsersResetPassword")
 
 	type request struct {
 		Email string `json:"email"`
@@ -590,7 +641,7 @@ func UsersResetPassword(c *gin.Context) {
 
 	var r request
 	if err := c.ShouldBindJSON(&r); err != nil {
-		log.Error(&ctx, ErrorParse, err.Error())
+		log.Error(c, ErrorParse, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "could not parse request",
 			"code":    ErrorParse,
@@ -600,7 +651,7 @@ func UsersResetPassword(c *gin.Context) {
 
 	var user models.User
 	if err := models.DB.Preload("Language").Where("email=?", r.Email).First(&user).Error; err != nil {
-		log.Error(&ctx, -10001, err.Error())
+		log.Error(c, -10001, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
 			"message": err.Error(),
@@ -620,7 +671,7 @@ func UsersResetPassword(c *gin.Context) {
 
 	et, err := utils.GetEmailTemplate("set_password", user.Language.Code)
 	if err != nil {
-		log.Error(&ctx, 0, err.Error())
+		log.Error(c, 0, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
@@ -652,7 +703,7 @@ func UsersResetPassword(c *gin.Context) {
 
 	email.Checksum = utils.ComputeHmac256(email.Subject+email.HtmlPart+email.SendAt.String(), config.AppConfig.HashingSecret)
 	if err := tx.Create(&email).Error; err != nil {
-		log.Error(&ctx, 0, err.Error())
+		log.Error(c, 0, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
@@ -661,7 +712,7 @@ func UsersResetPassword(c *gin.Context) {
 	}
 
 	if err := tx.Create(&cpr).Error; err != nil {
-		log.Error(&ctx, 0, err.Error())
+		log.Error(c, 0, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
@@ -671,13 +722,13 @@ func UsersResetPassword(c *gin.Context) {
 
 	tx.Commit()
 
-	log.Info(&ctx, 0, user.Uuid+" requested a password reset")
+	log.Info(c, 0, user.Uuid+" requested a password reset")
 
 	c.JSON(http.StatusNoContent, nil)
 }
 
 func UsersSetPassword(c *gin.Context) {
-	ctx := c.Request.Context()
+	log.Info(c, 0, "UsersSetPassword")
 
 	type request struct {
 		Password string `json:"password"`
@@ -685,7 +736,7 @@ func UsersSetPassword(c *gin.Context) {
 
 	var r request
 	if err := c.ShouldBindJSON(&r); err != nil {
-		log.Error(&ctx, ErrorInternalServerError, err.Error())
+		log.Error(c, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "could not parse request",
 			"code":    ErrorParse,
@@ -697,7 +748,7 @@ func UsersSetPassword(c *gin.Context) {
 
 	var cpr models.ChangePasswordRequest
 	if err := tx.Where("token=?", c.Param("token")).First(&cpr).Error; err != nil {
-		log.Error(&ctx, ErrorInternalServerError, err.Error())
+		log.Error(c, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
 			"message": err.Error(),
@@ -717,7 +768,7 @@ func UsersSetPassword(c *gin.Context) {
 
 	var user models.User
 	if err := tx.Where("id=?", cpr.UserId).First(&user).Error; err != nil {
-		log.Error(&ctx, ErrorInternalServerError, err.Error())
+		log.Error(c, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
 			"message": err.Error(),
@@ -737,7 +788,7 @@ func UsersSetPassword(c *gin.Context) {
 
 	p := utils.Password{}
 	if err := p.Create(r.Password); err != nil {
-		log.Error(&ctx, ErrorInternalServerError, err.Error())
+		log.Error(c, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    ErrorInternalServerError,
 			"message": err.Error(),
@@ -747,7 +798,7 @@ func UsersSetPassword(c *gin.Context) {
 	}
 
 	if err := tx.Table(table.Users).Where("id=?", user.Id).UpdateColumn("password", p.Value).UpdateColumn("password_salt", p.Salt).Error; err != nil {
-		log.Error(&ctx, ErrorInternalServerError, err.Error())
+		log.Error(c, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
 			"message": err.Error(),
@@ -757,7 +808,7 @@ func UsersSetPassword(c *gin.Context) {
 	}
 
 	if err := tx.Table(table.ChangePasswordRequests).Where("id=?", cpr.Id).UpdateColumn("expire_at", time.Now()).Error; err != nil {
-		log.Error(&ctx, ErrorInternalServerError, err.Error())
+		log.Error(c, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})

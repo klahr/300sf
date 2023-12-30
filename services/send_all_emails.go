@@ -1,7 +1,6 @@
 package services
 
 import (
-	"context"
 	"time"
 
 	"git.sr.ht/~klahr/300sf/config"
@@ -12,7 +11,7 @@ import (
 	"github.com/mailjet/mailjet-apiv3-go"
 )
 
-func SendAllEmails(ctx *context.Context, interval int64) {
+func SendAllEmails(interval int64) {
 	for {
 		var emails []models.Email
 		tx := models.DB.Begin()
@@ -44,13 +43,13 @@ func SendAllEmails(ctx *context.Context, interval int64) {
 			}
 			if len(messagesInfo) > 0 {
 				if err := sf_mailjet.SendEmails(messagesInfo, config.AppConfig.MailjetPublicKey, config.AppConfig.MailjetSecretKey); err != nil {
-					log.Error(ctx, 0, err.Error())
+					log.Error(nil, 0, err.Error())
 					tx.Rollback()
 				} else {
 					now := time.Now()
 					for _, e := range emails {
 						if err := tx.Model(e).Update("sent_at", now).Error; err != nil {
-							log.Error(ctx, 0, err.Error())
+							log.Error(nil, 0, err.Error())
 						}
 					}
 					tx.Commit()
