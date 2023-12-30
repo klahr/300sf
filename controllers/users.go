@@ -7,14 +7,16 @@ import (
 	"strings"
 	"time"
 
-	"git.sr.ht/~klahr/300sf/auth"
-	"git.sr.ht/~klahr/300sf/config"
-	"git.sr.ht/~klahr/300sf/models"
-	"git.sr.ht/~klahr/300sf/table"
-	"git.sr.ht/~klahr/300sf/utils"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/guregu/null.v4/zero"
 	"gorm.io/gorm/clause"
+
+	"git.sr.ht/~klahr/300sf/auth"
+	"git.sr.ht/~klahr/300sf/config"
+	"git.sr.ht/~klahr/300sf/log"
+	"git.sr.ht/~klahr/300sf/models"
+	"git.sr.ht/~klahr/300sf/table"
+	"git.sr.ht/~klahr/300sf/utils"
 )
 
 func Users(c *gin.Context) {
@@ -77,7 +79,13 @@ func Users(c *gin.Context) {
 	}
 
 	p := utils.Password{}
-	p.Create(r.Password)
+	if err := p.Create(r.Password); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorInternalServerError,
+			"message": err.Error(),
+		})
+		return
+	}
 
 	user := models.User{
 		Model: models.Model{
@@ -573,12 +581,16 @@ func UsersPortrait(c *gin.Context) {
 }
 
 func UsersResetPassword(c *gin.Context) {
+	ctx := c.Request.Context()
+	log.Info(&ctx, 0, "UsersResetPassword")
+
 	type request struct {
 		Email string `json:"email"`
 	}
 
 	var r request
 	if err := c.ShouldBindJSON(&r); err != nil {
+		log.Error(&ctx, ErrorParse, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "could not parse request",
 			"code":    ErrorParse,
@@ -588,6 +600,7 @@ func UsersResetPassword(c *gin.Context) {
 
 	var user models.User
 	if err := models.DB.Preload("Language").Where("email=?", r.Email).First(&user).Error; err != nil {
+		log.Error(&ctx, -10001, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
 			"message": err.Error(),
@@ -607,6 +620,7 @@ func UsersResetPassword(c *gin.Context) {
 
 	et, err := utils.GetEmailTemplate("set_password", user.Language.Code)
 	if err != nil {
+		log.Error(&ctx, 0, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
@@ -638,6 +652,7 @@ func UsersResetPassword(c *gin.Context) {
 
 	email.Checksum = utils.ComputeHmac256(email.Subject+email.HtmlPart+email.SendAt.String(), config.AppConfig.HashingSecret)
 	if err := tx.Create(&email).Error; err != nil {
+		log.Error(&ctx, 0, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
@@ -646,6 +661,7 @@ func UsersResetPassword(c *gin.Context) {
 	}
 
 	if err := tx.Create(&cpr).Error; err != nil {
+		log.Error(&ctx, 0, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
@@ -655,16 +671,21 @@ func UsersResetPassword(c *gin.Context) {
 
 	tx.Commit()
 
+	log.Info(&ctx, 0, user.Uuid+" requested a password reset")
+
 	c.JSON(http.StatusNoContent, nil)
 }
 
 func UsersSetPassword(c *gin.Context) {
+	ctx := c.Request.Context()
+
 	type request struct {
 		Password string `json:"password"`
 	}
 
 	var r request
 	if err := c.ShouldBindJSON(&r); err != nil {
+		log.Error(&ctx, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "could not parse request",
 			"code":    ErrorParse,
@@ -676,6 +697,7 @@ func UsersSetPassword(c *gin.Context) {
 
 	var cpr models.ChangePasswordRequest
 	if err := tx.Where("token=?", c.Param("token")).First(&cpr).Error; err != nil {
+		log.Error(&ctx, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
 			"message": err.Error(),
@@ -695,6 +717,7 @@ func UsersSetPassword(c *gin.Context) {
 
 	var user models.User
 	if err := tx.Where("id=?", cpr.UserId).First(&user).Error; err != nil {
+		log.Error(&ctx, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
 			"message": err.Error(),
@@ -708,13 +731,23 @@ func UsersSetPassword(c *gin.Context) {
 			"code":    ErrorSignUpInvalidPassword,
 			"message": "invalid password",
 		})
+		tx.Rollback()
 		return
 	}
 
 	p := utils.Password{}
-	p.Create(r.Password)
+	if err := p.Create(r.Password); err != nil {
+		log.Error(&ctx, ErrorInternalServerError, err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorInternalServerError,
+			"message": err.Error(),
+		})
+		tx.Rollback()
+		return
+	}
 
 	if err := tx.Table(table.Users).Where("id=?", user.Id).UpdateColumn("password", p.Value).UpdateColumn("password_salt", p.Salt).Error; err != nil {
+		log.Error(&ctx, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
 			"message": err.Error(),
@@ -724,6 +757,7 @@ func UsersSetPassword(c *gin.Context) {
 	}
 
 	if err := tx.Table(table.ChangePasswordRequests).Where("id=?", cpr.Id).UpdateColumn("expire_at", time.Now()).Error; err != nil {
+		log.Error(&ctx, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
