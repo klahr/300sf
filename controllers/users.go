@@ -708,6 +708,7 @@ func UsersSetPassword(c *gin.Context) {
 			"code":    ErrorSignUpInvalidPassword,
 			"message": "invalid password",
 		})
+		tx.Rollback()
 		return
 	}
 
