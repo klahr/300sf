@@ -1,7 +1,6 @@
 package services
 
 import (
-	"context"
 	"time"
 
 	"git.sr.ht/~klahr/300sf/log"
@@ -10,17 +9,17 @@ import (
 	"gorm.io/gorm"
 )
 
-func DeleteAccounts(ctx *context.Context, interval int64) {
+func DeleteAccounts(interval int64) {
 	for {
 		var users []models.User
 		tx := models.DB.Begin()
 		if err := tx.Select("users.*").Where("delete_at<=NOW()").Joins("JOIN delete_account_requests ON delete_account_request_id=delete_account_requests.id").Find(&users).Error; err != nil {
-			log.Error(ctx, 0, err.Error())
+			log.Error(nil, 0, err.Error())
 			tx.Rollback()
 		} else {
 			for _, u := range users {
 				if err := deleteUser(u, tx); err != nil {
-					log.Error(ctx, 0, err.Error())
+					log.Error(nil, 0, err.Error())
 				}
 			}
 
