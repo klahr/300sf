@@ -1,4 +1,5 @@
 /// <reference path="../models/Zone.ts"/>
+/// <reference path="../models/ListTemplate.ts"/>
 
 namespace Responses {
 	export class CompetitionsBasis {
