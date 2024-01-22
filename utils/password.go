@@ -3,6 +3,7 @@ package utils
 
 import (
 	"crypto/hmac"
+	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/hex"
 	"strconv"
@@ -17,7 +18,7 @@ type Password struct {
 }
 
 func (p *Password) Create(str string) error {
-	salt := RandomSha256()
+	salt := RandomSha1()
 	p.Salt = salt
 	if hashedPassword, err := bcrypt.GenerateFromPassword([]byte(str+salt), bcrypt.DefaultCost); err != nil {
 		return err
@@ -29,6 +30,11 @@ func (p *Password) Create(str string) error {
 
 func (p *Password) IsMatching(str, password, salt string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(password), []byte(str+salt)) == nil
+}
+
+func RandomSha1() string {
+	hash := hmac.New(sha1.New, []byte(strconv.FormatInt(time.Now().Unix(), 10)))
+	return hex.EncodeToString(hash.Sum(nil))
 }
 
 func RandomSha256() string {
