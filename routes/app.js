@@ -120,6 +120,12 @@ router.get('/privacy-policy', function (req, res) {
 	});
 });
 
+router.get('/terms', function (req, res) {
+	res.render('pages/terms-of-service', {
+		layout: false
+	});
+});
+
 router.post('/api/v1/auth', async (req, res) => {
 	const apiUrl = config.ApiEndpoint + req.originalUrl.substring(4);
 
