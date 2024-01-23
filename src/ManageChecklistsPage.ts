@@ -101,22 +101,22 @@ class ManageCheckListsPage extends Page {
 
 		this.mTemplatesTitle = document.createElement("h1");
 		this.mTemplatesTitle.innerHTML = App.translations.Templates;
-		this.container.appendChild(this.mTemplatesTitle);
+		//this.container.appendChild(this.mTemplatesTitle);
 
 		this.mTemplates = new Ui.Div();
 		this.mTemplates.style.position = "relative";
-		this.attach(this.mTemplates);
+		//this.attach(this.mTemplates);
 
 		const newTemplateLbl = document.createElement("h2");
 		newTemplateLbl.innerHTML = App.translations.NewTemplate;
-		this.container.appendChild(newTemplateLbl);
+		//this.container.appendChild(newTemplateLbl);
 
 		this.mTemplateName = new Ui.Input("text");
 		this.mTemplateName.setPlaceHolder(App.translations.Name);
 		this.mTemplateName.container.addEventListener("input", function () {
 			self.updateCreateTemplateButtonStatus();
 		});
-		this.attach(this.mTemplateName);
+		//this.attach(this.mTemplateName);
 
 		this.mCreateTemplateButton = document.createElement("button");
 		this.mCreateTemplateButton.innerHTML = App.translations.CreateTemplate;
@@ -125,7 +125,7 @@ class ManageCheckListsPage extends Page {
 		this.mCreateTemplateButton.style.borderRadius = "8px";
 		this.mCreateTemplateButton.style.backgroundColor = "var(--success-color)";
 		this.mCreateTemplateButton.disabled = true;
-		this.container.appendChild(this.mCreateTemplateButton);
+		//this.container.appendChild(this.mCreateTemplateButton);
 		this.mCreateTemplateButton.addEventListener("click", function () {
 			/*const r = new Requests.Lists();
 			r.name = new Models.Translation();
