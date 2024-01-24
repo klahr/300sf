@@ -1212,4 +1212,15 @@ ALTER TABLE `300sf`.`competitions`
 ADD COLUMN `password` VARCHAR(64) NULL AFTER `archived`,
 ADD COLUMN `password_salt` VARCHAR(64) NULL AFTER `password`;
 
+ALTER TABLE `300sf`.`reports` 
+DROP FOREIGN KEY `fk_reports_6`;
+ALTER TABLE `300sf`.`reports` 
+ADD CONSTRAINT `fk_reports_6`
+  FOREIGN KEY (`method_id`)
+  REFERENCES `300sf`.`methods` (`id`)
+  ON DELETE SET NULL
+  ON UPDATE NO ACTION;
+
 -->
+
+
