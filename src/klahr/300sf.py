@@ -56,10 +56,9 @@ def get_access_token():
 def http_get(path, headers):
     global config
 
-    headers["X-Api-Key"] = str(config.get("api-key"))
     access_token = get_access_token()
     if access_token is not None:
-        headers["X-Access-Token"] = access_token
+        headers["Authorization"] = f'Bearer {access_token}'
     try:
         r = httpx.get(
             f'{config.get("api-endpoint")}{path}', headers=headers, timeout=30.0
@@ -73,10 +72,9 @@ def http_get(path, headers):
 def http_post(path, headers, body):
     global config
 
-    headers["X-Api-Key"] = str(config.get("api-key"))
     access_token = get_access_token()
     if access_token is not None:
-        headers["X-Access-Token"] = access_token
+        headers["Authorization"] = f'Bearer {access_token}'
     try:
         r = httpx.post(
             f'{config.get("api-endpoint")}{path}',
@@ -130,6 +128,8 @@ def signup(display_name, password, email, accepted_terms):
 
 
 def login(email, password):
+    global config
+
     if email == None:
         err_print("err: no email (--email) provided.")
         return
@@ -141,11 +141,15 @@ def login(email, password):
 
     r = http_post(
         "/v1/auth",
-        {
-            "Authorization": "Basic "
-            + base64.b64encode((email + ":" + password).encode()).decode(),
-        },
         {},
+        {
+            "grant_type": "password",
+            "client_id": config.get("client-id"),
+            "client_secret": config.get("client-secret"),
+            "email": email,
+            "password": password,
+            "scopes": ["user", "admin"],
+        },
     )
     if r is not None:
         if r.status_code == 200:
