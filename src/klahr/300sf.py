@@ -791,12 +791,12 @@ def method(insert, details, lang):
     named_record(insert, details, "/v1/methods", lang)
 
 
-def translation(update, en, la, sv):
+def translation(update, en, la, sv, de):
     if update is not None:
         r = http_post(
             "/v1/translations/update",
             {},
-            {"uuid": update, "en": en, "sv": sv, "la": la},
+            {"uuid": update, "en": en, "sv": sv, "la": la, "de": de},
         )
         if r is not None and r.status_code != 204:
             response = r.json()
@@ -815,11 +815,12 @@ def translation(update, en, la, sv):
                         trans["uuid"],
                         trans["en"],
                         trans["sv"],
+                        trans["de"],
                         trans["la"],
                     ]
                 )
             print(
-                tabulate.tabulate(t, headers=["id", "en", "sv", "la"], tablefmt="plain")
+                tabulate.tabulate(t, headers=["id", "en", "sv", "de", "la"], tablefmt="plain")
             )
 
 
@@ -953,7 +954,7 @@ def main():
     if not lang:
         lang = "en"
 
-    lang_choices=["en", "sv"]
+    lang_choices=["en", "sv", "de"]
 
     parser = argparse.ArgumentParser(description="300sf arguments and options")
     subparsers = parser.add_subparsers(dest="subparser")
@@ -1134,6 +1135,7 @@ def main():
     translation_parser.add_argument("--en", dest="en", help="English.")
     translation_parser.add_argument("--la", dest="la", help="Swedish.")
     translation_parser.add_argument("--sv", dest="sv", help="Latin.")
+    translation_parser.add_argument("--de", dest="de", help="German.")
 
     tag_parser = subparsers.add_parser("tag", help="Tag management.")
     tag_parser.add_argument("--create", dest="create", metavar="NAME", help="Create a new tag.")
