@@ -20,8 +20,32 @@ class ListPage extends Page {
 	constructor(appListener: IAppListener) {
 		super(appListener);
 
+		const self = this;
+
 		this.mTitle = document.createElement("h1");
 		this.container.appendChild(this.mTitle);
+
+		const download = document.createElement("span");
+		download.className = "material-symbols-outlined";
+		download.innerHTML = "download";
+		download.style.color = "var(--primary-color)";
+		download.style.fontSize = "32px";
+		download.style.cursor = "pointer";
+		download.addEventListener("click", function (event) {
+			event.stopPropagation();
+			const d = {
+				"list_uuid": self.mData.uuid,
+				"format": "csv",
+				"timezone_offset": Utils.getTimezoneOffset()
+			};
+			const r = new HttpRequest("PUT", "/v1/reports/export", d);
+			r.process(function (status: any, data: any) {
+				DownloadFile("data.csv", JSON.stringify(data), "text/csv");
+			}, function () {
+				new Ui.MessageBox(App.translations.Error, App.translations.SomethingWentWrong, "/img/messagebox-256.webp", "var(--error-color)", function () { });
+			});
+		});
+		this.container.appendChild(download);
 
 		this.mProgressLbl = document.createElement("p");
 		this.mProgressLbl.style.margin = "0";
@@ -43,7 +67,6 @@ class ListPage extends Page {
 		filter.addClass("filter");
 		this.attach(filter);
 
-		const self = this;
 		this.mFilterInput = new Ui.Input("text");
 		this.mFilterInput.setPlaceHolder(App.translations.Search + "...");
 		filter.attach(this.mFilterInput);

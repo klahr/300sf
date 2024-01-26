@@ -1,5 +1,5 @@
 function DownloadFile(filename: string, data: string, mimeType: string = "application/json"): void {
-	const blob = new Blob([data], { type: mimeType });
+	const blob = new Blob([data.replace(/\\n/g, "\n")], { type: mimeType });
 	const url = URL.createObjectURL(blob);
 	const a = document.createElement("a");
 	a.href = url;

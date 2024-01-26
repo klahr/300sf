@@ -26,4 +26,10 @@ namespace Utils {
 		var r = new Date(date.getTime()).toISOString();
 		return r.slice(0, r.lastIndexOf(".")) + 'Z';
 	}
+
+	export function getTimezoneOffset(): number {
+		const now = new Date();
+		const isDaylightSavingTime = now.getTimezoneOffset() !== new Date(now.getFullYear(), 0, 1).getTimezoneOffset();
+		return -now.getTimezoneOffset() + (isDaylightSavingTime ? 60 : 0);
+	}
 }
