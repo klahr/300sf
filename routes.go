@@ -210,6 +210,7 @@ func SetupRoutes(r *gin.Engine) {
 	r.POST("/v1/reports/:uuid/remove_tag", apiKeyMiddleware, basicMiddleware, controllers.ReportsRemoveTag)
 	r.POST("/v1/reports/:uuid/add_tag", apiKeyMiddleware, basicMiddleware, controllers.ReportsAddTag)
 	r.PUT("/v1/reports/basis", apiKeyMiddleware, basicMiddleware, controllers.ReportsBasis)
+	r.PUT("/v1/reports/export", apiKeyMiddleware, basicMiddleware, controllers.ReportsExport)
 
 	// Activities
 	r.GET("/v1/activities/list", apiKeyMiddleware, basicMiddleware, controllers.NamedRecordList[models.Activity])

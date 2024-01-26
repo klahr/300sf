@@ -2,7 +2,9 @@
 package controllers
 
 import (
+	"encoding/csv"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -436,6 +438,129 @@ func ReportsRemoveTag(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusNoContent, nil)
+}
+
+func ReportsExport(c *gin.Context) {
+	type request struct {
+		ListUuid       string `json:"list_uuid"`
+		Format         string `json:"format"`
+		TimezoneOffset int64  `json:"timezone_offset"`
+	}
+
+	var r request
+	if err := c.ShouldBindJSON(&r); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var user models.User
+	if err := models.DB.Where("uuid=?", c.GetString("uuid")).Preload("Language").First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var list models.List
+	if err := models.DB.Where("uuid=?", r.ListUuid).Where("user_id=?", user.Id).First(&list).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var reports []models.Report
+	if err := models.DB.Table("list_reports").Select("reports.*").Preload("Comment").Preload("Zone.Name").Preload("Method.Name").Preload("Gender.Name").Preload("Activity.Name").Preload("Species.Name").Preload("Age.Name").Where("list_id=?", list.Id).Joins("JOIN reports ON reports.id=report_id").Find(&reports).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	csvData := [][]string{
+		{"species", "observed_from", "observed_until", "quantity", "method", "age", "gender", "activity", "comment", "zone", "latitude", "longitude"},
+	}
+
+	for _, report := range reports {
+		row := []string{}
+		row = append(row, utils.Translation2Value(report.Species.Name, user.Language.Code))
+		if report.From.Valid {
+			row = append(row, string(report.From.Time.Add(time.Duration(r.TimezoneOffset)*time.Minute).Format("2006-01-02 15:04:05")))
+		} else {
+			row = append(row, "")
+		}
+		if report.Until.Valid {
+			row = append(row, string(report.Until.Time.Add(time.Duration(r.TimezoneOffset)*time.Minute).Format("2006-01-02 15:04:05")))
+		} else {
+			row = append(row, "")
+		}
+		if !report.Quantity.IsZero() {
+			row = append(row, strconv.Itoa((int)(report.Quantity.ValueOrZero())))
+		} else {
+			row = append(row, "")
+		}
+		if report.Method != nil {
+			row = append(row, utils.Translation2Value(report.Method.Name, user.Language.Code))
+		} else {
+			row = append(row, "")
+		}
+		if report.Age != nil {
+			row = append(row, utils.Translation2Value(report.Age.Name, user.Language.Code))
+		} else {
+			row = append(row, "")
+		}
+		if report.Gender != nil {
+			row = append(row, utils.Translation2Value(report.Gender.Name, user.Language.Code))
+		} else {
+			row = append(row, "")
+		}
+		if report.Activity != nil {
+			row = append(row, utils.Translation2Value(report.Activity.Name, user.Language.Code))
+		} else {
+			row = append(row, "")
+		}
+		if report.Comment != nil {
+			row = append(row, report.Comment.Text)
+		} else {
+			row = append(row, "")
+		}
+		if report.Zone != nil {
+			row = append(row, utils.Translation2Value(report.Zone.Name, user.Language.Code))
+		} else {
+			row = append(row, "")
+		}
+		if !report.Latitude.IsZero() {
+			row = append(row, strconv.FormatFloat(report.Latitude.Float64, 'f', -1, 64))
+		} else {
+			row = append(row, "")
+		}
+		if !report.Longitude.IsZero() {
+			row = append(row, strconv.FormatFloat(report.Longitude.Float64, 'f', -1, 64))
+		} else {
+			row = append(row, "")
+		}
+
+		csvData = append(csvData, row)
+	}
+
+	var b strings.Builder
+	w := csv.NewWriter(&b)
+	w.WriteAll(csvData)
+	w.Flush()
+	if err := w.Error(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.Header("Content-Type", "text/csv")
+	c.String(http.StatusOK, b.String())
 }
 
 func ReportsBasis(c *gin.Context) {
