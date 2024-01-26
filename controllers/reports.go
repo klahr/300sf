@@ -474,18 +474,28 @@ func ReportsExport(c *gin.Context) {
 	}
 
 	var reports []models.Report
-	if err := models.DB.Table("list_reports").Select("reports.*").Preload("Comment").Preload("Zone.Name").Preload("Method.Name").Preload("Gender.Name").Preload("Activity.Name").Preload("Species.Name").Preload("Age.Name").Where("list_id=?", list.Id).Joins("JOIN reports ON reports.id=report_id").Find(&reports).Error; err != nil {
+	if err := models.DB.Table("list_reports").Select("reports.*").Preload("Comment").Preload("Zone.Name").Preload("Method.Name").Preload("Gender.Name").Preload("Activity.Name").Preload("Species.Name").Preload("Age.Name").Where("list_id=?", list.Id).Joins("JOIN reports ON reports.id=report_id").Order("`from` DESC").Find(&reports).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
 		return
 	}
 
-	csvData := [][]string{
-		{"species", "observed_from", "observed_until", "quantity", "method", "age", "gender", "activity", "comment", "zone", "latitude", "longitude"},
-	}
+	encountered := make(map[int64]bool)
+	result := []models.Report{}
 
 	for _, report := range reports {
+		if !encountered[report.SpeciesId] {
+			encountered[report.SpeciesId] = true
+			result = append(result, report)
+		}
+	}
+
+	csvData := [][]string{
+		{"species", "observed_from", "observed_until", "quantity", "method", "age", "gender", "activity", "comment", "location", "latitude", "longitude"},
+	}
+
+	for _, report := range result {
 		row := []string{}
 		row = append(row, utils.Translation2Value(report.Species.Name, user.Language.Code))
 		if report.From.Valid {
