@@ -1,5 +1,11 @@
 function DownloadFile(filename: string, data: string, mimeType: string = "application/json"): void {
-	const blob = new Blob([data.replace(/\\n/g, "\n")], { type: mimeType });
+	let d = data.replace(/\\n/g, "\n");
+	if (mimeType == "text/csv") {
+		if (d.startsWith("\"") && d.endsWith("\"")) {
+			d = d.slice(1, -1);
+		}
+	}
+	const blob = new Blob([d], { type: mimeType });
 	const url = URL.createObjectURL(blob);
 	const a = document.createElement("a");
 	a.href = url;

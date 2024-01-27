@@ -10,7 +10,7 @@ class HttpRequest {
 	private static sNumRequests = 0;
 
 	constructor(private mMethod: string, private mUrl: string, private mData: any = {}) {
-		this.setHeader("Accept", "application/json");
+		this.setHeader("Accept", "application/json, text/csv");
 		this.setHeader("Content-Type", "application/json");
 		this.setHeader("X-App-Language", App.language);
 		const ks = new LocalStorage();
