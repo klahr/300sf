@@ -5,7 +5,9 @@
 /// <reference path="MapSelect.ts"/>
 /// <reference path="models/Competition.ts"/>
 /// <reference path="utils/Base64.ts"/>
+/// <reference path="utils/Convert.ts"/>
 /// <reference path="responses/Competitions.ts"/>
+/// <reference path="requests/Competitions.ts"/>
 
 class CreateCompetitionPopUp {
 	private mAddButton: HTMLButtonElement;

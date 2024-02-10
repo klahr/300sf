@@ -81,6 +81,10 @@ router.get('/admin', function (req, res) {
 	renderPage(req, res);
 });
 
+router.get('/experimental', function (req, res) {
+	renderPage(req, res);
+});
+
 router.get('/list/:uuid', function (req, res) {
 	res.render('pages/app', {
 		data: {
@@ -141,6 +145,31 @@ router.post('/api/v1/auth', async (req, res) => {
 				'Content-Length': Buffer.byteLength(JSON.stringify(req.body))
 			},
 			data: req.body,
+		};
+
+		const response = await axios(axiosConfig);
+
+		res.status(response.status).json(response.data);
+	} catch (error) {
+		if (error.response) {
+			res.status(error.response.status).json(error.response.data ? error.response.data : {});
+		} else {
+			res.status(503).json({});
+		}
+	}
+});
+
+router.post('/analyze', async (req, res) => {
+	const apiUrl = "https://api.300sf.se/analyze";
+
+	console.log(apiUrl);
+
+	try {
+		const axiosConfig = {
+			method: req.method,
+			url: apiUrl,
+			headers: req.headers,
+			data: req.method == "GET" ? null : req.body,
 		};
 
 		const response = await axios(axiosConfig);
