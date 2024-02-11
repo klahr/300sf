@@ -11,14 +11,6 @@ class ExperimentalPage extends Page {
 		this.container.appendChild(title);
 
 		this.addProfile();
-
-		const analyzeButton = document.createElement("button");
-		analyzeButton.innerHTML = "Identify Species";
-		this.container.appendChild(analyzeButton);
-		analyzeButton.addEventListener("click", function() {
-			new AnalyzePopUp(function() {
-			});
-		});
 	}
 
 	public get id(): string {
