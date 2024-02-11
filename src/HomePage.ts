@@ -53,6 +53,7 @@ class HomePage extends Page {
 			});
 		});
 		this.attach(this.mSpeciesList);
+		this.mSpeciesList.showIdentifyButton(true);
 
 		this.mProgressBoxes = new Ui.Div();
 		this.mProgressBoxes.style.position = "relative";

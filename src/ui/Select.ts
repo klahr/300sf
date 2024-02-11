@@ -9,6 +9,7 @@ namespace Ui {
 		private mSearch: Ui.Input;
 		private mExpandable: Ui.Div;
 		private mOpenArrow: HTMLSpanElement;
+		private mIdentifyButton: HTMLSpanElement;
 		private mSelectCallback: (value: string | null) => void | null;
 
 		constructor(placeholder: string, searchText: string, selectCallback: (value: string | null) => void = function () { }) {
@@ -41,6 +42,21 @@ namespace Ui {
 			this.mOpenArrow.innerHTML = "expand_more";
 			this.mOpenArrow.style.pointerEvents = "none";
 			this.mContainer.appendChild(this.mOpenArrow);
+
+			this.mIdentifyButton = document.createElement("span");
+			this.mIdentifyButton.className = "material-symbols-outlined";
+			this.mIdentifyButton.style.cursor = "pointer";
+			this.mIdentifyButton.style.fontSize = "32px";
+			this.mIdentifyButton.style.position = "absolute";
+			this.mIdentifyButton.style.right = "53px";
+			this.mIdentifyButton.style.color = "white";
+			this.mIdentifyButton.style.top = "8px";
+			this.mIdentifyButton.innerHTML = "mic";
+			this.mIdentifyButton.style.display = "none";
+			this.mIdentifyButton.addEventListener("click", function () {
+				new AnalyzePopUp(function() {});
+			});
+			this.mContainer.appendChild(this.mIdentifyButton);
 
 			this.mExpandable = new Ui.Div();
 			this.mExpandable.style.backgroundColor = "var(--widget-color)";
@@ -171,6 +187,10 @@ namespace Ui {
 			} else {
 				this.show();
 			}
+		}
+
+		public showIdentifyButton(show: boolean): void {
+			this.mIdentifyButton.style.display = show ? "" : "none";
 		}
 
 		public show(): void {

@@ -144,16 +144,26 @@ class AnalyzePopUp {
 			r.process((status: any, data: any) => {
 				if (data.results) {
 					data.results.forEach(e => {
+						const d = document.createElement("div");
+						d.style.border = "2px solid #333";
+						d.style.padding = "8px";
+						d.style.borderRadius = "8px";
+						d.style.marginBottom = "4px";
+						d.style.cursor = "pointer";
+						d.addEventListener("click", function() {
+							openSpeciesPopUp(e.species, null, () => {});
+						});
+						self.mResultView.appendChild(d);
 						const r = document.createElement("p");
 						r.innerHTML = App.getTranslation(e.species.name);
-						self.mResultView.appendChild(r);
+						d.appendChild(r);
 					
 						const probability = new Ui.ProgressBar();
 						probability.style.position = "relative";
 						probability.setProgress(e.probability * 100);
 						probability.style.width = "100%";
 						probability.style.height = "8px";
-						self.mResultView.appendChild(probability.container);
+						d.appendChild(probability.container);
 					});
 				} else {
 					const r = document.createElement("p");
