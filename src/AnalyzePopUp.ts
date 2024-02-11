@@ -127,7 +127,7 @@ class AnalyzePopUp {
 		const self = this;
 		const formData = new FormData();
 		formData.append('audio', audioBlob, 'recording.wav');
-		formData.append('meta', '{"save":true}');
+		formData.append('meta', '{"save":false}');
 		this.mAnalyzeText.style.display = "";
 
 		fetch('https://api.300sf.se/analyze', {
