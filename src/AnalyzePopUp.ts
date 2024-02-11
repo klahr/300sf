@@ -5,6 +5,7 @@ class AnalyzePopUp {
 	private mResultView: HTMLDivElement;
 	private mAnalyzeText: HTMLParagraphElement;
 	private mPopUp: Ui.PopUp;
+	private mStream: any;
 
 	constructor(closeCallback: () => void) {
 		const self = this;
@@ -63,6 +64,7 @@ class AnalyzePopUp {
 		let audioChunks = [];
 
 		const handleSuccess = (stream) => {
+			self.mStream = stream;
 			const workerOptions = {
 				OggOpusEncoderWasmPath: 'https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/OggOpusEncoder.wasm',
 				WebMOpusEncoderWasmPath: 'https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/WebMOpusEncoder.wasm'
@@ -122,6 +124,12 @@ class AnalyzePopUp {
 			.catch(handleError);
 
 		this.mPopUp = new Ui.PopUp(content.container, function () {
+			if (self.mStream) {
+				const at = self.mStream.getAudioTracks()[0];
+				if (at) {
+					at.stop();
+				}
+			}
 			closeCallback();
 		});
 	}
