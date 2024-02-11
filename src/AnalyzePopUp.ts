@@ -68,10 +68,13 @@ class AnalyzePopUp {
 				WebMOpusEncoderWasmPath: 'https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/WebMOpusEncoder.wasm'
 			};
 
+			// @ts-ignore
 			window.MediaRecorder = OpusMediaRecorder;
+			// @ts-ignore
 			mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/ogg' }, workerOptions);
 			mediaRecorder.ondataavailable = (event) => {
 				if (event.data.size > 0) {
+					// @ts-ignore
 					audioChunks.push(event.data);
 				}
 			};
