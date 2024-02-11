@@ -167,7 +167,7 @@ class AnalyzePopUp {
 					});
 				} else {
 					const r = document.createElement("p");
-					r.innerHTML = "Lyckades inte identifiera arten.";
+					r.innerHTML = App.translations.NoIdentifySpecies;
 					self.mResultView.appendChild(r);
 				}
 				this.mAnalyzeText.style.display = "none";

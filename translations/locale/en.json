@@ -147,5 +147,6 @@
 	"Microphone": "Microphone",
 	"NoMicrophone": "Unable to utilize the microphone.",
 	"IdentifyingPleaseWait": "Identifying. Please wait...",
-	"Result": "Result"
+	"Result": "Result",
+	"NoIdentifySpecies": "Unable to identify the species."
 }

@@ -147,5 +147,6 @@
 	"Microphone": "Mikrofon",
 	"NoMicrophone": "Kunde inte använda mikrofonen.",
 	"IdentifyingPleaseWait": "Identifierar. Vänta...",
-	"Result": "Resultat"
+	"Result": "Resultat",
+	"NoIdentifySpecies": "Lyckades inte identifiera arten."
 }

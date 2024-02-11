@@ -149,6 +149,7 @@ class Translations {
         NoMicrophone: "Unable to utilize the microphone.",
         IdentifyingPleaseWait: "Identifying. Please wait...",
         Result: "Result",
+        NoIdentifySpecies: "Unable to identify the species.",
     }
     static sv = {
         SignIn: "Logga in",
@@ -300,6 +301,7 @@ class Translations {
         NoMicrophone: "Kunde inte använda mikrofonen.",
         IdentifyingPleaseWait: "Identifierar. Vänta...",
         Result: "Resultat",
+        NoIdentifySpecies: "Lyckades inte identifiera arten.",
     }
     static de = {
         SignIn: "Anmelden",
@@ -451,5 +453,6 @@ class Translations {
         NoMicrophone: "Unable to utilize the microphone.",
         IdentifyingPleaseWait: "Identifying. Please wait...",
         Result: "Result",
+        NoIdentifySpecies: "Unable to identify the species.",
     }
 }
