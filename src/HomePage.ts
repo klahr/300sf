@@ -100,7 +100,7 @@ class HomePage extends Page {
 				}
 
 				const title = document.createElement("p");
-				title.innerHTML = App.getTranslation(e.list.name).substring(0, 25);
+				title.innerHTML = App.getTranslation(e.list.name).substring(0, 50);
 				d.container.appendChild(title);
 
 				const pd = new Ui.Div();
