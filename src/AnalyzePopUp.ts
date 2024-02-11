@@ -1,8 +1,10 @@
 /// <reference path="ui/Div.ts"/>
+/// <reference path="App.ts"/>
 
 class AnalyzePopUp {
 	private mResultView: HTMLDivElement;
 	private mAnalyzeText: HTMLParagraphElement;
+	private mPopUp: Ui.PopUp;
 
 	constructor(closeCallback: () => void) {
 		const self = this;
@@ -12,12 +14,12 @@ class AnalyzePopUp {
 		content.style.position = "relative";
 
 		const title = document.createElement("h1");
-		title.innerHTML = "Identify species";
+		title.innerHTML = App.translations.IdentifySpecies;
 		title.style.margin = "unset";
 		content.container.appendChild(title);
 
 		const b = document.createElement("p");
-		b.innerHTML = "Använd inspelningsknappen nedan för att spela in ett fågelläte för artbestämning. Det finns ingen garanti för att det stämmer, utan ska ses som en ledtråd.";
+		b.innerHTML = App.translations.AnalyzeDescription;
 		content.container.appendChild(b);
 
 		const d = document.createElement("div");
@@ -37,17 +39,22 @@ class AnalyzePopUp {
 		d.appendChild(recordButton);
 
 		const recordText = document.createElement("p");
-		recordText.innerHTML = "Click to record";
+		recordText.innerHTML = App.translations.AnalyzeStartRecording;
 		d.appendChild(recordText);
 
 		this.mAnalyzeText = document.createElement("p");
-		this.mAnalyzeText.innerHTML = "Analyserar. Vänta...";
+		this.mAnalyzeText.innerHTML = App.translations.IdentifyingPleaseWait;
 		this.mAnalyzeText.style.display = "none";
 		d.appendChild(this.mAnalyzeText);
 
 		const audioPlayer = document.createElement("audio");
 		audioPlayer.setAttribute("controls", "controls");
 		//content.container.appendChild(audioPlayer);
+
+		const resultHeader = document.createElement("h2");
+		resultHeader.innerHTML = App.translations.Result;
+		resultHeader.style.margin = "unset";
+		content.container.appendChild(resultHeader);
 
 		this.mResultView = document.createElement("div");
 		content.container.appendChild(this.mResultView);
@@ -81,28 +88,31 @@ class AnalyzePopUp {
 					timeoutId = setTimeout(function() {
 						mediaRecorder.stop();
 						recordButton.innerHTML = "album";
-						recordText.innerHTML = "Click to record.";
+						recordText.innerHTML = App.translations.AnalyzeStartRecording;
 					}, 10000);
 					recordButton.innerHTML = "stop_circle";
-					recordText.innerHTML = "Recording...";
+					recordText.innerHTML = App.translations.Recording + "...";
 				} else {
 					clearTimeout(timeoutId);
 					mediaRecorder.stop();
 					recordButton.innerHTML = "album";
-					recordText.innerHTML = "Click to record.";
+					recordText.innerHTML = App.translations.AnalyzeStartRecording;
 				}
 			});
 		};
 
 		const handleError = (error) => {
 			console.error('Error accessing microphone:', error);
+			new Ui.MessageBox(App.translations.Microphone, App.translations.NoMicrophone, null, "var(--error-color)", function () {
+				self.mPopUp.close();
+			});
 		};
 
 		navigator.mediaDevices.getUserMedia({ audio: true })
 			.then(handleSuccess)
 			.catch(handleError);
 
-		new Ui.PopUp(content.container, function () {
+		this.mPopUp = new Ui.PopUp(content.container, function () {
 			closeCallback();
 		});
 	}
@@ -120,8 +130,6 @@ class AnalyzePopUp {
 		})
 		.then(response => response.json())
 		.then(data => {
-			console.log('Server response:', data);
-
 			let content: { name: string; probability: number }[] = [];
 
 			self.mResultView.innerHTML = "";
@@ -140,12 +148,12 @@ class AnalyzePopUp {
 						r.innerHTML = App.getTranslation(e.species.name);
 						self.mResultView.appendChild(r);
 					
-						const funding = new Ui.ProgressBar();
-						funding.style.position = "relative";
-						funding.setProgress(e.probability * 100);
-						funding.style.width = "100%";
-						funding.style.height = "8px";
-						self.mResultView.appendChild(funding.container);
+						const probability = new Ui.ProgressBar();
+						probability.style.position = "relative";
+						probability.setProgress(e.probability * 100);
+						probability.style.width = "100%";
+						probability.style.height = "8px";
+						self.mResultView.appendChild(probability.container);
 					});
 				} else {
 					const r = document.createElement("p");

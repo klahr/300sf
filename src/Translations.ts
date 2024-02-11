@@ -141,6 +141,14 @@ class Translations {
         NewTemplate: "New template",
         Competitions: "Competitions",
         Username: "Username",
+        AnalyzeDescription: "Press the record button to initiate recording, with a maximum duration of 10 seconds. It's important to note that while the identified species may not be guaranteed to be accurate, it should be regarded as a helpful hint.",
+        AnalyzeStartRecording: "Press to start recording.",
+        Recording: "Recording",
+        IdentifySpecies: "Identify species",
+        Microphone: "Microphone",
+        NoMicrophone: "Unable to utilize the microphone.",
+        IdentifyingPleaseWait: "Identifying. Please wait...",
+        Result: "Result",
     }
     static sv = {
         SignIn: "Logga in",
@@ -284,6 +292,14 @@ class Translations {
         NewTemplate: "Ny mall",
         Competitions: "Tävlingar",
         Username: "Användarnamn",
+        AnalyzeDescription: "Tryck på inspelningsknappen för att påbörja inspelningen, med en maximal varaktighet av 10 sekunder. Det är viktigt att notera att även om den identifierade arten inte garanteras vara korrekt, bör den betraktas som ett användbart tips.",
+        AnalyzeStartRecording: "Tryck för att spela in.",
+        Recording: "Spelar in",
+        IdentifySpecies: "Identifiera art",
+        Microphone: "Mikrofon",
+        NoMicrophone: "Kunde inte använda mikrofonen.",
+        IdentifyingPleaseWait: "Identifierar. Vänta...",
+        Result: "Resultat",
     }
     static de = {
         SignIn: "Anmelden",
@@ -427,5 +443,13 @@ class Translations {
         NewTemplate: "New template",
         Competitions: "Competitions",
         Username: "Username",
+        AnalyzeDescription: "Press the record button to initiate recording, with a maximum duration of 10 seconds. It's important to note that while the identified species may not be guaranteed to be accurate, it should be regarded as a helpful hint.",
+        AnalyzeStartRecording: "Press to start recording.",
+        Recording: "Recording",
+        IdentifySpecies: "Identify species",
+        Microphone: "Microphone",
+        NoMicrophone: "Unable to utilize the microphone.",
+        IdentifyingPleaseWait: "Identifying. Please wait...",
+        Result: "Result",
     }
 }

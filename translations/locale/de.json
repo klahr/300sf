@@ -139,5 +139,13 @@
 	"Templates": "Templates",
 	"NewTemplate": "New template",
 	"Competitions": "Competitions",
-	"Username": "Username"
+	"Username": "Username",
+	"AnalyzeDescription": "Press the record button to initiate recording, with a maximum duration of 10 seconds. It's important to note that while the identified species may not be guaranteed to be accurate, it should be regarded as a helpful hint.",
+	"AnalyzeStartRecording": "Press to start recording.",
+	"Recording": "Recording",
+	"IdentifySpecies": "Identify species",
+	"Microphone": "Microphone",
+	"NoMicrophone": "Unable to utilize the microphone.",
+	"IdentifyingPleaseWait": "Identifying. Please wait...",
+	"Result": "Result"
 }
