@@ -1,6 +1,9 @@
 /// <reference path="ui/Div.ts"/>
 
 class AnalyzePopUp {
+	private mResultView: HTMLDivElement;
+	private mAnalyzeText: HTMLParagraphElement;
+
 	constructor(closeCallback: () => void) {
 		const self = this;
 		const content = new Ui.Div();
@@ -9,24 +12,45 @@ class AnalyzePopUp {
 		content.style.position = "relative";
 
 		const title = document.createElement("h1");
-		title.innerHTML = "Analyze";
+		title.innerHTML = "Identify species";
 		title.style.margin = "unset";
 		content.container.appendChild(title);
 
-		const recordButton = document.createElement("button");
-		recordButton.innerHTML = "Record";
-		content.container.appendChild(recordButton);
+		const b = document.createElement("p");
+		b.innerHTML = "Använd inspelningsknappen nedan för att spela in ett fågelläte för artbestämning. Det finns ingen garanti för att det stämmer, utan ska ses som en ledtråd.";
+		content.container.appendChild(b);
 
-		const uploadButton = document.createElement("button");
-		uploadButton.innerHTML = "Upload";
-		content.container.appendChild(uploadButton);
+		const d = document.createElement("div");
+		d.style.textAlign = "center";
+		d.style.width = "100%";
+		d.style.margin = "32px 0";
+		content.container.appendChild(d);
+
+		const recordButton = document.createElement("span");
+		recordButton.className = "material-symbols-outlined";
+		recordButton.style.cursor = "pointer";
+		recordButton.style.fontSize = "128px";
+		recordButton.style.color = "var(--error-color)";
+		recordButton.innerHTML = "album";
+		recordButton.style.backgroundColor = "white";
+		recordButton.style.borderRadius = "50%";
+		d.appendChild(recordButton);
+
+		const recordText = document.createElement("p");
+		recordText.innerHTML = "Click to record";
+		d.appendChild(recordText);
+
+		this.mAnalyzeText = document.createElement("p");
+		this.mAnalyzeText.innerHTML = "Analyserar. Vänta...";
+		this.mAnalyzeText.style.display = "none";
+		d.appendChild(this.mAnalyzeText);
 
 		const audioPlayer = document.createElement("audio");
 		audioPlayer.setAttribute("controls", "controls");
-		content.container.appendChild(audioPlayer);
+		//content.container.appendChild(audioPlayer);
 
-		const resultView = document.createElement("div");
-		content.container.appendChild(resultView);
+		this.mResultView = document.createElement("div");
+		content.container.appendChild(this.mResultView);
 
 		let mediaRecorder;
 		let audioChunks = [];
@@ -46,71 +70,32 @@ class AnalyzePopUp {
 				const audioUrl = URL.createObjectURL(audioBlob);
 				audioPlayer.src = audioUrl;
 
-				uploadButton.style.display = 'inline'; // Show the upload button
-				uploadButton.addEventListener('click', () => {
-				  uploadToServer(audioBlob);
-				});
+				self.uploadToServer(audioBlob);
 			};
 
+			let timeoutId;
 			recordButton.addEventListener('click', () => {
 				if (mediaRecorder.state === 'inactive') {
 					audioChunks = [];
 					mediaRecorder.start();
-					setTimeout(() => mediaRecorder.stop(), 10000); // Record for 10 seconds
-					recordButton.textContent = 'Stop';
+					timeoutId = setTimeout(function() {
+						mediaRecorder.stop();
+						recordButton.innerHTML = "album";
+						recordText.innerHTML = "Click to record.";
+					}, 10000);
+					recordButton.innerHTML = "stop_circle";
+					recordText.innerHTML = "Recording...";
 				} else {
+					clearTimeout(timeoutId);
 					mediaRecorder.stop();
-					recordButton.textContent = 'Record';
+					recordButton.innerHTML = "album";
+					recordText.innerHTML = "Click to record.";
 				}
 			});
 		};
 
 		const handleError = (error) => {
 			console.error('Error accessing microphone:', error);
-		};
-
-		const uploadToServer = (audioBlob) => {
-			const formData = new FormData();
-			formData.append('audio', audioBlob, 'recording.wav');
-			formData.append('meta', '{"save":false}');
-
-			fetch('https://api.300sf.se/analyze', {
-				method: 'POST',
-				body: formData,
-			})
-			.then(response => response.json())
-			.then(data => {
-				console.log('Server response:', data);
-
-				let content: { name: string; probability: number }[] = [];
-
-				resultView.innerHTML = "";
-				data.results.forEach(e => {
-					content.push({
-						"name": e[0],
-						"probability": e[1]
-					});
-				});
-
-				const r = new HttpRequest("PUT", "/v1/analyze/resolve", {"birds": content});
-				r.process((status: any, data: any) => {
-					console.log(data);
-					if (data.results) {
-						data.results.forEach(e => {
-							const r = document.createElement("p");
-							r.innerHTML = App.getTranslation(e.species.name) + " (" + Math.round(e.probability * 100) + "%)";
-							resultView.appendChild(r);
-						});
-					} else {
-						const r = document.createElement("p");
-						r.innerHTML = "No result.";
-						resultView.appendChild(r);
-					}
-				});
-			})
-			.catch(error => {
-				console.error('Error uploading to server:', error);
-			});
 		};
 
 		navigator.mediaDevices.getUserMedia({ audio: true })
@@ -121,4 +106,61 @@ class AnalyzePopUp {
 			closeCallback();
 		});
 	}
+
+	private uploadToServer(audioBlob: Blob) {
+		const self = this;
+		const formData = new FormData();
+		formData.append('audio', audioBlob, 'recording.wav');
+		formData.append('meta', '{"save":false}');
+		this.mAnalyzeText.style.display = "";
+
+		fetch('https://api.300sf.se/analyze', {
+			method: 'POST',
+			body: formData,
+		})
+		.then(response => response.json())
+		.then(data => {
+			console.log('Server response:', data);
+
+			let content: { name: string; probability: number }[] = [];
+
+			self.mResultView.innerHTML = "";
+			data.results.forEach(e => {
+				content.push({
+					"name": e[0],
+					"probability": e[1]
+				});
+			});
+
+			const r = new HttpRequest("PUT", "/v1/analyze/resolve", {"birds": content});
+			r.process((status: any, data: any) => {
+				if (data.results) {
+					data.results.forEach(e => {
+						const r = document.createElement("p");
+						r.innerHTML = App.getTranslation(e.species.name);
+						self.mResultView.appendChild(r);
+					
+						const funding = new Ui.ProgressBar();
+						funding.style.position = "relative";
+						funding.setProgress(e.probability * 100);
+						funding.style.width = "100%";
+						funding.style.height = "8px";
+						self.mResultView.appendChild(funding.container);
+					});
+				} else {
+					const r = document.createElement("p");
+					r.innerHTML = "Lyckades inte identifiera arten.";
+					self.mResultView.appendChild(r);
+				}
+				this.mAnalyzeText.style.display = "none";
+			});
+		})
+		.catch(error => {
+			console.error('Error uploading to server:', error);
+		});
+	}
+}
+
+for (let i = 0; i < 5; ++i) {
+
 }
