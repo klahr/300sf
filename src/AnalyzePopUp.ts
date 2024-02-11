@@ -81,11 +81,31 @@ class AnalyzePopUp {
 			.then(response => response.json())
 			.then(data => {
 				console.log('Server response:', data);
+
+				let content: { name: string; probability: number }[] = [];
+
 				resultView.innerHTML = "";
 				data.results.forEach(e => {
-					const r = document.createElement("p");
-					r.innerHTML = e[0] + "(" + e[1] + ")";
-					resultView.appendChild(r);
+					content.push({
+						"name": e[0],
+						"probability": e[1]
+					});
+				});
+
+				const r = new HttpRequest("PUT", "/v1/analyze/resolve", {"birds": content});
+				r.process((status: any, data: any) => {
+					console.log(data);
+					if (data.results) {
+						data.results.forEach(e => {
+							const r = document.createElement("p");
+							r.innerHTML = App.getTranslation(e.species.name) + " (" + Math.round(e.probability * 100) + "%)";
+							resultView.appendChild(r);
+						});
+					} else {
+						const r = document.createElement("p");
+						r.innerHTML = "No result.";
+						resultView.appendChild(r);
+					}
 				});
 			})
 			.catch(error => {
