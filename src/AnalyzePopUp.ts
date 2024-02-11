@@ -141,8 +141,6 @@ class AnalyzePopUp {
 		.then(data => {
 			let content: { name: string; probability: number }[] = [];
 
-			console.log(data);
-
 			self.mResultView.innerHTML = "";
 			data.results.forEach(e => {
 				content.push({
@@ -156,6 +154,7 @@ class AnalyzePopUp {
 				if (data.results) {
 					data.results.forEach(e => {
 						const d = document.createElement("div");
+						d.className = "list-entry";
 						d.style.border = "2px solid #333";
 						d.style.padding = "8px";
 						d.style.borderRadius = "8px";
@@ -165,9 +164,12 @@ class AnalyzePopUp {
 							openSpeciesPopUp(e.species, null, () => {});
 						});
 						self.mResultView.appendChild(d);
-						const r = document.createElement("p");
+						const r = document.createElement("h3");
 						r.innerHTML = App.getTranslation(e.species.name);
 						d.appendChild(r);
+						const subName = document.createElement("p");
+						subName.innerHTML = e.species.name.la;
+						d.appendChild(subName);
 					
 						const probability = new Ui.ProgressBar();
 						probability.style.position = "relative";
