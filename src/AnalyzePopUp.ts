@@ -63,7 +63,13 @@ class AnalyzePopUp {
 		let audioChunks = [];
 
 		const handleSuccess = (stream) => {
-			mediaRecorder = new MediaRecorder(stream);
+			const workerOptions = {
+				OggOpusEncoderWasmPath: 'https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/OggOpusEncoder.wasm',
+				WebMOpusEncoderWasmPath: 'https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/WebMOpusEncoder.wasm'
+			};
+
+			window.MediaRecorder = OpusMediaRecorder;
+			mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/ogg' }, workerOptions);
 			mediaRecorder.ondataavailable = (event) => {
 				if (event.data.size > 0) {
 					audioChunks.push(event.data);
@@ -71,7 +77,7 @@ class AnalyzePopUp {
 			};
 
 			mediaRecorder.onstop = () => {
-				const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+				const audioBlob = new Blob(audioChunks, { type: 'audio/wav;codecs=opus' });
 				audioChunks = [];
 		
 				const audioUrl = URL.createObjectURL(audioBlob);
@@ -121,7 +127,7 @@ class AnalyzePopUp {
 		const self = this;
 		const formData = new FormData();
 		formData.append('audio', audioBlob, 'recording.wav');
-		formData.append('meta', '{"save":false}');
+		formData.append('meta', '{"save":true}');
 		this.mAnalyzeText.style.display = "";
 
 		fetch('https://api.300sf.se/analyze', {
@@ -131,6 +137,8 @@ class AnalyzePopUp {
 		.then(response => response.json())
 		.then(data => {
 			let content: { name: string; probability: number }[] = [];
+
+			console.log(data);
 
 			self.mResultView.innerHTML = "";
 			data.results.forEach(e => {
