@@ -2,9 +2,10 @@
 package utils
 
 import (
+	"regexp"
+
 	"git.sr.ht/~klahr/300sf/models"
 	"git.sr.ht/~klahr/300sf/table"
-	"github.com/badoux/checkmail"
 )
 
 func VerifyDisplayName(displayName string) bool {
@@ -12,7 +13,8 @@ func VerifyDisplayName(displayName string) bool {
 }
 
 func VerifyEmail(email string) bool {
-	if checkmail.ValidateFormat(email) != nil {
+	regex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+	if match, _ := regexp.MatchString(regex, email); !match {
 		return false
 	}
 
