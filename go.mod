@@ -3,7 +3,6 @@ module git.sr.ht/~klahr/300sf
 go 1.21
 
 require (
-	github.com/badoux/checkmail v1.2.1
 	github.com/gin-contrib/gzip v0.0.6
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-redis/redis v6.15.9+incompatible
