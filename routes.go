@@ -114,7 +114,12 @@ func apiKeyMiddleware(c *gin.Context) {
 		return
 	}
 
-	models.Cache.Set("/api-key/"+apiKey.Uuid, iCallCounter+1, time.Second*time.Duration(config.AppConfig.ApiCallCounterTTL))
+	ttl := models.Cache.TTL("/api-key/" + apiKey.Uuid)
+	if ttl.Val() > 0 {
+		models.Cache.Set("/api-key/"+apiKey.Uuid, iCallCounter+1, ttl.Val())
+	} else {
+		models.Cache.Set("/api-key/"+apiKey.Uuid, iCallCounter+1, time.Second*time.Duration(config.AppConfig.ApiCallCounterTTL))
+	}
 
 	c.Next()
 }
