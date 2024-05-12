@@ -12,6 +12,7 @@ import (
 
 	"git.sr.ht/~klahr/300sf/auth"
 	"git.sr.ht/~klahr/300sf/controllers"
+	"git.sr.ht/~klahr/300sf/log"
 	"git.sr.ht/~klahr/300sf/models"
 	"git.sr.ht/~klahr/300sf/utils"
 )
@@ -106,6 +107,7 @@ func apiKeyMiddleware(c *gin.Context) {
 	callCounter, _ := models.Cache.Get("/api-key/" + apiKey.Uuid).Result()
 	iCallCounter := utils.Str2Int(callCounter)
 	if iCallCounter >= apiKey.HardLimit {
+		log.Warning(c, controllers.ErrorTooManyApiCalls, "too many calls on api key")
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "too many calls on api key", "code": controllers.ErrorTooManyApiCalls})
 		c.Abort()
 		return
