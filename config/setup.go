@@ -22,6 +22,7 @@ type App struct {
 	DataStorage            string   `yaml:"data-storage"`
 	DefaultApiSoftLimit    int64    `yaml:"default-api-soft-limit"`
 	DefaultApiHardLimit    int64    `yaml:"default-api-hard-limit"`
+	ApiCallCounterTTL      int64    `yaml:"api-call-counter-ttl"`
 	DefaultLists           []string `yaml:"default-lists"`
 	CacheDuration          int64    `yaml:"cache-duration"`
 	WikipediaCacheDuration int64    `yaml:"wikipedia-cache-duration"`

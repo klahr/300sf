@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 
 	"git.sr.ht/~klahr/300sf/auth"
+	"git.sr.ht/~klahr/300sf/config"
 	"git.sr.ht/~klahr/300sf/controllers"
 	"git.sr.ht/~klahr/300sf/log"
 	"git.sr.ht/~klahr/300sf/models"
@@ -113,7 +114,7 @@ func apiKeyMiddleware(c *gin.Context) {
 		return
 	}
 
-	models.Cache.Set("/api-key/"+apiKey.Uuid, iCallCounter+1, time.Hour*24)
+	models.Cache.Set("/api-key/"+apiKey.Uuid, iCallCounter+1, time.Duration(config.AppConfig.ApiCallCounterTTL))
 
 	c.Next()
 }
