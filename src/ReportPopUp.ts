@@ -4,6 +4,7 @@
 /// <reference path="models/Species.ts"/>
 /// <reference path="models/List.ts"/>
 /// <reference path="ui/Div.ts"/>
+/// <reference path="ui/Toast.ts"/>
 /// <reference path="HttpRequest.ts"/>
 /// <reference path="utils/Sort.ts"/>
 /// <reference path="NewTagPopUp.ts"/>
@@ -292,7 +293,7 @@ class ReportPopUp {
 
 			const rr = new HttpRequest("POST", "/v1/reports", r);
 			rr.process(function (status: any, data: any) {
-				new Ui.MessageBox(App.translations.Congratulations, App.translations.YouFoundA.replace("{0}", self.mSpeciesList.value), null, "var(--success-color)", function () { });
+				new Ui.Toast(App.translations.Congratulations, App.translations.YouFoundA.replace("{0}", self.mSpeciesList.value), null, "var(--success-color)", function () { });
 				speciesAdded = true;
 				self.mPopUp.close();
 			});
