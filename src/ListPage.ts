@@ -144,6 +144,7 @@ class ListPage extends Page {
 
 	private updateLists(): void {
 		history.pushState({}, "", "/" + this.id + "/" + this.data.uuid);
+		const scrollPostion = this.container.scrollTop;
 
 		this.mFilterInput.value = "";
 		this.mTitle.innerHTML = "";
@@ -229,6 +230,7 @@ class ListPage extends Page {
 
 				self.mTable.addRow([entry]);
 			});
+			self.container.scrollTop = scrollPostion;
 		}, function (status: any, data: any) {
 			console.log(data);
 		});
