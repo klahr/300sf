@@ -66,6 +66,7 @@ class ListPage extends Page {
 
 		const filter = new Ui.Div
 		filter.addClass("filter");
+		filter.style.bottom = (window.innerHeight - document.documentElement.clientHeight) + "px";
 		this.attach(filter);
 
 		this.mFilterTitle = document.createElement("p");
