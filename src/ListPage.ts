@@ -16,6 +16,7 @@ class ListPage extends Page {
 	private mProgress: Ui.ProgressBar;
 	private mProgressLbl: HTMLParagraphElement;
 	private mFilterInput: Ui.Input;
+	private mFilterTitle: HTMLParagraphElement;
 
 	constructor(appListener: IAppListener) {
 		super(appListener);
@@ -66,6 +67,13 @@ class ListPage extends Page {
 		const filter = new Ui.Div
 		filter.addClass("filter");
 		this.attach(filter);
+
+		this.mFilterTitle = document.createElement("p");
+		this.mFilterTitle.style.fontSize = "0.8rem";
+		this.mFilterTitle.style.lineHeight = "normal";
+		this.mFilterTitle.style.textAlign = "center";
+		this.mFilterTitle.style.color = "#ffffffad";
+		filter.container.appendChild(this.mFilterTitle);
 
 		this.mFilterInput = new Ui.Input("text");
 		this.mFilterInput.setPlaceHolder(App.translations.Search + "...");
@@ -156,6 +164,7 @@ class ListPage extends Page {
 		const r = new HttpRequest("GET", "/v1/lists/" + (this.data as Models.List).uuid + "/reports");
 		r.process(function (status: any, data: any) {
 			self.mTitle.innerHTML = App.getTranslation((self.data as Models.List).name);
+			self.mFilterTitle.innerHTML = self.mTitle.innerHTML;
 			const reports = data.result as Models.Report[];
 			let lastOrder: Models.Order;
 			self.data.species.forEach(e => {
