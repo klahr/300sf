@@ -569,7 +569,8 @@ func ReportsExport(c *gin.Context) {
 		return
 	}
 
-	c.Header("Content-Type", "text/csv")
+	c.Header("Content-Type", "text/csv; charset=utf-8")
+	c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
 	c.String(http.StatusOK, b.String())
 }
 
