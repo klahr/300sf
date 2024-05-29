@@ -279,7 +279,6 @@ div.filter {
 	border-radius: var(--small-distance);
 	position: sticky;
 	bottom: 0;
-	bottom: env(safe-area-inset-bottom);
 	left: 0;
 }
 
