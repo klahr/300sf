@@ -109,7 +109,7 @@ func apiKeyMiddleware(c *gin.Context) {
 	iCallCounter := utils.Str2Int(callCounter)
 	if iCallCounter >= apiKey.HardLimit {
 		log.Warning(c, controllers.ErrorTooManyApiCalls, "too many calls on api key")
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "too many calls on api key", "code": controllers.ErrorTooManyApiCalls})
+		c.JSON(http.StatusTooManyRequests, gin.H{"message": "too many calls on api key", "code": controllers.ErrorTooManyApiCalls})
 		c.Abort()
 		return
 	}
