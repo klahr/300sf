@@ -50,7 +50,7 @@ class HttpRequest {
 				success(xhr.status, data);
 			},
 			error: function (xhr, _textStatus, errorThrown) {
-				if (xhr.status === 503 || xhr.status === 0) {
+				if (xhr.status === 503 || xhr.status === 429 || xhr.status === 0) {
 					new Ui.MessageBox(App.translations.ConnectionError, App.translations.ConnectionErrorDescription, null, "var(--error-color)", () => void {});
 				} else if (xhr.status == 401) {
 					const ks = new LocalStorage();
