@@ -1,7 +1,15 @@
 namespace Utils {
 	export function isValidDate(date: Date): boolean {
-		const d = new Date(date);
-		return d.getFullYear() !== 1 && d.getDate() !== 1
+		if (!(date instanceof Date) || isNaN(date.getTime())) {
+			return false;
+		}
+
+		const isoString = date.toISOString();
+		if (isoString === "0001-01-01T00:00:00.000Z") {
+			return false;
+		}
+
+		return true;
 	}
 
 	export function toYYYY_MM_DD_hh_mm(date: Date): string {
