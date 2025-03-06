@@ -1,10 +1,8 @@
 namespace Utils {
 	export function isValidDate(date: Date): boolean {
-		const isoString = date.toISOString();
-		if (isoString === "0001-01-01T00:00:00.000Z") {
+		if (date.getTime() === -62135596800000) {
 			return false;
 		}
-
 		return true;
 	}
 
