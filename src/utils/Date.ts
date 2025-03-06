@@ -1,10 +1,11 @@
 namespace Utils {
-	export function isValidDate(date: Date): boolean {
-		if (!(date instanceof Date) || isNaN(date.getTime())) {
+	export function isValidDate(date: string): boolean {
+		const d = new Date(date);
+		if (!(d instanceof Date) || isNaN(d.getTime())) {
 			return false;
 		}
 
-		const isoString = date.toISOString();
+		const isoString = d.toISOString();
 		if (isoString === "0001-01-01T00:00:00.000Z") {
 			return false;
 		}
