@@ -1,5 +1,6 @@
 namespace Utils {
 	export function isValidDate(date: Date): boolean {
+		console.log(date);
 		if (date.getTime() === -62135596800000) {
 			return false;
 		}
