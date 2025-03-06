@@ -1,7 +1,15 @@
 namespace Utils {
 	export function isValidDate(date: Date): boolean {
-		console.log(date);
-		if (date.getTime() === -62135596800000) {
+		let d: Date;
+		if (date instanceof Date) {
+			d = date;
+		} else {
+			d = new Date(date);
+		}
+		if (isNaN(d.getTime())) {
+			return false;
+		}
+		if (d.getTime() === -62135596800000) {
 			return false;
 		}
 		return true;
