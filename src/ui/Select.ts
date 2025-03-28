@@ -56,7 +56,7 @@ namespace Ui {
 			this.mIdentifyButton.addEventListener("click", function () {
 				new AnalyzePopUp(function() {});
 			});
-			this.mContainer.appendChild(this.mIdentifyButton);
+			//this.mContainer.appendChild(this.mIdentifyButton);
 
 			this.mExpandable = new Ui.Div();
 			this.mExpandable.style.backgroundColor = "var(--widget-color)";

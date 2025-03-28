@@ -31,7 +31,7 @@ class DonationPage extends Page {
 		this.attach(fundingDiv);
 
 		const needed = 2352;
-		const current = 300;
+		const current = 0;
 		const funding = new Ui.ProgressBar();
 		funding.style.position = "relative";
 		funding.setProgress(current / needed * 100);
