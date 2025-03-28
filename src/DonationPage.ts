@@ -43,7 +43,7 @@ class DonationPage extends Page {
 
 		const amount = document.createElement("p");
 		amount.style.marginLeft = "72px";
-		amount.innerHTML = "300 / 2,352 SEK " + App.translations.Raised;
+		amount.innerHTML = "0 / 2,352 SEK " + App.translations.Raised;
 		fundingDiv.container.appendChild(amount);
 
 		const amountDesc = document.createElement("p");
