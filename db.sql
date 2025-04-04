@@ -1224,3 +1224,5 @@ ADD CONSTRAINT `fk_reports_6`
 -->
 
 
+ALTER TABLE `300sf`.`reports` 
+ADD COLUMN `site` VARCHAR(256) NULL AFTER `archived`;

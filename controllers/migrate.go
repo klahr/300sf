@@ -109,7 +109,7 @@ func migrate(user models.User, username, password string) (interface{}, int, err
 	var d data
 	json.Unmarshal(body, &d)
 
-	species := fetchAllSpecies(response.Result.UserId)
+	species := fetchAllSpecies()
 
 	tx := models.DB.Begin()
 
@@ -143,6 +143,10 @@ func migrate(user models.User, username, password string) (interface{}, int, err
 				if dc.DateSeen != "" {
 					dateSeen, _ := time.Parse("2006-01-02", dc.DateSeen)
 					report.From = zero.TimeFrom(dateSeen)
+				}
+
+				if dc.Place != "" {
+					report.Site = zero.StringFrom(dc.Place)
 				}
 
 				tags := getTags(d.Result.Tags, d.Result.TagEukaryotes, dc.EukaryoteId)
@@ -226,7 +230,7 @@ func getTag(tags []tag, id int64) *tag {
 	return nil
 }
 
-func fetchAllSpecies(userId int64) []models.Species {
+func fetchAllSpecies() []models.Species {
 	var birds []models.Species
 	models.DB.Preload("Name").Find(&birds)
 

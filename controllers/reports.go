@@ -29,6 +29,7 @@ func Reports(c *gin.Context) {
 		GenderUuid          zero.String `json:"gender_uuid"`
 		MethodUuid          zero.String `json:"method_uuid"`
 		Comment             zero.String `json:"comment"`
+		Site                zero.String `json:"site"`
 		ListUuids           []string    `json:"list_uuids"`
 		TagUuids            []string    `json:"tag_uuids"`
 		Silent              bool        `json:"silent"`
@@ -78,6 +79,7 @@ func Reports(c *gin.Context) {
 		Latitude:  r.Latitude,
 		Longitude: r.Longitude,
 		Quantity:  r.Quantity,
+		Site:      r.Site,
 		Comment: &models.Comment{
 			Model: models.Model{
 				Timestamp: time.Now(),
@@ -492,7 +494,7 @@ func ReportsExport(c *gin.Context) {
 	}
 
 	csvData := [][]string{
-		{"species", "observed_from", "observed_until", "quantity", "method", "age", "gender", "activity", "comment", "location", "latitude", "longitude"},
+		{"species", "observed_from", "observed_until", "quantity", "method", "age", "gender", "activity", "comment", "site", "location", "latitude", "longitude"},
 	}
 
 	for _, report := range result {
@@ -535,6 +537,11 @@ func ReportsExport(c *gin.Context) {
 		}
 		if report.Comment != nil {
 			row = append(row, report.Comment.Text)
+		} else {
+			row = append(row, "")
+		}
+		if report.Site.Valid {
+			row = append(row, report.Site.String)
 		} else {
 			row = append(row, "")
 		}

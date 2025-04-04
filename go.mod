@@ -1,6 +1,6 @@
 module git.sr.ht/~klahr/300sf
 
-go 1.21
+go 1.24
 
 require (
 	github.com/gin-contrib/gzip v0.0.6

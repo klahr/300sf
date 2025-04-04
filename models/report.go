@@ -26,6 +26,7 @@ type Report struct {
 	CommentId    zero.Int      `json:"-"`
 	Comment      *Comment      `json:"comment"`
 	Archived     zero.Time     `json:"-"`
+	Site         zero.String   `json:"site"`
 	Lists        []List        `json:"lists" gorm:"many2many:list_reports"`
 	Tags         []Tag         `json:"tags" gorm:"many2many:report_tags"`
 	Notification *Notification `json:"notification"`
