@@ -150,6 +150,7 @@ class Translations {
         IdentifyingPleaseWait: "Identifying. Please wait...",
         Result: "Result",
         NoIdentifySpecies: "Unable to identify the species.",
+        Site: "Site",
     }
     static sv = {
         SignIn: "Logga in",
@@ -302,6 +303,7 @@ class Translations {
         IdentifyingPleaseWait: "Identifierar. Vänta...",
         Result: "Resultat",
         NoIdentifySpecies: "Lyckades inte identifiera arten.",
+        Site: "Lokal",
     }
     static de = {
         SignIn: "Anmelden",
@@ -454,5 +456,6 @@ class Translations {
         IdentifyingPleaseWait: "Identifying. Please wait...",
         Result: "Result",
         NoIdentifySpecies: "Unable to identify the species.",
+        Site: "Site",
     }
 }

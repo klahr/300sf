@@ -142,6 +142,13 @@ class ReportPopUp {
 		const activityList = new Ui.Select(App.translations.SelectActivity + "...", App.translations.Search);
 		content.attach(activityList);
 
+		const siteLbl = document.createElement("h3");
+		siteLbl.className = "title";
+		siteLbl.innerHTML = App.translations.Site;
+		content.container.appendChild(siteLbl);
+		const site = new Ui.Input("text");
+		content.attach(site);
+
 		const quantityLbl = document.createElement("h3");
 		quantityLbl.className = "title";
 		quantityLbl.innerHTML = App.translations.Quantity;
@@ -271,6 +278,7 @@ class ReportPopUp {
 			if (methodList.value) {
 				r.method_uuid = methodList.value;
 			}
+			r.site = site.value;
 			r.comment = privateComment.value;
 			r.silent = true;
 			const checklists = self.mChecklistContainer.container.getElementsByTagName("input");

@@ -25,6 +25,7 @@ namespace Models {
 		comment: Comment;
 		lists: Array<List>;
 		tags: Array<Tag>;
+		site: string;
 //		notification: Notification;
 	}
 }

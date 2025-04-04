@@ -86,6 +86,17 @@ class EditReportPopUp {
 			content.attach(activityList);
 		}
 
+		if (report.site !== "") {
+			const siteLbl = document.createElement("h3");
+			siteLbl.className = "title";
+			siteLbl.innerHTML = App.translations.Site;
+			content.container.appendChild(siteLbl);
+			const site = new Ui.Input("text");
+			site.setDisabled(true);
+			site.value = report.site;
+			content.attach(site);
+		}
+
 		const quantityLbl = document.createElement("h3");
 		quantityLbl.className = "title";
 		quantityLbl.innerHTML = App.translations.Quantity;

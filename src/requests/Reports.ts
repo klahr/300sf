@@ -15,5 +15,6 @@ namespace Requests {
 		public tag_uuids: Array<string>;
 		public silent: boolean;
 		public notification_comment: string;
+		public site: string;
 	}
 }
