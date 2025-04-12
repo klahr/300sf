@@ -31,7 +31,7 @@ class DonationPage extends Page {
 		this.attach(fundingDiv);
 
 		const needed = 2352;
-		const current = 700;
+		const current = 900;
 		const funding = new Ui.ProgressBar();
 		funding.style.position = "relative";
 		funding.setProgress(current / needed * 100);
@@ -43,7 +43,7 @@ class DonationPage extends Page {
 
 		const amount = document.createElement("p");
 		amount.style.marginLeft = "72px";
-		amount.innerHTML = "700 / 2,352 SEK " + App.translations.Raised;
+		amount.innerHTML = "900 / 2,352 SEK " + App.translations.Raised;
 		fundingDiv.container.appendChild(amount);
 
 		const amountDesc = document.createElement("p");
