@@ -25,6 +25,9 @@ type Data struct {
 func GetData(lang string, pageName models.Translation) Data {
 	var data Data
 
+	userAgent := "300sf/1.0 (https://app.300sf.se; support@300sf.se)"
+
+	gowiki.SetUserAgent(userAgent)
 	gowiki.SetLanguage(lang)
 	gowiki.SetCacheDuration(time.Second * time.Duration(config.AppConfig.WikipediaCacheDuration))
 
@@ -50,17 +53,38 @@ func GetData(lang string, pageName models.Translation) Data {
 		}
 	}
 
-	q := fmt.Sprintf("https://%s.wikipedia.org/w/api.php?action=query&titles=%s&prop=pageimages&format=json&pithumbsize=200", lang, url.QueryEscape(utils.Translation2Value(pageName, lang)))
+	q := fmt.Sprintf(
+		"https://%s.wikipedia.org/w/api.php?action=query&titles=%s&prop=pageimages&format=json&pithumbsize=200",
+		lang,
+		url.QueryEscape(utils.Translation2Value(pageName, lang)),
+	)
 
-	r, err := http.Get(q)
+	req, err := http.NewRequest("GET", q, nil)
+	if err != nil {
+		return data
+	}
+
+	req.Header.Set(
+		"User-Agent",
+		userAgent,
+	)
+	req.Header.Set("Accept", "application/json")
+
+	client := &http.Client{}
+	r, err := client.Do(req)
 	if err == nil {
 		defer r.Body.Close()
 		body, _ := io.ReadAll(r.Body)
+
 		begin := strings.Index(string(body), "\"source\":\"") + 10
-		end := strings.Index(string(body[begin:]), "\"")
-		thumbnail := string(body[begin : begin+end])
-		if strings.HasPrefix(thumbnail, "http") {
-			data.Thumbnail = thumbnail
+		if begin >= 10 {
+			end := strings.Index(string(body[begin:]), "\"")
+			if end > 0 {
+				thumbnail := string(body[begin : begin+end])
+				if strings.HasPrefix(thumbnail, "http") {
+					data.Thumbnail = thumbnail
+				}
+			}
 		}
 	}
 
