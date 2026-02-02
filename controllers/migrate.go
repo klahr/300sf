@@ -58,7 +58,7 @@ func migrate(user models.User, username, password string) (interface{}, int, err
 	}
 
 	loginJsonRequest := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"method\":\"SessionManager.create\",\"params\": {\"email\":\"%s\",\"password\":\"%s\"},\"id\":1}", username, password)
-	loginResponse, err := http.PostForm("https://angelsware.com/swedbirds/ajax_api.php", url.Values{
+	loginResponse, err := http.PostForm("https://300sf.se/legacy/ajax_api.php", url.Values{
 		"data": {loginJsonRequest},
 	})
 
@@ -84,7 +84,7 @@ func migrate(user models.User, username, password string) (interface{}, int, err
 	}
 
 	dataJsonRequest := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"method\":\"DataManager.sync\",\"params\": {\"userid\":%d},\"id\":1}", response.Result.UserId)
-	dataResponse, err := http.PostForm("https://angelsware.com/swedbirds/ajax_api.php", url.Values{
+	dataResponse, err := http.PostForm("https://300sf.se/legacy/ajax_api.php", url.Values{
 		"data": {dataJsonRequest},
 	})
 
