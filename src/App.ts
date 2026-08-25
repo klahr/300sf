@@ -166,31 +166,31 @@ class App implements IAppListener {
 		});
 		if (page) {
 			const p = page as Page;
+			// Show the page unconditionally. Pages that need a session get a 401 on
+			// their own requests, and HttpRequest already handles that.
+			p.setVisible(true);
+			p.setData(data);
 			if (!App.isLoggedIn()) {
-				const self = this;
 				const ks = new LocalStorage();
-				const d = {
-					grant_type: "refresh_token",
-					refresh_token: ks.get("x300sf_rt")
-				}
-				if (d.refresh_token !== null) {
-					const r = new HttpRequest("POST", "/v1/auth", d);
+				const refreshToken = ks.get("x300sf_rt");
+				if (refreshToken !== null) {
+					const r = new HttpRequest("POST", "/v1/auth", {
+						grant_type: "refresh_token",
+						refresh_token: refreshToken
+					});
 					r.process(function (status: any, token: Responses.AuthenticationResponse) {
 						ks.set("x300sf_at", token.access_token, token.expires_in);
 						ks.set("x300sf_rt", token.refresh_token, 3600 * 7 * 60);
 						ks.set("lang", token.lang, token.expires_in);
 						ks.set("scope", token.scope, token.expires_in);
 						window.location.reload();
-					}, function (status: any, data: Responses.GeneralErrorResponse, err: any) {
-						self.logOut(window.location.pathname);
+					}, function (status: any, errorData: Responses.GeneralErrorResponse, err: any) {
+						// The stored session is stale. Drop it and leave the user on
+						// the page they asked for. Navigating away here used to throw
+						// away the reset token in the query string.
+						ks.clear();
 					});
-				} else {
-					p.setVisible(true);
-					p.setData(data);
 				}
-			} else {
-				p.setVisible(true);
-				p.setData(data);
 			}
 		}
 		this.mMainMenu.close();

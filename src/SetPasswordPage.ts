@@ -27,19 +27,56 @@ class SetPasswordPage extends Page {
 		this.attach(password);
 
 		const self = this;
+		let inFlight = false;
 		const set = document.createElement("button");
 		set.innerHTML = "Set Password";
 		set.addEventListener("click", function () {
+			// The token is single use, a second submission would report the link as
+			// expired right after the first one succeeded.
+			if (inFlight) {
+				return;
+			}
+			const token = self.data ? self.data.token : null;
+			if (!token) {
+				new Ui.MessageBox(App.translations.Error, App.translations.ResetLinkInvalid, "/img/messagebox-256.webp", "var(--error-color)", function () {
+					appListener.showPage("forgot", null);
+				});
+				return;
+			}
+			inFlight = true;
 			password.setDisabled(true);
-			const r = new HttpRequest("POST", "/v1/users/set_password/" + self.data.token, {
+			const r = new HttpRequest("POST", "/v1/users/set_password/" + token, {
 				password: password.value,
 			});
 			r.process(function (status: any, data: any) {
-				password.setDisabled(false);
 				password.value = "";
 				new Ui.MessageBox(App.translations.NewPasswordSet, App.translations.SuccessfullyResetPassword, "/img/messagebox-256.webp", "var(--success-color)", function () {
 					appListener.showPage("home", null);
 				});
+			}, function (status: any, data: Responses.GeneralErrorResponse, error: any) {
+				switch (data ? data.code : 0) {
+					case Responses.ErrorCode.ErrorLinkExpired:
+						new Ui.MessageBox(App.translations.Error, App.translations.ResetLinkExpired, "/img/messagebox-256.webp", "var(--error-color)", function () {
+							appListener.showPage("forgot", null);
+						});
+						break;
+					case Responses.ErrorCode.ErrorRecordNotFound:
+						new Ui.MessageBox(App.translations.Error, App.translations.ResetLinkInvalid, "/img/messagebox-256.webp", "var(--error-color)", function () {
+							appListener.showPage("forgot", null);
+						});
+						break;
+					case Responses.ErrorCode.ErrorSignUpInvalidPassword:
+						new Ui.MessageBox(App.translations.Error, App.translations.InvalidPassword, "/img/messagebox-256.webp", "var(--error-color)", function () { });
+						break;
+					default:
+						new Ui.MessageBox(App.translations.Error, App.translations.SomethingWentWrong, "/img/messagebox-256.webp", "var(--error-color)", function () { });
+						break;
+				}
+			}, function () {
+				// Runs on success and on failure alike. Without this the input stays
+				// greyed out after an error and the button looks dead.
+				inFlight = false;
+				password.setDisabled(false);
 			});
 		});
 		password.container.addEventListener("keydown", function (e) {

@@ -6,6 +6,7 @@ namespace Responses {
 		public static ErrorDelete = 1003;
 
 		public static ErrorParse = 2001;
+		public static ErrorLinkExpired = 2002;
 
 		public static ErrorLoggedOut = 3001;
 		public static ErrorMissingApiKey = 3002;
