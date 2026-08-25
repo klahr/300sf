@@ -24,8 +24,6 @@ CREATE TABLE `300sf`.`users` (
   PRIMARY KEY (`id`),
   UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) VISIBLE,
   UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE,
-  UNIQUE INDEX `password_UNIQUE` (`password` ASC) VISIBLE,
-  UNIQUE INDEX `password_salt_UNIQUE` (`password_salt` ASC) VISIBLE,
   INDEX `index6` (`uuid` ASC) VISIBLE,
   INDEX `fk_users_1_idx` (`icon_id` ASC) VISIBLE,
   CONSTRAINT `fk_users_1`
@@ -1226,3 +1224,10 @@ ADD CONSTRAINT `fk_reports_6`
 
 ALTER TABLE `300sf`.`reports` 
 ADD COLUMN `site` VARCHAR(256) NULL AFTER `archived`;
+
+
+-- Two users may legitimately end up with the same hash or the same salt. These
+-- unique indexes turned such a collision into a failed password change.
+ALTER TABLE `300sf`.`users` 
+DROP INDEX `password_UNIQUE`,
+DROP INDEX `password_salt_UNIQUE`;

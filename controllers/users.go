@@ -632,6 +632,17 @@ func UsersPortrait(c *gin.Context) {
 	c.JSON(http.StatusNoContent, nil)
 }
 
+// defaultLanguageCode maps a client supplied language onto one we ship email
+// templates for, falling back to English.
+func defaultLanguageCode(code string) string {
+	switch code {
+	case "en", "sv", "de":
+		return code
+	default:
+		return "en"
+	}
+}
+
 func UsersResetPassword(c *gin.Context) {
 	log.Info(c, 0, "UsersResetPassword")
 
@@ -649,12 +660,14 @@ func UsersResetPassword(c *gin.Context) {
 		return
 	}
 
+	emailAddress := strings.TrimSpace(r.Email)
+
 	var user models.User
-	if err := models.DB.Preload("Language").Where("email=?", r.Email).First(&user).Error; err != nil {
-		log.Error(c, -10001, err.Error())
+	if err := models.DB.Preload("Language").Where("email=?", emailAddress).First(&user).Error; err != nil {
+		log.Error(c, ErrorRecordNotFound, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    -10001,
-			"message": err.Error(),
+			"code":    ErrorRecordNotFound,
+			"message": "no account with that email address",
 		})
 		return
 	}
@@ -664,12 +677,19 @@ func UsersResetPassword(c *gin.Context) {
 			Timestamp: time.Now(),
 			Uuid:      utils.GenerateShortUuid(),
 		},
-		ExpireAt: time.Now().Add(1 * time.Hour),
+		ExpireAt: time.Now().Add(24 * time.Hour),
 		Token:    utils.ComputeHmac256(user.Email+time.Now().String(), config.AppConfig.HashingSecret),
 		UserId:   user.Id,
 	}
 
-	et, err := utils.GetEmailTemplate("set_password", user.Language.Code)
+	// Users predating the language column have no language set, fall back to the
+	// language of the requesting client rather than looking up an empty template.
+	languageCode := user.Language.Code
+	if languageCode == "" {
+		languageCode = defaultLanguageCode(c.GetString("app_language"))
+	}
+
+	et, err := utils.GetEmailTemplate("set_password", languageCode)
 	if err != nil {
 		log.Error(c, 0, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -748,16 +768,17 @@ func UsersSetPassword(c *gin.Context) {
 
 	var cpr models.ChangePasswordRequest
 	if err := tx.Where("token=?", c.Param("token")).First(&cpr).Error; err != nil {
-		log.Error(c, ErrorInternalServerError, err.Error())
+		log.Error(c, ErrorRecordNotFound, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    -10001,
-			"message": err.Error(),
+			"code":    ErrorRecordNotFound,
+			"message": "unknown or already used reset link",
 		})
 		tx.Rollback()
 		return
 	}
 
 	if cpr.ExpireAt.Before(time.Now()) {
+		log.Error(c, ErrorLinkExpired, "reset link expired, issued "+cpr.Timestamp.String())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    ErrorLinkExpired,
 			"message": "link expired",
@@ -778,6 +799,7 @@ func UsersSetPassword(c *gin.Context) {
 	}
 
 	if !utils.VerifyPassword(r.Password) {
+		log.Error(c, ErrorSignUpInvalidPassword, "rejected new password for "+user.Uuid)
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    ErrorSignUpInvalidPassword,
 			"message": "invalid password",
