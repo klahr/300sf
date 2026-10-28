@@ -1,18 +1,18 @@
-version: '3.5'
+# Production stack. Build contexts are the sibling directories of this
+# monorepo; the API's CONFIG_FILE must exist (untracked) in api/.
 services:
   # api.300sf.se
   albatross:
     container_name: albatross
     network_mode: host
     build:
-      context: ../300sf
+      context: ../api
       dockerfile: Dockerfile
       args:
         CONFIG_FILE: 300sf-albatross.conf
     restart: unless-stopped
     environment:
       - "LOG_FILE_LOCATION=/logs/albatross.log"
-      - "DATA_STORAGE_PATH=/resources/"
     volumes:
       - /home/klarre/logs:/logs
   # api.300sf.se
@@ -20,14 +20,13 @@ services:
     container_name: blackbird
     network_mode: host
     build:
-      context: ../300sf
+      context: ../api
       dockerfile: Dockerfile
       args:
         CONFIG_FILE: 300sf-blackbird.conf
     restart: unless-stopped
     environment:
       - "LOG_FILE_LOCATION=/logs/blackbird.log"
-      - "DATA_STORAGE_PATH=/resources/"
     volumes:
       - /home/klarre/logs:/logs
   # app.300sf.se
@@ -35,7 +34,7 @@ services:
     container_name: yellowhammer
     network_mode: host
     build:
-      context: ../300sf-webapp
+      context: ../webapp
       dockerfile: Dockerfile
     restart: unless-stopped
   # 300sf.se
@@ -43,7 +42,7 @@ services:
     container_name: woodpecker
     network_mode: host
     build:
-      context: ../300sf-web
+      context: ../web
       dockerfile: Dockerfile
     restart: unless-stopped
   # api-docs.300sf.se
@@ -54,4 +53,4 @@ services:
     environment:
       - SWAGGER_JSON=/foo/swagger.yaml
     volumes:
-      - ../300sf:/foo
+      - ../api:/foo
