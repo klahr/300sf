@@ -1,12 +1,11 @@
-FROM node:alpine
+FROM node:22-alpine
 
-RUN mkdir /app
-ADD . /app
 WORKDIR /app
 
 COPY package*.json ./
+RUN npm ci --omit=dev
 
-RUN npm install
+COPY . .
 
 EXPOSE 8080
 
