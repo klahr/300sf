@@ -1,23 +1,21 @@
 /// <reference path="App.ts"/>
 /// <reference path="responses/Error.ts"/>
 /// <reference path="AppConfig.ts"/>
+/// <reference path="Session.ts"/>
 
 declare let $: any;
 
 class HttpRequest {
 	private mHeaders = new Map<string, string>();
 	private mAsync = true;
+	private mAnonymous = false;
+	private mRetried = false;
 	private static sNumRequests = 0;
 
 	constructor(private mMethod: string, private mUrl: string, private mData: any = {}) {
 		this.setHeader("Accept", "application/json, text/csv");
 		this.setHeader("Content-Type", "application/json");
 		this.setHeader("X-App-Language", App.language);
-		const ks = new LocalStorage();
-		const accessToken = ks.get("x300sf_at");
-		if (accessToken != null && accessToken != "") {
-			this.setHeader("Authorization", "Bearer " + accessToken);
-		}
 	}
 
 	public setHeader(key: string, value: string): void {
@@ -28,8 +26,20 @@ class HttpRequest {
 		this.mAsync = false;
 	}
 
+	// Sent without the access token and never triggers a token refresh.
+	public setAnonymous(): void {
+		this.mAnonymous = true;
+	}
+
 	public process(success: (status: any, data: any) => void = function () { }, fail: (status: any, data: Responses.GeneralErrorResponse, error: any) => void = function () { }, complete: () => void = function () { }): void {
 		const self = this;
+
+		const accessToken = self.mAnonymous ? null : Session.accessToken;
+		if (accessToken) {
+			self.setHeader("Authorization", "Bearer " + accessToken);
+		} else {
+			self.mHeaders.delete("Authorization");
+		}
 
 		$.ajax({
 			beforeSend: function (xhr) {
@@ -52,28 +62,23 @@ class HttpRequest {
 			error: function (xhr, _textStatus, errorThrown) {
 				if (xhr.status === 503 || xhr.status === 429 || xhr.status === 0) {
 					new Ui.MessageBox(App.translations.ConnectionError, App.translations.ConnectionErrorDescription, null, "var(--error-color)", () => void {});
-				} else if (xhr.status == 401) {
-					const ks = new LocalStorage();
-					if (xhr.responseJSON.code === 7001) {
-						ks.clear();
-						window.open("/", "_self");
+				} else if (xhr.status == 401 && !self.mAnonymous && xhr.responseJSON?.code !== Responses.ErrorCode.ErrorMissingPermission) {
+					// Expired or missing access token: refresh once and retry once.
+					if (self.mRetried || Session.refreshToken === null) {
+						if (Session.refreshToken !== null || accessToken) {
+							Session.signInAgain();
+							return;
+						}
+						fail(xhr.status, xhr.responseJSON, errorThrown);
 						return;
 					}
-					const d = {
-						grant_type: "refresh_token",
-						refresh_token: ks.get("x300sf_rt")
-					}
-					const r = new HttpRequest("POST", "/v1/auth", d);
-					r.process(function (status: any, data: Responses.AuthenticationResponse) {
-						ks.set("x300sf_at", data.access_token, data.expires_in);
-						ks.set("x300sf_rt", data.refresh_token, 3600 * 7 * 60);
-						ks.set("lang", data.lang, data.expires_in);
-						ks.set("scope", data.scope, data.expires_in);
-						self.setHeader("Authorization", "Bearer " + data.access_token);
-						self.process(success, fail, complete);
-					}, function (status: any, data: Responses.GeneralErrorResponse, err: any) {
-						ks.clear();
-						window.open("/", "_self");
+					Session.refresh(function (ok: boolean) {
+						if (ok) {
+							self.mRetried = true;
+							self.process(success, fail, complete);
+						} else {
+							Session.signInAgain();
+						}
 					});
 				} else {
 					fail(xhr.status, xhr.responseJSON, errorThrown);

@@ -34,7 +34,7 @@ class EditReportPopUp {
 			locationLbl.innerHTML = App.translations.ObservationLocation;
 			content.container.appendChild(locationLbl);
 			const mapDiv = new Ui.Div();
-			mapDiv.container.id = "map";
+			mapDiv.container.classList.add("map");
 			mapDiv.style.height = "300px";
 			mapDiv.style.width = "100%";
 			mapDiv.style.position = "relative";
@@ -43,7 +43,7 @@ class EditReportPopUp {
 
 			setTimeout(function () {
 				const latLng = [report.latitude, report.longitude];
-				const map = L.map('map').setView(latLng, 13);
+				const map = L.map(mapDiv.container).setView(latLng, 13);
 				L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 					maxZoom: 19,
 					attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -136,7 +136,7 @@ class EditReportPopUp {
 			const privateComment = document.createElement("textarea");
 			privateComment.style.height = "128px";
 			privateComment.disabled = true;
-			privateComment.innerHTML = report.comment.text;
+			privateComment.textContent = report.comment.text;
 			content.container.appendChild(privateComment);
 		}
 
@@ -158,7 +158,7 @@ class EditReportPopUp {
 			dd.attach(c);
 			const cLbl = document.createElement("label");
 			cLbl.setAttribute("for", c.container.getAttribute("name")!);
-			cLbl.innerHTML = App.getTranslation(e.name);
+			cLbl.textContent = App.getTranslation(e.name);
 			dd.container.appendChild(cLbl);
 		});
 
@@ -179,7 +179,7 @@ class EditReportPopUp {
 					tag.style.backgroundColor = e.color;
 				}
 				const c = document.createElement("p");
-				c.innerHTML = e.name;
+				c.textContent = e.name;
 				tag.appendChild(c);
 				tagsContainer.container.appendChild(tag);
 			});
@@ -190,7 +190,7 @@ class EditReportPopUp {
 		this.mReportButton.style.width = "auto";
 		this.mReportButton.style.cssFloat = "right";
 		this.mReportButton.style.borderRadius = "8px";
-		this.mReportButton.style.backgroundColor = "#a11f1f";
+		this.mReportButton.style.backgroundColor = "var(--danger)";
 		this.mReportButton.addEventListener("click", function () {
 			new Ui.ConfirmBox(App.translations.ArchiveSighting, App.translations.ConfirmArchiveSighting, "/img/messagebox-256.webp", "var(--success-color)", function () {
 				const r = new HttpRequest("POST", "/v1/reports/" + report.uuid + "/archive");

@@ -1,5 +1,9 @@
 namespace Utils {
-	export function isValidDate(date: Date): boolean {
+	// False for missing dates: null/undefined and Go's zero time.
+	export function isValidDate(date: Date | null | undefined): boolean {
+		if (date === null || date === undefined || (date as any) === "") {
+			return false;
+		}
 		let d: Date;
 		if (date instanceof Date) {
 			d = date;
@@ -38,9 +42,12 @@ namespace Utils {
 		return r.slice(0, r.lastIndexOf(".")) + 'Z';
 	}
 
+	// Minutes ahead of UTC right now (getTimezoneOffset already includes DST).
 	export function getTimezoneOffset(): number {
-		const now = new Date();
-		const isDaylightSavingTime = now.getTimezoneOffset() !== new Date(now.getFullYear(), 0, 1).getTimezoneOffset();
-		return -now.getTimezoneOffset() + (isDaylightSavingTime ? 60 : 0);
+		return -new Date().getTimezoneOffset();
+	}
+
+	export function getTimeZone(): string {
+		return Intl.DateTimeFormat().resolvedOptions().timeZone;
 	}
 }

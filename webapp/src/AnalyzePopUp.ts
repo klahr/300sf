@@ -66,8 +66,8 @@ class AnalyzePopUp {
 		const handleSuccess = (stream) => {
 			self.mStream = stream;
 			const workerOptions = {
-				OggOpusEncoderWasmPath: 'https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/OggOpusEncoder.wasm',
-				WebMOpusEncoderWasmPath: 'https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/WebMOpusEncoder.wasm'
+				OggOpusEncoderWasmPath: 'https://cdn.jsdelivr.net/npm/opus-media-recorder@0.8.0/OggOpusEncoder.wasm',
+				WebMOpusEncoderWasmPath: 'https://cdn.jsdelivr.net/npm/opus-media-recorder@0.8.0/WebMOpusEncoder.wasm'
 			};
 
 			// @ts-ignore
@@ -141,7 +141,7 @@ class AnalyzePopUp {
 		formData.append('meta', '{"save":false}');
 		this.mAnalyzeText.style.display = "";
 
-		fetch('https://api.300sf.se/analyze', {
+		fetch('/analyze', {
 			method: 'POST',
 			body: formData,
 		})

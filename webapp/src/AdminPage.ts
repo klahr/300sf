@@ -51,7 +51,7 @@ class AdminPage extends Page {
 	private addEntry(name: string, icon: string, action: () => void) {
 		const c = document.createElement("p");
 		c.className = "entry";
-		c.innerHTML = "<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>" + icon + "</span> " + name;
+		c.innerHTML = "<span style='font-size: 1rem; color: var(--blue);' class='material-symbols-outlined'>" + icon + "</span> " + name;
 		this.container.appendChild(c);
 		c.addEventListener("click", function () {
 			action();

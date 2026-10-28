@@ -51,7 +51,7 @@ class ManageCheckListsPage extends Page {
 				const o = self.mTemplateSelect.getOption(value);
 				if (o) {
 					const description = o.getAttribute("description");
-					self.mTemplateDescription.innerHTML = description ? description : App.translations.NoProvidedInfo;
+					self.mTemplateDescription.textContent = description ? description : App.translations.NoProvidedInfo;
 				}
 			}
 		});
@@ -185,11 +185,11 @@ class ManageCheckListsPage extends Page {
 			data.result.forEach(e => {
 				const c = document.createElement("p");
 				c.className = "entry";
-				let color = "#0d81b4";
+				let color = "var(--blue)";
 				if (e.color !== "") {
 					color = e.color;
 				}
-				c.innerHTML = "<span style='font-size: 1rem; color: " + color + ";' class='material-symbols-outlined'>trip_origin</span> " + App.getTranslation(e.name);
+				c.innerHTML = "<span style='font-size: 1rem; color: " + Utils.escapeHtml(color) + ";' class='material-symbols-outlined'>trip_origin</span> " + Utils.escapeHtml(App.getTranslation(e.name));
 				self.mChecklists.container.appendChild(c);
 				c.addEventListener("click", function () {
 					openEditListPopUp(e);
@@ -225,7 +225,7 @@ class ManageCheckListsPage extends Page {
 					default:
 						icon = "public";
 				}
-				c.innerHTML = "<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>public</span> " + App.getTranslation(e.name);
+				c.innerHTML = "<span style='font-size: 1rem; color: var(--blue);' class='material-symbols-outlined'>public</span> " + Utils.escapeHtml(App.getTranslation(e.name));
 				self.mTemplates.container.appendChild(c);
 				c.addEventListener("click", function () {
 					new Ui.MessageBox(App.translations.Error, "Not yet implemented.", "/img/messagebox-256.webp", "var(--error-color)", function () { });

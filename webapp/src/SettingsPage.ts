@@ -94,7 +94,7 @@ class SettingsPage extends Page {
 			exportDataButton.disabled = true;
 			const r = new HttpRequest("GET", "/v1/users/export");
 			r.process(function (status: any, data: any) {
-				DownloadFile("data.json", JSON.stringify(data));
+				DownloadFile("data.json", JSON.stringify(data, null, 2));
 			}, function () {
 				new Ui.MessageBox(App.translations.Error, App.translations.SomethingWentWrong, "/img/messagebox-256.webp", "var(--error-color)", function () { });
 			}, function () {

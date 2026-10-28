@@ -12,7 +12,7 @@ namespace Ui {
 			this.mProgression = new Div();
 			this.mProgression.style.width = "0%";
 			this.mProgression.style.height = "100%";
-			this.mProgression.style.backgroundColor = "var(--success-color)";
+			this.mProgression.style.backgroundColor = "var(--seen)";
 			this.mProgression.style.borderRadius = "3px";
 			this.mProgression.style.transitionDuration = "1s";
 

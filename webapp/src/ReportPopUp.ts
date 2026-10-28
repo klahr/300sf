@@ -16,7 +16,8 @@ class ReportPopUp {
 	private mSpeciesList: Ui.Input;
 	private mChecklistContainer: Ui.Div;
 	private mTagsContainer: Ui.Div;
-	private mLocation = L.latLng;
+	// Null until the user taps the map or their position is found.
+	private mLocation: { lat: number, lng: number } | null = null;
 	private mPopUp: Ui.PopUp;
 
 	constructor(species: Models.Species, list: Models.List | null, closeCallback: (speciesAdded: boolean) => void) {
@@ -41,7 +42,7 @@ class ReportPopUp {
 		locationLbl.innerHTML = App.translations.ObservationLocation;
 		content.container.appendChild(locationLbl);
 		const mapDiv = new Ui.Div();
-		mapDiv.container.id = "map";
+		mapDiv.container.classList.add("map");
 		mapDiv.style.height = "300px";
 		mapDiv.style.width = "100%";
 		mapDiv.style.position = "relative";
@@ -55,7 +56,7 @@ class ReportPopUp {
 		content.container.appendChild(locateButton);
 
 		setTimeout(function () {
-			const map = L.map('map').setView([58.1801188016368, 13.959220108737176], 13);
+			const map = L.map(mapDiv.container).setView([58.1801188016368, 13.959220108737176], 13);
 			L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				maxZoom: 19,
 				attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -115,7 +116,7 @@ class ReportPopUp {
 				dd.attach(c);
 				const cLbl = document.createElement("label");
 				cLbl.setAttribute("for", c.container.getAttribute("name")!);
-				cLbl.innerHTML = App.getTranslation(e.list.name);
+				cLbl.textContent = App.getTranslation(e.list.name);
 				dd.container.appendChild(cLbl);
 
 				if (!e.available) {
@@ -263,8 +264,10 @@ class ReportPopUp {
 				r.until = Utils.toISODate(new Date(until.value));
 			}
 
-			r.latitude = self.mLocation.lat;
-			r.longitude = self.mLocation.lng;
+			if (self.mLocation !== null) {
+				r.latitude = self.mLocation.lat;
+				r.longitude = self.mLocation.lng;
+			}
 			r.quantity = parseInt(quantity.value);
 			if (ageList.value) {
 				r.age_uuid = ageList.value;
@@ -299,11 +302,16 @@ class ReportPopUp {
 
 			// TODO: Tags and notifications.
 
+			// Disabled while saving so a double tap can't create two sightings.
+			self.mReportButton.disabled = true;
 			const rr = new HttpRequest("POST", "/v1/reports", r);
 			rr.process(function (status: any, data: any) {
-				new Ui.Toast(App.translations.Congratulations, App.translations.YouFoundA.replace("{0}", self.mSpeciesList.value), null, "var(--success-color)", function () { });
+				new Ui.Toast(App.translations.Congratulations, App.translations.YouFoundA.replace("{0}", Utils.escapeHtml(self.mSpeciesList.value)), null, "var(--success-color)", function () { });
 				speciesAdded = true;
 				self.mPopUp.close();
+			}, function () {
+				self.mReportButton.disabled = false;
+				new Ui.MessageBox(App.translations.Error, App.translations.SomethingWentWrong, "/img/messagebox-256.webp", "var(--error-color)", function () { });
 			});
 		});
 		content.container.appendChild(this.mReportButton);
@@ -349,7 +357,7 @@ class ReportPopUp {
 			tag.style.backgroundColor = e.color;
 		}
 		const c = document.createElement("p");
-		c.innerHTML = e.name;
+		c.textContent = e.name;
 		tag.appendChild(c);
 		this.mTagsContainer.container.appendChild(tag);
 

@@ -67,24 +67,24 @@ class MainMenu extends Ui.Widget {
 		const self = this;
 
 		this.addSection(App.translations.AppName);
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>home</span> " + App.translations.Dashboard, function () {
+		this.addEntry("<span style='font-size: 1rem; color: var(--blue);' class='material-symbols-outlined'>home</span> " + App.translations.Dashboard, function () {
 			self.mAppListener.showPage("home", null);
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>raven</span> " + App.translations.Sightings, function () {
+		this.addEntry("<span style='font-size: 1rem; color: var(--blue);' class='material-symbols-outlined'>raven</span> " + App.translations.Sightings, function () {
 			self.mAppListener.showPage("reports", null);
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>edit_note</span>  " + App.translations.Checklists, function () {
+		this.addEntry("<span style='font-size: 1rem; color: var(--blue);' class='material-symbols-outlined'>edit_note</span>  " + App.translations.Checklists, function () {
 			self.mAppListener.showPage("checklists", null);
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>label</span>  " + App.translations.Tags, function () {
+		this.addEntry("<span style='font-size: 1rem; color: var(--blue);' class='material-symbols-outlined'>label</span>  " + App.translations.Tags, function () {
 			self.mAppListener.showPage("tags", null);
 		});
 
 /*
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>military_tech</span>  " + App.translations.Competitions, function () {
+		this.addEntry("<span style='font-size: 1rem; color: var(--blue);' class='material-symbols-outlined'>military_tech</span>  " + App.translations.Competitions, function () {
 			self.mAppListener.showPage("competitions", null);
 		});
 */
@@ -98,11 +98,11 @@ class MainMenu extends Ui.Widget {
 			data.result.forEach(e => {
 				const c = document.createElement("p");
 				c.className = "entry";
-				let color = "#0d81b4";
+				let color = "var(--blue)";
 				if (e.color !== "") {
 					color = e.color;
 				}
-				c.innerHTML = "<span style='font-size: 1rem; color: " + color + ";' class='material-symbols-outlined'>trip_origin</span> " + App.getTranslation(e.name);
+				c.innerHTML = "<span style='font-size: 1rem; color: " + Utils.escapeHtml(color) + ";' class='material-symbols-outlined'>trip_origin</span> " + Utils.escapeHtml(App.getTranslation(e.name));
 				checklists.appendChild(c);
 				c.addEventListener("click", function () {
 					self.mAppListener.showPage("list", e);
@@ -111,32 +111,32 @@ class MainMenu extends Ui.Widget {
 		});
 
 		this.addSection(App.translations.Support);
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>mail</span> " + App.translations.Contact, function () {
+		this.addEntry("<span style='font-size: 1rem; color: var(--blue);' class='material-symbols-outlined'>mail</span> " + App.translations.Contact, function () {
 			self.mAppListener.showPage("contact", null);
 		});
 
-/*		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>support</span> " + App.translations.Contribute, function () {
+/*		this.addEntry("<span style='font-size: 1rem; color: var(--blue);' class='material-symbols-outlined'>support</span> " + App.translations.Contribute, function () {
 			self.mAppListener.showPage("contribute", null);
 		});
 */
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>volunteer_activism</span> " + App.translations.Donation, function () {
+		this.addEntry("<span style='font-size: 1rem; color: var(--blue);' class='material-symbols-outlined'>volunteer_activism</span> " + App.translations.Donation, function () {
 			self.mAppListener.showPage("donation", null);
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>policy</span> " + App.translations.PrivacyPolicy, function () {
+		this.addEntry("<span style='font-size: 1rem; color: var(--blue);' class='material-symbols-outlined'>policy</span> " + App.translations.PrivacyPolicy, function () {
 			window.open("/privacy-policy", "_blank");
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>handshake</span> " + App.translations.TermsOfService, function () {
+		this.addEntry("<span style='font-size: 1rem; color: var(--blue);' class='material-symbols-outlined'>handshake</span> " + App.translations.TermsOfService, function () {
 			window.open("/terms", "_blank");
 		});
 
 		this.addSection(App.translations.Account);
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>manage_accounts</span> " + App.translations.Account, function () {
+		this.addEntry("<span style='font-size: 1rem; color: var(--blue);' class='material-symbols-outlined'>manage_accounts</span> " + App.translations.Account, function () {
 			self.mAppListener.showPage("settings", null);
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>logout</span> " + App.translations.LogOut, function () {
+		this.addEntry("<span style='font-size: 1rem; color: var(--blue);' class='material-symbols-outlined'>logout</span> " + App.translations.LogOut, function () {
 			self.mAppListener.logOut();
 		});
 	}
@@ -145,28 +145,28 @@ class MainMenu extends Ui.Widget {
 		const self = this;
 		this.addSection(App.translations.Support);
 /*
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>support</span> " + App.translations.Contribute, function () {
+		this.addEntry("<span style='font-size: 1rem; color: var(--blue);' class='material-symbols-outlined'>support</span> " + App.translations.Contribute, function () {
 			self.mAppListener.showPage("contribute", null);
 		});
 */
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>volunteer_activism</span> " + App.translations.Donation, function () {
+		this.addEntry("<span style='font-size: 1rem; color: var(--blue);' class='material-symbols-outlined'>volunteer_activism</span> " + App.translations.Donation, function () {
 			self.mAppListener.showPage("donation", null);
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>policy</span> " + App.translations.PrivacyPolicy, function () {
+		this.addEntry("<span style='font-size: 1rem; color: var(--blue);' class='material-symbols-outlined'>policy</span> " + App.translations.PrivacyPolicy, function () {
 			window.open("/privacy-policy", "_blank");
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>handshake</span> " + App.translations.TermsOfService, function () {
+		this.addEntry("<span style='font-size: 1rem; color: var(--blue);' class='material-symbols-outlined'>handshake</span> " + App.translations.TermsOfService, function () {
 			window.open("/terms", "_blank");
 		});
 
 		this.addSection(App.translations.Account);
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>join</span> " + App.translations.SignUp, function () {
+		this.addEntry("<span style='font-size: 1rem; color: var(--blue);' class='material-symbols-outlined'>join</span> " + App.translations.SignUp, function () {
 			window.open("/sign-up", "_self");
 		});
 
-		this.addEntry("<span style='font-size: 1rem; color: #0d81b4;' class='material-symbols-outlined'>login</span> " + App.translations.SignIn, function () {
+		this.addEntry("<span style='font-size: 1rem; color: var(--blue);' class='material-symbols-outlined'>login</span> " + App.translations.SignIn, function () {
 			window.open("/", "_self");
 		});
 	}
@@ -174,7 +174,7 @@ class MainMenu extends Ui.Widget {
 	private addSection(name: string): HTMLParagraphElement {
 		const header = document.createElement("p");
 		header.className = "section";
-		header.innerHTML = name.toUpperCase();
+		header.textContent = name;
 		this.mContent.container.appendChild(header);
 		return header;
 	}

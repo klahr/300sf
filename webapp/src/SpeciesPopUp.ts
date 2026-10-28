@@ -50,10 +50,11 @@ function openSpeciesPopUp(species: Models.Species, list: Models.List | null, clo
 
 	const r = new HttpRequest("GET", "/v1/species/" + species.uuid);
 	r.process(function (status: any, data: any) {
-		summary.innerHTML = data.wikipedia.summary;
+		summary.textContent = data.wikipedia.summary;
 
 		const p = document.createElement("p");
-		p.innerHTML = "Wikipedia - <a target='_blank' href='" + data.wikipedia.url + "'>" + App.translations.GoToArticle + "</a>";
+		const articleUrl = Utils.safeUrl(data.wikipedia.url);
+		p.innerHTML = "Wikipedia" + (articleUrl ? " - <a target='_blank' rel='noopener' href='" + Utils.escapeHtml(articleUrl) + "'>" + App.translations.GoToArticle + "</a>" : "");
 		p.style.fontSize = "0.8rem";
 		p.style.fontWeight = "bold";
 		p.style.textAlign = "right";
@@ -93,7 +94,7 @@ function openSpeciesPopUp(species: Models.Species, list: Models.List | null, clo
 		if (data.recordings) {
 			(data.recordings as Array<Models.Recording>).forEach(e => {
 				const p = document.createElement("p");
-				p.innerHTML = e.type.charAt(0).toUpperCase() + e.type.slice(1);
+				p.textContent = e.type.charAt(0).toUpperCase() + e.type.slice(1);
 				p.style.color = "var(--primary-variant-color)";
 				p.style.cursor = "pointer";
 				recordings.appendChild(p);
@@ -103,7 +104,7 @@ function openSpeciesPopUp(species: Models.Species, list: Models.List | null, clo
 				const info = document.createElement("p");
 				info.style.fontSize = "0.8rem";
 				info.style.fontStyle = "italic";
-				info.innerHTML = e.recorder + ", " + e.location + ", " + e.country;
+				info.textContent = e.recorder + ", " + e.location + ", " + e.country;
 
 				recordings.appendChild(info);
 				const a = document.createElement("audio");

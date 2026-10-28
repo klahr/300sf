@@ -49,7 +49,7 @@ namespace Ui {
 			this.mIdentifyButton.style.fontSize = "32px";
 			this.mIdentifyButton.style.position = "absolute";
 			this.mIdentifyButton.style.right = "53px";
-			this.mIdentifyButton.style.color = "white";
+			this.mIdentifyButton.style.color = "var(--ink)";
 			this.mIdentifyButton.style.top = "8px";
 			this.mIdentifyButton.innerHTML = "mic";
 			this.mIdentifyButton.style.display = "none";
@@ -129,7 +129,7 @@ namespace Ui {
 				} else if (e.key == "Enter") {
 					for (let i = 0; i < allOptions.length; ++i) {
 						if (allOptions[i].classList.contains("selected")) {
-							self.mResult.innerHTML = allOptions[i].innerHTML;
+							self.mResult.textContent = allOptions[i].textContent;
 							self.mResult.setAttribute("value", allOptions[i].getAttribute("value")!);
 							self.toggleVisible();
 							self.mSelectCallback(allOptions[i].getAttribute("value"));
@@ -146,9 +146,9 @@ namespace Ui {
 				const filter = this.value.toLowerCase();
 				const options = self.mDropDown.getElementsByTagName("p");
 				for (let i = 0; i < options.length; i++) {
-					if (options[i].innerHTML.toLowerCase().indexOf(filter) > -1) {
+					if (options[i].textContent!.toLowerCase().indexOf(filter) > -1) {
 						options[i].style.display = "";
-						if (options[i].innerHTML.toLowerCase() === filter) {
+						if (options[i].textContent!.toLowerCase() === filter) {
 							self.updateScroll(options[i]);
 							options[i].classList.add("selected");
 						} else {
@@ -216,10 +216,10 @@ namespace Ui {
 			const self = this;
 			const option = document.createElement("p");
 			option.className = "uix-option";
-			option.innerHTML = name;
+			option.textContent = name;
 			option.setAttribute("value", value);
 			option.addEventListener("click", function () {
-				self.mResult.innerHTML = this.innerHTML;
+				self.mResult.textContent = this.textContent;
 				self.mResult.setAttribute("value", this.getAttribute("value")!);
 				const allOptionsSource = self.mDropDown.getElementsByTagName("p");
 				for (let i = 0; i < allOptionsSource.length; ++i) {

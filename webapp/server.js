@@ -18,7 +18,7 @@ app.set('view engine', 'ejs');
 app.set('views', __dirname + '/views');
 app.use(i18n.init);
 app.use(compression());
-app.use(express.json());
+app.use(express.json({ type: (req) => !req.url.startsWith('/analyze') && /json/.test(req.headers['content-type'] || '') }));
 app.use(expressLayouts);
 if (process.env.NODE_ENV !== 'test') {
 	app.use(morgan('dev'));

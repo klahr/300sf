@@ -96,7 +96,7 @@ class ProfilePopUp {
 		const me = new HttpRequest("GET", "/v1/users/me");
 		me.process(function (status: any, data: any) {
 			const d = data as Responses.UsersMe;
-			displayName.innerHTML = d.user.display_name;
+			displayName.textContent = d.user.display_name;
 			username.value = d.user.username;
 			uuid.value = d.user.uuid;
 			portraitSelect.select(d.user.portrait);

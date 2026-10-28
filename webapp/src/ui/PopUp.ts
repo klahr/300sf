@@ -36,7 +36,7 @@ namespace Ui {
 			c.container.style.width = "100%";
 			c.container.style.height = "100%";
 			c.container.style.overflow = "auto";
-			c.container.style.color = "white";
+			c.container.style.color = "var(--ink)";
 			c.container.style.position = "relative";
 			c.container.style.textAlign = "left";
 			this.mPopup.attach(c);

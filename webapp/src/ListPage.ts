@@ -37,11 +37,13 @@ class ListPage extends Page {
 			const d = {
 				"list_uuid": self.mData.uuid,
 				"format": "csv",
-				"timezone_offset": Utils.getTimezoneOffset()
+				"timezone_offset": Utils.getTimezoneOffset(),
+				"time_zone": Utils.getTimeZone()
 			};
 			const r = new HttpRequest("PUT", "/v1/reports/export", d);
 			r.process(function (status: any, data: any) {
-				DownloadFile("data.csv", JSON.stringify(data), "text/csv");
+				// The API returns the CSV text; the proxy delivers it as a JSON string.
+				DownloadFile("data.csv", typeof data === "string" ? data : String(data), "text/csv");
 			}, function () {
 				new Ui.MessageBox(App.translations.Error, App.translations.SomethingWentWrong, "/img/messagebox-256.webp", "var(--error-color)", function () { });
 			});
@@ -72,7 +74,7 @@ class ListPage extends Page {
 		this.mFilterTitle.style.fontSize = "0.8rem";
 		this.mFilterTitle.style.lineHeight = "normal";
 		this.mFilterTitle.style.textAlign = "center";
-		this.mFilterTitle.style.color = "#ffffffad";
+		this.mFilterTitle.style.color = "var(--ink-soft)";
 		filter.container.appendChild(this.mFilterTitle);
 
 		this.mFilterInput = new Ui.Input("text");
@@ -129,6 +131,10 @@ class ListPage extends Page {
 		this.mProfile.setImage("/img/portraits/" + App.user.portrait);
 	}
 
+	protected get path(): string {
+		return "/" + this.id + "/" + this.mData.uuid;
+	}
+
 	public setData(data: any): void {
 		this.mData = data;
 		const self = this;
@@ -151,7 +157,7 @@ class ListPage extends Page {
 	}
 
 	private updateLists(): void {
-		history.pushState({}, "", "/" + this.id + "/" + this.data.uuid);
+		Page.setUrl(this.path);
 		const scrollPostion = this.container.scrollTop;
 
 		this.mFilterInput.value = "";
@@ -163,8 +169,8 @@ class ListPage extends Page {
 
 		const r = new HttpRequest("GET", "/v1/lists/" + (this.data as Models.List).uuid + "/reports");
 		r.process(function (status: any, data: any) {
-			self.mTitle.innerHTML = App.getTranslation((self.data as Models.List).name);
-			self.mFilterTitle.innerHTML = self.mTitle.innerHTML;
+			self.mTitle.textContent = App.getTranslation((self.data as Models.List).name);
+			self.mFilterTitle.textContent = self.mTitle.textContent;
 			const reports = data.result as Models.Report[];
 			let lastOrder: Models.Order;
 			self.data.species.forEach(e => {
@@ -173,15 +179,14 @@ class ListPage extends Page {
 
 					const entry = document.createElement("div");
 					entry.style.textAlign = "center";
-					entry.style.backgroundColor = "var(--background-color)";
 					entry.className = "list-entry";
 
 					const name = document.createElement("p");
-					name.innerHTML = App.getTranslation(e.order.name).toUpperCase();
+					name.innerHTML = App.getTranslation(e.order.name);
+					name.classList.add("order-name");
 					name.style.cursor = "pointer";
 					name.style.fontWeight = "bold";
 					name.style.fontStyle = "initial";
-					name.style.color = "var(--primary-variant-color)";
 					entry.appendChild(name);
 					name.addEventListener("click", function () {
 						openOrderPopUp(e.order);
@@ -214,7 +219,7 @@ class ListPage extends Page {
 				const check = document.createElement("span");
 				check.className = "material-symbols-outlined";
 				check.innerHTML = "check_circle";
-				check.style.color = "var(--secondary-color)";
+				check.classList.add("seen-mark");
 				check.style.cursor = "pointer";
 				check.addEventListener("click", function (event) {
 					event.stopPropagation();
@@ -233,15 +238,13 @@ class ListPage extends Page {
 				});
 
 				if (found) {
-					name.style.color = "var(--success-color)";
-					check.style.color = "var(--success-color)";
+					entry.classList.add("seen");
 				}
 
 				self.mTable.addRow([entry]);
 			});
 			self.container.scrollTop = scrollPostion;
 		}, function (status: any, data: any) {
-			console.log(data);
 		});
 	}
 }

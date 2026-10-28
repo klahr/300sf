@@ -32,7 +32,7 @@ class EditListPopUp {
 		this.mArchiveButton.style.width = "auto";
 		this.mArchiveButton.style.cssFloat = "right";
 		this.mArchiveButton.style.borderRadius = "8px";
-		this.mArchiveButton.style.backgroundColor = "#a11f1f";
+		this.mArchiveButton.style.backgroundColor = "var(--danger)";
 		this.mArchiveButton.addEventListener("click", function () {
 			new Ui.ConfirmBox(App.translations.ArchiveChecklist, App.translations.ConfirmArchiveChecklist, "/img/messagebox-256.webp", "var(--success-color)", function () {
 				const r = new HttpRequest("POST", "/v1/lists/" + list.uuid + "/archive");

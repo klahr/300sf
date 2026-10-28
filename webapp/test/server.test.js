@@ -9,7 +9,9 @@ const fakeApi = http.createServer((req, res) => {
 	let body = '';
 	req.on('data', (chunk) => body += chunk);
 	req.on('end', () => {
-		lastRequest = { method: req.method, url: req.url, headers: req.headers, body: body ? JSON.parse(body) : null };
+		let parsed = null;
+		try { parsed = body ? JSON.parse(body) : null; } catch (e) { parsed = body; }
+		lastRequest = { method: req.method, url: req.url, headers: req.headers, body: parsed };
 		fakeApiHandler(req, res, lastRequest);
 	});
 });
@@ -28,6 +30,7 @@ before(async () => {
 	process.env.API_ENDPOINT = `http://127.0.0.1:${fakeApi.address().port}`;
 	process.env.CLIENT_ID = 'test-client';
 	process.env.CLIENT_SECRET = 'abc.secret';
+	process.env.ANALYZE_ENDPOINT = `http://127.0.0.1:${fakeApi.address().port}/analyze`;
 	const app = require('../server');
 	server = app.listen(0, '127.0.0.1');
 	await new Promise((resolve) => server.once('listening', resolve));
@@ -44,15 +47,24 @@ test('root renders the single-page app', async () => {
 	assert.strictEqual(res.status, 200);
 	const html = await res.text();
 	assert.match(html, /src="\/js\/app.js"/);
-	assert.match(html, /new App\("sv", ""/);
+	assert.match(html, /"language":"sv","redirect":""/);
 });
 
 test('client-side routes render the app with a redirect', async () => {
 	const res = await fetch(base + '/checklists?lang=en&x=1');
 	assert.strictEqual(res.status, 200);
 	const html = await res.text();
-	assert.match(html, /new App\("en", "checklists"/);
+	assert.match(html, /"language":"en","redirect":"checklists"/);
 	assert.match(html, /"x":"1"/);
+});
+
+test('query parameters cannot break out of the boot script', async () => {
+	const payload = encodeURIComponent("x'-alert(1)-'</script><script>alert(2)</script>");
+	const html = await (await fetch(base + '/home?a=' + payload)).text();
+	assert.doesNotMatch(html, /<\/script><script>alert/);
+	assert.match(html, /\\u003c\/script\\u003e/);
+	const boot = html.match(/const boot = (.*);/)[1];
+	assert.strictEqual(JSON.parse(boot).queryParameters.a, "x'-alert(1)-'</script><script>alert(2)</script>");
 });
 
 test('list route passes the uuid to the app', async () => {
@@ -139,4 +151,17 @@ test('api proxy returns 503 when the API is unreachable', async () => {
 	const res = await fetch(base + '/api/v1/lists/list');
 	assert.strictEqual(res.status, 503);
 	fakeApiHandler = saved;
+});
+
+test('analyze forwards multipart uploads unchanged', async () => {
+	fakeApiHandler = (req, res) => json(res, 200, { birds: [] });
+	const form = new FormData();
+	form.append('audio', new Blob([new Uint8Array([1, 2, 3])]), 'recording.wav');
+	form.append('meta', '{"save":false}');
+	const res = await fetch(base + '/analyze', { method: 'POST', body: form });
+	assert.strictEqual(res.status, 200);
+	assert.strictEqual(lastRequest.url, '/analyze');
+	assert.match(lastRequest.headers['content-type'], /^multipart\/form-data; boundary=/);
+	assert.match(lastRequest.body, /name="meta"\r\n\r\n\{"save":false\}/);
+	assert.match(lastRequest.body, /filename="recording.wav"/);
 });

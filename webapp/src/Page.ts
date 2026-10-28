@@ -72,7 +72,22 @@ class Page extends Ui.Widget {
 
 	public setData(data: any): void {
 		super.setData(data);
-		history.pushState({}, "", "/" + this.id + window.location.search);
+		Page.setUrl(this.path);
+	}
+
+	protected get path(): string {
+		return "/" + this.id;
+	}
+
+	// Replaces the history entry when the path is unchanged (first load,
+	// refreshes) and pushes one when the user moves to another page. Query
+	// parameters such as ?token= only belong to the page they were sent to.
+	protected static setUrl(path: string): void {
+		if (window.location.pathname === path) {
+			history.replaceState({}, "", path + window.location.search);
+		} else {
+			history.pushState({}, "", path);
+		}
 	}
 
 	protected onCreateLoggedIn(): void { }

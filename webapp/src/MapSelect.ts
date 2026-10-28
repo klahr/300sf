@@ -11,7 +11,7 @@ class MapSelect extends Ui.Widget {
 		this.mCallback = callback;
 
 		this.mContainer = document.createElement("div");
-		this.mContainer.id = "map";
+		this.mContainer.classList.add("map");
 		this.mContainer.style.height = "500px";
 		this.mContainer.style.width = "100%";
 		this.mContainer.style.position = "relative";
@@ -19,7 +19,7 @@ class MapSelect extends Ui.Widget {
 
 		const self = this;
 		setTimeout(function () {
-			self.mMap = L.map('map', {
+			self.mMap = L.map(self.mContainer, {
 				doubleClickZoom: false
 			}).setView([62.0, 15.0], 4);
 			L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {

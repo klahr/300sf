@@ -106,7 +106,7 @@ class ManageTagsPage extends Page {
 					tag.style.backgroundColor = t.color;
 				}
 				const c = document.createElement("p");
-				c.innerHTML = t.name;
+				c.textContent = t.name;
 				tag.appendChild(c);
 				self.mTags.container.appendChild(tag);
 				c.addEventListener("click", function () {

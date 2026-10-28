@@ -27,10 +27,11 @@ function openOrderPopUp(order: Models.Order) {
 
 	const r = new HttpRequest("GET", "/v1/orders/" + order.uuid);
 	r.process(function (status: any, data: any) {
-		summary.innerHTML = data.wikipedia.summary;
+		summary.textContent = data.wikipedia.summary;
 
 		const p = document.createElement("p");
-		p.innerHTML = "Wikipedia - <a target='_blank' href='" + data.wikipedia.url + "'>" + App.translations.GoToArticle + "</a>";
+		const articleUrl = Utils.safeUrl(data.wikipedia.url);
+		p.innerHTML = "Wikipedia" + (articleUrl ? " - <a target='_blank' rel='noopener' href='" + Utils.escapeHtml(articleUrl) + "'>" + App.translations.GoToArticle + "</a>" : "");
 		p.style.fontSize = "0.8rem";
 		p.style.fontWeight = "bold";
 		p.style.textAlign = "right";

@@ -14,12 +14,12 @@ function openRecordingPopUp(species: Models.Species, recording: Models.Recording
 	content.container.appendChild(name);
 
 	const subName = document.createElement("p");
-	subName.innerHTML = recording.type.charAt(0).toUpperCase() + recording.type.slice(1);
+	subName.textContent = recording.type.charAt(0).toUpperCase() + recording.type.slice(1);
 	subName.style.fontStyle = "italic";
 	content.container.appendChild(subName);
 
 	const mapDiv = new Ui.Div();
-	mapDiv.container.id = "map";
+	mapDiv.container.classList.add("map");
 	mapDiv.style.height = "300px";
 	mapDiv.style.width = "100%";
 	mapDiv.style.position = "relative";
@@ -27,13 +27,13 @@ function openRecordingPopUp(species: Models.Species, recording: Models.Recording
 	content.attach(mapDiv);
 
 	const place = document.createElement("p");
-	place.innerHTML = recording.location + ", " + recording.country;
+	place.textContent = recording.location + ", " + recording.country;
 	place.style.fontStyle = "italic";
 	content.container.appendChild(place);
 
 	setTimeout(function () {
 		const latLng = [recording.latitude, recording.longitude];
-		const map = L.map('map').setView(latLng, 4);
+		const map = L.map(mapDiv.container).setView(latLng, 4);
 		L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 			maxZoom: 19,
 			attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -67,7 +67,6 @@ function openRecordingPopUp(species: Models.Species, recording: Models.Recording
 		if (!isNaN(duration)) {
 			const percentage = (currentTime / duration) * 100;
 			// TODO: Use this to display progress in the sono.
-			console.log(`Percentage played: ${percentage.toFixed(2)}%`);
 		}
 	});
 

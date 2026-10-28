@@ -96,11 +96,11 @@ class HomePage extends Page {
 				});
 				self.mProgressBoxes.attach(d);
 				if (e.list.color !== "") {
-					d.container.style.background = "linear-gradient(" + e.list.color + ", " + e.list.color + "bf)";
+					d.container.style.setProperty("--list-color", e.list.color);
 				}
 
 				const title = document.createElement("p");
-				title.innerHTML = App.getTranslation(e.list.name).substring(0, 50);
+				title.textContent = App.getTranslation(e.list.name).substring(0, 50);
 				d.container.appendChild(title);
 
 				const pd = new Ui.Div();
@@ -115,7 +115,6 @@ class HomePage extends Page {
 				const uniqueSpeciesInReports = Utils.numberOfUniqueSpeciesInReports(e.reports);
 				const pbt = document.createElement("p");
 				pbt.innerHTML = uniqueSpeciesInReports.toString() + "/" + e.list.species.length.toString();
-				pbt.style.textShadow = "1px 1px #0000005e";
 				pbt.style.fontSize = "0.8rem";
 				pbt.style.fontWeight = "bold";
 				pbt.style.cssFloat = "right";
@@ -141,7 +140,7 @@ class HomePage extends Page {
 				const name = document.createElement("h3");
 				name.innerHTML = App.getTranslation(species.name);
 				name.style.cursor = "pointer";
-				name.style.color = "var(--success-color)";
+				name.classList.add("species-name");
 				name.style.width = "fit-content";
 				entry.appendChild(name);
 				name.addEventListener("click", function (event) {
@@ -176,12 +175,12 @@ class HomePage extends Page {
 
 				if (d.comment.text !== "") {
 					const comment = document.createElement("p");
-					comment.style.backgroundColor = "#1d3944";
+					comment.classList.add("comment");
 					comment.style.borderRadius = "0 12px 0 12px";
 					comment.style.lineHeight = "unset";
 					comment.style.padding = "8px";
 					comment.style.width = "fit-content";
-					comment.innerHTML = d.comment.text;
+					comment.textContent = d.comment.text;
 					entry.appendChild(comment);
 				}
 
@@ -197,7 +196,7 @@ class HomePage extends Page {
 							tag.style.backgroundColor = e.color;
 						}
 						const c = document.createElement("p");
-						c.innerHTML = e.name;
+						c.textContent = e.name;
 						tag.appendChild(c);
 						tagsContainer.appendChild(tag);
 					});
@@ -212,7 +211,6 @@ class HomePage extends Page {
 				self.mTable.addRow([noRecent]);
 			}
 		}, function (status: any, data: Responses.GeneralErrorResponse, error: any) {
-			console.log(data);
 		});
 
 		const species = new HttpRequest("GET", "/v1/species/list", null);
@@ -352,14 +350,11 @@ class HomePage extends Page {
 				scopes: ["user", "admin"]
 			}
 			const r = new HttpRequest("POST", "/v1/auth", d);
+			r.setAnonymous();
 			r.process(function (status: any, data: Responses.AuthenticationResponse) {
-				const ks = new LocalStorage();
-				ks.set("x300sf_at", data.access_token, stayLoggedIn ? 0 : data.expires_in);
-				ks.set("x300sf_rt", data.refresh_token, 3600 * 7 * 60);
-				ks.set("lang", data.lang, stayLoggedIn ? 0 : data.expires_in);
-				ks.set("scope", data.scope, data.expires_in);
+				Session.store(data, stayLoggedIn);
 				const url = new URL(window.location.href);
-				const redirectParam = url.searchParams.get("redirect");
+				const redirectParam = Utils.safeRedirect(url.searchParams.get("redirect"));
 				if (redirectParam) {
 					window.open(redirectParam, "_self");
 				} else {

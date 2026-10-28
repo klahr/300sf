@@ -144,7 +144,7 @@ class ReportsPage extends Page {
 					tag.style.backgroundColor = e.color;
 				}
 				const c = document.createElement("p");
-				c.innerHTML = e.name;
+				c.textContent = e.name;
 				tag.appendChild(c);
 				self.mFilterTags.container.appendChild(tag);
 			});
@@ -165,7 +165,7 @@ class ReportsPage extends Page {
 				const name = document.createElement("h3");
 				name.innerHTML = App.getTranslation(e.species.name);
 				name.style.cursor = "pointer";
-				name.style.color = "var(--success-color)";
+				name.classList.add("species-name");
 				name.style.width = "fit-content";
 				entry.appendChild(name);
 				name.addEventListener("click", function (event) {
@@ -200,12 +200,12 @@ class ReportsPage extends Page {
 
 				if (e.comment.text !== "") {
 					const comment = document.createElement("p");
-					comment.style.backgroundColor = "#1d3944";
+					comment.classList.add("comment");
 					comment.style.borderRadius = "0 12px 0 12px";
 					comment.style.lineHeight = "unset";
 					comment.style.padding = "8px";
 					comment.style.width = "fit-content";
-					comment.innerHTML = e.comment.text;
+					comment.textContent = e.comment.text;
 					entry.appendChild(comment);
 				}
 
@@ -222,7 +222,7 @@ class ReportsPage extends Page {
 							tag.style.backgroundColor = e.color;
 						}
 						const c = document.createElement("p");
-						c.innerHTML = e.name;
+						c.textContent = e.name;
 						tag.appendChild(c);
 						tagsContainer.appendChild(tag);
 					});

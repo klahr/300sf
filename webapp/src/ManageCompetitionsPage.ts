@@ -29,7 +29,6 @@ class ManageCompetitionsPage extends Page {
 		this.container.appendChild(this.mCreateButton);
 		this.mCreateButton.addEventListener("click", function () {
 			new CreateCompetitionPopUp((competition: Models.Competition | null) => {
-				console.log("closed");
 			});
 		});
 	}

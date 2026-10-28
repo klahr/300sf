@@ -20,6 +20,7 @@
 /// <reference path="models/Translation.ts"/>
 /// <reference path="models/User.ts"/>
 /// <reference path="LocalStorage.ts"/>
+/// <reference path="Session.ts"/>
 
 interface IAppListener {
 	openMainMenu(): void;
@@ -36,6 +37,10 @@ class App implements IAppListener {
 	private static sUser: Models.User;
 
 	constructor(language: string, redirect: string, queryParameters: object) {
+		// Pages read the signed-in state when they are built, so renew an expired
+		// access token first.
+		Session.refreshSync();
+
 		const ks = new LocalStorage();
 		const lang = ks.get("lang") as string;
 		App.setLanguage(lang !== null && lang !== "" ? lang : language);
@@ -94,8 +99,7 @@ class App implements IAppListener {
 	}
 
 	public static isLoggedIn(): boolean {
-		const ks = new LocalStorage();
-		return ks.get("x300sf_at") !== null;
+		return Session.accessToken !== null;
 	}
 
 	public static getTranslation(translation: Models.Translation): string {
@@ -166,32 +170,12 @@ class App implements IAppListener {
 		});
 		if (page) {
 			const p = page as Page;
-			// Show the page unconditionally. Pages that need a session get a 401 on
-			// their own requests, and HttpRequest already handles that.
+			if (p.requireSignIn() && (!App.isLoggedIn() || !App.user)) {
+				Session.signInAgain();
+				return;
+			}
 			p.setVisible(true);
 			p.setData(data);
-			if (!App.isLoggedIn()) {
-				const ks = new LocalStorage();
-				const refreshToken = ks.get("x300sf_rt");
-				if (refreshToken !== null) {
-					const r = new HttpRequest("POST", "/v1/auth", {
-						grant_type: "refresh_token",
-						refresh_token: refreshToken
-					});
-					r.process(function (status: any, token: Responses.AuthenticationResponse) {
-						ks.set("x300sf_at", token.access_token, token.expires_in);
-						ks.set("x300sf_rt", token.refresh_token, 3600 * 7 * 60);
-						ks.set("lang", token.lang, token.expires_in);
-						ks.set("scope", token.scope, token.expires_in);
-						window.location.reload();
-					}, function (status: any, errorData: Responses.GeneralErrorResponse, err: any) {
-						// The stored session is stale. Drop it and leave the user on
-						// the page they asked for. Navigating away here used to throw
-						// away the reset token in the query string.
-						ks.clear();
-					});
-				}
-			}
 		}
 		this.mMainMenu.close();
 	}

@@ -12,28 +12,40 @@ const pages = [
 	'admin', 'experimental'
 ];
 
+// JSON that is safe to place inside a <script> element.
+function scriptJson(value) {
+	return JSON.stringify(value)
+		.replace(/</g, '\\u003c')
+		.replace(/>/g, '\\u003e')
+		.replace(/&/g, '\\u0026')
+		.replace(/\u2028/g, '\\u2028')
+		.replace(/\u2029/g, '\\u2029');
+}
+
 function renderApp(req, res, redirect, queryParameters) {
 	res.render('pages/app', {
 		data: {
-			language: i18n.getLocale(req),
-			redirect: redirect,
-			queryParameters: queryParameters
+			boot: scriptJson({
+				language: i18n.getLocale(req),
+				redirect: redirect,
+				queryParameters: queryParameters
+			})
 		}
 	});
 }
 
 router.get('/', function (req, res) {
-	renderApp(req, res, '', '');
+	renderApp(req, res, '', {});
 });
 
 for (const page of pages) {
 	router.get('/' + page, function (req, res) {
-		renderApp(req, res, page, JSON.stringify(req.query));
+		renderApp(req, res, page, req.query);
 	});
 }
 
 router.get('/list/:uuid', function (req, res) {
-	renderApp(req, res, 'list', JSON.stringify({ uuid: req.params.uuid }));
+	renderApp(req, res, 'list', { uuid: req.params.uuid });
 });
 
 router.get('/compare', async (req, res) => {
@@ -85,7 +97,8 @@ router.post('/api/v1/auth', (req, res) => {
 	forward(req, res, config.ApiEndpoint + req.originalUrl.substring(4), headers, body);
 });
 
-router.post('/analyze', (req, res) => {
+// Audio uploads (multipart) are passed through untouched.
+router.post('/analyze', express.raw({ type: () => true, limit: '20mb' }), (req, res) => {
 	forward(req, res, config.AnalyzeEndpoint, req.headers, req.body);
 });
 

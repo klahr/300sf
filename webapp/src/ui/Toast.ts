@@ -39,7 +39,7 @@ namespace Ui {
 			c.container.style.width = "100%";
 			c.container.style.height = "100%";
 			c.container.style.overflow = "auto";
-			c.container.style.color = "white";
+			c.container.style.color = "var(--ink)";
 			c.container.style.position = "relative";
 			c.container.style.textAlign = "left";
 			c.container.style.border = "2px solid " + color;
@@ -58,7 +58,7 @@ namespace Ui {
 			}
 
 			const t = document.createElement("h2");
-			t.innerHTML = title;
+			t.textContent = title;
 			c.container.appendChild(t);
 
 			const m = document.createElement("p");
