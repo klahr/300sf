@@ -1,9 +1,34 @@
 # 300sf CLI
 
+Command line client for the 300sf API.
+
+## Install
+
+```bash
+pip install ./cli        # from the repository root; installs the `300sf` command
+```
+
+Configure it in `~/.config/300sf/config.yml`:
+
+```yaml
+api-endpoint: https://api.300sf.se
+client-id: <client id>
+client-secret: <prefix>.<secret>
+language: sv            # optional, en | sv | de
+```
+
+The session is stored in `~/.config/300sf/session.json` (mode 600).
+
+## Tests
+
+```bash
+cd cli && python -m unittest discover -s tests
+```
+
 ## Authentication
 ### Login
 ```bash
-$ echo mysecretpassword > passsword
+$ echo mysecretpassword > password
 $ gpg2 --encrypt ./password
 $ rm ./password
 $ gpg2 --decrypt --quiet ./password.gpg | 300sf login --email me@example.com  
@@ -61,20 +86,19 @@ $ 300sf list --create "My Epic list" --template 2409476e187f4acf9163510ebd200c58
 ### List Lists
 ```bash
 $ 300sf list
-???
 ```
 
 ### Rename a List
 ```bash
-$ 300sf list --rename ??? "My List"
+$ 300sf list --rename <list-uuid> "My List"
 ```
 
 ### Set List Start and End Date
 ```bash
-$ 300sf list --timespan ??? "2023-01-01" "2023-12-31T23:59:00"
+$ 300sf list --timespan <list-uuid> "2023-01-01" "2023-12-31T23:59:00"
 ```
 
 ### Archive a List
 ```bash
-$ 300sf list --archive ???
+$ 300sf list --archive <list-uuid>
 ```

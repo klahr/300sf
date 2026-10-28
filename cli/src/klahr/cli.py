@@ -10,7 +10,6 @@ from getpass import getpass
 import httpx
 import tabulate
 import yaml
-import base64
 
 __version__ = "0.1.0"
 
@@ -26,10 +25,11 @@ class Config:
     data = {}
 
     def open(self, filename):
-        with open(filename, encoding="utf8") as file:
-            stream = file.read()
-            self.data = yaml.safe_load(stream)
-            file.close()
+        try:
+            with open(filename, encoding="utf8") as file:
+                self.data = yaml.safe_load(file.read()) or {}
+        except FileNotFoundError:
+            self.data = {}
 
     def get(self, key):
         try:
@@ -42,12 +42,13 @@ class Config:
 config = Config()
 
 
+CONFIG_DIR = os.path.join(os.path.expanduser("~"), ".config/300sf")
+SESSION_FILENAME = os.path.join(CONFIG_DIR, "session.json")
+
+
 def get_access_token():
-    session_filename = os.path.join(
-        os.path.expanduser("~"), ".config/300sf/session.json"
-    )
-    if os.path.exists(session_filename):
-        with open(session_filename, "r", encoding="utf8") as file:
+    if os.path.exists(SESSION_FILENAME):
+        with open(SESSION_FILENAME, "r", encoding="utf8") as file:
             data = json.load(file)
             return data["access_token"]
     return None
@@ -134,7 +135,7 @@ def login(email, password):
         err_print("err: no email (--email) provided.")
         return
     if password == None and not sys.stdin.isatty():
-        password = sys.stdin.read()
+        password = sys.stdin.read().rstrip("\r\n")
 
     if password == None:
         password = getpass()
@@ -153,12 +154,10 @@ def login(email, password):
     )
     if r is not None:
         if r.status_code == 200:
-            session_filename = os.path.join(
-                os.path.expanduser("~"), ".config/300sf/session.json"
-            )
-            with open(session_filename, "w", encoding="utf8") as file:
+            os.makedirs(CONFIG_DIR, exist_ok=True)
+            fd = os.open(SESSION_FILENAME, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+            with os.fdopen(fd, "w", encoding="utf8") as file:
                 file.write(json.dumps(r.json(), indent=4))
-                file.close()
         else:
             response = r.json()
             err_print(f'err: {response["message"]}')
@@ -167,11 +166,8 @@ def login(email, password):
 
 
 def logout():
-    session_filename = os.path.join(
-        os.path.expanduser("~"), ".config/300sf/session.json"
-    )
-    if os.path.exists(session_filename):
-        os.remove(session_filename)
+    if os.path.exists(SESSION_FILENAME):
+        os.remove(SESSION_FILENAME)
     else:
         err_print("err: already logged out")
 
@@ -949,8 +945,8 @@ def migrate(email, password):
 
 def main():
     global config
-    config.open(os.path.join(os.path.expanduser("~"), ".config/300sf/config.yml"))
-    lang = config.get("language")
+    config.open(os.path.join(CONFIG_DIR, "config.yml"))
+    lang = config.data.get("language")
     if not lang:
         lang = "en"
 
