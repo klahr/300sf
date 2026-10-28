@@ -1,6 +1,8 @@
 const Config = {
-	ApiKey: '<YOUR_API_KEY>',
-	ApiEndpoint: 'http://localhost:8090'
+	ApiEndpoint: 'http://localhost:8090',
+	AnalyzeEndpoint: 'https://api.300sf.se/analyze',
+	ClientId: '<YOUR_CLIENT_ID>',
+	ClientSecret: '<PREFIX>.<YOUR_CLIENT_SECRET>'
 };
 
 module.exports = Config;

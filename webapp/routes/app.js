@@ -1,154 +1,73 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const config = require('./config');
+const config = require('./settings');
 const i18n = require('i18n');
-const nm = require('./network-manager');
 module.exports = router;
 
-function renderPage(req, res) {
+// Client-side routes; the single-page app picks the page from `redirect`.
+const pages = [
+	'home', 'sign-up', 'forgot', 'settings', 'checklists', 'contribute', 'donation',
+	'contact', 'tags', 'reports', 'set-password', 'delete-account', 'competitions',
+	'admin', 'experimental'
+];
+
+function renderApp(req, res, redirect, queryParameters) {
 	res.render('pages/app', {
 		data: {
 			language: i18n.getLocale(req),
-			redirect: req.path.substring(1),
-			queryParameters: JSON.stringify(req.query)
+			redirect: redirect,
+			queryParameters: queryParameters
 		}
 	});
 }
 
 router.get('/', function (req, res) {
-	res.render('pages/app', {
-		data: {
-			language: i18n.getLocale(req),
-			redirect: ""
-		}
+	renderApp(req, res, '', '');
+});
+
+for (const page of pages) {
+	router.get('/' + page, function (req, res) {
+		renderApp(req, res, page, JSON.stringify(req.query));
 	});
-});
-
-router.get('/home', function (req, res) {
-	renderPage(req, res);
-});
-
-router.get('/sign-up', function (req, res) {
-	renderPage(req, res);
-});
-
-router.get('/forgot', function (req, res) {
-	renderPage(req, res);
-});
-
-router.get('/settings', function (req, res) {
-	renderPage(req, res);
-});
-
-router.get('/checklists', function (req, res) {
-	renderPage(req, res);
-});
-
-router.get('/contribute', function (req, res) {
-	renderPage(req, res);
-});
-
-router.get('/donation', function (req, res) {
-	renderPage(req, res);
-});
-
-router.get('/contact', function (req, res) {
-	renderPage(req, res);
-});
-
-router.get('/tags', function (req, res) {
-	renderPage(req, res);
-});
-
-router.get('/reports', function (req, res) {
-	renderPage(req, res);
-});
-
-router.get('/set-password', function (req, res) {
-	renderPage(req, res);
-});
-
-router.get('/delete-account', function (req, res) {
-	renderPage(req, res);
-});
-
-router.get('/competitions', function (req, res) {
-	renderPage(req, res);
-});
-
-router.get('/admin', function (req, res) {
-	renderPage(req, res);
-});
-
-router.get('/experimental', function (req, res) {
-	renderPage(req, res);
-});
+}
 
 router.get('/list/:uuid', function (req, res) {
-	res.render('pages/app', {
-		data: {
-			language: i18n.getLocale(req),
-			redirect: "list",
-			queryParameters: JSON.stringify({ uuid: req.params.uuid })
-		}
-	});
+	renderApp(req, res, 'list', JSON.stringify({ uuid: req.params.uuid }));
 });
 
-router.get('/compare', function (req, res) {
+router.get('/compare', async (req, res) => {
 	if (!req.query.uuids) {
-		res.redirect(200, req.baseUrl);
+		return res.redirect(req.baseUrl || '/');
 	}
-	const r = {
-		uuids: req.query.uuids.split(',')
-	}
-	nm.request('POST', '/v1/lists/compare', {}, function (data, statusCode) {
-		res.render('pages/compare', {
-			data: data
+
+	try {
+		const response = await axios.post(config.ApiEndpoint + '/v1/lists/compare', {
+			uuids: String(req.query.uuids).split(',')
 		});
-	}, function (err, statusCode) {
-		console.log(err);
-		res.redirect(200, req.baseUrl);
-	}, JSON.stringify(r));
+		res.render('pages/compare', { data: response.data });
+	} catch (error) {
+		console.log(error.message);
+		res.redirect(req.baseUrl || '/');
+	}
 });
 
 router.get('/terms', function (req, res) {
-	res.render('pages/terms', {
-		layout: false
-	});
+	res.render('pages/terms', { layout: false });
 });
 
 router.get('/privacy-policy', function (req, res) {
-	res.render('pages/privacy-policy', {
-		layout: false
-	});
+	res.render('pages/privacy-policy', { layout: false });
 });
 
-router.get('/terms', function (req, res) {
-	res.render('pages/terms-of-service', {
-		layout: false
-	});
-});
-
-router.post('/api/v1/auth', async (req, res) => {
-	const apiUrl = config.ApiEndpoint + req.originalUrl.substring(4);
-
-	req.body.client_id = config.ClientId;
-	req.body.client_secret = config.ClientSecret;
-
+async function forward(req, res, url, headers, data) {
 	try {
-		const axiosConfig = {
+		const response = await axios({
 			method: req.method,
-			url: apiUrl,
-			headers: {
-				...req.headers,
-				'Content-Length': Buffer.byteLength(JSON.stringify(req.body))
-			},
-			data: req.body,
-		};
-
-		const response = await axios(axiosConfig);
-
+			url: url,
+			headers: headers,
+			data: data
+		});
 		res.status(response.status).json(response.data);
 	} catch (error) {
 		if (error.response) {
@@ -157,52 +76,19 @@ router.post('/api/v1/auth', async (req, res) => {
 			res.status(503).json({});
 		}
 	}
+}
+
+// The API key never reaches the browser: it is added here on login.
+router.post('/api/v1/auth', (req, res) => {
+	const body = { ...req.body, client_id: config.ClientId, client_secret: config.ClientSecret };
+	const headers = { ...req.headers, 'content-length': Buffer.byteLength(JSON.stringify(body)) };
+	forward(req, res, config.ApiEndpoint + req.originalUrl.substring(4), headers, body);
 });
 
-router.post('/analyze', async (req, res) => {
-	const apiUrl = "https://api.300sf.se/analyze";
-
-	console.log(apiUrl);
-
-	try {
-		const axiosConfig = {
-			method: req.method,
-			url: apiUrl,
-			headers: req.headers,
-			data: req.method == "GET" ? null : req.body,
-		};
-
-		const response = await axios(axiosConfig);
-
-		res.status(response.status).json(response.data);
-	} catch (error) {
-		if (error.response) {
-			res.status(error.response.status).json(error.response.data ? error.response.data : {});
-		} else {
-			res.status(503).json({});
-		}
-	}
+router.post('/analyze', (req, res) => {
+	forward(req, res, config.AnalyzeEndpoint, req.headers, req.body);
 });
 
-router.all('/api/*', async (req, res) => {
-	const apiUrl = config.ApiEndpoint + req.originalUrl.substring(4);
-
-	try {
-		const axiosConfig = {
-			method: req.method,
-			url: apiUrl,
-			headers: req.headers,
-			data: req.method == "GET" ? null : req.body,
-		};
-
-		const response = await axios(axiosConfig);
-
-		res.status(response.status).json(response.data);
-	} catch (error) {
-		if (error.response) {
-			res.status(error.response.status).json(error.response.data ? error.response.data : {});
-		} else {
-			res.status(503).json({});
-		}
-	}
+router.all('/api/*', (req, res) => {
+	forward(req, res, config.ApiEndpoint + req.originalUrl.substring(4), req.headers, req.method == 'GET' ? null : req.body);
 });

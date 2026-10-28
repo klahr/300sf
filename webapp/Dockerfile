@@ -1,17 +1,12 @@
 FROM node:22-alpine
 
-RUN mkdir /app
-ADD . /app
 WORKDIR /app
 
 COPY package*.json ./
+RUN npm ci
 
-RUN npm install
-RUN npm install -g typescript
-RUN npm install -g terser
-
-RUN tsc --build src/tsconfig-release.json
-RUN terser --compress --mangle -o public/js/app.js -- public/js/app.js
+COPY . .
+RUN npm run build && npm prune --omit=dev
 
 EXPOSE 3000
 

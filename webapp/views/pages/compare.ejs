@@ -2,13 +2,13 @@
 
 	<div class="surface" style="max-height: none;">
 		<a href="/"><img style="border-radius: 50%; float: left; margin-right: 16px;" width="64" src="/img/birds-256.png" alt="TODO" /></a>
-		<h1><%- data.reference_list.name.sv %></h1>
+		<h1><%= data.reference_list.name.sv %></h1>
 		<table>
 			<tr>
 				<th></th>
 				<% for (let i=0; i < data.result.length; ++i) { %>
 					<th style="min-width: 100px;">
-						<p><%- data.result[i].user.display_name %></p>
+						<p><%= data.result[i].user.display_name %></p>
 					</th>
 					<% } %>
 						</th>
@@ -16,8 +16,8 @@
 			<tr>
 				<td>
 					<div class="list-entry">
-						<h3><%- data.species[i].name.sv %></h3>
-						<p><%- data.species[i].name.la %></p>
+						<h3><%= data.species[i].name.sv %></h3>
+						<p><%= data.species[i].name.la %></p>
 					</div>
 				</td>
 				<% for (let j=0; j < data.result.length; ++j) { let found=false; for (let k=0; k <
