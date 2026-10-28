@@ -1,20 +1,22 @@
-:root {
-	--tiny-distance: 2px;
-	--small-distance: 8px;
-	--medium-distance: 16px;
-	--large-distance: 32px;
-	--medium-radius: 8px;
-}
-
 * {
 	margin: 0;
 	padding: 0;
-	font-family: 'Roboto', sans-serif;
+	font-family: var(--font-body);
 	-webkit-tap-highlight-color: transparent;
+}
+
+.material-symbols-outlined {
+	font-family: 'Material Symbols Outlined';
+	vertical-align: middle;
 }
 
 :focus {
 	outline: none;
+}
+
+:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
 }
 
 :disabled:hover {
@@ -22,21 +24,24 @@
 }
 
 *.error {
-	color: var(--error-color);
+	color: var(--danger);
 }
 
 body {
-	background-color: var(--background-color);
+	background-color: var(--paper);
+	color: var(--ink);
+	-webkit-font-smoothing: antialiased;
 }
 
 a {
-	color: var(--primary-color);
+	color: var(--primary-strong);
 	font-size: 1rem;
 	text-decoration: none;
 }
 
 a:hover {
 	text-decoration: underline;
+	text-underline-offset: 3px;
 	cursor: pointer;
 }
 
@@ -44,61 +49,69 @@ textarea {
 	width: calc(100% - var(--small-distance)*2);
 	resize: none;
 	margin: var(--small-distance);
-	padding: 12px 24px;
+	padding: 12px 16px;
 	box-sizing: border-box;
-	margin: var(--small-distance);
-	border-radius: var(--small-distance);
-	border: none;
-	background-color: var(--widget-color);
-	color: white;
+	border-radius: 10px;
+	border: 1px solid transparent;
+	background-color: var(--surface-sunk);
+	color: var(--ink);
 	font-size: 1rem;
+	line-height: 1.5;
+}
+
+textarea:focus {
+	border-color: var(--primary);
 }
 
 textarea:disabled {
-	box-shadow: 0 0 0 1px inset var(--secondary-color);
+	background-color: transparent;
+	border-color: var(--line);
 }
 
 p,
 label {
-	color: var(--black-or-white-color);
+	color: var(--ink);
 	font-size: 1rem;
 	line-height: 1.5rem;
 }
 
 p.success {
-	color: var(--success-color) !important;
+	color: var(--seen) !important;
 	text-align: center;
 }
 
 p.details {
-	font-size: 0.8rem;
-	font-style: italic;
+	font-size: 0.875rem;
+	color: var(--ink-soft);
 }
 
 p.copyright {
 	margin-top: var(--medium-distance);
-	color: var(--widget-color);
+	color: var(--ink-soft);
 	text-align: center;
 }
 
 h1 {
-	color: var(--black-or-white-color);
-	font-size: 3rem;
-	font-weight: bold;
+	color: var(--ink);
+	font-size: clamp(2rem, 6vw, 2.75rem);
+	font-weight: 700;
+	letter-spacing: -0.01em;
+	line-height: 1.1;
 	clear: right;
 }
 
 h2 {
-	color: var(--black-or-white-color);
-	font-size: 1.5rem;
-	font-weight: bold;
-	margin-top: var(--medium-distance);
+	color: var(--ink);
+	font-size: 1.375rem;
+	font-weight: 700;
+	margin-top: var(--large-distance);
+	margin-bottom: var(--small-distance);
 }
 
 h3 {
-	color: var(--black-or-white-color);
-	font-size: 1.0rem;
-	font-weight: bold;
+	color: var(--ink);
+	font-size: 1rem;
+	font-weight: 700;
 }
 
 h3.title {
@@ -106,7 +119,7 @@ h3.title {
 }
 
 div.background {
-	background-color: var(--background-color);
+	background-color: var(--paper);
 	padding: var(--medium-distance);
 	padding-bottom: 80px;
 	height: calc(100% - var(--medium-distance)*2);
@@ -119,8 +132,8 @@ div.footer {
 }
 
 div.card {
-	background-color: var(--secondary-variant-color);
-	border-radius: var(--medium-radius);
+	background-color: var(--surface-raised);
+	border-radius: var(--radius-m);
 	padding: var(--medium-distance);
 	margin-top: var(--medium-distance);
 }
@@ -136,15 +149,14 @@ div.card>div>p {
 	position: absolute;
 	right: 0;
 	padding: 8px;
-	border-radius: 16px;
-	color: white;
-	font-size: 16px;
-	font-weight: bold;
+	color: var(--ink);
+	font-size: 1rem;
+	font-weight: 700;
 }
 
 div.card>div>div {
 	height: 8px;
-	background-color: #7f7f7f;
+	background-color: var(--surface-sunk);
 	width: 65%;
 	float: left;
 	border-radius: 4px;
@@ -160,7 +172,7 @@ div.card>div>div>div {
 
 div.announcement {
 	width: calc(100% - var(--small-distance)*2);
-	border-radius: var(--small-distance);
+	border-radius: var(--radius-m);
 	margin-bottom: 16px;
 	padding: 8px;
 	position: relative;
@@ -170,48 +182,96 @@ div.announcement>p>h2 {
 	margin-top: unset;
 }
 
+/* Rows of species and sightings: name, then the Latin name in italic, then
+ * details in a quieter grey. */
+
 div.list-entry {
 	width: 100%;
-	background-color: var(--secondary-variant-color);
-	padding: var(--small-distance);
+	padding: 12px var(--small-distance);
 	box-sizing: border-box;
-	border-bottom: 1px inset var(--widget-color);
+	border-bottom: 1px solid var(--line);
 	position: relative;
 	cursor: pointer;
 }
 
 div.list-entry:hover {
-	background-color: var(--widget-color);
+	background-color: var(--surface-raised);
 }
 
 div.list-entry>p {
-	font-size: 0.8rem;
+	font-size: 0.875rem;
+	color: var(--ink-soft);
+	line-height: 1.35rem;
+}
+
+div.list-entry>h3+p {
+	font-family: var(--font-latin);
 	font-style: italic;
+	font-size: 0.9rem;
 }
 
 div.list-entry>h3:hover {
 	text-decoration: underline;
+	text-underline-offset: 3px;
 }
 
 div.list-entry>span {
-	font-size: 32px;
+	font-size: 30px;
 	position: absolute;
-	right: 4px;
+	right: 8px;
 	top: 50%;
 	transform: translateY(-50%);
 }
 
+h3.species-name {
+	color: var(--seen);
+}
+
+div.list-entry p.order-name {
+	font-size: 0.9rem;
+	font-weight: 700;
+	font-style: normal;
+	color: var(--accent);
+	padding-top: var(--medium-distance);
+}
+
+div.list-entry p.order-name+p {
+	font-family: var(--font-latin);
+	font-style: italic;
+}
+
+span.seen-mark {
+	color: var(--surface-sunk);
+}
+
+div.list-entry.seen h3 {
+	color: var(--seen);
+}
+
+div.list-entry.seen span.seen-mark {
+	color: var(--seen);
+	font-variation-settings: 'FILL' 1;
+}
+
+p.comment {
+	background-color: #1d3944;
+	color: var(--ink) !important;
+	margin-top: 6px;
+}
+
 div.surface {
-	background-color: var(--surface-color);
-	border-radius: var(--medium-radius);
+	background-color: var(--surface);
+	border-radius: var(--radius-m);
 	padding: var(--medium-distance);
 	max-width: 735px;
 	height: calc(100% - var(--medium-distance) * 4);
 	width: calc(100% - var(--medium-distance) * 4);
 	margin: var(--medium-distance);
-	transition: all 250ms;
 	overflow: auto;
+	box-sizing: content-box;
 }
+
+/* Side menu */
 
 div.main-menu {
 	width: 256px;
@@ -228,65 +288,72 @@ div.main-menu-background {
 }
 
 div.main-menu-background.open {
-	background-color: #0000007d;
+	background-color: rgba(0, 0, 0, 0.55);
 	pointer-events: all;
-	transition: background-color 250ms;
 }
 
 div.main-menu>div.content>p.section {
 	font-size: 0.8rem;
-	font-weight: bold;
-	padding: 8px 16px;
-	opacity: 0.5;
+	font-weight: 700;
+	color: var(--ink-soft);
+	padding: 20px 20px 6px;
 }
 
-div.main-menu>div.content>div,
 *>p.entry {
-	padding: 8px 16px;
-	color: white;
+	padding: 8px 12px;
+	color: var(--ink);
 	cursor: pointer;
 	font-size: 1rem;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	border-radius: 8px;
+	margin: 0 8px;
 }
 
-div.main-menu>div.content>div,
 *>p.entry:hover {
-	color: var(--primary-variant-color);
+	background-color: var(--surface-raised);
+}
+
+*>p.entry .material-symbols-outlined {
+	font-size: 20px !important;
 }
 
 div.main-menu>div.content {
 	width: 100%;
-	background-color: var(--surface-color);
+	background-color: var(--surface);
 	height: 100%;
 	overflow-y: auto;
+	box-sizing: border-box;
+	padding-bottom: var(--large-distance);
 }
 
 div.main-menu.open {
 	transform: translateX(0);
-	transition: transform 250ms;
 }
 
 div.surface>p,
 h1 {
-	color: var(--black-or-white-color);
+	color: var(--ink);
 }
 
 div.filter {
 	width: 100%;
-	background-color: var(--surface-color);
-	box-shadow: 0 0 8px 0 black;
+	background-color: var(--surface-raised);
+	box-shadow: 0 -8px 24px -8px rgba(0, 0, 0, 0.7);
 	box-sizing: border-box;
 	padding: var(--small-distance);
-	border-radius: var(--small-distance);
+	border-radius: var(--radius-m);
 	position: sticky;
 	bottom: 0;
 	left: 0;
 }
 
 div.tag {
-	background-color: #0d81b4;
-	padding: 2px 8px;
-	border-radius: 8px;
-	margin: 4px;
+	background-color: var(--blue);
+	padding: 2px 10px;
+	border-radius: var(--radius-pill);
+	margin: 4px 4px 0 0;
 	width: fit-content;
 	cursor: pointer;
 	display: inline-block;
@@ -295,7 +362,7 @@ div.tag {
 }
 
 div.tag.selected {
-	box-shadow: inset 0 0 0 2px #ffffffad;
+	box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--ink);
 }
 
 div.fade-out {
@@ -304,20 +371,20 @@ div.fade-out {
 }
 
 div.tag>p {
-	color: white;
-	font-weight: bold;
+	color: #fff;
+	font-weight: 700;
 	font-size: 0.8rem;
 	user-select: none;
-	text-shadow: 1px 1px #0000005e;
+	text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
 }
 
 div.loading {
 	position: fixed;
 	width: 100%;
-	height: 4px;
+	height: 3px;
 	z-index: 1;
 	animation: animate-loading 1s linear infinite;
-	background-image: linear-gradient(90deg, var(--primary-color), #030303, var(--primary-color));
+	background-image: linear-gradient(90deg, var(--primary), var(--paper), var(--primary));
 	background-size: 200% 100%;
 	display: none;
 }
@@ -332,31 +399,49 @@ div.loading {
 	}
 }
 
+/* Checklist tiles on the dashboard, filled with the list's own colour. */
+
 div.progress-box {
+	--list-color: var(--blue);
 	width: 128px;
 	height: 128px;
-	background: linear-gradient(#0d81b4, #0d81b4bf);
-	border-radius: var(--medium-radius);
+	background: linear-gradient(160deg, var(--list-color), color-mix(in srgb, var(--list-color) 70%, black));
+	border-radius: var(--radius-m);
 	display: inline-block;
 	margin: var(--small-distance);
 	position: relative;
-	transition: transform 100ms;
 	vertical-align: top;
 	flex-grow: 1;
 	max-width: 272px;
+	box-sizing: border-box;
+	transition: transform 120ms;
 }
 
 div.progress-box:hover {
-	transform: scale(1.1);
-	transition: transform 100ms;
+	transform: translateY(-2px);
 }
 
 div.progress-box>p {
-	padding: var(--small-distance);
-	font-size: 1rem;
-	font-weight: bold;
-	line-height: unset;
-	text-shadow: 1px 1px #0000005e;
+	padding: 12px;
+	font-size: 1.05rem;
+	font-weight: 700;
+	line-height: 1.3;
+	color: #fff;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+div.progress-box>div>p {
+	color: #fff;
+	font-variant-numeric: tabular-nums;
+	margin-bottom: 4px;
+}
+
+div.progress-box>div {
+	padding: 0 12px 10px !important;
+}
+
+div.progress-box div.uix-progress-bar {
+	background-color: rgba(0, 0, 0, 0.3);
 }
 
 div.portrait {
@@ -365,46 +450,55 @@ div.portrait {
 	top: var(--medium-distance);
 	border-radius: 100%;
 	cursor: pointer;
-	filter: drop-shadow(rgba(255, 255, 255, 0.07) 0px 2px 4px) drop-shadow(rgba(255, 255, 255, 0.05) 0px 1px 1.5px);
+	box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px var(--line);
 }
 
 span.menu {
 	font-size: 32px;
-	color: white;
+	color: var(--ink);
 	user-select: none;
 }
 
 input {
-	background-color: var(--widget-color);
-	border: none;
-	border-radius: var(--small-distance);
+	background-color: var(--surface-sunk);
+	border: 1px solid transparent;
+	border-radius: 10px;
 	outline: none;
-	color: var(--black-or-white-color);
+	color: var(--ink);
 	font-size: 1rem;
 	width: calc(100% - var(--small-distance)*2);
 	height: 48px;
-	padding: 0 24px;
+	padding: 0 16px;
 	box-sizing: border-box;
 	margin: var(--small-distance);
 }
 
+input::placeholder,
+textarea::placeholder {
+	color: var(--ink-soft);
+}
+
 input:focus {
 	outline: none;
+	border-color: var(--primary);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent);
 }
 
 input[type=checkbox] {
-	width: 24px;
-	height: 24px;
+	width: 22px;
+	height: 22px;
+	accent-color: var(--primary);
+	vertical-align: middle;
 }
 
 button {
-	background-color: var(--primary-color);
+	background-color: var(--primary);
 	outline: none;
 	border: none;
-	border-radius: 24px;
-	padding: 16px;
-	color: white;
-	font-weight: bold;
+	border-radius: var(--radius-pill);
+	padding: 0 24px;
+	color: var(--on-primary);
+	font-weight: 700;
 	font-size: 1rem;
 	width: calc(100% - var(--small-distance)*2);
 	min-width: fit-content;
@@ -414,12 +508,24 @@ button {
 	user-select: none;
 }
 
+button:hover {
+	background-color: var(--primary-strong);
+}
+
+button:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+}
+
 button:disabled {
-	background-color: var(--secondary-color) !important;
+	background-color: var(--surface-sunk) !important;
+	color: var(--ink-soft);
 }
 
 hr {
 	margin: var(--medium-distance) 0;
+	border: none;
+	border-top: 1px solid var(--line);
 }
 
 @media screen and (min-width: 800px) {
@@ -432,6 +538,7 @@ hr {
 		left: 256px;
 		max-width: calc(800px - var(--medium-distance) * 4);
 		width: calc(100% - 256px - var(--medium-distance) * 4);
+		padding: var(--large-distance);
 	}
 
 	span.menu {
@@ -441,5 +548,12 @@ hr {
 	div.main-menu-background {
 		pointer-events: all;
 		width: 256px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	* {
+		transition: none !important;
+		animation: none !important;
 	}
 }

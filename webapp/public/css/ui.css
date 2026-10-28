@@ -35,26 +35,28 @@ div.uix-img {
 div.uix-select {
 	position: relative;
 	width: calc(100% - var(--small-distance)*2);
-	background-color: var(--widget-color);
-	border-radius: var(--small-distance);
+	background-color: var(--surface-sunk);
+	box-sizing: border-box;
+	border-radius: 10px;
 	height: 48px;
 	margin: var(--small-distance);
 }
 
 p.uix-option {
-	color: white;
+	color: var(--ink);
 	cursor: pointer;
-	padding: 4px;
-	border-radius: 4px;
+	padding: 6px 10px;
+	border-radius: 6px;
 	text-align: left;
 }
 
 p.uix-option:hover {
-	background-color: var(--primary-color);
+	background-color: var(--surface-raised);
 }
 
 p.uix-option.selected {
-	background-color: var(--primary-color);
+	background-color: var(--primary);
+	color: var(--on-primary);
 }
 
 div.uix-option {
@@ -77,14 +79,15 @@ div.uix-option:hover {
 div.uix-option.selected {
 	transform: scale(1.1);
 	transition: all 150ms;
-	box-shadow: inset 0 0 0 4px #ffffffad;
+	box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--ink);
 }
 
 div.uix-progress-bar {
 	width: 100%;
 	height: 6px;
 	border-radius: 3px;
-	background-color: var(--widget-color);
+	background-color: var(--surface-sunk);
+	overflow: hidden;
 }
 
 input.uix-input {
@@ -99,11 +102,12 @@ input.uix-input:disabled {
 
 div.uix-messagebox {
 	width: calc(100% - var(--large-distance) * 2);
-	max-width: 800px;
+	max-width: 560px;
 	box-sizing: border-box;
-	background-color: var(--surface-color);
-	margin: var(--large-distance);
+	background-color: var(--surface);
+	margin: var(--large-distance) auto;
 	border-radius: 16px;
+	box-shadow: 0 24px 60px -16px rgba(0, 0, 0, 0.8);
 	text-align: center;
 	position: relative;
 }
@@ -113,9 +117,10 @@ div.uix-popup {
 	height: calc(100% - var(--medium-distance) * 2);
 	max-width: 800px;
 	box-sizing: border-box;
-	background-color: var(--surface-color);
+	background-color: var(--surface);
 	margin: var(--medium-distance);
 	border-radius: 16px;
+	box-shadow: 0 24px 60px -16px rgba(0, 0, 0, 0.8);
 	text-align: center;
 	position: relative;
 }
@@ -131,7 +136,7 @@ div.uix-popup-base {
 
 div.uix-popup-background {
 	transition: background-color 250ms;
-	background-color: #0000007d;
+	background-color: rgba(0, 0, 0, 0.6);
 }
 
 .fade {

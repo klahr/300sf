@@ -6,6 +6,13 @@ on:
   pull_request:
 
 jobs:
+  design-tokens:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Shared tokens are identical in web and webapp
+        run: cmp web/public/css/tokens.css webapp/public/css/tokens.css
+
   api:
     runs-on: ubuntu-latest
     defaults:

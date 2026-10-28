@@ -19,7 +19,8 @@
 		}
 
 		function onAppStart() {
-			new App("<%- data.language %>", "<%- data.redirect %>", '<%- data.queryParameters %>' !== "" ? JSON.parse('<%- data.queryParameters %>') : {});
+			const boot = <%- data.boot %>;
+			new App(boot.language, boot.redirect, boot.queryParameters);
 		}
 
 		document.querySelector('script[src="/js/app.js"]').onload = onAppStart;

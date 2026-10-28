@@ -1,6 +1,64 @@
 {
 	"Name": "300 Swedish Birds",
-	"GetStartedNow": "Get started now!",
-	"Description": "Are you a passionate bird watcher or nature enthusiast? If so, you're in the right place! 300 Swedish Birds is here to revolutionize your bird watching experience.\n\nWith our user-friendly web-app, you can effortlessly track and manage the birds you've spotted, creating an interactive checklist that will excite and inspire you to explore the diverse avian world.\n\nWhy choose 300 Swedish Birds?\n\n* Comprehensive Bird Database: Our app features a vast database, including thousands of bird species from all around the globe. Whether you're a beginner or an experienced birder, 300 Swedish Birds ensures you'll never miss a bird sighting.\n* Easy Tracking: Simply tap on the birds you've spotted, and 300 Swedish Birds automatically catalogs them for you. You can even add custom notes, dates, and locations to each observation, making your bird encounters truly memorable.\n* Personalized Lists: Organize your bird sightings however you like. Create regional lists, life lists, or year lists to track your progress and record your achievements. 300 Swedish Birds keeps your lists synced across multiple devices, so your birding journey goes uninterrupted.\n\nDon't let a single bird sighting slip through the cracks. Join the 300 Swedish Birds community today and elevate your bird watching experience. Start using the web-app now and embark on an unforgettable journey through the fascinating world of birds. Happy birding!\n",
-	"DescriptionHeader": "Welcome to 300 Swedish Birds - The Ultimate Bird Checklist Web-app!"
+	"MetaDescription": "A checklist for birders in Sweden. Tick off species, log where and when you saw them, and compare lists with friends.",
+	"Language": "Language",
+	"SignIn": "Sign in",
+	"Headline": "Every bird you see in Sweden, in one list.",
+	"Lede": "Tick off species as you see them, note the place and the date, and watch your year list grow. Free, in your browser.",
+	"CreateAccount": "Create a free account",
+	"HaveAccount": "I already have an account",
+	"PlateLabel": "Example of a checklist",
+	"PlateTitle": "Year list 2026",
+	"PlateExample": "Example",
+	"NotYet": "Not yet",
+	"PlateProgress": "87 of 300",
+	"PlateSpecies": [
+		{
+			"name": "Great tit",
+			"latin": "Parus major",
+			"date": "2 Jan"
+		},
+		{
+			"name": "Eurasian blue tit",
+			"latin": "Cyanistes caeruleus",
+			"date": "2 Jan"
+		},
+		{
+			"name": "Eurasian bullfinch",
+			"latin": "Pyrrhula pyrrhula",
+			"date": "14 Jan"
+		},
+		{
+			"name": "European robin",
+			"latin": "Erithacus rubecula",
+			"date": ""
+		},
+		{
+			"name": "Common blackbird",
+			"latin": "Turdus merula",
+			"date": "3 Feb"
+		},
+		{
+			"name": "Common crane",
+			"latin": "Grus grus",
+			"date": ""
+		}
+	],
+	"FeaturesLabel": "What you can do",
+	"Features": [
+		{
+			"title": "Lists for every goal",
+			"text": "Start from the 300 most common Swedish birds or build your own list: a year list, a list for your garden, or one for a single trip."
+		},
+		{
+			"title": "Where and when",
+			"text": "Each sighting keeps its date and position, and is placed in the right county and municipality automatically. Export everything as CSV whenever you like."
+		},
+		{
+			"title": "Bird with friends",
+			"text": "Share a list and compare it with friends' lists species by species, or set up a competition for a season."
+		}
+	],
+	"Terms": "Terms of service",
+	"Privacy": "Privacy policy"
 }

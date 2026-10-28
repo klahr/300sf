@@ -4,9 +4,9 @@
   "start_url": "/",
   "id": "/",
   "display": "standalone",
-  "background_color": "#fff",
-  "description": "A 300 Swedish Birds client.",
-  "theme_color": "#1a1a1a",
+  "background_color": "#070707",
+  "description": "A checklist for birders in Sweden.",
+  "theme_color": "#181818",
   "icons": [
     {
       "src": "/img/birds-192.png",

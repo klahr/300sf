@@ -1,0 +1,19 @@
+/* Older names used throughout the TypeScript, mapped onto the shared tokens. */
+:root {
+	--primary-color: var(--primary);
+	--primary-variant-color: var(--accent);
+	--secondary-color: var(--ink-soft);
+	--secondary-variant-color: var(--surface-raised);
+	--background-color: var(--paper);
+	--widget-color: var(--surface-sunk);
+	--surface-color: var(--surface);
+	--error-color: var(--danger);
+	--success-color: var(--seen);
+	--black-or-white-color: var(--ink);
+
+	--tiny-distance: 2px;
+	--small-distance: 8px;
+	--medium-distance: 16px;
+	--large-distance: 32px;
+	--medium-radius: var(--radius-m);
+}
