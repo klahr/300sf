@@ -1,0 +1,17 @@
+{
+	"compilerOptions": {
+		"target": "es2017",
+		"module": "system",
+		"outFile": "../../server/site/static/js/app.js",
+		"tsBuildInfoFile": "../node_modules/.cache/app.tsbuildinfo",
+		"sourceMap": true,
+		"mapRoot": "../../server/site/static/js",
+		"watch": true
+	},
+	"include": [
+		"**/*"
+	],
+	"exclude": [
+		"AppConfigRelease.ts"
+	]
+}

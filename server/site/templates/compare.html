@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="{{.Lang}}">
+
+<head>
+	{{template "app-head" .}}
+</head>
+
+<body>
+	<div id="root" class="background">
+		{{$lang := .Lang}}
+		{{$result := .Data.Result}}
+		<div class="surface" style="max-height: none;">
+			<a href="/"><img style="border-radius: 50%; float: left; margin-right: 16px;" width="64" src="/img/birds-256.png" alt="" /></a>
+			<h1>{{translate .Data.ReferenceList.Name $lang}}</h1>
+			<table>
+				<tr>
+					<th></th>
+					{{range $result}}
+					<th style="min-width: 100px;">
+						<p>{{.User.DisplayName}}</p>
+					</th>
+					{{end}}
+				</tr>
+				{{range $species := .Data.Species}}
+				<tr>
+					<td>
+						<div class="list-entry">
+							<h3>{{translate $species.Name $lang}}</h3>
+							<p>{{$species.Name.La.String}}</p>
+						</div>
+					</td>
+					{{range $result}}
+					<td style="border-bottom: 1px solid var(--line); text-align: center; background-color: var(--surface-raised);">
+						{{if .Has $species.Uuid}}<span class="material-symbols-outlined" style="color: var(--seen);">check_circle</span>{{end}}
+					</td>
+					{{end}}
+				</tr>
+				{{end}}
+			</table>
+			<input id="list-id" placeholder="ID">
+			<button onclick="window.open(window.location + ',' + encodeURIComponent(document.getElementById('list-id').value), '_self');">Lägg till</button>
+		</div>
+	</div>
+</body>
+
+</html>

@@ -1,0 +1,246 @@
+openapi: 3.0.3
+info:
+  title: "300sf Open API"
+  description: "Description"
+  version: 0.1.0
+contact:
+  name: "Joachim Klahr"
+  email: "joachim@300sf.se"
+license:
+  name: "GPL-2.0"
+servers:
+  - url: https://300sf.se
+    description: "Live server."
+  - url: http://localhost:8090
+    description: "Local development server."
+components:
+  responses:
+    GeneralErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 3002
+        message:
+          type: string
+          example: "missing api key"
+    GeneralSuccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "success"
+        data:
+          type: object
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+  parameters:
+    X-Access-Token:
+      name: "X-Access-Token"
+      in: header
+      required: true
+      schema:
+        type: string
+    X-Api-Key:
+      name: "X-Api-Key"
+      in: header
+      required: true
+      schema:
+        type: string
+  schemas:
+    Language:
+      type: object
+      properties:
+        iso_name:
+          type: string
+          example: "Swedish"
+        native_name:
+          type: string
+          example: "Svenska"
+        code:
+          type: string
+          example: "sv"
+    Order:
+      type: object
+      properties:
+        uuid:
+          type: string
+          example: "a1b2c3"
+        name:
+          $ref: "#/components/schemas/Translation"
+    Species:
+      type: object
+      properties:
+        uuid:
+          type: string
+        name:
+          $ref: "#/components/schemas/Translation"
+        order:
+          $ref: "#/components/schemas/Order"
+    Tag:
+      type: object
+      properties:
+        uuid:
+          type: string
+          example: "a1b2c3"
+        name:
+          type: string
+          example: "Garden"
+        color:
+          type: string
+          example: "#ff00ff"
+        archived:
+          type: string
+          example: "2023-07-19T07:04:20Z"
+    Translation:
+      type: object
+      properties:
+        uuid:
+          type: string
+          example: "a1b2c3"
+        sv:
+          type: string
+          example: "Hej"
+        en:
+          type: string
+          example: "Hello"
+        de:
+          type: string
+          example: "Hallo"
+        la:
+          type: string
+          example: "Salve"
+    User:
+      type: object
+      properties:
+        uuid:
+          type: string
+          example: "abcdef"
+        display_name:
+          type: string
+          example: "John Doe"
+        scopes:
+          type: string
+          example: 1
+        notifications:
+          type: integer
+          example: 0
+        last_seen:
+          type: string
+          example: "2023-07-19T07:04:20Z"
+        confirmed_at:
+          type: string
+          example: "2023-07-19T07:04:20Z"
+        deactivated_at:
+          type: string
+          example: "2023-07-19T07:04:20Z"
+        deleted_at:
+          type: string
+          example: "2023-07-19T07:04:20Z"
+        accepted_terms_at:
+          type: string
+          example: "2023-07-19T07:04:20Z"
+        imported_at:
+          type: string
+          example: "2023-07-19T07:04:20Z"
+        language:
+          $ref: "#/components/schemas/Language"
+        portrait:
+          type: string
+          example: "1.png"
+    Message:
+      type: string
+      example: "success"
+paths:
+  /health:
+    get:
+      summary: "This API endpoint allows you to retrieve the current health status of the server. It provides information about the overall health and operational status of the server, indicating whether it is functioning correctly or experiencing issues."
+      tags:
+        - "Status"
+      responses:
+        "200":
+          description: "Just pong"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "healthy"
+                  data:
+                    type: object
+                    properties:
+                      version:
+                        type: string
+                        example: "0.1.0"
+  /v1/auth:
+    put:
+      security:
+        - BasicAuth: []
+      summary: "Login."
+      tags:
+        - "Authentication"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token_type:
+                    type: string
+                    example: "bearer"
+                  access_token:
+                    type: string
+                  expires_at:
+                    type: integer
+                    example: 427413600
+                  max_age:
+                    type: integer
+                    example: 3600
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/GeneralErrorResponse"
+  /v1/users/me:
+    get:
+      summary: "Get me."
+      tags:
+        - "Users"
+      parameters:
+      - $ref: "#/components/parameters/X-Access-Token"
+      responses:
+        "200":
+          description: "OK"
+  /v1/users/whoami:
+    get:
+      summary: "Who am I"
+      tags:
+        - "Users"
+      parameters:
+      - $ref: "#/components/parameters/X-Access-Token"
+      - $ref: "#/components/parameters/X-Api-Key"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: "#/components/schemas/Message"
+                  data:
+                    $ref: "#/components/schemas/User"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/GeneralErrorResponse"

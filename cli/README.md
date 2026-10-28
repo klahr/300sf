@@ -11,7 +11,7 @@ pip install ./cli        # from the repository root; installs the `300sf` comman
 Configure it in `~/.config/300sf/config.yml`:
 
 ```yaml
-api-endpoint: https://api.300sf.se
+api-endpoint: https://300sf.se
 client-id: <client id>
 client-secret: <prefix>.<secret>
 language: sv            # optional, en | sv | de

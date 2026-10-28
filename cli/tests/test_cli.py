@@ -104,8 +104,13 @@ class TestLogin(CliTest):
         self.assertFalse(os.path.exists(cli.SESSION_FILENAME))
 
     def test_logout(self):
-        self.write_session("tok")
-        cli.logout()
+        os.makedirs(cli.CONFIG_DIR, exist_ok=True)
+        with open(cli.SESSION_FILENAME, "w", encoding="utf8") as file:
+            json.dump({"access_token": "at", "refresh_token": "rt"}, file)
+        with mock.patch("httpx.post", return_value=FakeResponse(204, {})) as post:
+            cli.logout()
+        self.assertEqual(post.call_args.args[0], "http://api.test/v1/auth/logout")
+        self.assertEqual(json.loads(post.call_args.kwargs["content"]), {"refresh_token": "rt"})
         self.assertFalse(os.path.exists(cli.SESSION_FILENAME))
         with redirect_stderr(io.StringIO()) as err:
             cli.logout()

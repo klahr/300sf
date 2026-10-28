@@ -6,58 +6,35 @@ on:
   pull_request:
 
 jobs:
-  design-tokens:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Shared tokens are identical in web and webapp
-        run: cmp web/public/css/tokens.css webapp/public/css/tokens.css
-
-  api:
+  server:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: api
+        working-directory: server
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version-file: api/go.mod
-          cache-dependency-path: api/go.sum
+          go-version-file: server/go.mod
+          cache-dependency-path: server/go.sum
       - run: test -z "$(gofmt -l .)" || (gofmt -l . && exit 1)
       - run: go vet ./...
       - run: go test ./...
 
-  webapp:
+  frontend:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: webapp
+        working-directory: frontend
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: webapp/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
       - run: npm ci
-      - run: npm run build
-      - run: npm test
-
-  web:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: web
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: web/package-lock.json
-      - run: npm ci
-      - run: npm test
+      - run: mkdir -p ../server/site/static/js && npm run build
 
   cli:
     runs-on: ubuntu-latest
@@ -71,3 +48,9 @@ jobs:
           python-version: "3.12"
       - run: pip install .
       - run: python -m unittest discover -s tests
+
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t 300sf .

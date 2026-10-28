@@ -1,0 +1,7 @@
+/300sf
+/bin/
+/logs/
+/*.yml
+/*.conf
+*.pem
+/site/static/js/

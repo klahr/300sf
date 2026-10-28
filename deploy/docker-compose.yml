@@ -1,56 +1,24 @@
-# Production stack. Build contexts are the sibling directories of this
-# monorepo; the API's CONFIG_FILE must exist (untracked) in api/.
+# Production: one container serves everything on 300sf.se (landing page, app,
+# API and docs) and redirects the old domains. A reverse proxy on the host
+# terminates TLS; see README.md in this directory.
 services:
-  # api.300sf.se
-  albatross:
-    container_name: albatross
-    network_mode: host
+  300sf:
+    container_name: 300sf
     build:
-      context: ../api
+      context: ..
       dockerfile: Dockerfile
-      args:
-        CONFIG_FILE: 300sf-albatross.conf
     restart: unless-stopped
-    environment:
-      - "LOG_FILE_LOCATION=/logs/albatross.log"
+    # MariaDB and Redis run on the host.
+    network_mode: host
     volumes:
-      - /home/klarre/logs:/logs
-  # api.300sf.se
-  blackbird:
-    container_name: blackbird
-    network_mode: host
-    build:
-      context: ../api
-      dockerfile: Dockerfile
-      args:
-        CONFIG_FILE: 300sf-blackbird.conf
-    restart: unless-stopped
-    environment:
-      - "LOG_FILE_LOCATION=/logs/blackbird.log"
-    volumes:
-      - /home/klarre/logs:/logs
-  # app.300sf.se
-  yellowhammer:
-    container_name: yellowhammer
-    network_mode: host
-    build:
-      context: ../webapp
-      dockerfile: Dockerfile
-    restart: unless-stopped
-  # 300sf.se
-  woodpecker:
-    container_name: woodpecker
-    network_mode: host
-    build:
-      context: ../web
-      dockerfile: Dockerfile
-    restart: unless-stopped
-  # api-docs.300sf.se
-  swagger-ui:
-    image: swaggerapi/swagger-ui
-    ports:
-      - "8070:8080"
-    environment:
-      - SWAGGER_JSON=/foo/swagger.yaml
-    volumes:
-      - ../api:/foo
+      - ${CONFIG_FILE:-/etc/300sf/300sf.yml}:/config/300sf.yml:ro
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:${PORT:-8090}/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"

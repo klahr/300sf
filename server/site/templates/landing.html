@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="{{.Lang}}">
+{{$lang := .Lang}}
+{{with .T}}
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="{{.MetaDescription}}">
+	<meta name="theme-color" content="#070707">
+	<title>{{.Name}}</title>
+	<link rel="icon" href="/img/99249498-452f-4b0b-a1f5-45902f7ffe48.png" type="image/png">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Source+Serif+4:ital,opsz,wght@1,8..60,400&display=swap">
+	<link rel="stylesheet" href="/css/tokens.css">
+	<link rel="stylesheet" href="/css/landing.css">
+	{{- if $.SignedInGoesToApp}}
+	<script>
+		// Signed-in visitors land in the app instead of on this page.
+		if (/(?:^|;\s*)sf_session=/.test(document.cookie)) {
+			location.replace("/home");
+		}
+	</script>
+	{{- end}}
+</head>
+<body>
+<header class="hero-image">
+	<nav class="lang wrap" aria-label="{{.Language}}">
+		<a href="?lang=sv" hreflang="sv" lang="sv" aria-current="{{eq $lang "sv"}}">Svenska</a>
+		<a href="?lang=en" hreflang="en" lang="en" aria-current="{{eq $lang "en"}}">English</a>
+		<a href="/home" class="text-link">{{.SignIn}}</a>
+	</nav>
+	<a href="?lang={{$lang}}" class="logo" aria-label="{{.Name}}"><img src="/img/300sf.svg" alt="" width="128"></a>
+</header>
+
+<main>
+	<section class="hero wrap">
+		<div>
+			<h1>{{.Headline}}</h1>
+			<p class="lede">{{.Lede}}</p>
+			<div class="actions">
+				<a class="button" href="/sign-up">{{.CreateAccount}}</a>
+				<a class="text-link" href="/home">{{.HaveAccount}}</a>
+			</div>
+		</div>
+
+		<figure class="plate" aria-label="{{.PlateLabel}}">
+			<div class="plate-head">
+				<h2>{{.PlateTitle}}</h2>
+				<span>{{.PlateExample}}</span>
+			</div>
+			<ol>
+				{{$notYet := .NotYet}}
+				{{range .PlateSpecies}}
+				<li class="{{if .date}}seen{{end}}">
+					<span class="mark" aria-hidden="true"></span>
+					<span class="species"><b>{{.name}}</b><i lang="la">{{.latin}}</i></span>
+					<span class="date">{{if .date}}{{.date}}{{else}}{{$notYet}}{{end}}</span>
+				</li>
+				{{end}}
+			</ol>
+			<div class="progress">
+				<div class="progress-bar" role="presentation"><span style="width: 29%"></span></div>
+				<span>{{.PlateProgress}}</span>
+			</div>
+		</figure>
+	</section>
+
+	<section class="features wrap" aria-label="{{.FeaturesLabel}}">
+		{{range .Features}}
+		<div>
+			<h3>{{.title}}</h3>
+			<p>{{.text}}</p>
+		</div>
+		{{end}}
+	</section>
+</main>
+
+<footer class="site-footer wrap">
+	<span>© {{year}} Angels' Ware</span>
+	<nav>
+		<a href="/terms">{{.Terms}}</a>
+		<a href="/privacy-policy">{{.Privacy}}</a>
+	</nav>
+</footer>
+</body>
+{{end}}
+</html>

@@ -167,6 +167,19 @@ def login(email, password):
 
 def logout():
     if os.path.exists(SESSION_FILENAME):
+        # End the session on the server too, so the refresh token is useless
+        # even if the file was copied.
+        with open(SESSION_FILENAME, "r", encoding="utf8") as file:
+            refresh_token = json.load(file).get("refresh_token")
+        if refresh_token:
+            try:
+                httpx.post(
+                    f'{config.get("api-endpoint")}/v1/auth/logout',
+                    content=json.dumps({"refresh_token": refresh_token}),
+                    timeout=30.0,
+                )
+            except Exception:  # pylint: disable=broad-except
+                err_print("warning: could not reach the server to end the session")
         os.remove(SESSION_FILENAME)
     else:
         err_print("err: already logged out")

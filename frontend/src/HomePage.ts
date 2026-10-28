@@ -1,0 +1,389 @@
+/// <reference path="ui/Widget.ts"/>
+/// <reference path="ui/Image.ts"/>
+/// <reference path="ui/Input.ts"/>
+/// <reference path="utils/Report.ts"/>
+/// <reference path="Page.ts"/>
+/// <reference path="App.ts"/>
+/// <reference path="HttpRequest.ts"/>
+/// <reference path="SpeciesPopUp.ts"/>
+/// <reference path="ReportPopUp.ts"/>
+/// <reference path="ProfilePopUp.ts"/>
+/// <reference path="EditReportPopUp.ts"/>
+/// <reference path="responses/Users.ts"/>
+/// <reference path="responses/Auth.ts"/>
+/// <reference path="responses/Response.ts"/>
+
+class HomePage extends Page {
+	private mTable: Ui.Table;
+	private mEmail: Ui.Input;
+	private mPassword: Ui.Input;
+	private mProgressBoxes: Ui.Div;
+	private mSpecies: Array<Models.Species>;
+	private mSpeciesList: Ui.Select;
+	private mAnnouncements: Ui.Div;
+
+	public get id(): string {
+		return "home";
+	}
+
+	protected onCreateLoggedIn(): void {
+		const self = this;
+
+		this.addProfile();
+
+		const title = document.createElement("h1");
+		title.innerHTML = App.translations.WelcomeMessage;
+		this.container.appendChild(title);
+
+		this.mAnnouncements = new Ui.Div();
+		this.mAnnouncements.style.position = "relative";
+		this.mAnnouncements.style.width = "100%";
+		this.attach(this.mAnnouncements);
+
+		this.mSpeciesList = new Ui.Select(App.translations.Search, "", (value) => {
+			self.mSpecies.forEach(e => {
+				if (e.uuid === value) {
+					openSpeciesPopUp(e, null, (speciesAdded: boolean) => {
+						if (speciesAdded) {
+							self.refresh();
+						}
+					});
+					return;
+				}
+			});
+		});
+		this.attach(this.mSpeciesList);
+		this.mSpeciesList.showIdentifyButton(true);
+
+		this.mProgressBoxes = new Ui.Div();
+		this.mProgressBoxes.style.position = "relative";
+		this.mProgressBoxes.style.display = "flex";
+		this.mProgressBoxes.style.flexWrap = "wrap";
+		this.attach(this.mProgressBoxes);
+
+		const lastReportsLbl = document.createElement("h2");
+		lastReportsLbl.innerHTML = App.translations.LastSightings;
+		this.container.appendChild(lastReportsLbl);
+
+		this.mTable = new Ui.Table();
+		this.attach(this.mTable);
+	}
+
+	public setVisible(visible: boolean): void {
+		super.setVisible(visible);
+		if (App.isLoggedIn()) {
+			this.refresh();
+		}
+	}
+
+	private refresh(): void {
+		const self = this;
+
+		const me = new HttpRequest("GET", "/v1/users/me");
+		me.process(function (status: any, data: any) {
+			const d = data as Responses.UsersMe;
+			App.setUser(d.user);
+			self.mProfile.setImage("/img/portraits/" + d.user.portrait);
+			self.mProgressBoxes.clear();
+			self.mProgressBoxes.container.innerHTML = "";
+
+			d.list_reports.forEach(e => {
+				const d = new Ui.Div();
+				d.container.className = "progress-box";
+				d.container.style.cursor = "pointer";
+				d.container.addEventListener("click", function () {
+					self.appListener.showPage("list", e.list);
+				});
+				self.mProgressBoxes.attach(d);
+				if (e.list.color !== "") {
+					d.container.style.setProperty("--list-color", e.list.color);
+				}
+
+				const title = document.createElement("p");
+				title.textContent = App.getTranslation(e.list.name).substring(0, 50);
+				d.container.appendChild(title);
+
+				const pd = new Ui.Div();
+				pd.container.style.bottom = "4px";
+				pd.container.style.top = "unset";
+				pd.container.style.left = "0";
+				pd.container.style.width = "100%";
+				pd.container.style.padding = "0 4px";
+				pd.container.style.boxSizing = "border-box";
+				d.attach(pd);
+
+				const uniqueSpeciesInReports = Utils.numberOfUniqueSpeciesInReports(e.reports);
+				const pbt = document.createElement("p");
+				pbt.innerHTML = uniqueSpeciesInReports.toString() + "/" + e.list.species.length.toString();
+				pbt.style.fontSize = "0.8rem";
+				pbt.style.fontWeight = "bold";
+				pbt.style.cssFloat = "right";
+				pbt.style.lineHeight = "unset";
+				pd.container.appendChild(pbt);
+
+				const pb = new Ui.ProgressBar();
+				pb.style.position = "relative";
+				pb.setProgress(uniqueSpeciesInReports / e.list.species.length * 100);
+				pd.attach(pb);
+			});
+
+			self.mTable.clear();
+			d.last_reports.forEach(e => {
+				const d = e as Models.Report;
+				const species = e.species as Models.Species;
+				const entry = document.createElement("div");
+				entry.addEventListener("click", function () {
+					openEditReportPopUp(e);
+				});
+				entry.className = "list-entry";
+
+				const name = document.createElement("h3");
+				name.innerHTML = App.getTranslation(species.name);
+				name.style.cursor = "pointer";
+				name.classList.add("species-name");
+				name.style.width = "fit-content";
+				entry.appendChild(name);
+				name.addEventListener("click", function (event) {
+					event.stopPropagation();
+					openSpeciesPopUp(e.species, null, (speciesAdded: boolean) => {
+						if (speciesAdded) {
+							self.refresh();
+						}
+					});
+				});
+
+				const subName = document.createElement("p");
+				subName.innerHTML = species.name.la;
+				entry.appendChild(subName);
+
+				const dateInterval = document.createElement("p");
+				if (Utils.isValidDate(d.from)) {
+					dateInterval.innerHTML = Utils.toYYYY_MM_DD_hh_mm(d.from);
+				}
+				if (Utils.isValidDate(d.until)) {
+					dateInterval.innerHTML += " - " + Utils.toYYYY_MM_DD_hh_mm(d.until);
+				}
+				dateInterval.style.fontStyle = "unset";
+				entry.appendChild(dateInterval);
+
+				const location = document.createElement("p");
+				if (d.zone) {
+					location.innerHTML = App.getTranslation(d.zone.name);
+				}
+				location.style.fontStyle = "unset";
+				entry.appendChild(location);
+
+				if (d.comment.text !== "") {
+					const comment = document.createElement("p");
+					comment.classList.add("comment");
+					comment.style.borderRadius = "0 12px 0 12px";
+					comment.style.lineHeight = "unset";
+					comment.style.padding = "8px";
+					comment.style.width = "fit-content";
+					comment.textContent = d.comment.text;
+					entry.appendChild(comment);
+				}
+
+				if (e.tags.length > 0) {
+					const tagsContainer = document.createElement("div");
+					tagsContainer.style.position = "relative";
+					entry.appendChild(tagsContainer);
+
+					e.tags.forEach(e => {
+						const tag = document.createElement("div");
+						tag.className = "tag";
+						if (e.color !== "") {
+							tag.style.backgroundColor = e.color;
+						}
+						const c = document.createElement("p");
+						c.textContent = e.name;
+						tag.appendChild(c);
+						tagsContainer.appendChild(tag);
+					});
+				}
+
+				self.mTable.addRow([entry]);
+			});
+
+			if (d.last_reports.length === 0) {
+				const noRecent = document.createElement("p");
+				noRecent.innerHTML = App.translations.NoRecentSightings;
+				self.mTable.addRow([noRecent]);
+			}
+		}, function (status: any, data: Responses.GeneralErrorResponse, error: any) {
+		});
+
+		const species = new HttpRequest("GET", "/v1/species/list", null);
+		species.process((status: any, data: any) => {
+			self.mSpecies = data.result;
+			self.mSpecies.sort(Utils.sortByNameOnCurrentLanguage);
+			self.mSpeciesList.clear();
+			self.mSpecies.forEach(e => {
+				const s = e as Models.Species;
+				self.mSpeciesList.addOption(App.getTranslation(s.name), s.uuid);
+			});
+		}, (status: any, data: Responses.GeneralErrorResponse, error: any) => {
+		}, undefined);
+
+		const announcements = new HttpRequest("GET", "/v1/announcements/list", null);
+		announcements.process((status: any, data: any) => {
+			const an = data.data as Array<Models.Announcement>;
+			self.mAnnouncements.clear();
+			an.forEach(e => {
+				const a = document.createElement("div");
+				a.className = "announcement";
+				self.mAnnouncements.container.appendChild(a);
+				const img = document.createElement("p");
+				img.innerHTML = "<span style='font-size: 2rem; color: " + e.color + ";' class='material-symbols-outlined'>" + e.icon + "</span>";
+				a.style.boxShadow = "inset 0 0 0px 1px " + e.color;
+
+				a.appendChild(img);
+
+				const close = document.createElement("span");
+				close.className = "material-symbols-outlined close";
+				close.style.position = "absolute";
+				close.style.cursor = "pointer";
+				close.style.fontSize = "24px";
+				close.style.right = "var(--small-distance)";
+				close.style.top = "var(--small-distance)";
+				close.style.color = "var(--secondary-color)";
+				close.innerHTML = "close";
+				a.appendChild(close);
+				close.addEventListener("click", function () {
+					const r = new HttpRequest("PUT", "/v1/announcements/" + e.uuid + "/read");
+					r.process((status: any, data: any) => {
+						a.classList.add("fade-out");
+						setTimeout(function () {
+							self.mAnnouncements.container.removeChild(a);
+						}, 500);
+					});
+				});
+
+				const c = document.createElement("p");
+				c.innerHTML = App.getTranslation(e.content);
+				a.appendChild(c);
+			});
+		}, (status: any, data: Responses.GeneralErrorResponse, error: any) => {
+		}, undefined);
+	}
+
+	public setData(data: any): void {
+		super.setData(data);
+
+		if (data) {
+			if (data.email) {
+				if (this.mEmail) {
+					this.mEmail.value = data.email;
+					new Ui.MessageBox(App.translations.Welcome + " " + data.display_name, App.translations.ProceedToSignIn, "/img/messagebox-256.webp", "var(--success-color)", function () { });
+				}
+			}
+		}
+	}
+
+	protected onCreateLoggedOut(): void {
+		const content = new Ui.Div();
+		content.style.position = "relative";
+		content.style.width = "100%";
+		content.style.textAlign = "center";
+		this.attach(content);
+		const logo = document.createElement("img");
+		logo.src = "/img/birds-192.webp";
+		logo.alt = "TODO";
+		logo.width = 192;
+		logo.height = 192;
+		logo.style.borderRadius = "50%";
+		logo.classList.add("shadow");
+		content.container.appendChild(logo);
+
+		const title = document.createElement("h1");
+		title.innerHTML = App.translations.SignIn;
+		this.container.appendChild(title);
+
+		this.mEmail = new Ui.Input("email");
+		this.mPassword = new Ui.Input("password");
+		const signIn = document.createElement("button");
+
+		this.mEmail.style.position = "relative";
+		this.mEmail.setPlaceHolder(App.translations.Email);
+		this.mEmail.container.addEventListener("keydown", function (e) {
+			if (e.key == "Enter") {
+				e.preventDefault();
+				self.mPassword.select();
+			}
+		});
+		this.attach(this.mEmail);
+
+		this.mPassword.style.position = "relative";
+		this.mPassword.setPlaceHolder(App.translations.Password);
+		this.mPassword.container.addEventListener("keydown", function (e) {
+			if (e.key == "Enter") {
+				e.preventDefault();
+				signIn.click();
+			}
+		});
+		this.attach(this.mPassword);
+
+		const staySignedIn = new Ui.Input("checkbox");
+		staySignedIn.style.position = "relative";
+		staySignedIn.container.setAttribute("name", "stay_signed_in");
+		staySignedIn.container.id = "stay_signed_in";
+		this.attach(staySignedIn);
+
+		const staySignedInLbl = document.createElement("label");
+		staySignedInLbl.setAttribute("for", staySignedIn.container.id);
+		staySignedInLbl.innerHTML = App.translations.StaySignedIn;
+		this.container.appendChild(staySignedInLbl);
+
+		const help = document.createElement("p");
+		help.className = "details";
+		help.innerHTML = App.translations.MarkSignInCheckbox;
+		this.container.appendChild(help);
+
+		signIn.innerHTML = App.translations.SignIn;
+		signIn.addEventListener("click", function () {
+			const stayLoggedIn = (staySignedIn.container as HTMLInputElement).checked;
+
+			const d = {
+				grant_type: "password",
+				email: self.mEmail.value,
+				password: self.mPassword.value,
+				scopes: ["user", "admin"],
+				stay_signed_in: stayLoggedIn
+			}
+			const r = new HttpRequest("POST", "/v1/auth", d);
+			r.setNoRetry();
+			r.process(function (status: any, data: Responses.AuthenticationResponse) {
+				Session.store(data);
+				const url = new URL(window.location.href);
+				const redirectParam = Utils.safeRedirect(url.searchParams.get("redirect"));
+				if (redirectParam) {
+					window.open(redirectParam, "_self");
+				} else {
+					location.reload();
+				}
+			}, function (status: any, data: Responses.GeneralErrorResponse, err: any) {
+				if (data.code === Responses.ErrorCode.ErrorAccountDeactivated) {
+					new Ui.MessageBox(App.translations.Error, App.translations.AccountDeactivated, "/img/messagebox-256.webp", "var(--error-color)", function () { });
+				} else {
+					new Ui.MessageBox(App.translations.Error, App.translations.InvalidEmailOrPassword, "/img/messagebox-256.webp", "var(--error-color)", function () { });
+				}
+			});
+		});
+
+		this.container.appendChild(signIn);
+
+		const hr = document.createElement("hr");
+		this.container.appendChild(hr);
+
+		const self = this;
+		const noAccountYet = document.createElement("p");
+		noAccountYet.innerHTML = App.translations.NoAccountYet;
+		this.container.appendChild(noAccountYet);
+
+		const forgot = document.createElement("a");
+		forgot.innerHTML = App.translations.ForgotYourPassword;
+		forgot.style.margin = "var(--small-distance)";
+		forgot.href = "/forgot";
+		this.container.appendChild(forgot);
+	}
+}
