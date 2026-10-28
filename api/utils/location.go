@@ -2,8 +2,8 @@
 package utils
 
 import (
-	"git.sr.ht/~klahr/300sf/models"
-	"git.sr.ht/~klahr/300sf/types"
+	"github.com/klahr/300sf/api/models"
+	"github.com/klahr/300sf/api/types"
 	"github.com/tidwall/geojson"
 	"github.com/tidwall/geojson/geometry"
 	"gorm.io/gorm"

@@ -11,12 +11,12 @@ import (
 	"gopkg.in/guregu/null.v4/zero"
 	"gorm.io/gorm/clause"
 
-	"git.sr.ht/~klahr/300sf/auth"
-	"git.sr.ht/~klahr/300sf/config"
-	"git.sr.ht/~klahr/300sf/log"
-	"git.sr.ht/~klahr/300sf/models"
-	"git.sr.ht/~klahr/300sf/table"
-	"git.sr.ht/~klahr/300sf/utils"
+	"github.com/klahr/300sf/api/auth"
+	"github.com/klahr/300sf/api/config"
+	"github.com/klahr/300sf/api/log"
+	"github.com/klahr/300sf/api/models"
+	"github.com/klahr/300sf/api/table"
+	"github.com/klahr/300sf/api/utils"
 )
 
 func Users(c *gin.Context) {

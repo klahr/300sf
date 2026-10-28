@@ -1,31 +1,24 @@
-FROM golang:latest as builder
+FROM golang:1.24-alpine AS builder
 
 LABEL maintainer="Joachim Klahr <joachim@klahr.se>"
 
-RUN mkdir /app
-ADD . /app
 WORKDIR /app
 
 COPY go.mod go.sum ./
 RUN go mod download
 
+COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o 300sf
 
-ARG CONFIG_FILE
-COPY $CONFIG_FILE ./300sf.conf
-COPY ./private_key.pem ./public_key.pem ./
-COPY ./email-templates ./email-templates/
-
-FROM alpine:latest
+FROM alpine:3.20
 
 RUN apk --no-cache add ca-certificates
 
 WORKDIR /root/
 
+ARG CONFIG_FILE
 COPY --from=builder /app/300sf ./
-COPY --from=builder /app/300sf.conf ./
-COPY --from=builder /app/private_key.pem ./
-COPY --from=builder /app/public_key.pem ./
-COPY --from=builder /app/email-templates ./email-templates/
+COPY $CONFIG_FILE ./300sf.conf
+COPY ./email-templates ./email-templates/
 
 CMD ["./300sf", "-config", "./300sf.conf"]

@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strings"
 
-	"git.sr.ht/~klahr/300sf/models"
 	"github.com/gin-gonic/gin"
+	"github.com/klahr/300sf/api/models"
 )
 
 func AnalyzeResolve(c *gin.Context) {

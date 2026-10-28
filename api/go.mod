@@ -1,4 +1,4 @@
-module git.sr.ht/~klahr/300sf
+module github.com/klahr/300sf/api
 
 go 1.24
 

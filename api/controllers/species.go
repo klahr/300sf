@@ -8,14 +8,14 @@ import (
 	"strings"
 	"time"
 
-	"git.sr.ht/~klahr/300sf/config"
-	"git.sr.ht/~klahr/300sf/models"
-	"git.sr.ht/~klahr/300sf/table"
-	"git.sr.ht/~klahr/300sf/utils"
-	"git.sr.ht/~klahr/300sf/wikipedia"
-	"git.sr.ht/~klahr/300sf/xenocanto"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
+	"github.com/klahr/300sf/api/config"
+	"github.com/klahr/300sf/api/models"
+	"github.com/klahr/300sf/api/table"
+	"github.com/klahr/300sf/api/utils"
+	"github.com/klahr/300sf/api/wikipedia"
+	"github.com/klahr/300sf/api/xenocanto"
 )
 
 func Species(c *gin.Context) {

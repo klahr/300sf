@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	"git.sr.ht/~klahr/300sf/models"
-	"git.sr.ht/~klahr/300sf/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/klahr/300sf/api/models"
+	"github.com/klahr/300sf/api/utils"
 )
 
 func CreateNamedRecord[T models.Age | models.Order | models.Gender | models.Activity | models.Method](c *gin.Context) {

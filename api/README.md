@@ -1,39 +1,42 @@
-# 300 Svenska Fåglar (300 Swedish Birds)
-This is an API designed for bird watching that manages the recording of bird observations associated with user accounts.
+# 300sf API
 
-## Development
-This guide provides an introduction to developing the project.
+REST API for 300 Svenska Fåglar: users, checklists, list templates, reports
+(observations), tags, competitions, zones and species. Go + gin, MariaDB via
+gorm, Redis for caching and API rate limits, Mailjet for email.
 
-### Getting The Source-code
+## Running locally
+
+Requires Go (see `go.mod`), MariaDB and Redis.
+
 ```bash
-git clone https://git.sr.ht/~klahr/300sf
-```
+mysql -e 'CREATE DATABASE `300sf`'
+mysql 300sf < db.sql
 
-### Building
-```bash
-cd 300sf
+cp config.yml.sample config.yml   # then fill in credentials and secret
 go build -o bin/300sf
-```
-
-### Setting Up The Database
-...
-
-### Prepare Running
-Copy the `config.yml.sample` file, renaming it to `config.yml`. Subsequently, update the `USERNAME` and `PASSWORD` fields within this file to correspond with your database credentials.
-```bash
-cp config.yml.sample config.yml
-```
-
-### Running
-```
 ./bin/300sf -config ./config.yml
-```
-
-### Testing
-```bash
 curl localhost:8090/health
 ```
-#### Response If Working
-```json
- {"message":"healthy","data":{"version":"0.1.0"}}
- ```
+
+Logs go to `$LOG_FILE_LOCATION` (stderr if unset).
+
+## Tests
+
+```bash
+go test ./...
+```
+
+## Authentication
+
+`POST /v1/auth` with `grant_type: password` (plus a `client_id`/`client_secret`
+API key, `email`, `password`, `scopes`) or `grant_type: refresh_token`. Returns
+HS256 JWTs signed with `hashing-secret`; send them as `Authorization: Bearer
+<token>`. Scopes are `user` and `admin`. Routes are declared in `routes.go`;
+the OpenAPI spec in `swagger.yaml` is partial.
+
+## Zones
+
+Zones are GeoJSON polygons nested country → county → municipality
+(`admin_level` 2, 4, 7). Reports are matched to zones by point-in-polygon
+(`utils/location.go`). Zones are inserted with `300sf zone --insert` from the
+CLI.

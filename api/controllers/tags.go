@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"time"
 
-	"git.sr.ht/~klahr/300sf/models"
-	"git.sr.ht/~klahr/300sf/table"
-	"git.sr.ht/~klahr/300sf/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/klahr/300sf/api/models"
+	"github.com/klahr/300sf/api/table"
+	"github.com/klahr/300sf/api/utils"
 	"gopkg.in/guregu/null.v4/zero"
 )
 

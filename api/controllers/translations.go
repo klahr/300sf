@@ -4,9 +4,9 @@ package controllers
 import (
 	"net/http"
 
-	"git.sr.ht/~klahr/300sf/models"
-	"git.sr.ht/~klahr/300sf/table"
 	"github.com/gin-gonic/gin"
+	"github.com/klahr/300sf/api/models"
+	"github.com/klahr/300sf/api/table"
 	"gopkg.in/guregu/null.v4/zero"
 )
 

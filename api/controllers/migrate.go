@@ -9,10 +9,10 @@ import (
 	"net/url"
 	"time"
 
-	"git.sr.ht/~klahr/300sf/config"
-	"git.sr.ht/~klahr/300sf/models"
-	"git.sr.ht/~klahr/300sf/table"
-	"git.sr.ht/~klahr/300sf/utils"
+	"github.com/klahr/300sf/api/config"
+	"github.com/klahr/300sf/api/models"
+	"github.com/klahr/300sf/api/table"
+	"github.com/klahr/300sf/api/utils"
 	"gopkg.in/guregu/null.v4/zero"
 )
 

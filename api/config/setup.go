@@ -12,19 +12,14 @@ type App struct {
 	Address                string   `yaml:"address"`
 	AccessTokenLifetime    int64    `yaml:"access-token-lifetime"`
 	RefreshTokenLifetime   int64    `yaml:"refresh-token-lifetime"`
-	PrivateKeyFilename     string   `yaml:"private-key-filename"`
-	PublicKeyFilename      string   `yaml:"public-key-filename"`
 	HashingSecret          string   `yaml:"hashing-secret"`
 	Domain                 string   `yaml:"domain"`
-	ResourcePath           string   `yaml:"resource-path"`
 	RedisHost              string   `yaml:"redis-host"`
 	LogLevel               string   `yaml:"log-level"`
-	DataStorage            string   `yaml:"data-storage"`
 	DefaultApiSoftLimit    int64    `yaml:"default-api-soft-limit"`
 	DefaultApiHardLimit    int64    `yaml:"default-api-hard-limit"`
 	ApiCallCounterTTL      int64    `yaml:"api-call-counter-ttl"`
 	DefaultLists           []string `yaml:"default-lists"`
-	CacheDuration          int64    `yaml:"cache-duration"`
 	WikipediaCacheDuration int64    `yaml:"wikipedia-cache-duration"`
 	MailjetPublicKey       string   `yaml:"mailjet-public-key"`
 	MailjetSecretKey       string   `yaml:"mailjet-secret-key"`
@@ -35,18 +30,6 @@ type App struct {
 
 func (c *App) Parse(data []byte) error {
 	return yaml.Unmarshal(data, c)
-}
-
-func (a *App) GetDataStorage() string {
-	if a.DataStorage == "" {
-		dataStoragePath := os.Getenv("DATA_STORAGE_PATH")
-		if dataStoragePath != "" {
-			return dataStoragePath
-		} else {
-			return "resources/"
-		}
-	}
-	return a.DataStorage
 }
 
 var AppConfig *App

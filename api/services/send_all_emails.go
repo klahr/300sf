@@ -3,12 +3,12 @@ package services
 import (
 	"time"
 
-	"git.sr.ht/~klahr/300sf/config"
-	"git.sr.ht/~klahr/300sf/log"
-	"git.sr.ht/~klahr/300sf/models"
-	"git.sr.ht/~klahr/300sf/table"
+	"github.com/klahr/300sf/api/config"
+	"github.com/klahr/300sf/api/log"
+	"github.com/klahr/300sf/api/models"
+	"github.com/klahr/300sf/api/table"
 
-	sf_mailjet "git.sr.ht/~klahr/300sf/mailjet"
+	sf_mailjet "github.com/klahr/300sf/api/mailjet"
 	"github.com/mailjet/mailjet-apiv3-go"
 )
 

@@ -8,12 +8,12 @@ import (
 	"os/signal"
 	"syscall"
 
-	"git.sr.ht/~klahr/300sf/config"
-	"git.sr.ht/~klahr/300sf/log"
-	"git.sr.ht/~klahr/300sf/models"
-	"git.sr.ht/~klahr/300sf/services"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
+	"github.com/klahr/300sf/api/config"
+	"github.com/klahr/300sf/api/log"
+	"github.com/klahr/300sf/api/models"
+	"github.com/klahr/300sf/api/services"
 )
 
 func main() {

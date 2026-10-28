@@ -8,8 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mailjet/mailjet-apiv3-go"
 
-	sf_mailjet "git.sr.ht/~klahr/300sf/mailjet"
-	"git.sr.ht/~klahr/300sf/models"
+	sf_mailjet "github.com/klahr/300sf/api/mailjet"
+	"github.com/klahr/300sf/api/models"
 )
 
 func EmailsSendAll(c *gin.Context) {

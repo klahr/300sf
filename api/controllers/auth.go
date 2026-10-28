@@ -6,11 +6,11 @@ import (
 	"strings"
 	"time"
 
-	"git.sr.ht/~klahr/300sf/config"
-	"git.sr.ht/~klahr/300sf/models"
-	"git.sr.ht/~klahr/300sf/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
+	"github.com/klahr/300sf/api/config"
+	"github.com/klahr/300sf/api/models"
+	"github.com/klahr/300sf/api/utils"
 )
 
 func ValidateToken(token string) (*jwt.Token, error) {

@@ -2,8 +2,8 @@
 package models
 
 import (
-	"git.sr.ht/~klahr/300sf/log"
 	"github.com/go-redis/redis"
+	"github.com/klahr/300sf/api/log"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"

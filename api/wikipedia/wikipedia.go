@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"git.sr.ht/~klahr/300sf/config"
-	"git.sr.ht/~klahr/300sf/models"
-	"git.sr.ht/~klahr/300sf/utils"
+	"github.com/klahr/300sf/api/config"
+	"github.com/klahr/300sf/api/models"
+	"github.com/klahr/300sf/api/utils"
 	gowiki "github.com/trietmn/go-wiki"
 )
 

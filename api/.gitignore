@@ -1,6 +1,6 @@
-private_key.pem
-public_key.pem
-300sf
-docs/_build
+/300sf
+/bin/
+/logs/
 /*.yml
-logs/
+/*.conf
+*.pem

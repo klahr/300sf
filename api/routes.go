@@ -10,12 +10,12 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 
-	"git.sr.ht/~klahr/300sf/auth"
-	"git.sr.ht/~klahr/300sf/config"
-	"git.sr.ht/~klahr/300sf/controllers"
-	"git.sr.ht/~klahr/300sf/log"
-	"git.sr.ht/~klahr/300sf/models"
-	"git.sr.ht/~klahr/300sf/utils"
+	"github.com/klahr/300sf/api/auth"
+	"github.com/klahr/300sf/api/config"
+	"github.com/klahr/300sf/api/controllers"
+	"github.com/klahr/300sf/api/log"
+	"github.com/klahr/300sf/api/models"
+	"github.com/klahr/300sf/api/utils"
 )
 
 func parseToken(accessToken string) *jwt.Token {
