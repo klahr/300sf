@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 // Package site serves the websites from the same binary as the API, all on
 // one host: the landing page on /, the app on /home and its other pages, and
@@ -12,10 +12,9 @@ import (
 	"html/template"
 	"io/fs"
 	"net/http"
-	"net/http/httputil"
-	"net/url"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -47,6 +46,11 @@ type Site struct {
 	landing   map[string]map[string]any
 	// Overridable in tests.
 	compare func(uuids []string) (*controllers.CompareResult, error)
+	stats   func() (*controllers.SiteStats, error)
+
+	statsMu   sync.Mutex
+	statsAt   time.Time
+	statsLast *controllers.SiteStats
 }
 
 // New serves the embedded site. Pass a directory (os.DirFS("site")) as files
@@ -56,10 +60,11 @@ func New(cfg config.Site, files fs.FS) (*Site, error) {
 	if files == nil {
 		files = embedded
 	}
-	s := &Site{files: files, cfg: cfg, landing: map[string]map[string]any{}, compare: controllers.CompareLists}
+	s := &Site{files: files, cfg: cfg, landing: map[string]map[string]any{}, compare: controllers.CompareLists, stats: controllers.GetSiteStats}
 
 	funcs := template.FuncMap{
 		"year": func() int { return time.Now().Year() },
+		"number": formatNumber,
 		"translate": func(t models.Translation, lang string) string {
 			if lang == "sv" && t.Sv.String != "" {
 				return t.Sv.String
@@ -120,7 +125,6 @@ func (s *Site) Register(r *gin.Engine) {
 	r.GET("/terms", s.page("pages/terms.html"))
 	r.GET("/privacy-policy", s.page("pages/privacy-policy.html"))
 	r.GET("/compare", s.comparePage)
-	r.POST("/analyze", s.analyze())
 }
 
 // The app's session lives in cookies the page's JavaScript can't read:
@@ -306,7 +310,41 @@ func (s *Site) render(c *gin.Context, status int, name string, data any) {
 
 func (s *Site) landingData(c *gin.Context, signedInGoesToApp bool) gin.H {
 	lang := language(c, []string{"en", "sv"}, "en")
-	return gin.H{"Lang": lang, "T": s.landing[lang], "SignedInGoesToApp": signedInGoesToApp}
+	return gin.H{"Lang": lang, "T": s.landing[lang], "SignedInGoesToApp": signedInGoesToApp, "Stats": s.siteStats()}
+}
+
+// siteStats are the landing page's community numbers, counted at most every 15 minutes. Nil when
+// they could not be counted; the page then leaves them out.
+func (s *Site) siteStats() *controllers.SiteStats {
+	s.statsMu.Lock()
+	defer s.statsMu.Unlock()
+	if time.Since(s.statsAt) < 15*time.Minute {
+		return s.statsLast
+	}
+	stats, err := s.stats()
+	if err != nil {
+		stats = nil
+	}
+	s.statsAt = time.Now()
+	s.statsLast = stats
+	return stats
+}
+
+// formatNumber groups thousands the way the language does: 20 401 in Swedish, 20,401 in English.
+func formatNumber(n int64, lang string) string {
+	sep := ","
+	if lang == "sv" {
+		sep = "\u00a0"
+	}
+	digits := strconv.FormatInt(n, 10)
+	var b strings.Builder
+	for i, d := range digits {
+		if i > 0 && (len(digits)-i)%3 == 0 {
+			b.WriteString(sep)
+		}
+		b.WriteRune(d)
+	}
+	return b.String()
 }
 
 // landingPage always shows the landing page, also to signed-in visitors.
@@ -352,23 +390,4 @@ func (s *Site) comparePage(c *gin.Context) {
 	}
 	lang := language(c, []string{"sv", "en", "de"}, "sv")
 	s.render(c, http.StatusOK, "compare.html", gin.H{"Lang": lang, "Title": appNames[lang], "Data": result})
-}
-
-// analyze passes audio uploads to the identification service unchanged.
-func (s *Site) analyze() gin.HandlerFunc {
-	target, err := url.Parse(s.cfg.AnalyzeEndpoint)
-	if s.cfg.AnalyzeEndpoint == "" || err != nil {
-		return func(c *gin.Context) {
-			c.JSON(http.StatusServiceUnavailable, gin.H{"message": "identification is not available"})
-		}
-	}
-	proxy := &httputil.ReverseProxy{
-		Rewrite: func(r *httputil.ProxyRequest) {
-			r.Out.URL = target
-			r.Out.Host = target.Host
-		},
-	}
-	return func(c *gin.Context) {
-		proxy.ServeHTTP(c.Writer, c.Request)
-	}
 }

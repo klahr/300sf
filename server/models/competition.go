@@ -8,6 +8,7 @@ import (
 
 type Competition struct {
 	Model
+	NameId           int64        `json:"-"`
 	Name             Translation  `json:"name"`
 	UserId           zero.Int     `json:"-"`
 	User             *User        `json:"user"`
@@ -16,6 +17,7 @@ type Competition struct {
 	FinishedAt       zero.Time    `json:"finished_at"`
 	ListTemplateId   zero.Int     `json:"-"`
 	ListTemplate     ListTemplate `json:"list_template"`
+	DescriptionId    int64        `json:"-"`
 	Description      Translation  `json:"description"`
 	EndOnReports     zero.Int     `json:"end_on_reports"`
 	MaxCompetitors   zero.Int     `json:"max_competitors"`
@@ -26,7 +28,7 @@ type Competition struct {
 	Color            string       `json:"color"`
 	CompetitionZones []Zone       `json:"zones" gorm:"many2many:competition_zones"`
 	Archived         zero.Time    `json:"-"`
-	Participants     []User       `json:"participants" gorm:"many2many:competition_participants"`
+	Participants     []User       `json:"participants" gorm:"many2many:competition_users"`
 	Password         zero.String  `json:"-"`
 	PasswordSalt     zero.String  `json:"-"`
 }

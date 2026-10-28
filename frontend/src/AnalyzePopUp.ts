@@ -1,201 +1,287 @@
+/// <reference path="ui/Sheet.ts"/>
 /// <reference path="ui/Div.ts"/>
 /// <reference path="App.ts"/>
+/// <reference path="HttpRequest.ts"/>
 
+// Records up to ten seconds of a bird and asks the identification service (BirdNET, behind
+// /api/v1/analyze) what it is. Recorded as plain WAV in the browser, which the service can always
+// read, so nothing has to be loaded for it. Picking a result calls pick with the species.
 class AnalyzePopUp {
-	private mResultView: HTMLDivElement;
-	private mAnalyzeText: HTMLParagraphElement;
-	private mPopUp: Ui.PopUp;
-	private mStream: any;
+	private static readonly SECONDS = 10;
 
-	constructor(closeCallback: () => void) {
+	private mSheet: Ui.Sheet;
+	private mButton: HTMLButtonElement;
+	private mStatus: HTMLParagraphElement;
+	private mResults: HTMLElement;
+	private mStream: MediaStream | null = null;
+	private mContext: AudioContext | null = null;
+	private mSamples: Array<Float32Array> = [];
+	private mTimer: number | null = null;
+	private mRecording = false;
+	private mClosed = false;
+	private mPick: (species: Models.Species) => void;
+
+	constructor(pick: (species: Models.Species) => void) {
 		const self = this;
-		const content = new Ui.Div();
-		content.style.textAlign = "left";
-		content.style.width = "100%";
-		content.style.position = "relative";
+		this.mPick = pick;
 
-		const title = document.createElement("h1");
-		title.innerHTML = App.translations.IdentifySpecies;
-		title.style.margin = "unset";
-		content.container.appendChild(title);
+		this.mSheet = new Ui.Sheet({ title: App.translations.IdentifyBySound, size: "auto" });
 
-		const b = document.createElement("p");
-		b.innerHTML = App.translations.AnalyzeDescription;
-		content.container.appendChild(b);
+		const record = this.mSheet.section();
+		record.classList.add("identify");
 
-		const d = document.createElement("div");
-		d.style.textAlign = "center";
-		d.style.width = "100%";
-		d.style.margin = "32px 0";
-		content.container.appendChild(d);
+		const description = document.createElement("p");
+		description.className = "identify-description";
+		description.textContent = App.translations.AnalyzeDescription;
+		record.appendChild(description);
 
-		const recordButton = document.createElement("span");
-		recordButton.className = "material-symbols-outlined";
-		recordButton.style.cursor = "pointer";
-		recordButton.style.fontSize = "128px";
-		recordButton.style.color = "var(--error-color)";
-		recordButton.innerHTML = "album";
-		recordButton.style.backgroundColor = "white";
-		recordButton.style.borderRadius = "50%";
-		d.appendChild(recordButton);
-
-		const recordText = document.createElement("p");
-		recordText.innerHTML = App.translations.AnalyzeStartRecording;
-		d.appendChild(recordText);
-
-		this.mAnalyzeText = document.createElement("p");
-		this.mAnalyzeText.innerHTML = App.translations.IdentifyingPleaseWait;
-		this.mAnalyzeText.style.display = "none";
-		d.appendChild(this.mAnalyzeText);
-
-		const audioPlayer = document.createElement("audio");
-		audioPlayer.setAttribute("controls", "controls");
-		//content.container.appendChild(audioPlayer);
-
-		const resultHeader = document.createElement("h2");
-		resultHeader.innerHTML = App.translations.Result;
-		resultHeader.style.margin = "unset";
-		content.container.appendChild(resultHeader);
-
-		this.mResultView = document.createElement("div");
-		content.container.appendChild(this.mResultView);
-
-		let mediaRecorder;
-		let audioChunks = [];
-
-		const handleSuccess = (stream) => {
-			self.mStream = stream;
-			const workerOptions = {
-				OggOpusEncoderWasmPath: 'https://cdn.jsdelivr.net/npm/opus-media-recorder@0.8.0/OggOpusEncoder.wasm',
-				WebMOpusEncoderWasmPath: 'https://cdn.jsdelivr.net/npm/opus-media-recorder@0.8.0/WebMOpusEncoder.wasm'
-			};
-
-			// @ts-ignore
-			window.MediaRecorder = OpusMediaRecorder;
-			// @ts-ignore
-			mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/ogg' }, workerOptions);
-			mediaRecorder.ondataavailable = (event) => {
-				if (event.data.size > 0) {
-					// @ts-ignore
-					audioChunks.push(event.data);
-				}
-			};
-
-			mediaRecorder.onstop = () => {
-				const audioBlob = new Blob(audioChunks, { type: 'audio/wav;codecs=opus' });
-				audioChunks = [];
-		
-				const audioUrl = URL.createObjectURL(audioBlob);
-				audioPlayer.src = audioUrl;
-
-				self.uploadToServer(audioBlob);
-			};
-
-			let timeoutId;
-			recordButton.addEventListener('click', () => {
-				if (mediaRecorder.state === 'inactive') {
-					audioChunks = [];
-					mediaRecorder.start();
-					timeoutId = setTimeout(function() {
-						mediaRecorder.stop();
-						recordButton.innerHTML = "album";
-						recordText.innerHTML = App.translations.AnalyzeStartRecording;
-					}, 10000);
-					recordButton.innerHTML = "stop_circle";
-					recordText.innerHTML = App.translations.Recording + "...";
-				} else {
-					clearTimeout(timeoutId);
-					mediaRecorder.stop();
-					recordButton.innerHTML = "album";
-					recordText.innerHTML = App.translations.AnalyzeStartRecording;
-				}
-			});
-		};
-
-		const handleError = (error) => {
-			console.error('Error accessing microphone:', error);
-			new Ui.MessageBox(App.translations.Microphone, App.translations.NoMicrophone, null, "var(--error-color)", function () {
-				self.mPopUp.close();
-			});
-		};
-
-		navigator.mediaDevices.getUserMedia({ audio: true })
-			.then(handleSuccess)
-			.catch(handleError);
-
-		this.mPopUp = new Ui.PopUp(content.container, function () {
-			if (self.mStream) {
-				const at = self.mStream.getAudioTracks()[0];
-				if (at) {
-					at.stop();
-				}
+		this.mButton = document.createElement("button");
+		this.mButton.className = "identify-button";
+		this.mButton.setAttribute("aria-label", App.translations.AnalyzeStartRecording);
+		this.mButton.innerHTML = "<svg viewBox='0 0 120 120' aria-hidden='true'><circle class='track' cx='60' cy='60' r='56'/><circle class='progress' cx='60' cy='60' r='56'/></svg><span class='material-symbols-outlined'>mic</span>";
+		this.mButton.addEventListener("click", function () {
+			if (self.mRecording) {
+				self.stop();
+			} else {
+				self.start();
 			}
-			closeCallback();
+		});
+		record.appendChild(this.mButton);
+
+		this.mStatus = document.createElement("p");
+		this.mStatus.className = "identify-status";
+		this.mStatus.textContent = App.translations.AnalyzeStartRecording;
+		this.mStatus.setAttribute("role", "status");
+		record.appendChild(this.mStatus);
+
+		this.mResults = this.mSheet.section(App.translations.PossibleSpecies);
+		this.mResults.classList.add("hidden");
+
+		// Required by the BirdNET model's license (CC BY-NC-SA 4.0).
+		const credit = document.createElement("p");
+		credit.className = "identify-credit";
+		credit.innerHTML = App.translations.AnalyzeCredit + " <a href='https://birdnet.cornell.edu' target='_blank' rel='noopener'>BirdNET</a> (K. Lisa Yang Center for Conservation Bioacoustics, Cornell Lab of Ornithology, Chemnitz University of Technology). <a href='https://creativecommons.org/licenses/by-nc-sa/4.0/' target='_blank' rel='noopener'>CC BY-NC-SA 4.0</a>";
+		this.mSheet.section().appendChild(credit);
+
+		this.mSheet.open(function () {
+			self.mClosed = true;
+			self.release();
 		});
 	}
 
-	private uploadToServer(audioBlob: Blob) {
+	private start(): void {
 		const self = this;
-		const formData = new FormData();
-		formData.append('audio', audioBlob, 'recording.wav');
-		formData.append('meta', '{"save":false}');
-		this.mAnalyzeText.style.display = "";
+		this.mResults.classList.add("hidden");
+		this.mStatus.classList.remove("error");
 
-		fetch('/analyze', {
-			method: 'POST',
-			body: formData,
-		})
-		.then(response => response.json())
-		.then(data => {
-			let content: { name: string; probability: number }[] = [];
+		// Birds are not voices: no echo cancelling, noise suppression or gain control.
+		navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } }).then(function (stream) {
+			if (self.mClosed) {
+				stream.getTracks().forEach(t => t.stop());
+				return;
+			}
+			self.mStream = stream;
+			const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+			const context: AudioContext = new AudioContextClass();
+			self.mContext = context;
+			const source = context.createMediaStreamSource(stream);
+			// ScriptProcessorNode is deprecated but available everywhere, and needs no worklet file.
+			const processor = context.createScriptProcessor(4096, 1, 1);
+			self.mSamples = [];
+			processor.onaudioprocess = function (e) {
+				if (self.mRecording) {
+					self.mSamples.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+				}
+			};
+			source.connect(processor);
+			processor.connect(context.destination);
 
-			self.mResultView.innerHTML = "";
-			data.results.forEach(e => {
-				content.push({
-					"name": e[0],
-					"probability": e[1]
+			self.mRecording = true;
+			self.mButton.classList.add("recording");
+			self.mButton.setAttribute("aria-label", App.translations.TapToStop);
+			self.mButton.querySelector(".material-symbols-outlined")!.textContent = "stop";
+			self.mStatus.textContent = App.translations.Recording + "... " + App.translations.TapToStop;
+			self.mTimer = window.setTimeout(function () {
+				self.stop();
+			}, AnalyzePopUp.SECONDS * 1000);
+		}).catch(function () {
+			self.showError(App.translations.NoMicrophone);
+		});
+	}
+
+	private stop(): void {
+		if (!this.mRecording) {
+			return;
+		}
+		this.mRecording = false;
+		if (this.mTimer !== null) {
+			clearTimeout(this.mTimer);
+			this.mTimer = null;
+		}
+		const sampleRate = this.mContext ? this.mContext.sampleRate : 48000;
+		const wav = AnalyzePopUp.encodeWav(this.mSamples, sampleRate);
+		this.mSamples = [];
+		this.release();
+
+		this.mButton.classList.remove("recording");
+		this.mButton.classList.add("busy-identify");
+		this.mButton.disabled = true;
+		this.mButton.querySelector(".material-symbols-outlined")!.textContent = "graphic_eq";
+		this.mStatus.textContent = App.translations.IdentifyingPleaseWait;
+		this.upload(wav);
+	}
+
+	// Stops the microphone and the audio processing.
+	private release(): void {
+		if (this.mTimer !== null) {
+			clearTimeout(this.mTimer);
+			this.mTimer = null;
+		}
+		this.mRecording = false;
+		if (this.mStream) {
+			this.mStream.getTracks().forEach(t => t.stop());
+			this.mStream = null;
+		}
+		if (this.mContext) {
+			this.mContext.close();
+			this.mContext = null;
+		}
+	}
+
+	private reset(): void {
+		this.mButton.classList.remove("busy-identify", "recording");
+		this.mButton.disabled = false;
+		this.mButton.setAttribute("aria-label", App.translations.AnalyzeStartRecording);
+		this.mButton.querySelector(".material-symbols-outlined")!.textContent = "mic";
+	}
+
+	private showError(message: string): void {
+		this.release();
+		this.reset();
+		this.mStatus.textContent = message;
+		this.mStatus.classList.add("error");
+	}
+
+	private upload(wav: Blob): void {
+		const self = this;
+		const form = new FormData();
+		form.append("audio", wav, "recording.wav");
+		// The week of the year (BirdNET's 48-week calendar) narrows the result to birds likely now.
+		const now = new Date();
+		const week = Math.min(48, Math.floor((now.getMonth() * 4) + Math.min(3, Math.floor((now.getDate() - 1) / 7.75))) + 1);
+		form.append("meta", JSON.stringify({ save: false, num_results: 5, sensitivity: 1, week: week }));
+
+		fetch("/api/v1/analyze", {
+			method: "POST",
+			body: form,
+			headers: { "X-Requested-With": "XMLHttpRequest" },
+			credentials: "same-origin",
+		}).then(function (response) {
+			if (!response.ok) {
+				throw response.status;
+			}
+			return response.json();
+		}).then(function (data) {
+			if (self.mClosed) {
+				return;
+			}
+			const birds = (data.results || []).map(e => ({ name: e[0], probability: e[1] }));
+			new HttpRequest("PUT", "/v1/analyze/resolve", { birds: birds }).process(function (status: any, resolved: any) {
+				self.reset();
+				self.showResults(resolved.results || []);
+			}, function () {
+				self.showError(App.translations.SomethingWentWrong);
+			});
+		}).catch(function (status) {
+			if (self.mClosed) {
+				return;
+			}
+			self.showError(status === 503 || status === 502 ? App.translations.AnalyzeUnavailable : App.translations.SomethingWentWrong);
+		});
+	}
+
+	private showResults(results: Array<{ species: Models.Species, probability: number }>): void {
+		const self = this;
+		const list = this.mResults;
+		list.querySelectorAll(".identify-result, p.details").forEach(e => e.remove());
+		list.classList.remove("hidden");
+
+		if (results.length === 0) {
+			this.mStatus.textContent = App.translations.NoIdentifySpecies;
+			const none = document.createElement("p");
+			none.className = "details";
+			none.textContent = App.translations.NoIdentifyHint;
+			list.appendChild(none);
+			return;
+		}
+
+		this.mStatus.textContent = App.translations.RecordAgain;
+		results.forEach(r => {
+			const row = document.createElement("button");
+			row.className = "identify-result";
+
+			const names = document.createElement("span");
+			names.className = "identify-names";
+			const name = document.createElement("span");
+			name.className = "identify-name";
+			name.textContent = App.getTranslation(r.species.name);
+			const latin = document.createElement("span");
+			latin.className = "identify-latin";
+			latin.textContent = r.species.name.la;
+			names.appendChild(name);
+			names.appendChild(latin);
+			row.appendChild(names);
+
+			const percent = Math.round(r.probability * 100);
+			const confidence = document.createElement("span");
+			confidence.className = "identify-confidence";
+			confidence.innerHTML = "<span class='identify-meter'><span style='width: " + percent + "%'></span></span>" + percent + "%";
+			row.appendChild(confidence);
+
+			row.addEventListener("click", function () {
+				self.mSheet.close();
+				Ui.PopUp.whenHistorySettled(function () {
+					self.mPick(r.species);
 				});
 			});
-
-			const r = new HttpRequest("PUT", "/v1/analyze/resolve", {"birds": content});
-			r.process((status: any, data: any) => {
-				if (data.results) {
-					data.results.forEach(e => {
-						const d = document.createElement("div");
-						d.className = "list-entry";
-						d.style.border = "2px solid #333";
-						d.style.padding = "8px";
-						d.style.borderRadius = "8px";
-						d.style.marginBottom = "4px";
-						d.style.cursor = "pointer";
-						d.addEventListener("click", function() {
-							openSpeciesPopUp(e.species, null, () => {});
-						});
-						self.mResultView.appendChild(d);
-						const r = document.createElement("h3");
-						r.innerHTML = App.getTranslation(e.species.name);
-						d.appendChild(r);
-						const subName = document.createElement("p");
-						subName.innerHTML = e.species.name.la;
-						d.appendChild(subName);
-					
-						const probability = new Ui.ProgressBar();
-						probability.style.position = "relative";
-						probability.setProgress(e.probability * 100);
-						probability.style.width = "100%";
-						probability.style.height = "8px";
-						d.appendChild(probability.container);
-					});
-				} else {
-					const r = document.createElement("p");
-					r.innerHTML = App.translations.NoIdentifySpecies;
-					self.mResultView.appendChild(r);
-				}
-				this.mAnalyzeText.style.display = "none";
-			});
-		})
-		.catch(error => {
-			console.error('Error uploading to server:', error);
+			list.appendChild(row);
 		});
 	}
+
+	// 16-bit mono PCM WAV.
+	private static encodeWav(chunks: Array<Float32Array>, sampleRate: number): Blob {
+		const length = chunks.reduce((n, c) => n + c.length, 0);
+		const buffer = new ArrayBuffer(44 + length * 2);
+		const view = new DataView(buffer);
+		const text = function (offset: number, s: string) {
+			for (let i = 0; i < s.length; ++i) {
+				view.setUint8(offset + i, s.charCodeAt(i));
+			}
+		};
+		text(0, "RIFF");
+		view.setUint32(4, 36 + length * 2, true);
+		text(8, "WAVE");
+		text(12, "fmt ");
+		view.setUint32(16, 16, true);
+		view.setUint16(20, 1, true);
+		view.setUint16(22, 1, true);
+		view.setUint32(24, sampleRate, true);
+		view.setUint32(28, sampleRate * 2, true);
+		view.setUint16(32, 2, true);
+		view.setUint16(34, 16, true);
+		text(36, "data");
+		view.setUint32(40, length * 2, true);
+		let offset = 44;
+		chunks.forEach(chunk => {
+			for (let i = 0; i < chunk.length; ++i, offset += 2) {
+				const s = Math.max(-1, Math.min(1, chunk[i]));
+				view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+			}
+		});
+		return new Blob([buffer], { type: "audio/wav" });
+	}
+}
+
+function openIdentifyBySound(pick: (species: Models.Species) => void): void {
+	new AnalyzePopUp(pick);
 }

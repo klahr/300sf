@@ -23,7 +23,6 @@
 /// <reference path="Session.ts"/>
 
 interface IAppListener {
-	openMainMenu(): void;
 	showPage(id: string, data: any): void;
 	logOut(): void;
 }
@@ -31,12 +30,16 @@ interface IAppListener {
 class App implements IAppListener {
 	private mLayerManager = new Ui.LayerManager();
 	private mMainMenu = new MainMenu(this);
+	private mCurrentPage = "home";
+	private mCurrentData: any = null;
 	private static sLanguage: string = "en";
 	public static translations = Translations.en;
 	private mPages = new Array<Page>();
 	private static sUser: Models.User;
 
 	constructor(language: string, redirect: string, queryParameters: object) {
+		App.hideIconNames();
+
 		Session.forgetLegacyTokens();
 		// Pages read the signed-in state when they are built, so renew an expired
 		// access token first.
@@ -45,6 +48,12 @@ class App implements IAppListener {
 		const ks = new LocalStorage();
 		const lang = ks.get("lang") as string;
 		App.setLanguage(lang !== null && lang !== "" ? lang : language);
+
+		// Before any page or the navigation is built: they need the user, and are written in the
+		// user's language, which this sets.
+		if (App.isLoggedIn()) {
+			this.fetchUser();
+		}
 
 		this.mLayerManager.addLayer("base");
 		this.mLayerManager.showLayer("base");
@@ -66,13 +75,57 @@ class App implements IAppListener {
 		this.addPage(new ManageCompetitionsPage(this));
 		this.addPage(new ExperimentalPage(this));
 
+		document.body.classList.toggle("signed-out", !App.isLoggedIn());
 		this.mLayerManager.addToLayer("base", this.mMainMenu);
 
-		if (App.isLoggedIn()) {
-			this.fetchUser();
-		}
-
 		this.showPage(redirect === "" ? "home" : redirect, queryParameters);
+
+		// Back and forward: close the newest dialog, or show the page for the URL without a reload.
+		const self = this;
+
+		// A sighting was reported, from any form: show the current page again so it includes it.
+		window.addEventListener("sightingadded", function () {
+			self.showPage(self.mCurrentPage, self.mCurrentData);
+		});
+		window.addEventListener("popstate", function () {
+			if (Ui.PopUp.handleBack()) {
+				return;
+			}
+			self.showPageForLocation();
+		});
+	}
+
+	// Icons are ligatures, so a screen reader would read "volunteer_activism" before "Donation". Hide
+	// them from assistive technology as they are added; buttons with only an icon carry aria-label.
+	private static hideIconNames(): void {
+		const hide = function (root: ParentNode) {
+			root.querySelectorAll(".material-symbols-outlined:not([aria-hidden])").forEach(e => e.setAttribute("aria-hidden", "true"));
+		};
+		new MutationObserver(function (mutations) {
+			mutations.forEach(m => m.addedNodes.forEach(n => {
+				if (n instanceof Element) {
+					if (n.classList.contains("material-symbols-outlined")) {
+						n.setAttribute("aria-hidden", "true");
+					}
+					hide(n);
+				}
+			}));
+		}).observe(document.body, { childList: true, subtree: true });
+	}
+
+	// The page for the current URL: /list/<uuid> or /<page id>, with the query string as its data.
+	private showPageForLocation(): void {
+		const parts = window.location.pathname.split("/").filter(p => p !== "");
+		const query: { [key: string]: string } = {};
+		new URLSearchParams(window.location.search).forEach((value, key) => {
+			query[key] = value;
+		});
+		if (parts[0] === "list" && parts[1]) {
+			this.showPage("list", { uuid: parts[1] });
+			return;
+		}
+		const id = parts[0] || "home";
+		this.showPage(this.mPages.some(p => p.id === id) ? id : "home", query);
 	}
 
 	private addPage(page: Page): void {
@@ -151,9 +204,6 @@ class App implements IAppListener {
 		return App.sUser;
 	}
 
-	openMainMenu(): void {
-		this.mMainMenu.open();;
-	}
 
 	showPage(id: string, data: any): void {
 		if (id === "admin") {
@@ -176,8 +226,11 @@ class App implements IAppListener {
 				Session.signInAgain();
 				return;
 			}
+			this.mCurrentPage = id;
+			this.mCurrentData = data;
 			p.setVisible(true);
 			p.setData(data);
+			this.mMainMenu.setActive(id === "list" && data && data.uuid ? "list:" + data.uuid : id);
 		}
 		this.mMainMenu.close();
 	}

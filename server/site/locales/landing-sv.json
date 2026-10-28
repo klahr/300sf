@@ -1,64 +1,120 @@
 {
 	"Name": "300 Svenska Fåglar",
-	"MetaDescription": "En checklista för fågelskådare i Sverige. Bocka av arter, notera var och när du såg dem och jämför listor med vänner.",
+	"MetaDescription": "Checklistan för fågelskådare i Sverige. Bocka av arter, notera var och när du såg dem, känn igen fåglar på lätet och tävla med vänner. Gratis, direkt i webbläsaren.",
 	"Language": "Språk",
+	"Menu": "Huvudmeny",
+	"NavFeatures": "Funktioner",
+	"NavHow": "Så fungerar det",
+	"NavFaq": "Frågor",
 	"SignIn": "Logga in",
+	"CreateAccountShort": "Skapa konto",
+	"Eyebrow": "Checklistan för fågelskådare i Sverige",
 	"Headline": "Varje fågel du ser i Sverige, i en lista.",
-	"Lede": "Bocka av arter när du ser dem, notera plats och datum och se din årslista växa. Gratis, direkt i webbläsaren.",
+	"Lede": "Bocka av arter när du ser dem, notera var och när, och se din årslista växa. Gratis, i mobilen och på datorn.",
 	"CreateAccount": "Skapa ett gratis konto",
 	"HaveAccount": "Jag har redan ett konto",
-	"PlateLabel": "Exempel på en checklista",
-	"PlateTitle": "Årslista 2026",
-	"PlateExample": "Exempel",
+	"HeroFacts": ["Gratis", "Inget att installera", "Svenska · English · Deutsch"],
+	"MockLabel": "Exempel på appen: en årslista med 87 av 300 arter, en fågel som känts igen på lätet och en ny art som lagts till.",
+	"MockListTitle": "Årslista 2026",
+	"MockProgress": "87 av 300",
+	"MockProgressShort": "arter",
 	"NotYet": "Inte än",
-	"PlateProgress": "87 av 300",
-	"PlateSpecies": [
+	"MockSpecies": [
+		{ "name": "Talgoxe", "latin": "Parus major", "date": "2 jan" },
+		{ "name": "Domherre", "latin": "Pyrrhula pyrrhula", "date": "14 jan" },
+		{ "name": "Koltrast", "latin": "Turdus merula", "date": "3 feb" },
+		{ "name": "Rödhake", "latin": "Erithacus rubecula", "date": "" },
+		{ "name": "Trana", "latin": "Grus grus", "date": "" }
+	],
+	"MockIdentified": "Igenkänd på lätet",
+	"MockIdentifiedName": "Koltrast",
+	"MockNewTitle": "Ny art!",
+	"MockNewText": "Trana · nummer 88 i år",
+	"StatsLabel": "300sf i siffror",
+	"StatBirders": "fågelskådare",
+	"StatSightings": "rapporterade fynd",
+	"StatSpecies": "rapporterade arter",
+	"FeaturesEyebrow": "Funktioner",
+	"FeaturesTitle": "Allt ditt fågelår behöver",
+	"FeaturesLede": "Gjort av fågelskådare för fågelskådare i Sverige: snabbt att använda i fält, och med alla detaljer när du kommer hem.",
+	"Showcase": [
 		{
-			"name": "Talgoxe",
-			"latin": "Parus major",
-			"date": "2 jan"
+			"eyebrow": "Checklistor",
+			"title": "En lista för varje mål",
+			"text": "Börja med Sveriges 300 vanligaste fåglar, eller gör en egen lista för året, trädgården eller en enda resa.",
+			"points": ["Färdig lista med de 300 vanligaste arterna", "Egna listor, så många du vill", "Se hur långt du kommit i varje lista"]
 		},
 		{
-			"name": "Blåmes",
-			"latin": "Cyanistes caeruleus",
-			"date": "2 jan"
+			"eyebrow": "Fynd",
+			"title": "Var och när, sparat åt dig",
+			"text": "Varje fynd sparar datum och position och placeras automatiskt i rätt län och kommun.",
+			"points": ["Position från mobilen eller en nål på kartan", "Antal, ålder, kön och kommentar när du vill", "Exportera allt som CSV eller JSON"]
 		},
 		{
-			"name": "Domherre",
-			"latin": "Pyrrhula pyrrhula",
-			"date": "14 jan"
+			"eyebrow": "Känn igen på lätet",
+			"title": "Hör du en fågel du inte känner igen?",
+			"text": "Spela in upp till tio sekunder och få de troligaste arterna, och hur säker gissningen är. Välj en för att rapportera den.",
+			"points": ["Fungerar med mobilens mikrofon", "Föreslår arter som finns i Sverige vid den här tiden på året", "Igenkänning med BirdNET"]
 		},
 		{
-			"name": "Rödhake",
-			"latin": "Erithacus rubecula",
-			"date": ""
-		},
-		{
-			"name": "Koltrast",
-			"latin": "Turdus merula",
-			"date": "3 feb"
-		},
-		{
-			"name": "Trana",
-			"latin": "Grus grus",
-			"date": ""
+			"eyebrow": "Tävlingar",
+			"title": "Skåda tillsammans med vänner",
+			"text": "Välj en period och en artlista, bjud in dina vänner och följ vem som kommer längst.",
+			"points": ["Egna regler: period, lista och antal deltagare", "Den som först når ett antal arter kan vinna", "Bjud in vänner eller öppna för alla"]
 		}
 	],
-	"FeaturesLabel": "Vad du kan göra",
-	"Features": [
-		{
-			"title": "Listor för varje mål",
-			"text": "Utgå från de 300 vanligaste svenska fåglarna eller bygg din egen lista: en årslista, en lista för trädgården eller en för en enda resa."
-		},
-		{
-			"title": "Var och när",
-			"text": "Varje observation sparar datum och position och hamnar automatiskt i rätt län och kommun. Exportera allt som CSV när du vill."
-		},
-		{
-			"title": "Skåda med vänner",
-			"text": "Dela en lista och jämför den art för art med dina vänners, eller starta en tävling för en säsong."
-		}
+	"MockSighting": "Fynd",
+	"MockSightingSpecies": "Domherre",
+	"MockSightingDate": "14 jan 2026 · 08:42",
+	"MockSightingPlace": "Kalmar län · Mörbylånga",
+	"MockSightingCount": "3 individer",
+	"MockLists": [
+		{ "name": "Årslista 2026", "seen": 87, "total": 300 },
+		{ "name": "Trädgården", "seen": 23, "total": 40 },
+		{ "name": "Öland i maj", "seen": 64, "total": 120 }
 	],
+	"MockRecording": "Spelar in…",
+	"MockResults": [
+		{ "name": "Koltrast", "latin": "Turdus merula", "percent": 99 },
+		{ "name": "Taltrast", "latin": "Turdus philomelos", "percent": 12 }
+	],
+	"MockCompetition": "Vårracet 2026",
+	"MockCompetitionMeta": "1 mars – 31 maj · 300 arter",
+	"MockStandings": [
+		{ "name": "Anna", "count": 142 },
+		{ "name": "Erik", "count": 137 },
+		{ "name": "Du", "count": 131 },
+		{ "name": "Maja", "count": 118 }
+	],
+	"More": [
+		{ "icon": "photo", "title": "Lär känna fågeln", "text": "Bilder och en kort beskrivning från Wikipedia för varje art." },
+		{ "icon": "import", "title": "Ta med dina gamla fynd", "text": "Importera allt från appen 300 Svenska Fåglar på en gång." },
+		{ "icon": "devices", "title": "Mobil och dator", "text": "Samma listor överallt, i webbläsaren du redan har." }
+	],
+	"HowEyebrow": "Så fungerar det",
+	"HowTitle": "Igång på en minut",
+	"Steps": [
+		{ "title": "Skapa ett konto", "text": "Allt du behöver är en e-postadress. Det är gratis." },
+		{ "title": "Välj en lista", "text": "Börja med de 300 vanligaste arterna, eller gör en egen." },
+		{ "title": "Bocka av fåglar", "text": "Rapportera det du ser. Listor och statistik uppdateras direkt." }
+	],
+	"FaqEyebrow": "Frågor",
+	"FaqTitle": "Bra att veta",
+	"Faq": [
+		{ "q": "Kostar det något?", "a": "Nej. 300 Svenska Fåglar är gratis att använda. Vill du kan du stödja projektet med en gåva." },
+		{ "q": "Vilka fåglar finns med?", "a": "Den färdiga listan har Sveriges 300 vanligaste fåglar. Dina egna listor kan innehålla vilken som helst av över 2 000 arter i katalogen." },
+		{ "q": "Jag använde appen 300 Svenska Fåglar. Kan jag behålla mina fynd?", "a": "Ja. Logga in, öppna Konto och importera dina fynd med appens e-postadress och lösenord." },
+		{ "q": "Måste jag installera en app?", "a": "Nej. 300 Svenska Fåglar fungerar i webbläsaren i mobilen, surfplattan och datorn." },
+		{ "q": "Kan jag få ut mina data?", "a": "Ja. Ladda ner en lista som kalkylblad (CSV) eller alla dina data på en gång, när du vill." },
+		{ "q": "Hur säker är igenkänningen av läten?", "a": "Den är ett förslag, inte en säker artbestämning. Den fungerar bäst med en tydlig inspelning av en sjungande fågel på nära håll." }
+	],
+	"CtaTitle": "Börja din lista i dag",
+	"CtaText": "Gratis, och klart på en minut. Nästa fågel du ser kan bli den första på listan.",
+	"FooterTagline": "Checklistan för fågelskådare i Sverige.",
+	"FooterProduct": "300sf",
+	"FooterLegal": "Juridik",
+	"ApiDocs": "API",
 	"Terms": "Användarvillkor",
-	"Privacy": "Integritetspolicy"
+	"Privacy": "Integritetspolicy",
+	"Credits": "Artbilder och texter från Wikipedia. Igenkänning av läten med BirdNET."
 }

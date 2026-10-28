@@ -5,23 +5,24 @@ namespace Ui {
 		constructor(title: string, message: string, image: string | null, color: string, yesCallback: () => void, closeCallback: () => void, yesText: string, cancelText: string) {
 			super(title, message, image, color, closeCallback);
 
+			const actions = document.createElement("div");
+			actions.className = "dialog-actions";
+			this.popUp().container.appendChild(actions);
+
 			const cancelButton = document.createElement("button");
+			cancelButton.className = "secondary";
 			cancelButton.innerHTML = cancelText;
-			cancelButton.style.width = "calc(50% - var(--small-distance)*2)";
-			cancelButton.style.backgroundColor = "transparent";
-			cancelButton.style.boxShadow = "0 0 0 1px inset white";
-			this.popUp().container.appendChild(cancelButton);
+			actions.appendChild(cancelButton);
 
 			const self = this;
 			const yesButton = document.createElement("button");
 			yesButton.innerHTML = yesText;
-			yesButton.style.width = "calc(50% - var(--small-distance)*2)";
 			yesButton.addEventListener("click", function (event) {
 				event.stopPropagation();
-				self.container.click();
+				self.close();
 				yesCallback();
 			});
-			this.popUp().container.appendChild(yesButton);
+			actions.appendChild(yesButton);
 		}
 	}
 }

@@ -17,21 +17,27 @@ class ListPage extends Page {
 	private mProgressLbl: HTMLParagraphElement;
 	private mFilterInput: Ui.Input;
 	private mFilterTitle: HTMLParagraphElement;
+	private mShownUuid = "";
 
 	constructor(appListener: IAppListener) {
 		super(appListener);
 
 		const self = this;
 
-		this.mTitle = document.createElement("h1");
-		this.container.appendChild(this.mTitle);
+		this.addProfile();
 
-		const download = document.createElement("span");
-		download.className = "material-symbols-outlined";
-		download.innerHTML = "download";
-		download.style.color = "var(--primary-color)";
-		download.style.fontSize = "32px";
-		download.style.cursor = "pointer";
+		const header = document.createElement("div");
+		header.className = "page-header";
+		this.container.appendChild(header);
+
+		this.mTitle = document.createElement("h1");
+		header.appendChild(this.mTitle);
+
+		const download = document.createElement("button");
+		download.className = "icon-button";
+		download.title = App.translations.DownloadCsv;
+		download.setAttribute("aria-label", App.translations.DownloadCsv);
+		download.innerHTML = "<span class='material-symbols-outlined'>download</span>";
 		download.addEventListener("click", function (event) {
 			event.stopPropagation();
 			const d = {
@@ -41,40 +47,43 @@ class ListPage extends Page {
 				"time_zone": Utils.getTimeZone()
 			};
 			const r = new HttpRequest("PUT", "/v1/reports/export", d);
+			r.setTextResponse();
+			Ui.setBusy(download, true);
 			r.process(function (status: any, data: any) {
-				// The API returns the CSV text; the proxy delivers it as a JSON string.
-				DownloadFile("data.csv", typeof data === "string" ? data : String(data), "text/csv");
+				// The browser drops the byte order mark when reading the response; Excel needs it to read
+				// the file as UTF-8, so put it back.
+				const bom = String.fromCharCode(0xFEFF);
+				const csv = String(data);
+				DownloadFile(Utils.exportFileName(App.getTranslation((self.data as Models.List).name), "csv"), csv.startsWith(bom) ? csv : bom + csv, "text/csv");
 			}, function () {
 				new Ui.MessageBox(App.translations.Error, App.translations.SomethingWentWrong, "/img/messagebox-256.webp", "var(--error-color)", function () { });
+			}, function () {
+				Ui.setBusy(download, false);
 			});
 		});
-		this.container.appendChild(download);
+		header.appendChild(download);
+
+		const summary = document.createElement("div");
+		summary.className = "progress-summary";
+		this.container.appendChild(summary);
 
 		this.mProgressLbl = document.createElement("p");
-		this.mProgressLbl.style.margin = "0";
-		this.mProgressLbl.style.fontWeight = "bold";
-		this.mProgressLbl.style.cssFloat = "right";
-		this.mProgressLbl.style.color = "var(--success-color)";
-		this.container.appendChild(this.mProgressLbl);
+		summary.appendChild(this.mProgressLbl);
 
 		this.mProgress = new Ui.ProgressBar();
-		this.mProgress.container.style.position = "relative";
-		this.attach(this.mProgress);
+		this.mChildren.push(this.mProgress);
+		summary.appendChild(this.mProgress.container);
 
+		this.addClass("wide");
 		this.mTable = new Ui.Table();
+		this.mTable.addClass("species-table");
 		this.attach(this.mTable);
-
-		this.addProfile();
 
 		const filter = new Ui.Div
 		filter.addClass("filter");
 		this.attach(filter);
 
 		this.mFilterTitle = document.createElement("p");
-		this.mFilterTitle.style.fontSize = "0.8rem";
-		this.mFilterTitle.style.lineHeight = "normal";
-		this.mFilterTitle.style.textAlign = "center";
-		this.mFilterTitle.style.color = "var(--ink-soft)";
 		filter.container.appendChild(this.mFilterTitle);
 
 		this.mFilterInput = new Ui.Input("text");
@@ -143,7 +152,7 @@ class ListPage extends Page {
 			const r = new HttpRequest("GET", "/v1/lists/list");
 			const superSetData = super.setData;
 			r.process(function (status: any, data: any) {
-				data.result.forEach(e => {
+				(data.result || []).forEach(e => {
 					if (e.uuid === self.data.uuid) {
 						superSetData.call(self, e);
 						self.updateLists();
@@ -160,33 +169,44 @@ class ListPage extends Page {
 		Page.setUrl(this.path);
 		const scrollPostion = this.container.scrollTop;
 
-		this.mFilterInput.value = "";
-		this.mTitle.innerHTML = "";
-		this.mTable.clear();
-		this.mProgress.setProgress(0);
-		this.mProgressLbl.innerHTML = "";
+		// Reloading the list on screen (after a sighting was reported) keeps what is shown and the
+		// search until the new rows arrive; only another list starts from placeholders.
+		const sameList = this.mShownUuid === (this.data as Models.List).uuid;
+		this.mShownUuid = (this.data as Models.List).uuid;
+		if (!sameList) {
+			this.mFilterInput.value = "";
+			this.mTitle.innerHTML = "";
+			this.mTable.showPlaceholders(12);
+			this.mProgress.setProgress(0);
+			this.mProgressLbl.innerHTML = "";
+		}
 		const self = this;
 
 		const r = new HttpRequest("GET", "/v1/lists/" + (this.data as Models.List).uuid + "/reports");
 		r.process(function (status: any, data: any) {
 			self.mTitle.textContent = App.getTranslation((self.data as Models.List).name);
 			self.mFilterTitle.textContent = self.mTitle.textContent;
-			const reports = data.result as Models.Report[];
+			self.mTable.clear();
+			const reports = (data.result || []) as Models.Report[];
+			const seenSpecies = new Set<string>();
+			reports.forEach(r => {
+				seenSpecies.add(r.species.uuid);
+			});
+			const uniqueSpeciesInReports = Utils.numberOfUniqueSpeciesInReports(reports);
+			const total = self.data.species.length;
+			self.mProgress.setProgress(total > 0 ? uniqueSpeciesInReports / total * 100 : 0);
+			self.mProgressLbl.innerHTML = "<strong>" + uniqueSpeciesInReports + "</strong> / " + total + "<em>" + (total > 0 ? Math.floor(uniqueSpeciesInReports / total * 100) : 0) + "%</em>";
 			let lastOrder: Models.Order;
 			self.data.species.forEach(e => {
 				if (!lastOrder || lastOrder.uuid !== e.order.uuid) {
 					lastOrder = e.order;
 
 					const entry = document.createElement("div");
-					entry.style.textAlign = "center";
-					entry.className = "list-entry";
+					entry.className = "list-entry order";
 
 					const name = document.createElement("p");
 					name.innerHTML = App.getTranslation(e.order.name);
 					name.classList.add("order-name");
-					name.style.cursor = "pointer";
-					name.style.fontWeight = "bold";
-					name.style.fontStyle = "initial";
 					entry.appendChild(name);
 					name.addEventListener("click", function () {
 						openOrderPopUp(e.order);
@@ -195,22 +215,17 @@ class ListPage extends Page {
 					const subName = document.createElement("p");
 					subName.innerHTML = e.order.name.la;
 					entry.appendChild(subName);
-					self.mTable.addRow([entry]);
+					self.mTable.addRow([entry]).classList.add("order-row");
 				}
 				const entry = document.createElement("div");
 				entry.className = "list-entry";
 
 				const name = document.createElement("h3");
 				name.innerHTML = App.getTranslation(e.name);
-				name.style.cursor = "pointer";
 				entry.appendChild(name);
 				entry.addEventListener("click", function () {
 					openSpeciesPopUp(e, self.data, (boolean) => { });
 				});
-
-				const uniqueSpeciesInReports = Utils.numberOfUniqueSpeciesInReports(reports);
-				self.mProgress.setProgress(uniqueSpeciesInReports / self.data.species.length * 100);
-				self.mProgressLbl.innerHTML = uniqueSpeciesInReports + "/" + self.data.species.length;
 
 				const subName = document.createElement("p");
 				subName.innerHTML = e.name.la;
@@ -220,29 +235,29 @@ class ListPage extends Page {
 				check.className = "material-symbols-outlined";
 				check.innerHTML = "check_circle";
 				check.classList.add("seen-mark");
-				check.style.cursor = "pointer";
+				check.setAttribute("role", "button");
+				check.setAttribute("aria-label", App.translations.SubmitSighting);
+				check.tabIndex = 0;
+				check.addEventListener("keydown", function (event) {
+					if (event.key === "Enter") {
+						check.click();
+					}
+				});
 				check.addEventListener("click", function (event) {
 					event.stopPropagation();
-					openReportPopUp(e, self.data, function () {
-						self.setData(self.data);
-					});
+					openReportPopUp(e, self.data);
 				});
 				entry.appendChild(check);
 
-				let found = false;
-				reports.forEach(r => {
-					if (r.species.uuid === e.uuid) {
-						found = true;
-						return;
-					}
-				});
-
-				if (found) {
+				if (seenSpecies.has(e.uuid)) {
 					entry.classList.add("seen");
 				}
 
 				self.mTable.addRow([entry]);
 			});
+			if (self.mFilterInput.value !== "") {
+				self.mFilterInput.container.dispatchEvent(new Event("keyup"));
+			}
 			self.container.scrollTop = scrollPostion;
 		}, function (status: any, data: any) {
 		});

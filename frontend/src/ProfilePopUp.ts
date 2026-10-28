@@ -1,18 +1,24 @@
 /// <reference path="ui/PopUp.ts"/>
+/// <reference path="ui/Sheet.ts"/>
 /// <reference path="ui/DivSelect.ts"/>
 /// <reference path="ui/Input.ts"/>
 /// <reference path="ui/Select.ts"/>
 /// <reference path="HttpRequest.ts"/>
 
+// The signed-in user: portrait, account details and language.
 class ProfilePopUp {
-	private mPopUp: Ui.PopUp;
-
 	constructor(closeCallback: () => void) {
-		const content = new Ui.Div();
-		content.style.textAlign = "center";
-		content.style.width = "100%";
-		content.style.position = "relative";
+		const sheet = new Ui.Sheet({ eyebrow: App.translations.Profile, title: App.user ? App.user.display_name : App.translations.PleaseWait + "...", subtitle: App.user ? "@" + App.user.username : " ", size: "auto" });
 
+		sheet.header.classList.add("with-portrait");
+		const portrait = document.createElement("img");
+		portrait.alt = "";
+		if (App.user) {
+			portrait.src = "/img/portraits/" + App.user.portrait;
+		}
+		sheet.header.insertBefore(portrait, sheet.names);
+
+		const portraits = sheet.section(App.translations.Portrait);
 		const portraitSelect = new Ui.DivSelect((value) => {
 			const r = new HttpRequest("POST", "/v1/users/portrait", { "portrait": value });
 			r.process(function (status: any, data: any) {
@@ -20,58 +26,45 @@ class ProfilePopUp {
 				location.reload();
 			});
 		});
-		portraitSelect.addOption("", "1.webp").style.backgroundImage = "url(/img/portraits/1.webp)";
-		portraitSelect.addOption("", "2.webp").style.backgroundImage = "url(/img/portraits/2.webp)";
-		portraitSelect.addOption("", "3.webp").style.backgroundImage = "url(/img/portraits/3.webp)";
-		portraitSelect.addOption("", "4.webp").style.backgroundImage = "url(/img/portraits/4.webp)";
-		portraitSelect.addOption("", "5.webp").style.backgroundImage = "url(/img/portraits/5.webp)";
-		portraitSelect.addOption("", "6.webp").style.backgroundImage = "url(/img/portraits/6.webp)";
-		portraitSelect.addOption("", "7.webp").style.backgroundImage = "url(/img/portraits/7.webp)";
-		portraitSelect.addOption("", "8.webp").style.backgroundImage = "url(/img/portraits/8.webp)";
-		portraitSelect.addOption("", "9.webp").style.backgroundImage = "url(/img/portraits/9.webp)";
-		portraitSelect.addOption("", "10.webp").style.backgroundImage = "url(/img/portraits/10.webp)";
-		content.attach(portraitSelect);
+		for (let i = 1; i <= 10; ++i) {
+			portraitSelect.addOption("", i + ".webp").style.backgroundImage = "url(/img/portraits/" + i + ".webp)";
+		}
+		portraitSelect.addClass("portraits");
+		portraits.appendChild(portraitSelect.container);
 
-		const displayName = document.createElement("h1");
-		displayName.innerHTML = App.translations.PleaseWait + "...";
-		content.container.appendChild(displayName);
+		const account = sheet.section(App.translations.Account);
+		const details = document.createElement("div");
+		details.className = "detail-grid";
+		account.appendChild(details);
+		const addDetail = function (label: string, icon: string): HTMLParagraphElement {
+			const item = document.createElement("div");
+			const l = document.createElement("p");
+			l.className = "detail-label";
+			l.innerHTML = "<span class='material-symbols-outlined'>" + icon + "</span>" + label;
+			item.appendChild(l);
+			const v = document.createElement("p");
+			v.className = "detail-value";
+			v.innerHTML = "<span class='skeleton line short'></span>";
+			item.appendChild(v);
+			details.appendChild(item);
+			return v;
+		};
+		const username = addDetail(App.translations.Username, "alternate_email");
+		const uuid = addDetail(App.translations.InternalID, "fingerprint");
 
-		const uuidLbl = document.createElement("h2");
-		uuidLbl.innerHTML = App.translations.InternalID;
-		uuidLbl.style.textAlign = "left";
-		content.container.appendChild(uuidLbl);
-
-		const uuid = new Ui.Input("text");
-		uuid.container.setAttribute("disabled", "");
-		content.attach(uuid);
-
-		const usernameLbl = document.createElement("h2");
-		usernameLbl.innerHTML = App.translations.Username;
-		usernameLbl.style.textAlign = "left";
-		content.container.appendChild(usernameLbl);
-
-		const username = new Ui.Input("text");
-		username.container.setAttribute("disabled", "");
-		content.attach(username);
-
-		const languageLbl = document.createElement("h2");
-		languageLbl.innerHTML = App.translations.Language;
-		languageLbl.style.textAlign = "left";
-		content.container.appendChild(languageLbl);
-
+		const language = sheet.section(App.translations.Language);
 		let lang;
 		switch (App.language) {
 			case "sv":
 				lang = "Svenska";
 				break;
 			case "de":
-				lang = "Deutch";
+				lang = "Deutsch";
 				break;
 			default:
 				lang = "English";
 				break;
 		}
-
 		const languageList = new Ui.Select(lang, App.translations.Search, function (value: string | null) {
 			if (value) {
 				const d = {
@@ -87,24 +80,26 @@ class ProfilePopUp {
 				});
 			}
 		});
-		languageList.style.textAlign = "left";
-		languageList.addOption("Deutch", "de");
+		languageList.addOption("Deutsch", "de");
 		languageList.addOption("English", "en");
 		languageList.addOption("Svenska", "sv");
-		content.attach(languageList);
+		language.appendChild(languageList.container);
 
 		const me = new HttpRequest("GET", "/v1/users/me");
 		me.process(function (status: any, data: any) {
 			const d = data as Responses.UsersMe;
-			displayName.textContent = d.user.display_name;
-			username.value = d.user.username;
-			uuid.value = d.user.uuid;
+			sheet.title.textContent = d.user.display_name;
+			const handle = sheet.names.querySelector("p.sheet-subtitle");
+			if (handle) {
+				handle.textContent = "@" + d.user.username;
+			}
+			username.textContent = d.user.username;
+			uuid.textContent = d.user.uuid;
+			portrait.src = "/img/portraits/" + d.user.portrait;
 			portraitSelect.select(d.user.portrait);
 		});
 
-		this.mPopUp = new Ui.PopUp(content.container, function () {
-			closeCallback();
-		});
+		sheet.open(closeCallback);
 	}
 }
 

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: AGPL-3.0-or-later
 package controllers
 
 const (
@@ -33,4 +33,9 @@ const (
 
 	ErrorAuthInvalid          = 7001
 	ErrorTooManyLoginAttempts = 7002
+
+	// The bird sound identification service is not configured or not answering.
+	ErrorAnalyzeUnavailable = 8001
+
+	ErrorCompetitionPassword = 9001
 )

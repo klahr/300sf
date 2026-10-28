@@ -4,9 +4,9 @@
   "start_url": "/home",
   "id": "/",
   "display": "standalone",
-  "background_color": "#070707",
+  "background_color": "#0b0a0d",
   "description": "A checklist for birders in Sweden.",
-  "theme_color": "#181818",
+  "theme_color": "#0b0a0d",
   "icons": [
     {
       "src": "/img/birds-192.png",

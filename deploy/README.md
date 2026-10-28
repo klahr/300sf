@@ -39,7 +39,11 @@ files.
 `site.client-id` / `site.client-secret` are the API key the app signs in
 with (previously `ClientId`/`ClientSecret` in the webapp's
 `routes/config.js`). `site.analyze-endpoint` is the bird sound identification
-service; leave it empty to disable it.
+service: the `analyzer` container in `docker-compose.yml` (BirdNET-Analyzer,
+built from `../analyzer`) answers on `http://127.0.0.1:8095/analyze`. Leave the
+setting empty to disable identification; the app then says it is unavailable.
+Only signed-in users can reach it (`/api/v1/analyze`). BirdNET's model is
+licensed CC BY-NC-SA 4.0, so it may only be used non-commercially.
 
 Apply the migrations at the end of `server/db.sql` that are newer than your
 database before starting a new version.

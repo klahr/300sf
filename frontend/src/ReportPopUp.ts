@@ -4,10 +4,15 @@
 /// <reference path="models/Species.ts"/>
 /// <reference path="models/List.ts"/>
 /// <reference path="ui/Div.ts"/>
+/// <reference path="ui/Sheet.ts"/>
 /// <reference path="ui/Toast.ts"/>
 /// <reference path="HttpRequest.ts"/>
 /// <reference path="utils/Sort.ts"/>
 /// <reference path="NewTagPopUp.ts"/>
+/// <reference path="Onboarding.ts"/>
+/// <reference path="SpeciesCatalog.ts"/>
+/// <reference path="AnalyzePopUp.ts"/>
+/// <reference path="ui/SpeciesSearch.ts"/>
 
 declare const L;
 
@@ -18,45 +23,57 @@ class ReportPopUp {
 	private mTagsContainer: Ui.Div;
 	// Null until the user taps the map or their position is found.
 	private mLocation: { lat: number, lng: number } | null = null;
-	private mPopUp: Ui.PopUp;
+	private mPopUp: Ui.Sheet;
+	private mListHint: HTMLParagraphElement;
+	private mEmptyLists = false;
 
 	constructor(species: Models.Species, list: Models.List | null, closeCallback: (speciesAdded: boolean) => void) {
 		const self = this;
 
 		var speciesAdded = false;
-		const content = new Ui.Div();
-		content.style.textAlign = "left";
-		content.style.width = "100%";
-		content.style.position = "relative";
+
+		const sheet = new Ui.Sheet({ eyebrow: App.translations.SubmitSighting, title: App.getTranslation(species.name), subtitle: species.name.la, latin: true });
+		this.mPopUp = sheet;
 
 		this.mChecklistContainer = new Ui.Div();
 		this.mChecklistContainer.style.position = "relative";
 
-		const name = document.createElement("h1");
-		name.innerHTML = App.translations.SubmitSighting;
-		name.style.margin = "unset";
-		content.container.appendChild(name);
+		// Which lists: required, so it comes first.
+		const listsSection = sheet.section(App.translations.AvailableChecklists);
+		listsSection.appendChild(self.mChecklistContainer.container);
+		this.mListHint = document.createElement("p");
+		this.mListHint.className = "details hidden";
+		this.mListHint.textContent = App.translations.ChooseAtLeastOneList;
+		listsSection.appendChild(this.mListHint);
 
-		const locationLbl = document.createElement("h3");
-		locationLbl.className = "title";
-		locationLbl.innerHTML = App.translations.ObservationLocation;
-		content.container.appendChild(locationLbl);
+		// The map looks up the position after a moment; stop that if the sheet closes first.
+		let closed = false;
+		let map: any = null;
+
+		// Where: the map, centred on the user's position when it can be found.
+		const where = sheet.section(App.translations.ObservationLocation);
 		const mapDiv = new Ui.Div();
 		mapDiv.container.classList.add("map");
-		mapDiv.style.height = "300px";
-		mapDiv.style.width = "100%";
+		mapDiv.style.height = "240px";
 		mapDiv.style.position = "relative";
-		mapDiv.style.borderRadius = "var(--small-distance)";
-		content.attach(mapDiv);
+		where.appendChild(mapDiv.container);
 
+		const locateLabel = "<span class='material-symbols-outlined'>my_location</span>" + App.translations.FindMyLocation;
 		const locateButton = document.createElement("button");
-		locateButton.innerHTML = App.translations.FindMyLocation;
-		locateButton.style.borderRadius = "8px";
-		locateButton.style.backgroundColor = "var(--success-color)";
-		content.container.appendChild(locateButton);
+		locateButton.className = "secondary";
+		locateButton.innerHTML = locateLabel;
+		where.appendChild(locateButton);
+
+		const positionNote = document.createElement("p");
+		positionNote.className = "details hidden";
+		positionNote.textContent = App.translations.NoPositionYet;
+		where.appendChild(positionNote);
 
 		setTimeout(function () {
-			const map = L.map(mapDiv.container).setView([58.1801188016368, 13.959220108737176], 13);
+			if (closed) {
+				return;
+			}
+			map = L.map(mapDiv.container).setView([58.1801188016368, 13.959220108737176], 13);
 			L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				maxZoom: 19,
 				attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -66,142 +83,175 @@ class ReportPopUp {
 				markerGroup.clearLayers();
 				L.marker(e.latlng).addTo(markerGroup);
 				self.mLocation = e.latlng;
+				positionNote.classList.add("hidden");
 			});
 			map.on('locationfound', function (e) {
 				markerGroup.clearLayers();
 				L.marker(e.latlng).addTo(markerGroup);
 				self.mLocation = e.latlng;
 				map.setZoom(16);
-				locateButton.disabled = false;
-				locateButton.innerHTML = App.translations.FindMyLocation;
+				Ui.setBusy(locateButton, false);
+				positionNote.classList.add("hidden");
 			});
+			// Not an error worth a dialog: the position is optional and can be set on the map.
 			map.on('locationerror', function () {
-				locateButton.disabled = false;
-				locateButton.innerHTML = App.translations.FindMyLocation;
-				new Ui.MessageBox(App.translations.Error, App.translations.YourLocationNotFound, "/img/messagebox-256.webp", "var(--error-color)", function () { });
-			});
-
-			locateButton.addEventListener("click", function () {
-				locateButton.innerHTML = App.translations.PleaseWait + "...";
-				locateButton.disabled = true;
-				map.locate({ setView: true, maxZoom: 19 });
-			});
-			setTimeout(function() {
-				locateButton.click();
-			}, 1000);
-		}, 10);
-
-		this.mSpeciesList = new Ui.Input("text");
-		this.mSpeciesList.setDisabled(true);
-		this.mSpeciesList.value = App.getTranslation(species.name);
-		this.mSpeciesList.setData(species);
-		content.attach(this.mSpeciesList);
-
-		new HttpRequest("GET", "/v1/lists/species/" + species.uuid).process(function (status: any, data: any) {
-			const d = data as Responses.ListsSpecies;
-			self.mChecklistContainer.detachAll();
-			self.mChecklistContainer.container.innerHTML = "";
-
-			d.result.forEach(e => {
-				const dd = new Ui.Div();
-				dd.style.position = "relative";
-				dd.style.width = "100%";
-				self.mChecklistContainer.attach(dd);
-				const c = new Ui.Input("checkbox");
-				c.container.setAttribute("name", e.list.uuid);
-				c.container.addEventListener("click", function () {
-					self.validate();
-				});
-
-				dd.attach(c);
-				const cLbl = document.createElement("label");
-				cLbl.setAttribute("for", c.container.getAttribute("name")!);
-				cLbl.textContent = App.getTranslation(e.list.name);
-				dd.container.appendChild(cLbl);
-
-				if (!e.available) {
-					c.container.setAttribute("disabled", "");
-					cLbl.style.color = "var(--secondary-color)";
-				} else if (list && e.list.uuid === list.uuid) {
-					(c.container as HTMLInputElement).checked = true;
-					(c.container as HTMLInputElement).disabled = true;
+				Ui.setBusy(locateButton, false);
+				if (self.mLocation === null) {
+					positionNote.classList.remove("hidden");
 				}
 			});
 
-			self.validate();
-		});
+			locateButton.addEventListener("click", function () {
+				Ui.setBusy(locateButton, true);
+				map.locate({ setView: true, maxZoom: 19 });
+			});
+			setTimeout(function() {
+				if (!closed) {
+					locateButton.click();
+				}
+			}, 1000);
+		}, 10);
 
-		const ageList = new Ui.Select(App.translations.SelectAge + "...", App.translations.Search);
-		content.attach(ageList);
+		// The species is fixed; the input only carries it to the request and the toast.
+		this.mSpeciesList = new Ui.Input("text");
+		this.mSpeciesList.value = App.getTranslation(species.name);
+		this.mSpeciesList.setData(species);
 
-		const genderList = new Ui.Select(App.translations.SelectGender + "...", App.translations.Search);
-		content.attach(genderList);
+		const loadLists = function () {
+			new HttpRequest("GET", "/v1/lists/species/" + species.uuid).process(function (status: any, data: any) {
+				const d = data as Responses.ListsSpecies;
+				self.mChecklistContainer.detachAll();
+				self.mChecklistContainer.container.innerHTML = "";
+				self.mEmptyLists = false;
 
-		const methodList = new Ui.Select(App.translations.SelectMethod + "...", App.translations.Search);
-		content.attach(methodList);
+				// No checklist at all: offer to start one right here.
+				if (!d.result || d.result.length === 0) {
+					self.mEmptyLists = true;
+					const intro = document.createElement("p");
+					intro.className = "details";
+					intro.textContent = App.translations.NoChecklistForReport;
+					self.mChecklistContainer.container.appendChild(intro);
+					self.mChecklistContainer.container.appendChild(Onboarding.starterCard(function () {
+						loadLists();
+					}));
+					self.validate();
+					return;
+				}
+				if (!d.result.some(e => e.available)) {
+					self.mEmptyLists = true;
+					const none = document.createElement("p");
+					none.className = "details";
+					none.textContent = App.translations.NotOnYourLists;
+					self.mChecklistContainer.container.appendChild(none);
+				}
 
-		const activityList = new Ui.Select(App.translations.SelectActivity + "...", App.translations.Search);
-		content.attach(activityList);
+				(d.result || []).forEach(e => {
+					const dd = new Ui.Div();
+					dd.addClass("check-row");
+					self.mChecklistContainer.attach(dd);
+					const c = new Ui.Input("checkbox");
+					c.container.setAttribute("name", e.list.uuid);
+					c.container.id = "report-list-" + e.list.uuid;
+					c.container.addEventListener("click", function () {
+						self.validate();
+					});
 
-		const siteLbl = document.createElement("h3");
-		siteLbl.className = "title";
-		siteLbl.innerHTML = App.translations.Site;
-		content.container.appendChild(siteLbl);
-		const site = new Ui.Input("text");
-		content.attach(site);
+					dd.attach(c);
+					const cLbl = document.createElement("label");
+					cLbl.setAttribute("for", c.container.id);
+					cLbl.textContent = App.getTranslation(e.list.name);
+					dd.container.appendChild(cLbl);
 
-		const quantityLbl = document.createElement("h3");
-		quantityLbl.className = "title";
-		quantityLbl.innerHTML = App.translations.Quantity;
-		content.container.appendChild(quantityLbl);
-		const quantity = new Ui.Input("number");
-		quantity.container.setAttribute("min", "1");
-		quantity.container.setAttribute("step", "1");
-		quantity.value = "1";
-		content.attach(quantity);
+					if (!e.available) {
+						c.container.setAttribute("disabled", "");
+						dd.addClass("unavailable");
+					} else if (list && e.list.uuid === list.uuid) {
+						(c.container as HTMLInputElement).checked = true;
+						(c.container as HTMLInputElement).disabled = true;
+					}
+				});
 
-		const fromLbl = document.createElement("h3");
-		fromLbl.className = "title";
-		fromLbl.innerHTML = App.translations.ObservedFrom;
-		content.container.appendChild(fromLbl);
+				// With only one list that can hold the species, choose it for the user.
+				const open = Array.from(self.mChecklistContainer.container.querySelectorAll("input")).filter(c => !c.disabled);
+				if (open.length === 1 && !self.mChecklistContainer.container.querySelector("input:checked")) {
+					open[0].checked = true;
+				}
+
+				self.validate();
+			});
+		};
+		loadLists();
+
+		// When and how many.
+		const when = sheet.section(App.translations.Sighting);
+		const whenGrid = document.createElement("div");
+		whenGrid.className = "sheet-grid";
+		when.appendChild(whenGrid);
+
 		const from = new Ui.Input("datetime-local");
-		content.attach(from);
+		from.container.id = "report-from";
+		sheet.field(whenGrid, App.translations.ObservedFrom, from.container);
 
 		const now = new Date();
 		now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
 		now.setSeconds(now.getMinutes());
 		from.value = now.toISOString().slice(0, -8);
 
-		const untilLbl = document.createElement("h3");
-		untilLbl.className = "title";
-		untilLbl.innerHTML = App.translations.ObservedUntil;
-		content.container.appendChild(untilLbl);
 		const until = new Ui.Input("datetime-local");
-		content.attach(until);
+		until.container.id = "report-until";
+		sheet.field(whenGrid, App.translations.ObservedUntil, until.container);
 
-		const privateCommentLbl = document.createElement("h3");
-		privateCommentLbl.className = "title";
-		privateCommentLbl.innerHTML = App.translations.PrivateComment;
-		content.container.appendChild(privateCommentLbl);
+		const quantity = new Ui.Input("number");
+		quantity.container.id = "report-quantity";
+		quantity.container.setAttribute("min", "1");
+		quantity.container.setAttribute("step", "1");
+		quantity.value = "1";
+		sheet.field(whenGrid, App.translations.Quantity, quantity.container);
+
+		// Details and labels are optional; folded away so a quick tick stays short.
+		const moreToggle = document.createElement("button");
+		moreToggle.className = "text-button details-toggle";
+		moreToggle.innerHTML = "<span class='material-symbols-outlined'>expand_more</span>" + App.translations.MoreDetails;
+		when.appendChild(moreToggle);
+
+		const details = sheet.section(App.translations.Details);
+		details.classList.add("hidden");
+		const detailGrid = document.createElement("div");
+		detailGrid.className = "sheet-grid";
+		details.appendChild(detailGrid);
+
+		const ageList = new Ui.Select(App.translations.SelectAge + "...", App.translations.Search);
+		sheet.field(detailGrid, App.translations.Age, ageList.container);
+
+		const genderList = new Ui.Select(App.translations.SelectGender + "...", App.translations.Search);
+		sheet.field(detailGrid, App.translations.Gender, genderList.container);
+
+		const methodList = new Ui.Select(App.translations.SelectMethod + "...", App.translations.Search);
+		sheet.field(detailGrid, App.translations.Method, methodList.container);
+
+		const activityList = new Ui.Select(App.translations.SelectActivity + "...", App.translations.Search);
+		sheet.field(detailGrid, App.translations.Activity, activityList.container);
+
+		const site = new Ui.Input("text");
+		site.container.id = "report-site";
+		sheet.field(details, App.translations.Site, site.container);
+
 		const privateComment = document.createElement("textarea");
-		privateComment.style.height = "128px";
-		content.container.appendChild(privateComment);
+		privateComment.id = "report-comment";
+		privateComment.rows = 3;
+		sheet.field(details, App.translations.PrivateComment, privateComment);
 
-		const tagsLbl = document.createElement("h3");
-		tagsLbl.className = "title";
-		tagsLbl.innerHTML = App.translations.Tags;
-		content.container.appendChild(tagsLbl);
-
+		const tagsSection = sheet.section(App.translations.Tags);
+		tagsSection.classList.add("hidden");
+		moreToggle.addEventListener("click", function () {
+			const show = details.classList.contains("hidden");
+			details.classList.toggle("hidden", !show);
+			tagsSection.classList.toggle("hidden", !show);
+			moreToggle.innerHTML = "<span class='material-symbols-outlined'>" + (show ? "expand_less" : "expand_more") + "</span>" + (show ? App.translations.FewerDetails : App.translations.MoreDetails);
+		});
 		this.mTagsContainer = new Ui.Div();
-		this.mTagsContainer.style.position = "relative";
-		this.mTagsContainer.style.margin = "var(--small-distance)";
-		content.attach(this.mTagsContainer);
-
-		const listsLbl = document.createElement("h3");
-		listsLbl.className = "title";
-		listsLbl.innerHTML = App.translations.AvailableChecklists;
-		content.container.appendChild(listsLbl);
-		content.attach(self.mChecklistContainer);
+		this.mTagsContainer.addClass("chips");
+		tagsSection.appendChild(this.mTagsContainer.container);
 
 		const r = new HttpRequest("PUT", "/v1/reports/basis", { species_uuid: species.uuid });
 		r.process(function (status: any, data: any) {
@@ -247,12 +297,7 @@ class ReportPopUp {
 			self.addNewTagTag();
 		});
 
-		this.mReportButton = document.createElement("button");
-		this.mReportButton.innerHTML = App.translations.SubmitSighting;
-		this.mReportButton.style.width = "auto";
-		this.mReportButton.style.cssFloat = "right";
-		this.mReportButton.style.borderRadius = "8px";
-		this.mReportButton.style.backgroundColor = "var(--success-color)";
+		this.mReportButton = sheet.addAction(Ui.actionButton(App.translations.SubmitSighting, "check", "success"));
 		this.mReportButton.disabled = true;
 		this.mReportButton.addEventListener("click", function () {
 			const r = new Requests.Reports();
@@ -303,20 +348,29 @@ class ReportPopUp {
 			// TODO: Tags and notifications.
 
 			// Disabled while saving so a double tap can't create two sightings.
-			self.mReportButton.disabled = true;
+			Ui.setBusy(self.mReportButton, true);
 			const rr = new HttpRequest("POST", "/v1/reports", r);
 			rr.process(function (status: any, data: any) {
 				new Ui.Toast(App.translations.Congratulations, App.translations.YouFoundA.replace("{0}", Utils.escapeHtml(self.mSpeciesList.value)), null, "var(--success-color)", function () { });
 				speciesAdded = true;
 				self.mPopUp.close();
+				// Every page that shows sightings or progress updates from this, wherever the form was
+				// opened from.
+				window.dispatchEvent(new Event("sightingadded"));
 			}, function () {
-				self.mReportButton.disabled = false;
+				Ui.setBusy(self.mReportButton, false);
 				new Ui.MessageBox(App.translations.Error, App.translations.SomethingWentWrong, "/img/messagebox-256.webp", "var(--error-color)", function () { });
+			}, function () {
+				// Also after network errors, which skip the handler above.
+				Ui.setBusy(self.mReportButton, false);
 			});
 		});
-		content.container.appendChild(this.mReportButton);
-
-		this.mPopUp = new Ui.PopUp(content.container, function () {
+		sheet.open(function () {
+			closed = true;
+			if (map) {
+				map.stopLocate();
+				map.remove();
+			}
 			closeCallback(speciesAdded);
 		});
 	}
@@ -376,6 +430,8 @@ class ReportPopUp {
 			}
 		}
 
+		// Say why the button is disabled, unless the list section already explains it.
+		this.mListHint.classList.toggle("hidden", isAnyChecked || this.mEmptyLists);
 		if (!isAnyChecked) {
 			this.mReportButton.disabled = true;
 			return;
@@ -385,4 +441,40 @@ class ReportPopUp {
 
 function openReportPopUp(species: Models.Species, list: Models.List | null, closeCallback: (speciesAdded: boolean) => void = function () { }): void {
 	new ReportPopUp(species, list, closeCallback);
+}
+
+// The "Report sighting" button in the menu: pick the bird, then the report form.
+function openQuickReport(): void {
+	const sheet = new Ui.Sheet({ eyebrow: App.translations.SubmitSighting, title: App.translations.WhichBird, size: "tall" });
+	const section = sheet.section();
+	const search = new Ui.SpeciesSearch(App.translations.SearchSpecies, function (species: Models.Species) {
+		sheet.close();
+		Ui.PopUp.whenHistorySettled(function () {
+			openReportPopUp(species, null);
+		});
+	}, true, App.translations.WhichBirdHint);
+	section.appendChild(search.container);
+
+	// Not sure what it was: let the bird's song tell.
+	const identify = document.createElement("button");
+	identify.className = "secondary identify-entry";
+	identify.innerHTML = "<span class='material-symbols-outlined'>mic</span>" + App.translations.IdentifyBySound;
+	identify.addEventListener("click", function () {
+		sheet.close();
+		Ui.PopUp.whenHistorySettled(function () {
+			openIdentifyBySound(function (species: Models.Species) {
+				openReportPopUp(species, null);
+			});
+		});
+	});
+	section.insertBefore(identify, search.container.nextSibling);
+
+	SpeciesCatalog.get(function (c) {
+		search.setSpecies(c.species, c.preferred, c.swedish);
+	});
+	sheet.open();
+	// After the sheet has slid in, so the keyboard does not push it around on phones.
+	setTimeout(function () {
+		search.focus();
+	}, 350);
 }

@@ -3,14 +3,14 @@
 
 namespace Ui {
 	export class Toast extends Div {
-		private mRoot: HTMLDivElement;
 		private mPopup: Ui.Div;
 		private mCloseCallback: () => void;
+		private mClosed = false;
 
 		constructor(title: string, message: string, image: string | null, color: string, closeCallback: () => void) {
 			super();
 
-			var id = this.hashStr(title + message);
+			const id = this.hashStr(title + message);
 			if (document.getElementById(id) !== null) {
 				return;
 			}
@@ -19,70 +19,70 @@ namespace Ui {
 
 			this.mCloseCallback = closeCallback;
 
+			// One host for all toasts so a newer one replaces the older.
+			document.querySelectorAll("div.uix-toast-host").forEach(e => e.remove());
+			this.addClass("uix-toast-host");
 			this.container.id = id;
-
-			this.mRoot = document.getElementById("root") as HTMLDivElement;
-			this.mRoot.appendChild(this.mContainer);
+			this.container.setAttribute("role", "status");
+			document.body.appendChild(this.mContainer);
 
 			this.mPopup = new Ui.Div();
-			this.mPopup.addClass("uix-messagebox");
-			this.mPopup.addClass("animate__animated");
-			this.mPopup.addClass("animate__slideInLeft");
-			this.mPopup.style.setProperty("--animate-duration", "500ms");
-			this.mPopup.style.padding = "0px";
-			this.mPopup.style.marginLeft = "0px";
+			this.mPopup.addClass("uix-toast");
+			this.mPopup.style.setProperty("--tone", color);
+			this.mPopup.container.addEventListener("click", function () {
+				self.close();
+			});
 			this.attach(this.mPopup);
-
-			const c = new Ui.Div();
-			c.container.style.padding = "16px";
-			c.container.style.boxSizing = "border-box";
-			c.container.style.width = "100%";
-			c.container.style.height = "100%";
-			c.container.style.overflow = "auto";
-			c.container.style.color = "var(--ink)";
-			c.container.style.position = "relative";
-			c.container.style.textAlign = "left";
-			c.container.style.border = "2px solid " + color;
-			c.container.style.borderLeft = "0";
-			c.container.style.borderRadius = "0 16px 16px 0";
-			c.container.style.textAlign = "center";
-			this.mPopup.attach(c);
 
 			if (image) {
 				const img = document.createElement("img");
 				img.src = image;
-				img.style.width = "75%";
-				img.style.maxWidth = "128px";
+				img.alt = "";
+				img.width = 40;
+				img.height = 40;
 				img.style.borderRadius = "50%";
-				c.container.appendChild(img);
+				this.mPopup.container.appendChild(img);
+			} else {
+				const icon = document.createElement("span");
+				icon.className = "material-symbols-outlined";
+				icon.textContent = "check_circle";
+				this.mPopup.container.appendChild(icon);
 			}
+
+			const text = document.createElement("div");
+			this.mPopup.container.appendChild(text);
 
 			const t = document.createElement("h2");
 			t.textContent = title;
-			c.container.appendChild(t);
+			text.appendChild(t);
 
 			const m = document.createElement("p");
 			m.innerHTML = message;
-			c.container.appendChild(m);
+			text.appendChild(m);
+
+			requestAnimationFrame(function () {
+				requestAnimationFrame(function () {
+					self.mPopup.addClass("open");
+				});
+			});
 
 			setTimeout(function () {
 				self.close();
-			}, 2000);
+			}, 3500);
 		}
 
 		public close(): void {
+			if (this.mClosed) {
+				return;
+			}
+			this.mClosed = true;
+
 			const self = this;
-			this.mPopup.removeClass("animate__zoomIn");
-			this.mPopup.addClass("animate__slideOutLeft");
-			this.mPopup.style.setProperty('--animate-duration', '500ms');
+			this.mPopup.removeClass("open");
 
 			setTimeout(function () {
-				self.removeClass("uix-popup-background");
-			}, 250);
-
-			setTimeout(function () {
-				self.mRoot.removeChild(self.mContainer);
-			}, 500);
+				self.mContainer.remove();
+			}, 400);
 
 			if (this.mCloseCallback) {
 				this.mCloseCallback();

@@ -37,8 +37,8 @@
 				</tr>
 				{{end}}
 			</table>
-			<input id="list-id" placeholder="ID">
-			<button onclick="window.open(window.location + ',' + encodeURIComponent(document.getElementById('list-id').value), '_self');">Lägg till</button>
+			<input id="list-id" placeholder="{{if eq .Lang "sv"}}Listans ID{{else if eq .Lang "de"}}Listen-ID{{else}}List ID{{end}}">
+			<button onclick="window.open(window.location + ',' + encodeURIComponent(document.getElementById('list-id').value), '_self');">{{if eq .Lang "sv"}}Lägg till{{else if eq .Lang "de"}}Hinzufügen{{else}}Add{{end}}</button>
 		</div>
 	</div>
 </body>

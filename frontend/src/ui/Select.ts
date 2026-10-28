@@ -9,8 +9,17 @@ namespace Ui {
 		private mSearch: Ui.Input;
 		private mExpandable: Ui.Div;
 		private mOpenArrow: HTMLSpanElement;
-		private mIdentifyButton: HTMLSpanElement;
 		private mSelectCallback: (value: string | null) => void | null;
+		private mOutsideListener = (event: PointerEvent) => {
+			if (!this.mContainer.contains(event.target as Node)) {
+				this.hide();
+			}
+		};
+		private mFocusOutListener = (event: FocusEvent) => {
+			if (event.relatedTarget && !this.mContainer.contains(event.relatedTarget as Node)) {
+				this.hide();
+			}
+		};
 
 		constructor(placeholder: string, searchText: string, selectCallback: (value: string | null) => void = function () { }) {
 			super();
@@ -23,9 +32,15 @@ namespace Ui {
 			this.mContainer.className = "uix-select";
 
 			this.mResult = document.createElement("p");
-			this.mResult.style.padding = "12px 24px";
-			this.mResult.style.cursor = "pointer";
-			this.mResult.style.color = "var(--black-or-white-color)";
+			this.mResult.className = "uix-select-value";
+			this.mResult.setAttribute("role", "button");
+			this.mResult.tabIndex = 0;
+			this.mResult.addEventListener("keydown", function (e) {
+				if (e.key === "Enter" || e.key === " ") {
+					e.preventDefault();
+					self.toggleVisible();
+				}
+			});
 			this.mResult.innerHTML = placeholder;
 			this.mResult.addEventListener("click", function () {
 				self.toggleVisible();
@@ -33,49 +48,18 @@ namespace Ui {
 			this.mContainer.appendChild(this.mResult);
 
 			this.mOpenArrow = document.createElement("span");
-			this.mOpenArrow.className = "material-symbols-outlined";
-			this.mOpenArrow.style.position = "absolute";
-			this.mOpenArrow.style.right = "16px";
-			this.mOpenArrow.style.top = "8px";
-			this.mOpenArrow.style.fontSize = "32px";
-			this.mOpenArrow.style.color = "var(--black-or-white-color)";
+			this.mOpenArrow.className = "material-symbols-outlined uix-select-arrow";
 			this.mOpenArrow.innerHTML = "expand_more";
-			this.mOpenArrow.style.pointerEvents = "none";
 			this.mContainer.appendChild(this.mOpenArrow);
 
-			this.mIdentifyButton = document.createElement("span");
-			this.mIdentifyButton.className = "material-symbols-outlined";
-			this.mIdentifyButton.style.cursor = "pointer";
-			this.mIdentifyButton.style.fontSize = "32px";
-			this.mIdentifyButton.style.position = "absolute";
-			this.mIdentifyButton.style.right = "53px";
-			this.mIdentifyButton.style.color = "var(--ink)";
-			this.mIdentifyButton.style.top = "8px";
-			this.mIdentifyButton.innerHTML = "mic";
-			this.mIdentifyButton.style.display = "none";
-			this.mIdentifyButton.addEventListener("click", function () {
-				new AnalyzePopUp(function() {});
-			});
-			//this.mContainer.appendChild(this.mIdentifyButton);
 
 			this.mExpandable = new Ui.Div();
-			this.mExpandable.style.backgroundColor = "var(--widget-color)";
-			this.mExpandable.style.position = "absolute";
-			this.mExpandable.style.left = "0";
-			this.mExpandable.style.top = "48px";
-			this.mExpandable.style.width = "100%";
-			this.mExpandable.style.height = "256px";
-			this.mExpandable.style.borderBottomLeftRadius = "var(--small-distance)";
-			this.mExpandable.style.borderBottomRightRadius = "var(--small-distance)";
-			this.mExpandable.style.zIndex = "1";
+			this.mExpandable.addClass("uix-select-panel");
 			this.mExpandable.setVisible(false);
 			this.attach(this.mExpandable);
 
 			this.mSearch = new Ui.Input("text");
-			this.mSearch.style.margin = "0";
 			this.mSearch.setPlaceHolder(searchText + "...");
-			this.mSearch.style.borderBottomLeftRadius = "0";
-			this.mSearch.style.borderBottomRightRadius = "0";
 
 			this.mSearch.container.addEventListener("keydown", function (e) {
 				const allOptionsSource = self.mDropDown.getElementsByTagName("p");
@@ -126,6 +110,10 @@ namespace Ui {
 					if (selected) {
 						self.updateScroll(selected);
 					}
+				} else if (e.key === "Escape") {
+					e.stopPropagation();
+					self.hide();
+					self.mResult.focus();
 				} else if (e.key == "Enter") {
 					for (let i = 0; i < allOptions.length; ++i) {
 						if (allOptions[i].classList.contains("selected")) {
@@ -162,10 +150,7 @@ namespace Ui {
 			this.mExpandable.attach(this.mSearch);
 
 			this.mDropDown = document.createElement("div");
-			this.mDropDown.style.margin = "0 24px var(--small-distance) 24px";
-			this.mDropDown.style.overflowY = "auto";
-			this.mDropDown.style.height = "calc(100% - 56px)";
-			this.mDropDown.style.width = "calc(100% - 48px)";
+			this.mDropDown.className = "uix-select-options";
 			this.mExpandable.container.appendChild(this.mDropDown);
 		}
 
@@ -189,23 +174,23 @@ namespace Ui {
 			}
 		}
 
-		public showIdentifyButton(show: boolean): void {
-			this.mIdentifyButton.style.display = show ? "" : "none";
-		}
-
 		public show(): void {
 			this.mExpandable.setVisible(true);
-			this.style.borderBottomLeftRadius = "0";
-			this.style.borderBottomRightRadius = "0";
-			this.mOpenArrow.innerHTML = "expand_less";
+			this.addClass("open");
 			this.mSearch.select();
+			const self = this;
+			// Close when the user taps or tabs anywhere else.
+			setTimeout(function () {
+				document.addEventListener("pointerdown", self.mOutsideListener);
+				self.mContainer.addEventListener("focusout", self.mFocusOutListener);
+			}, 0);
 		}
 
 		public hide(): void {
 			this.mExpandable.setVisible(false);
-			this.style.borderBottomLeftRadius = "";
-			this.style.borderBottomRightRadius = "";
-			this.mOpenArrow.innerHTML = "expand_more";
+			this.removeClass("open");
+			document.removeEventListener("pointerdown", this.mOutsideListener);
+			this.mContainer.removeEventListener("focusout", this.mFocusOutListener);
 		}
 
 		public get value(): string | null {
@@ -256,13 +241,11 @@ namespace Ui {
 
 		public setDisabled(disabled: boolean): void {
 			if (disabled) {
-				this.mResult.style.pointerEvents = "none";
-				this.mOpenArrow.style.color = "gray";
-				this.mContainer.style.boxShadow = "0 0 0 1px inset var(--secondary-color)";
+				this.addClass("disabled");
+				this.mResult.tabIndex = -1;
 			} else {
-				this.mResult.style.pointerEvents = "unset";
-				this.mOpenArrow.style.color = "unset";
-				this.mContainer.style.boxShadow = "unset";
+				this.removeClass("disabled");
+				this.mResult.tabIndex = 0;
 			}
 		}
 

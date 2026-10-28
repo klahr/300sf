@@ -14,7 +14,7 @@ div#root {
 }
 
 *.shadow {
-	filter: drop-shadow(rgba(255, 255, 255, 0.07) 0px 2px 4px) drop-shadow(rgba(255, 255, 255, 0.05) 0px 1px 1.5px);
+	box-shadow: var(--shadow-2);
 }
 
 div.uix-div {
@@ -28,30 +28,134 @@ div.uix-img {
 	display: inline-block;
 	position: absolute;
 	background-size: cover;
+	background-position: center;
 	left: 0;
 	top: 0;
 }
+
+/* Select: a field that opens a floating panel with a search box. */
 
 div.uix-select {
 	position: relative;
 	width: calc(100% - var(--small-distance)*2);
 	background-color: var(--surface-sunk);
 	box-sizing: border-box;
-	border-radius: 10px;
-	height: 48px;
+	border: 1px solid transparent;
+	border-radius: var(--radius-m);
+	min-height: 48px;
 	margin: var(--small-distance);
+	transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+}
+
+div.uix-select:hover {
+	border-color: var(--line-strong);
+}
+
+div.uix-select.open {
+	border-color: var(--primary);
+	box-shadow: 0 0 0 3px var(--primary-soft);
+	z-index: 20;
+}
+
+div.uix-select.disabled {
+	background-color: transparent;
+	border-color: var(--line);
+}
+
+div.uix-select.disabled>p.uix-select-value {
+	pointer-events: none;
+	color: var(--ink-soft);
+}
+
+p.uix-select-value {
+	padding: 12px 48px 12px 16px;
+	cursor: pointer;
+	color: var(--ink);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	user-select: none;
+}
+
+span.uix-select-arrow {
+	position: absolute;
+	right: 12px;
+	top: 50%;
+	transform: translateY(-50%);
+	font-size: 24px !important;
+	color: var(--ink-soft);
+	pointer-events: none;
+	transition: transform var(--dur) var(--ease-out);
+}
+
+div.uix-select.open span.uix-select-arrow {
+	transform: translateY(-50%) rotate(180deg);
+}
+
+div.uix-select.search>p.uix-select-value {
+	padding-left: 48px;
+	color: var(--ink-soft);
+}
+
+div.uix-select.search>p.uix-select-value::before {
+	content: "search";
+	font-family: 'Material Symbols Rounded';
+	font-size: 22px;
+	position: absolute;
+	left: 16px;
+	top: 50%;
+	transform: translateY(-50%);
+	color: var(--ink-soft);
+}
+
+div.uix-select.search span.uix-select-arrow {
+	display: none;
+}
+
+div.uix-select-panel {
+	position: absolute;
+	left: 0 !important;
+	top: calc(100% + 6px) !important;
+	width: 100%;
+	max-height: 320px;
+	display: flex !important;
+	flex-direction: column;
+	background-color: var(--surface-raised);
+	border: 1px solid var(--line);
+	border-radius: var(--radius-m);
+	box-shadow: var(--shadow-3);
+	z-index: 20;
+	overflow: hidden;
+	animation: uix-pop-in var(--dur) var(--ease-out);
+}
+
+div.uix-select-panel.hidden {
+	display: none !important;
+}
+
+div.uix-select-panel>input {
+	position: relative;
+	flex-shrink: 0;
+	margin: var(--small-distance);
+	width: calc(100% - var(--small-distance)*2);
+}
+
+div.uix-select-options {
+	overflow-y: auto;
+	padding: 0 var(--small-distance) var(--small-distance);
+	overscroll-behavior: contain;
 }
 
 p.uix-option {
 	color: var(--ink);
 	cursor: pointer;
-	padding: 6px 10px;
-	border-radius: 6px;
+	padding: 10px 12px;
+	border-radius: var(--radius-s);
 	text-align: left;
 }
 
 p.uix-option:hover {
-	background-color: var(--surface-raised);
+	background-color: var(--surface-hover);
 }
 
 p.uix-option.selected {
@@ -59,88 +163,264 @@ p.uix-option.selected {
 	color: var(--on-primary);
 }
 
+/* Image options (portraits, colours). */
 div.uix-option {
 	width: 64px;
 	height: 64px;
 	background-color: white;
 	display: inline-block;
-	border-radius: var(--small-distance);
+	border-radius: var(--radius-m);
 	margin: 8px;
 	cursor: pointer;
 	vertical-align: middle;
-	transition: all 150ms;
+	transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast);
 	background-size: contain;
 }
 
 div.uix-option:hover {
-	transform: scale(1.1);
+	transform: scale(1.08);
 }
 
 div.uix-option.selected {
-	transform: scale(1.1);
-	transition: all 150ms;
-	box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--ink);
+	transform: scale(1.08);
+	box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--primary);
 }
 
 div.uix-progress-bar {
 	width: 100%;
-	height: 6px;
-	border-radius: 3px;
+	height: 8px;
+	border-radius: var(--radius-pill);
 	background-color: var(--surface-sunk);
 	overflow: hidden;
 }
 
-input.uix-input {
-	display: inline-block;
-	border: none;
-	border-bottom: 1px solid var(--main-color);
+div.uix-progress-fill {
+	position: relative !important;
+	display: block !important;
+	height: 100%;
+	width: 0;
+	background-color: var(--seen);
+	border-radius: inherit;
+	transition: width 900ms var(--ease-out);
 }
 
 input.uix-input:disabled {
-	box-shadow: 0 0 0 1px inset var(--secondary-color);
+	background-color: transparent;
+	border-color: var(--line);
+	color: var(--ink-soft);
 }
 
+/* Dialogs: a bottom sheet on phones, a centred card on larger screens. */
+
+div.uix-popup-base {
+	position: fixed !important;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	display: flex !important;
+	align-items: flex-end;
+	justify-content: center;
+	background-color: transparent;
+	transition: background-color var(--dur) var(--ease-out), backdrop-filter var(--dur);
+	z-index: 100;
+	text-align: center;
+}
+
+div.uix-popup-base.uix-popup-background {
+	background-color: var(--scrim);
+	backdrop-filter: blur(2px);
+}
+
+div.uix-popup,
 div.uix-messagebox {
-	width: calc(100% - var(--large-distance) * 2);
-	max-width: 560px;
+	position: relative !important;
 	box-sizing: border-box;
 	background-color: var(--surface);
-	margin: var(--large-distance) auto;
-	border-radius: 16px;
-	box-shadow: 0 24px 60px -16px rgba(0, 0, 0, 0.8);
-	text-align: center;
-	position: relative;
+	color: var(--ink);
+	box-shadow: var(--shadow-3);
+	text-align: left;
+	transition: transform var(--dur-slow) var(--ease-out), opacity var(--dur) var(--ease-out);
 }
 
 div.uix-popup {
-	width: calc(100% - var(--medium-distance) * 2);
-	height: calc(100% - var(--medium-distance) * 2);
-	max-width: 800px;
-	box-sizing: border-box;
-	background-color: var(--surface);
-	margin: var(--medium-distance);
-	border-radius: 16px;
-	box-shadow: 0 24px 60px -16px rgba(0, 0, 0, 0.8);
-	text-align: center;
-	position: relative;
-}
-
-div.uix-popup-base {
-	background-color: #00000000;
-	transition: background-color 250ms;
 	width: 100%;
-	height: 100%;
-	position: fixed;
-	text-align: center;
+	max-width: 760px;
+	height: auto;
+	max-height: calc(100dvh - 24px);
+	display: flex !important;
+	flex-direction: column;
+	border-radius: var(--radius-l) var(--radius-l) 0 0;
+	padding-bottom: env(safe-area-inset-bottom);
+	transform: translateY(100%);
 }
 
-div.uix-popup-background {
-	transition: background-color 250ms;
-	background-color: rgba(0, 0, 0, 0.6);
+div.uix-popup.open {
+	transform: none;
+}
+
+div.uix-popup.closing {
+	transform: translateY(100%);
+	transition-timing-function: var(--ease-in);
+	transition-duration: var(--dur);
+}
+
+div.uix-popup-grabber {
+	position: relative !important;
+	display: block !important;
+	width: 40px;
+	height: 4px;
+	border-radius: var(--radius-pill);
+	background-color: var(--line-strong);
+	margin: 8px auto 0;
+	flex-shrink: 0;
+}
+
+div.uix-popup-body {
+	position: relative !important;
+	display: block !important;
+	width: 100%;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	box-sizing: border-box;
+	--body-pad-x: 20px;
+	--body-pad-b: 24px;
+	padding: 8px var(--body-pad-x) var(--body-pad-b);
+}
+
+button.uix-close {
+	position: sticky;
+	top: 0;
+	float: right;
+	z-index: 5;
+	width: 40px;
+	min-width: 40px;
+	height: 40px;
+	margin: 4px -8px 0 8px;
+	padding: 0;
+	border-radius: 50%;
+	background-color: var(--surface-sunk);
+	color: var(--ink-soft);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+button.uix-close:hover {
+	background-color: var(--surface-hover);
+	color: var(--ink);
+}
+
+div.uix-messagebox {
+	width: calc(100% - 32px);
+	max-width: 420px;
+	margin: auto;
+	border-radius: var(--radius-l);
+	padding: 28px 24px 20px;
+	text-align: center;
+	opacity: 0;
+	transform: translateY(16px) scale(0.96);
+}
+
+div.uix-messagebox.open {
+	opacity: 1;
+	transform: none;
+}
+
+div.uix-messagebox.closing {
+	opacity: 0;
+	transform: translateY(8px) scale(0.98);
+	transition-duration: var(--dur-fast);
+}
+
+div.uix-messagebox img {
+	width: 96px;
+	height: 96px;
+	border-radius: 50%;
+	object-fit: cover;
+	box-shadow: 0 0 0 4px var(--surface), 0 0 0 6px var(--tone, var(--primary));
+	margin-bottom: 12px;
+}
+
+div.uix-messagebox h2 {
+	margin-top: 4px;
+}
+
+div.uix-messagebox p {
+	color: var(--ink-soft);
+}
+
+div.dialog-actions {
+	position: relative !important;
+	display: flex !important;
+	gap: 8px;
+	width: 100%;
+	margin-top: 20px;
+}
+
+div.dialog-actions>button {
+	margin: 0;
+	flex: 1;
+	width: auto;
+}
+
+/* Toasts: a snackbar along the bottom edge that doesn't block the page. */
+
+div.uix-toast-host {
+	position: fixed !important;
+	left: 50% !important;
+	top: auto !important;
+	bottom: calc(24px + env(safe-area-inset-bottom));
+	transform: translateX(-50%);
+	width: calc(100% - 32px);
+	max-width: 440px;
+	z-index: 200;
+	pointer-events: none;
+}
+
+div.uix-toast {
+	position: relative !important;
+	display: flex !important;
+	align-items: center;
+	gap: 12px;
+	width: 100%;
+	box-sizing: border-box;
+	padding: 12px 16px;
+	background-color: var(--surface-raised);
+	border: 1px solid var(--line);
+	border-left: 4px solid var(--tone, var(--seen));
+	border-radius: var(--radius-m);
+	box-shadow: var(--shadow-3);
+	text-align: left;
+	opacity: 0;
+	transform: translateY(24px);
+	transition: transform var(--dur-slow) var(--ease-out), opacity var(--dur) var(--ease-out);
+	pointer-events: auto;
+}
+
+div.uix-toast.open {
+	opacity: 1;
+	transform: none;
+}
+
+div.uix-toast>span.material-symbols-outlined {
+	color: var(--tone, var(--seen));
+	font-size: 28px;
+	font-variation-settings: 'FILL' 1;
+}
+
+div.uix-toast h2 {
+	font-size: 0.95rem;
+	margin: 0;
+}
+
+div.uix-toast p {
+	font-size: 0.875rem;
+	line-height: 1.35;
+	color: var(--ink-soft);
 }
 
 .fade {
-	transition: opacity 250ms;
+	transition: opacity var(--dur);
 	opacity: 0;
 }
 
@@ -148,31 +428,30 @@ div.uix-button {
 	position: absolute;
 	left: 0;
 	top: 0;
-	background-color: var(--main-color);
-	color: white;
-	padding: 4vw;
-	border-radius: 2vw;
-	min-width: 20vw;
-	transition: all 250ms;
+	background-color: var(--primary);
+	color: var(--on-primary);
+	padding: 12px 24px;
+	border-radius: var(--radius-pill);
+	transition: background-color var(--dur-fast);
 	cursor: pointer;
 }
 
 div.uix-button.disabled {
-	background-color: gray !important;
+	background-color: var(--surface-sunk) !important;
 	pointer-events: none;
-	transition: all 250ms;
-}
-
-div.uix-button>p {
-	font-size: 4vw;
 }
 
 div.uix-button:active {
-	background-color: var(--fifth-color);
+	background-color: var(--primary-strong);
 }
 
 table.uix-table {
 	width: 100%;
+	border-collapse: collapse;
+}
+
+table.uix-table td {
+	padding: 0;
 }
 
 div.uix-layer {
@@ -181,18 +460,284 @@ div.uix-layer {
 	top: 0;
 	width: 100%;
 	height: 100%;
-	transition: all 500ms;
+	transition: opacity var(--dur-slow) var(--ease-out), transform var(--dur-slow) var(--ease-out);
 	opacity: 1.0;
-	transform: scale3d(1.0, 1.0, 1.0);
+	transform: none;
 }
 
 div.uix-layer.hide-scale {
-	transition: all 500ms;
 	opacity: 0.5;
-	transform: scale3d(0.7, 0.7, 1.0);
+	transform: scale3d(0.96, 0.96, 1.0);
 }
 
 div.uix-layer.hide-side {
-	transition: all 500ms;
 	transform: translateX(100%);
+}
+
+@keyframes uix-pop-in {
+	from {
+		opacity: 0;
+		transform: translateY(-4px) scale(0.98);
+	}
+}
+
+@media screen and (min-width: 720px) {
+	div.uix-popup-base {
+		align-items: center;
+		padding: 24px;
+		box-sizing: border-box;
+	}
+
+	div.uix-popup {
+		max-height: min(880px, calc(100dvh - 48px));
+		border-radius: var(--radius-l);
+		padding-bottom: 0;
+		transform: translateY(24px) scale(0.97);
+		opacity: 0;
+	}
+
+	div.uix-popup.open {
+		transform: none;
+		opacity: 1;
+	}
+
+	div.uix-popup.closing {
+		transform: translateY(12px) scale(0.98);
+		opacity: 0;
+	}
+
+	div.uix-popup-grabber {
+		display: none !important;
+	}
+
+	div.uix-popup-body {
+		--body-pad-x: 32px;
+		--body-pad-b: 32px;
+		padding: 20px var(--body-pad-x) var(--body-pad-b);
+	}
+}
+
+/* Photo viewer: the whole screen, dark whatever the theme, on top of the sheet it was opened from. */
+
+div.uix-popup-base.image-viewer {
+	padding: 0;
+	align-items: stretch;
+}
+
+div.uix-popup-base.image-viewer.uix-popup-background {
+	background-color: transparent;
+	backdrop-filter: none;
+}
+
+div.image-viewer div.uix-popup {
+	max-width: none;
+	max-height: none;
+	height: 100%;
+	border-radius: 0;
+	padding: 0;
+	background: transparent;
+	box-shadow: none;
+	transform: none;
+	opacity: 0;
+	transition: opacity var(--dur) var(--ease-out);
+}
+
+div.image-viewer div.uix-popup.open {
+	opacity: 1;
+}
+
+div.image-viewer div.uix-popup.closing {
+	transform: none;
+	opacity: 0;
+}
+
+div.image-viewer div.uix-popup-grabber {
+	display: none !important;
+}
+
+div.image-viewer div.uix-popup-body {
+	height: 100%;
+	padding: 0;
+	overflow: hidden;
+}
+
+div.image-viewer button.uix-close {
+	position: absolute;
+	float: none;
+	top: calc(12px + env(safe-area-inset-top));
+	right: 12px;
+	margin: 0;
+	background-color: rgba(255, 255, 255, 0.12);
+	color: #fff;
+}
+
+div.image-viewer button.uix-close:hover {
+	background-color: rgba(255, 255, 255, 0.22);
+	color: #fff;
+}
+
+div.viewer-stage {
+	--dim: 1;
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+	touch-action: none;
+	user-select: none;
+	-webkit-user-select: none;
+	background-color: rgba(8, 8, 10, var(--dim));
+	color: #fff;
+}
+
+div.viewer-stage>img {
+	max-width: 100%;
+	max-height: 100%;
+	object-fit: contain;
+	transform-origin: center;
+	transition: transform var(--dur) var(--ease-out), opacity var(--dur);
+	cursor: zoom-in;
+	-webkit-user-drag: none;
+}
+
+div.viewer-stage.zoomed>img {
+	cursor: grab;
+}
+
+div.viewer-stage.is-loading>img,
+div.viewer-stage.is-broken>img {
+	opacity: 0;
+}
+
+/* A spinner while the photo loads. */
+div.viewer-stage.is-loading::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 36px;
+	height: 36px;
+	margin: -18px 0 0 -18px;
+	border-radius: 50%;
+	border: 3px solid rgba(255, 255, 255, 0.18);
+	border-top-color: #fff;
+	animation: viewer-spin 0.8s linear infinite;
+}
+
+@keyframes viewer-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+span.viewer-broken {
+	position: absolute;
+	display: none;
+	font-size: 48px;
+	color: rgba(255, 255, 255, 0.5);
+}
+
+div.viewer-stage.is-broken span.viewer-broken {
+	display: block;
+}
+
+p.viewer-counter {
+	position: absolute;
+	top: calc(12px + env(safe-area-inset-top));
+	left: 16px;
+	margin: 0;
+	line-height: 40px;
+	font-size: 14px;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+	color: rgba(255, 255, 255, 0.85);
+	pointer-events: none;
+}
+
+button.viewer-nav {
+	position: absolute;
+	top: 50%;
+	width: 48px;
+	min-width: 48px;
+	height: 48px;
+	margin: -24px 0 0;
+	padding: 0;
+	border-radius: 50%;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background-color: rgba(255, 255, 255, 0.12);
+	color: #fff;
+	transition: background-color var(--dur), opacity var(--dur);
+}
+
+button.viewer-nav[hidden] {
+	display: none;
+}
+
+button.viewer-nav:hover:not(:disabled) {
+	background-color: rgba(255, 255, 255, 0.24);
+}
+
+button.viewer-nav:disabled {
+	opacity: 0;
+	pointer-events: none;
+}
+
+button.viewer-nav.prev {
+	left: 16px;
+}
+
+button.viewer-nav.next {
+	right: 16px;
+}
+
+button.viewer-nav span {
+	font-size: 32px;
+}
+
+/* On touch screens the photos are swiped. */
+@media (hover: none) {
+	button.viewer-nav {
+		display: none;
+	}
+}
+
+p.viewer-credit {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	margin: 0;
+	padding: 32px 16px calc(14px + env(safe-area-inset-bottom));
+	font-size: 12px;
+	line-height: 1.5;
+	text-align: center;
+	color: rgba(255, 255, 255, 0.75);
+	background: linear-gradient(transparent, rgba(0, 0, 0, 0.55));
+	pointer-events: none;
+	overflow-wrap: anywhere;
+}
+
+p.viewer-credit:empty {
+	display: none;
+}
+
+p.viewer-credit a {
+	color: #fff;
+	text-decoration: underline;
+	pointer-events: auto;
+}
+
+div.viewer-stage.zoomed p.viewer-credit,
+div.viewer-stage.zoomed p.viewer-counter,
+div.viewer-stage.zoomed button.viewer-nav {
+	opacity: 0;
+	pointer-events: none;
+}
+
+div.uix-select.search {
+	width: 100%;
+	margin: 0;
 }

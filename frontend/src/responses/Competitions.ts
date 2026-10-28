@@ -1,9 +1,16 @@
 /// <reference path="../models/Zone.ts"/>
-/// <reference path="../models/ListTemplate.ts"/>
+/// <reference path="../models/Translation.ts"/>
 
 namespace Responses {
+	export class CompetitionsBasisList {
+		uuid: string;
+		name: Models.Translation;
+		description: Models.Translation;
+		size: number;
+	}
+
 	export class CompetitionsBasis {
 		zones: Array<Models.Zone>;
-		list_templates: Array<Models.ListTemplate>;
+		list_templates: Array<CompetitionsBasisList>;
 	}
 }

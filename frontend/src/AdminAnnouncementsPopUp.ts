@@ -1,3 +1,4 @@
+/// <reference path="ui/Sheet.ts"/>
 /// <reference path="App.ts"/>
 /// <reference path="models/Announcement.ts"/>
 
@@ -18,12 +19,8 @@ class AdminAnnouncementsPopUp {
 		content.style.width = "100%";
 		content.style.position = "relative";
 
-		const name = document.createElement("h1");
-		name.innerHTML = "Announcements";
-		name.style.margin = "unset";
-		content.container.appendChild(name);
 
-		new Ui.PopUp(content.container, function () {
+		Ui.Sheet.wrap(content.container, App.translations.Announcements).open(function () {
 			closeCallback();
 		});
 
@@ -33,7 +30,7 @@ class AdminAnnouncementsPopUp {
 		content.attach(this.mAnnouncementsDiv);
 
 		const addAnnouncementLbl = document.createElement("h2");
-		addAnnouncementLbl.innerHTML = "Add announcement";
+		addAnnouncementLbl.innerHTML = App.translations.AddAnnouncement;
 		content.container.appendChild(addAnnouncementLbl);
 
 		this.mName = new Ui.Input("text");
@@ -44,7 +41,7 @@ class AdminAnnouncementsPopUp {
 		});
 
 		this.mIcon = new Ui.Input("text");
-		this.mIcon.setPlaceHolder("Material Design icon");
+		this.mIcon.setPlaceHolder(App.translations.IconName);
 		content.attach(this.mIcon);
 		this.mIcon.container.addEventListener("input", () => {
 			self.verify();
@@ -70,19 +67,20 @@ class AdminAnnouncementsPopUp {
 
 		const fromLbl = document.createElement("h3");
 		fromLbl.className = "title";
-		fromLbl.innerHTML = "From";
+		fromLbl.innerHTML = App.translations.From;
 		content.container.appendChild(fromLbl);
 		const from = new Ui.Input("date");
 		content.attach(from);
 
 		const untilLbl = document.createElement("h3");
 		untilLbl.className = "title";
-		untilLbl.innerHTML = "Until";
+		untilLbl.innerHTML = App.translations.Until;
 		content.container.appendChild(untilLbl);
 		const until = new Ui.Input("date");
 		content.attach(until);
 
 		const colorSelect = new Ui.DivSelect();
+		colorSelect.addClass("swatches");
 		colorSelect.addOption("", "#8227ac").style.backgroundColor = "#8227ac";
 		colorSelect.addOption("", "#0d81b4").style.backgroundColor = "#0d81b4";
 		colorSelect.addOption("", "#75b98e").style.backgroundColor = "#75b98e";
@@ -101,11 +99,11 @@ class AdminAnnouncementsPopUp {
 
 		const onHoldLbl = document.createElement("label");
 		onHoldLbl.setAttribute("for", onHold.container.id);
-		onHoldLbl.innerHTML = "Draft";
+		onHoldLbl.innerHTML = App.translations.Draft;
 		content.container.appendChild(onHoldLbl);
 
 		this.mAddButton = document.createElement("button");
-		this.mAddButton.innerHTML = "Add announcement";
+		this.mAddButton.innerHTML = App.translations.AddAnnouncement;
 		this.mAddButton.disabled = true;
 		content.container.appendChild(this.mAddButton);
 		this.mAddButton.addEventListener("click", function () {
@@ -143,7 +141,7 @@ class AdminAnnouncementsPopUp {
 				new Ui.MessageBox(App.translations.Error, error, "/img/messagebox-256.webp", "var(--error-color)", function () { });
 			}, () => {
 				self.mAddButton.disabled = false;
-				self.mAddButton.innerHTML = "Add announcement";
+				self.mAddButton.innerHTML = App.translations.AddAnnouncement;
 				self.mName.setDisabled(false);
 				self.mEnglishContent.disabled = false;
 				from.setDisabled(false);
@@ -212,12 +210,12 @@ class AdminAnnouncementsPopUp {
 				t.style.color = "var(--secondary-color)";
 				t.innerHTML = "delete_forever";
 				t.addEventListener("click", function () {
-					new Ui.ConfirmBox("Really?", "Are you sure?", null, "var(--success-color)", function() {
+					new Ui.ConfirmBox(App.translations.AreYouSure, App.translations.ConfirmDeleteAnnouncement, null, "var(--error-color)", function() {
 						const r = new HttpRequest("DELETE", "/v1/announcements/" + e.uuid);
 						r.process((status: any, data: any) => {
 							self.refresh();
 						});	
-					}, function() {}, "Yes", App.translations.Cancel);
+					}, function() {}, App.translations.Delete, App.translations.Cancel);
 				});
 				self.mAnnouncementsDiv.container.appendChild(t);
 

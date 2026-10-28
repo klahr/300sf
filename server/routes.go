@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: AGPL-3.0-or-later
 package main
 
 import (
@@ -166,15 +166,17 @@ func SetupRoutes(r gin.IRouter, signIn, signOut gin.HandlerFunc) {
 
 	r.GET("/health", Health)
 
-	// Competitions are not finished: creation never stored the competition and
-	// the other handlers were empty. Answer 501 until the feature is built.
-	r.POST("/v1/competitions", apiKeyMiddleware, basicMiddleware, controllers.NotImplemented)
-	r.GET("/v1/competitions/list", apiKeyMiddleware, basicMiddleware, controllers.NotImplemented)
-	r.GET("/v1/competitions/list/me", apiKeyMiddleware, basicMiddleware, controllers.NotImplemented)
-	r.GET("/v1/competitions/:uuid", apiKeyMiddleware, basicMiddleware, controllers.NotImplemented)
-	r.PUT("/v1/competitions/:uuid/invite", apiKeyMiddleware, basicMiddleware, controllers.NotImplemented)
-	r.PUT("/v1/competitions/:uuid/archive", apiKeyMiddleware, basicMiddleware, controllers.NotImplemented)
-	r.GET("/v1/competitions/:uuid/result", noneMiddleware, controllers.NotImplemented)
+	// Competitions
+	r.POST("/v1/competitions", apiKeyMiddleware, basicMiddleware, controllers.Competitions)
+	r.GET("/v1/competitions/list", apiKeyMiddleware, basicMiddleware, controllers.CompetitionsList)
+	r.GET("/v1/competitions/list/me", apiKeyMiddleware, basicMiddleware, controllers.CompetitionsListMe)
+	r.GET("/v1/competitions/:uuid", apiKeyMiddleware, basicMiddleware, controllers.CompetitionsGet)
+	r.PUT("/v1/competitions/:uuid/join", apiKeyMiddleware, basicMiddleware, controllers.CompetitionsJoin)
+	r.PUT("/v1/competitions/:uuid/leave", apiKeyMiddleware, basicMiddleware, controllers.CompetitionsLeave)
+	r.PUT("/v1/competitions/:uuid/invite", apiKeyMiddleware, basicMiddleware, controllers.CompetitionsInvite)
+	r.PUT("/v1/competitions/:uuid/decline", apiKeyMiddleware, basicMiddleware, controllers.CompetitionsDecline)
+	r.PUT("/v1/competitions/:uuid/archive", apiKeyMiddleware, basicMiddleware, controllers.CompetitionsArchive)
+	r.GET("/v1/competitions/:uuid/result", noneMiddleware, controllers.CompetitionsResult)
 	r.GET("/v1/competitions/basis", apiKeyMiddleware, basicMiddleware, controllers.CompetitionsBasis)
 
 	// Lists
@@ -258,6 +260,7 @@ func SetupRoutes(r gin.IRouter, signIn, signOut gin.HandlerFunc) {
 	r.PUT("/v1/announcements/:uuid/read", apiKeyMiddleware, basicMiddleware, controllers.AnnouncementsRead)
 	r.GET("/v1/announcements/list", apiKeyMiddleware, basicMiddleware, controllers.AnnouncementsList)
 
+	r.POST("/v1/analyze", apiKeyMiddleware, basicMiddleware, controllers.Analyze)
 	r.PUT("/v1/analyze/resolve", apiKeyMiddleware, basicMiddleware, controllers.AnalyzeResolve)
 
 	setupPrivateRoutes(r)

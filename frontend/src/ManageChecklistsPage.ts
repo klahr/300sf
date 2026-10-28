@@ -4,6 +4,7 @@
 /// <reference path="ProfilePopUp.ts"/>
 /// <reference path="HttpRequest.ts"/>
 /// <reference path="EditListPopUp.ts"/>
+/// <reference path="Onboarding.ts"/>
 /// <reference path="requests/Lists.ts"/>
 /// <reference path="models/Visibility.ts"/>
 /// <reference path="models/ListTemplate.ts"/>
@@ -30,7 +31,7 @@ class ManageCheckListsPage extends Page {
 		this.container.appendChild(this.mTitle);
 
 		this.mChecklists = new Ui.Div();
-		this.mChecklists.style.position = "relative";
+		this.mChecklists.addClass("manage-list");
 		this.attach(this.mChecklists);
 
 		const newChecklistsLbl = document.createElement("h2");
@@ -66,7 +67,7 @@ class ManageCheckListsPage extends Page {
 		this.container.appendChild(colorLbl);
 
 		const colorSelect = new Ui.DivSelect();
-		colorSelect.style.width = "100%";
+		colorSelect.addClass("swatches");
 		colorSelect.addOption("", "#8227ac").style.backgroundColor = "#8227ac";
 		colorSelect.addOption("", "#0d81b4").style.backgroundColor = "#0d81b4";
 		colorSelect.addOption("", "#75b98e").style.backgroundColor = "#75b98e";
@@ -78,10 +79,7 @@ class ManageCheckListsPage extends Page {
 
 		this.mCreateButton = document.createElement("button");
 		this.mCreateButton.innerHTML = App.translations.CreateChecklist;
-		this.mCreateButton.style.width = "auto";
-		this.mCreateButton.style.cssFloat = "right";
-		this.mCreateButton.style.borderRadius = "8px";
-		this.mCreateButton.style.backgroundColor = "var(--success-color)";
+		this.mCreateButton.className = "inline success end";
 		this.mCreateButton.disabled = true;
 		this.container.appendChild(this.mCreateButton);
 		this.mCreateButton.addEventListener("click", function () {
@@ -120,10 +118,7 @@ class ManageCheckListsPage extends Page {
 
 		this.mCreateTemplateButton = document.createElement("button");
 		this.mCreateTemplateButton.innerHTML = App.translations.CreateTemplate;
-		this.mCreateTemplateButton.style.width = "auto";
-		this.mCreateTemplateButton.style.cssFloat = "right";
-		this.mCreateTemplateButton.style.borderRadius = "8px";
-		this.mCreateTemplateButton.style.backgroundColor = "var(--success-color)";
+		this.mCreateTemplateButton.className = "inline success end";
 		this.mCreateTemplateButton.disabled = true;
 		//this.container.appendChild(this.mCreateTemplateButton);
 		this.mCreateTemplateButton.addEventListener("click", function () {
@@ -139,8 +134,10 @@ class ManageCheckListsPage extends Page {
 			req.process(function (status: any, data: any) {
 				location.reload();
 			});*/
-			new Ui.MessageBox(App.translations.Error, "Not yet implemented.", "/img/messagebox-256.webp", "var(--error-color)", function () { });
+			new Ui.MessageBox(App.translations.Error, App.translations.NotAvailableYet, "/img/messagebox-256.webp", "var(--error-color)", function () { });
 		});
+
+		this.groupSections();
 	}
 
 	public get id(): string {
@@ -182,17 +179,47 @@ class ManageCheckListsPage extends Page {
 		const r = new HttpRequest("GET", "/v1/lists/list");
 		r.process(function (status: any, data: any) {
 			self.mChecklists.clear();
-			data.result.forEach(e => {
-				const c = document.createElement("p");
-				c.className = "entry";
+			if (!data.result || data.result.length === 0) {
+				self.mChecklists.container.appendChild(Onboarding.starterCard(function () {
+					location.reload();
+				}));
+			}
+			(data.result || []).forEach(e => {
+				const c = document.createElement("div");
+				c.className = "manage-row";
+				c.setAttribute("role", "button");
+				c.tabIndex = 0;
 				let color = "var(--blue)";
 				if (e.color !== "") {
 					color = e.color;
 				}
-				c.innerHTML = "<span style='font-size: 1rem; color: " + Utils.escapeHtml(color) + ";' class='material-symbols-outlined'>trip_origin</span> " + Utils.escapeHtml(App.getTranslation(e.name));
+				c.setAttribute("aria-label", App.translations.OpenChecklist + ": " + App.getTranslation(e.name));
+				c.innerHTML = "<span class='list-dot' style='--dot: " + Utils.escapeHtml(color) + ";'></span><p>" + Utils.escapeHtml(App.getTranslation(e.name)) + "</p><p class='meta'>" + App.translations.SpeciesCount.replace("{0}", e.species.length) + "</p>";
+
+				// Archiving is rare; it lives behind this button so a tap on the row opens the list.
+				const more = document.createElement("button");
+				more.className = "icon-button";
+				more.setAttribute("aria-label", App.translations.MoreOptions);
+				more.innerHTML = "<span class='material-symbols-outlined'>more_horiz</span>";
+				more.addEventListener("click", function (event) {
+					event.stopPropagation();
+					openEditListPopUp(e);
+				});
+				c.appendChild(more);
+
+				const chevron = document.createElement("span");
+				chevron.className = "material-symbols-outlined";
+				chevron.textContent = "chevron_right";
+				c.appendChild(chevron);
+
+				c.addEventListener("keydown", function (event) {
+					if (event.key === "Enter" && event.target === c) {
+						self.appListener.showPage("list", e);
+					}
+				});
 				self.mChecklists.container.appendChild(c);
 				c.addEventListener("click", function () {
-					openEditListPopUp(e);
+					self.appListener.showPage("list", e);
 				});
 			});
 		});
@@ -201,7 +228,7 @@ class ManageCheckListsPage extends Page {
 		this.mTemplateSelect.clear();
 		const s = new HttpRequest("GET", "/v1/list_templates/list");
 		s.process(function (status: any, data: any) {
-			data.result.forEach(element => {
+			(data.result || []).forEach(element => {
 				const o = self.mTemplateSelect.addOption(App.getTranslation(element.name), element.uuid);
 				o.setAttribute("description", App.getTranslation(element.description));
 			});
@@ -210,7 +237,7 @@ class ManageCheckListsPage extends Page {
 		this.mTemplates.clear();
 		const t = new HttpRequest("GET", "/v1/list_templates/list/me");
 		t.process(function (status: any, data: any) {
-			data.result.forEach(element => {
+			(data.result || []).forEach(element => {
 				const e = element as Models.ListTemplate;
 				const c = document.createElement("p");
 				c.className = "entry";
@@ -228,7 +255,7 @@ class ManageCheckListsPage extends Page {
 				c.innerHTML = "<span style='font-size: 1rem; color: var(--blue);' class='material-symbols-outlined'>public</span> " + Utils.escapeHtml(App.getTranslation(e.name));
 				self.mTemplates.container.appendChild(c);
 				c.addEventListener("click", function () {
-					new Ui.MessageBox(App.translations.Error, "Not yet implemented.", "/img/messagebox-256.webp", "var(--error-color)", function () { });
+					new Ui.MessageBox(App.translations.Error, App.translations.NotAvailableYet, "/img/messagebox-256.webp", "var(--error-color)", function () { });
 				});
 			});
 		});

@@ -1,3 +1,4 @@
+/// <reference path="ui/Sheet.ts"/>
 /// <reference path="App.ts"/>
 
 class AdminSpeciesPopUp {
@@ -18,10 +19,6 @@ class AdminSpeciesPopUp {
 		content.style.width = "100%";
 		content.style.position = "relative";
 
-		const name = document.createElement("h1");
-		name.innerHTML = App.translations.SpeciesPlural;
-		name.style.margin = "unset";
-		content.container.appendChild(name);
 
 		this.mSpeciesList = new Ui.Select(App.translations.AllSpecies, "", (value: string | null) => {
 			self.mSpecies.forEach(e => {
@@ -34,7 +31,7 @@ class AdminSpeciesPopUp {
 
 		content.attach(this.mSpeciesList);
 
-		new Ui.PopUp(content.container, function () {
+		Ui.Sheet.wrap(content.container, App.translations.SpeciesPlural).open(function () {
 			closeCallback();
 		});
 

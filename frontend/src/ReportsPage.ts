@@ -12,21 +12,23 @@ class ReportsPage extends Page {
 	constructor(appListener: IAppListener) {
 		super(appListener);
 
+		this.addClass("wide");
+		this.addProfile();
+
+		const header = document.createElement("div");		header.className = "page-header";
+		this.container.appendChild(header);
+
 		this.mTitle = document.createElement("h1");
 		this.mTitle.innerHTML = App.translations.Sightings;
-		this.container.appendChild(this.mTitle);
+		header.appendChild(this.mTitle);
 
 		this.mProgressLbl = document.createElement("p");
-		this.mProgressLbl.style.margin = "0";
-		this.mProgressLbl.style.fontWeight = "bold";
-		this.mProgressLbl.style.cssFloat = "right";
-		this.mProgressLbl.style.color = "var(--success-color)";
-		this.container.appendChild(this.mProgressLbl);
+		this.mProgressLbl.className = "count-badge";
+		header.appendChild(this.mProgressLbl);
 
 		this.mTable = new Ui.Table();
+		this.mTable.addClass("sightings");
 		this.attach(this.mTable);
-
-		this.addProfile();
 
 		const filter = new Ui.Div
 		filter.addClass("filter");
@@ -50,7 +52,7 @@ class ReportsPage extends Page {
 
 		this.mFilterTags = new Ui.Div();
 		this.mFilterTags.style.position = "relative";
-		this.mFilterTags.style.margin = "var(--small-distance)";
+		this.mFilterTags.style.margin = "4px 4px 6px";
 		filter.attach(this.mFilterTags);
 	}
 
@@ -128,7 +130,7 @@ class ReportsPage extends Page {
 		const t = new HttpRequest("GET", "/v1/tags/list");
 		t.process(function (status: any, data: any) {
 			self.mFilterTags.clear();
-			data.result.forEach(e => {
+			(data.result || []).forEach(e => {
 				const tag = document.createElement("div");
 				tag.className = "tag";
 				tag.setAttribute("uuid", e.uuid);
@@ -150,10 +152,13 @@ class ReportsPage extends Page {
 			});
 		});
 
+		if (this.mTable.container.childElementCount === 0) {
+			this.mTable.showPlaceholders(9);
+		}
 		const r = new HttpRequest("GET", "/v1/reports/list");
 		r.process(function (status: any, data: any) {
 			self.mTable.clear();
-			const reports = data.result as Models.Report[];
+			const reports = (data.result || []) as Models.Report[];
 			self.mProgressLbl.innerHTML = reports.length.toString();
 			reports.forEach(e => {
 				const entry = document.createElement("div");
@@ -164,17 +169,11 @@ class ReportsPage extends Page {
 
 				const name = document.createElement("h3");
 				name.innerHTML = App.getTranslation(e.species.name);
-				name.style.cursor = "pointer";
 				name.classList.add("species-name");
-				name.style.width = "fit-content";
 				entry.appendChild(name);
 				name.addEventListener("click", function (event) {
 					event.stopPropagation();
-					openSpeciesPopUp(e.species, null, (speciesAdded: boolean) => {
-						if (speciesAdded) {
-							self.refresh();
-						}
-					});
+					openSpeciesPopUp(e.species, null, () => { });
 				});
 
 				const subName = document.createElement("p");
@@ -182,29 +181,25 @@ class ReportsPage extends Page {
 				entry.appendChild(subName);
 
 				const dateInterval = document.createElement("p");
+				dateInterval.className = "meta date";
 				if (Utils.isValidDate(e.from)) {
 					dateInterval.innerHTML = Utils.toYYYY_MM_DD_hh_mm(e.from);
 				}
 				if (Utils.isValidDate(e.until)) {
 					dateInterval.innerHTML += " - " + Utils.toYYYY_MM_DD_hh_mm(e.until);
 				}
-				dateInterval.style.fontStyle = "unset";
 				entry.appendChild(dateInterval);
 
 				const location = document.createElement("p");
+				location.className = "meta place";
 				if (e.zone) {
 					location.innerHTML = App.getTranslation(e.zone.name);
 				}
-				location.style.fontStyle = "unset";
 				entry.appendChild(location);
 
 				if (e.comment.text !== "") {
 					const comment = document.createElement("p");
 					comment.classList.add("comment");
-					comment.style.borderRadius = "0 12px 0 12px";
-					comment.style.lineHeight = "unset";
-					comment.style.padding = "8px";
-					comment.style.width = "fit-content";
 					comment.textContent = e.comment.text;
 					entry.appendChild(comment);
 				}

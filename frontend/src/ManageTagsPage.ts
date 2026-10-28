@@ -21,8 +21,7 @@ class ManageTagsPage extends Page {
 		this.container.appendChild(this.mTitle);
 
 		this.mTags = new Ui.Div();
-		this.mTags.style.position = "relative";
-		this.mTags.style.margin = "var(--small-distance)";
+		this.mTags.addClass("tag-cloud");
 		this.attach(this.mTags);
 
 		const newTagLbl = document.createElement("h2");
@@ -42,7 +41,7 @@ class ManageTagsPage extends Page {
 		this.container.appendChild(colorLbl);
 
 		const colorSelect = new Ui.DivSelect();
-		colorSelect.style.width = "100%";
+		colorSelect.addClass("swatches");
 		colorSelect.addOption("", "#8227ac").style.backgroundColor = "#8227ac";
 		colorSelect.addOption("", "#0d81b4").style.backgroundColor = "#0d81b4";
 		colorSelect.addOption("", "#75b98e").style.backgroundColor = "#75b98e";
@@ -54,10 +53,7 @@ class ManageTagsPage extends Page {
 
 		this.mCreateButton = document.createElement("button");
 		this.mCreateButton.innerHTML = App.translations.CreateTag;
-		this.mCreateButton.style.width = "auto";
-		this.mCreateButton.style.cssFloat = "right";
-		this.mCreateButton.style.borderRadius = "8px";
-		this.mCreateButton.style.backgroundColor = "var(--success-color)";
+		this.mCreateButton.className = "inline success end";
 		this.mCreateButton.disabled = true;
 		this.container.appendChild(this.mCreateButton);
 		this.mCreateButton.addEventListener("click", function () {
@@ -69,6 +65,8 @@ class ManageTagsPage extends Page {
 				location.reload();
 			});
 		});
+
+		this.groupSections();
 	}
 
 	public get id(): string {
@@ -98,7 +96,7 @@ class ManageTagsPage extends Page {
 		const r = new HttpRequest("GET", "/v1/tags/list");
 		r.process(function (status: any, data: any) {
 			self.mTags.clear();
-			data.result.forEach(e => {
+			(data.result || []).forEach(e => {
 				const t = e as Models.Tag;
 				const tag = document.createElement("div");
 				tag.className = "tag";
@@ -108,8 +106,15 @@ class ManageTagsPage extends Page {
 				const c = document.createElement("p");
 				c.textContent = t.name;
 				tag.appendChild(c);
+				tag.setAttribute("role", "button");
+				tag.tabIndex = 0;
 				self.mTags.container.appendChild(tag);
-				c.addEventListener("click", function () {
+				tag.addEventListener("keydown", function (event) {
+					if (event.key === "Enter") {
+						openEditTagPopUp(e);
+					}
+				});
+				tag.addEventListener("click", function () {
 					openEditTagPopUp(e);
 				});
 			});

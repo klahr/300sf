@@ -1,8 +1,7 @@
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: AGPL-3.0-or-later
 package controllers
 
 import (
-	"encoding/csv"
 	"net/http"
 	"strconv"
 	"strings"
@@ -469,8 +468,9 @@ func ReportsExport(c *gin.Context) {
 		return
 	}
 
+	// Oldest first, so the row kept for each species is the sighting that ticked it off the list.
 	var reports []models.Report
-	if err := models.DB.Table("list_reports").Select("reports.*").Preload("Comment").Preload("Zone.Name").Preload("Method.Name").Preload("Gender.Name").Preload("Activity.Name").Preload("Species.Name").Preload("Age.Name").Where("list_id=?", list.Id).Where("reports.archived IS NULL").Joins("JOIN reports ON reports.id=report_id").Order("`from` DESC").Find(&reports).Error; err != nil {
+	if err := models.DB.Table("list_reports").Select("reports.*").Preload("Comment").Preload("Zone.Name").Preload("Method.Name").Preload("Gender.Name").Preload("Activity.Name").Preload("Species.Name").Preload("Age.Name").Preload("Tags").Where("list_id=?", list.Id).Where("reports.archived IS NULL").Joins("JOIN reports ON reports.id=report_id").Order("reports.`from` IS NULL, reports.`from` ASC").Find(&reports).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -488,92 +488,68 @@ func ReportsExport(c *gin.Context) {
 		}
 	}
 
+	lang := user.Language.Code
+	name := func(t models.Translation) string {
+		return csvText(translated(t, lang))
+	}
+
+	rows := [][]string{
+		{"species", "scientific_name", "first_seen", "seen_until", "quantity", "method", "age", "sex", "activity", "comment", "site", "municipality", "latitude", "longitude", "labels"},
+	}
 	encountered := make(map[int64]bool)
-	result := []models.Report{}
-
 	for _, report := range reports {
-		if !encountered[report.SpeciesId] {
-			encountered[report.SpeciesId] = true
-			result = append(result, report)
+		if encountered[report.SpeciesId] {
+			continue
 		}
-	}
+		encountered[report.SpeciesId] = true
 
-	csvData := [][]string{
-		{"species", "observed_from", "observed_until", "quantity", "method", "age", "gender", "activity", "comment", "site", "location", "latitude", "longitude"},
-	}
-
-	for _, report := range result {
-		row := []string{}
-		row = append(row, utils.Translation2Value(report.Species.Name, user.Language.Code))
+		row := make([]string, len(rows[0]))
+		row[0] = name(report.Species.Name)
+		row[1] = csvText(report.Species.Name.La.String)
 		if report.From.Valid {
-			row = append(row, string(localTime(report.From.Time).Format("2006-01-02 15:04:05")))
-		} else {
-			row = append(row, "")
+			row[2] = csvTime(report.From.Time, localTime)
 		}
 		if report.Until.Valid {
-			row = append(row, string(localTime(report.Until.Time).Format("2006-01-02 15:04:05")))
-		} else {
-			row = append(row, "")
+			row[3] = csvTime(report.Until.Time, localTime)
 		}
 		if !report.Quantity.IsZero() {
-			row = append(row, strconv.Itoa((int)(report.Quantity.ValueOrZero())))
-		} else {
-			row = append(row, "")
+			row[4] = strconv.FormatInt(report.Quantity.ValueOrZero(), 10)
 		}
 		if report.Method != nil {
-			row = append(row, utils.Translation2Value(report.Method.Name, user.Language.Code))
-		} else {
-			row = append(row, "")
+			row[5] = name(report.Method.Name)
 		}
 		if report.Age != nil {
-			row = append(row, utils.Translation2Value(report.Age.Name, user.Language.Code))
-		} else {
-			row = append(row, "")
+			row[6] = name(report.Age.Name)
 		}
 		if report.Gender != nil {
-			row = append(row, utils.Translation2Value(report.Gender.Name, user.Language.Code))
-		} else {
-			row = append(row, "")
+			row[7] = name(report.Gender.Name)
 		}
 		if report.Activity != nil {
-			row = append(row, utils.Translation2Value(report.Activity.Name, user.Language.Code))
-		} else {
-			row = append(row, "")
+			row[8] = name(report.Activity.Name)
 		}
 		if report.Comment != nil {
-			row = append(row, report.Comment.Text)
-		} else {
-			row = append(row, "")
+			row[9] = csvText(report.Comment.Text)
 		}
-		if report.Site.Valid {
-			row = append(row, report.Site.String)
-		} else {
-			row = append(row, "")
-		}
+		row[10] = csvText(report.Site.String)
 		if report.Zone != nil {
-			row = append(row, utils.Translation2Value(report.Zone.Name, user.Language.Code))
-		} else {
-			row = append(row, "")
+			row[11] = name(report.Zone.Name)
 		}
 		if !report.Latitude.IsZero() {
-			row = append(row, strconv.FormatFloat(report.Latitude.Float64, 'f', -1, 64))
-		} else {
-			row = append(row, "")
+			row[12] = strconv.FormatFloat(report.Latitude.Float64, 'f', -1, 64)
 		}
 		if !report.Longitude.IsZero() {
-			row = append(row, strconv.FormatFloat(report.Longitude.Float64, 'f', -1, 64))
-		} else {
-			row = append(row, "")
+			row[13] = strconv.FormatFloat(report.Longitude.Float64, 'f', -1, 64)
 		}
-
-		csvData = append(csvData, row)
+		labels := []string{}
+		for _, t := range report.Tags {
+			labels = append(labels, t.Name)
+		}
+		row[14] = csvText(strings.Join(labels, ", "))
+		rows = append(rows, row)
 	}
 
-	var b strings.Builder
-	w := csv.NewWriter(&b)
-	w.WriteAll(csvData)
-	w.Flush()
-	if err := w.Error(); err != nil {
+	data, err := writeCSV(rows, lang)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
 			"message": err.Error(),
@@ -583,7 +559,7 @@ func ReportsExport(c *gin.Context) {
 
 	c.Header("Content-Type", "text/csv; charset=utf-8")
 	c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
-	c.String(http.StatusOK, b.String())
+	c.String(http.StatusOK, data)
 }
 
 func ReportsBasis(c *gin.Context) {

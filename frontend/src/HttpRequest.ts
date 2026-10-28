@@ -1,3 +1,4 @@
+/// <reference path="ui/Progress.ts"/>
 /// <reference path="App.ts"/>
 /// <reference path="responses/Error.ts"/>
 /// <reference path="AppConfig.ts"/>
@@ -10,6 +11,7 @@ class HttpRequest {
 	private mAsync = true;
 	private mNoRetry = false;
 	private mRetried = false;
+	private mDataType = "json";
 	private static sNumRequests = 0;
 
 	constructor(private mMethod: string, private mUrl: string, private mData: any = {}) {
@@ -27,8 +29,12 @@ class HttpRequest {
 	}
 
 	// For the session's own requests: a 401 is reported, never refreshed.
-	public setNoRetry(): void {
-		this.mNoRetry = true;
+	// For responses that are not JSON, such as the CSV export.
+	public setTextResponse(): void {
+		this.mDataType = "text";
+	}
+
+	public setNoRetry(): void {		this.mNoRetry = true;
 	}
 
 	public process(success: (status: any, data: any) => void = function () { }, fail: (status: any, data: Responses.GeneralErrorResponse, error: any) => void = function () { }, complete: () => void = function () { }): void {
@@ -44,17 +50,19 @@ class HttpRequest {
 					xhr.setRequestHeader(key, value);
 				}
 				++HttpRequest.sNumRequests;
-				const loading = document.getElementById("loading");
-				if (loading) {
-					loading.style.display = "block";
-				}
+				Ui.Progress.start();
 			},
 			type: self.mMethod,
 			data: JSON.stringify(self.mData),
 			async: self.mAsync,
 			url: AppConfig.ApiEndpoint + self.mUrl,
 			success: function (data, _textStatus, xhr) {
-				success(xhr.status, data);
+				// A failing handler must not skip the clean-up below, such as hiding the progress bar.
+				try {
+					success(xhr.status, data);
+				} catch (e) {
+					console.error(e);
+				}
 			},
 			error: function (xhr, _textStatus, errorThrown) {
 				if (xhr.status === 503 || xhr.status === 429 || xhr.status === 0) {
@@ -82,16 +90,11 @@ class HttpRequest {
 				}
 			},
 			timeout: 60000,
-			dataType: "json",
+			dataType: self.mDataType,
 			contentType: "application/json",
 			complete: function () {
 				--HttpRequest.sNumRequests;
-				if (HttpRequest.sNumRequests == 0) {
-					const loading = document.getElementById("loading");
-					if (loading) {
-						loading.style.display = "none";
-					}
-				}
+				Ui.Progress.done();
 				complete();
 			},
 		});

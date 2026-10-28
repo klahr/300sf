@@ -7,7 +7,7 @@ class ExperimentalPage extends Page {
 		super(appListener);
 
 		const title = document.createElement("h1");
-		title.innerHTML = "Experimental";
+		title.innerHTML = App.translations.Experimental;
 		this.container.appendChild(title);
 
 		this.addProfile();

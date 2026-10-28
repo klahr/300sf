@@ -4,42 +4,90 @@
 /// <reference path="models/Species.ts"/>
 /// <reference path="models/List.ts"/>
 /// <reference path="ui/Div.ts"/>
+/// <reference path="ui/Sheet.ts"/>
 /// <reference path="HttpRequest.ts"/>
 /// <reference path="utils/Sort.ts"/>
+/// <reference path="SpeciesPopUp.ts"/>
 
+// One sighting, read only: the species photo, what was seen when and where, and the lists and labels
+// it counts for.
 class EditReportPopUp {
-	private mReportButton: HTMLButtonElement;
-	private mChecklistContainer: Ui.Div;
-	private mPopUp: Ui.PopUp;
+	private mSheet: Ui.Sheet;
 
 	constructor(report: Models.Report, closeCallback: () => void) {
 		const self = this;
 
-		const content = new Ui.Div();
-		content.style.textAlign = "left";
-		content.style.width = "100%";
-		content.style.position = "relative";
+		const sheet = new Ui.Sheet({ eyebrow: App.translations.Sighting, title: App.getTranslation(report.species.name), subtitle: report.species.name.la, latin: true, hero: true });
+		this.mSheet = sheet;
 
-		this.mChecklistContainer = new Ui.Div();
-		this.mChecklistContainer.style.position = "relative";
+		// The species page, for the photos and the article.
+		const speciesChip = document.createElement("button");
+		speciesChip.className = "sheet-chip";
+		speciesChip.innerHTML = App.translations.AboutSpecies;
+		speciesChip.addEventListener("click", function () {
+			openSpeciesPopUp(report.species, null, function () { });
+		});
+		sheet.names.insertBefore(speciesChip, sheet.title);
+		sheet.names.querySelector("p.sheet-eyebrow")?.remove();
 
-		const name = document.createElement("h1");
-		name.innerHTML = App.translations.Sighting;
-		name.style.margin = "unset";
-		content.container.appendChild(name);
+		// Label and value pairs; empty values are left out.
+		const facts = sheet.section(App.translations.Sighting);
+		const details = document.createElement("div");
+		details.className = "detail-grid";
+		facts.appendChild(details);
+		const addDetail = function (label: string, value: string, icon: string) {
+			if (!value) {
+				return;
+			}
+			const item = document.createElement("div");
+			const l = document.createElement("p");
+			l.className = "detail-label";
+			l.innerHTML = "<span class='material-symbols-outlined'>" + icon + "</span>" + label;
+			item.appendChild(l);
+			const v = document.createElement("p");
+			v.className = "detail-value";
+			v.textContent = value;
+			item.appendChild(v);
+			details.appendChild(item);
+		};
+		if (Utils.isValidDate(report.from)) {
+			addDetail(App.translations.ObservedFrom, Utils.toYYYY_MM_DD_hh_mm(report.from), "schedule");
+		}
+		if (Utils.isValidDate(report.until)) {
+			addDetail(App.translations.ObservedUntil, Utils.toYYYY_MM_DD_hh_mm(report.until), "schedule");
+		}
+		if (report.zone) {
+			addDetail(App.translations.ObservationLocation, App.getTranslation(report.zone.name), "location_on");
+		}
+		addDetail(App.translations.Site, report.site, "pin_drop");
+		addDetail(App.translations.Quantity, report.quantity.toString(), "tag");
+		if (report.age) {
+			addDetail(App.translations.Age, App.getTranslation(report.age.name), "cake");
+		}
+		if (report.gender) {
+			addDetail(App.translations.Gender, App.getTranslation(report.gender.name), "wc");
+		}
+		if (report.method) {
+			addDetail(App.translations.Method, App.getTranslation(report.method.name), "visibility");
+		}
+		if (report.activity) {
+			addDetail(App.translations.Activity, App.getTranslation(report.activity.name), "directions_run");
+		}
+
+		if (report.comment.text !== "") {
+			const comment = document.createElement("p");
+			comment.className = "comment";
+			comment.textContent = report.comment.text;
+			facts.appendChild(comment);
+		}
 
 		if (report.latitude !== 0 && report.longitude !== 0) {
-			const locationLbl = document.createElement("h3");
-			locationLbl.className = "title";
-			locationLbl.innerHTML = App.translations.ObservationLocation;
-			content.container.appendChild(locationLbl);
+			const where = sheet.section(App.translations.ObservationLocation);
 			const mapDiv = new Ui.Div();
 			mapDiv.container.classList.add("map");
-			mapDiv.style.height = "300px";
-			mapDiv.style.width = "100%";
+			mapDiv.style.height = "220px";
 			mapDiv.style.position = "relative";
-			mapDiv.style.borderRadius = "var(--small-distance)";
-			content.attach(mapDiv);
+			where.appendChild(mapDiv.container);
 
 			setTimeout(function () {
 				const latLng = [report.latitude, report.longitude];
@@ -53,125 +101,22 @@ class EditReportPopUp {
 			}, 10);
 		}
 
-		const speciesList = new Ui.Input("text")
-		speciesList.value = App.getTranslation(report.species.name);
-		speciesList.setDisabled(true);
-		content.attach(speciesList);
-
-		if (report.age) {
-			const ageList = new Ui.Input("text");
-			ageList.value = App.getTranslation(report.age.name);
-			ageList.setDisabled(true);
-			content.attach(ageList);
-		}
-
-		if (report.gender) {
-			const genderList = new Ui.Input("text");
-			genderList.value = App.getTranslation(report.gender.name);
-			genderList.setDisabled(true);
-			content.attach(genderList);
-		}
-
-		if (report.method) {
-			const methodList = new Ui.Input("text");
-			methodList.value = App.getTranslation(report.method.name);
-			methodList.setDisabled(true);
-			content.attach(methodList);
-		}
-
-		if (report.activity) {
-			const activityList = new Ui.Input("text");
-			activityList.value = App.getTranslation(report.activity.name);
-			activityList.setDisabled(true);
-			content.attach(activityList);
-		}
-
-		if (report.site !== "") {
-			const siteLbl = document.createElement("h3");
-			siteLbl.className = "title";
-			siteLbl.innerHTML = App.translations.Site;
-			content.container.appendChild(siteLbl);
-			const site = new Ui.Input("text");
-			site.setDisabled(true);
-			site.value = report.site;
-			content.attach(site);
-		}
-
-		const quantityLbl = document.createElement("h3");
-		quantityLbl.className = "title";
-		quantityLbl.innerHTML = App.translations.Quantity;
-		content.container.appendChild(quantityLbl);
-		const quantity = new Ui.Input("number");
-		quantity.setDisabled(true);
-		quantity.value = report.quantity.toString();
-		content.attach(quantity);
-
-		if (Utils.isValidDate(report.from)) {
-			const fromLbl = document.createElement("h3");
-			fromLbl.className = "title";
-			fromLbl.innerHTML = App.translations.ObservedFrom;
-			content.container.appendChild(fromLbl);
-			const from = new Ui.Input("text");
-			from.value = Utils.toYYYY_MM_DD_hh_mm(report.from);
-			from.setDisabled(true);
-			content.attach(from);
-
-			if (Utils.isValidDate(report.until)) {
-				const untilLbl = document.createElement("h3");
-				untilLbl.className = "title";
-				untilLbl.innerHTML = App.translations.ObservedUntil;
-				content.container.appendChild(untilLbl);
-				const until = new Ui.Input("text");
-				until.value = Utils.toYYYY_MM_DD_hh_mm(report.until);
-				until.setDisabled(true);
-				content.attach(until);
-			}
-		}
-
-		if (report.comment.text !== "") {
-			const privateCommentLbl = document.createElement("h3");
-			privateCommentLbl.className = "title";
-			privateCommentLbl.innerHTML = App.translations.PrivateComment;
-			content.container.appendChild(privateCommentLbl);
-			const privateComment = document.createElement("textarea");
-			privateComment.style.height = "128px";
-			privateComment.disabled = true;
-			privateComment.textContent = report.comment.text;
-			content.container.appendChild(privateComment);
-		}
-
-		const listsLbl = document.createElement("h3");
-		listsLbl.className = "title";
-		listsLbl.innerHTML = App.translations.Checklists;
-		content.container.appendChild(listsLbl);
-		content.attach(self.mChecklistContainer);
-
+		const lists = sheet.section(App.translations.Checklists);
+		const listChips = document.createElement("div");
+		listChips.className = "chips";
+		lists.appendChild(listChips);
 		report.lists.forEach(e => {
-			const dd = new Ui.Div();
-			dd.style.position = "relative";
-			dd.style.width = "100%";
-			self.mChecklistContainer.attach(dd);
-			const c = new Ui.Input("checkbox");
-			c.container.setAttribute("disabled", "");
-			(c.container as HTMLInputElement).checked = true;
-
-			dd.attach(c);
-			const cLbl = document.createElement("label");
-			cLbl.setAttribute("for", c.container.getAttribute("name")!);
-			cLbl.textContent = App.getTranslation(e.name);
-			dd.container.appendChild(cLbl);
+			const chip = document.createElement("span");
+			chip.className = "chip";
+			chip.innerHTML = "<span class='list-dot' style='--dot: " + Utils.escapeHtml(e.color !== "" ? e.color : "var(--blue)") + ";'></span>" + Utils.escapeHtml(App.getTranslation(e.name));
+			listChips.appendChild(chip);
 		});
 
 		if (report.tags.length > 0) {
-			const tagsLbl = document.createElement("h3");
-			tagsLbl.className = "title";
-			tagsLbl.innerHTML = App.translations.Tags;
-			content.container.appendChild(tagsLbl);
-
-			const tagsContainer = new Ui.Div();
-			tagsContainer.style.position = "relative";
-			content.attach(tagsContainer);
-
+			const tags = sheet.section(App.translations.Tags);
+			const tagChips = document.createElement("div");
+			tagChips.className = "chips";
+			tags.appendChild(tagChips);
 			report.tags.forEach(e => {
 				const tag = document.createElement("div");
 				tag.className = "tag";
@@ -181,21 +126,15 @@ class EditReportPopUp {
 				const c = document.createElement("p");
 				c.textContent = e.name;
 				tag.appendChild(c);
-				tagsContainer.container.appendChild(tag);
+				tagChips.appendChild(tag);
 			});
 		}
 
-		this.mReportButton = document.createElement("button");
-		this.mReportButton.innerHTML = App.translations.ArchiveSighting;
-		this.mReportButton.style.width = "auto";
-		this.mReportButton.style.cssFloat = "right";
-		this.mReportButton.style.borderRadius = "8px";
-		this.mReportButton.style.backgroundColor = "var(--danger)";
-		this.mReportButton.addEventListener("click", function () {
-			new Ui.ConfirmBox(App.translations.ArchiveSighting, App.translations.ConfirmArchiveSighting, "/img/messagebox-256.webp", "var(--success-color)", function () {
+		sheet.addAction(Ui.actionButton(App.translations.ArchiveSighting, "archive", "secondary")).addEventListener("click", function () {
+			new Ui.ConfirmBox(App.translations.ArchiveSighting, App.translations.ConfirmArchiveSighting, "/img/messagebox-256.webp", "var(--error-color)", function () {
 				const r = new HttpRequest("POST", "/v1/reports/" + report.uuid + "/archive");
 				r.process(function (status: any, data: any) {
-					self.mPopUp.close();
+					self.mSheet.close();
 					setTimeout(() => {
 						location.reload();
 					}, 150);
@@ -203,9 +142,15 @@ class EditReportPopUp {
 			}, function () {
 			}, App.translations.ArchiveSighting, App.translations.Cancel);
 		});
-		content.container.appendChild(this.mReportButton);
 
-		this.mPopUp = new Ui.PopUp(content.container, function () {
+		// The species photo for the header.
+		new HttpRequest("GET", "/v1/species/" + report.species.uuid).process(function (status: any, data: any) {
+			sheet.setHeroImage(wikipediaHeroUrl(data.wikipedia || {}));
+		}, function () {
+			sheet.setHeroImage("");
+		});
+
+		sheet.open(function () {
 			closeCallback();
 		});
 	}

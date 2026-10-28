@@ -1,12 +1,9 @@
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: AGPL-3.0-or-later
 package site
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
-	"io"
-	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -38,6 +35,9 @@ func newTestSite(t *testing.T, c config.Site) (*Site, *gin.Engine) {
 	s, err := New(c, nil)
 	if err != nil {
 		t.Fatal(err)
+	}
+	s.stats = func() (*controllers.SiteStats, error) {
+		return &controllers.SiteStats{Birders: 386, Sightings: 20401, Species: 449}, nil
 	}
 	r := gin.New()
 	s.Register(r)
@@ -89,6 +89,9 @@ func TestLandingPage(t *testing.T) {
 	sv := get(r, "300sf.se:443", "/?lang=sv").Body.String()
 	if !strings.Contains(sv, `<html lang="sv">`) || !strings.Contains(sv, "Talgoxe") {
 		t.Error("?lang=sv did not give the Swedish landing page")
+	}
+	if !strings.Contains(body, "20,401") || !strings.Contains(sv, "20\u00a0401") {
+		t.Error("community numbers are missing or not grouped per language")
 	}
 
 	browser := get(r, "300sf.se", "/", "Accept-Language", "sv-SE,sv;q=0.9,en;q=0.8").Body.String()
@@ -274,50 +277,6 @@ func TestAppSignInRejectsBadBody(t *testing.T) {
 	r.ServeHTTP(w, httptest.NewRequest(http.MethodPost, "/api/v1/auth", strings.NewReader("{")))
 	if w.Code != http.StatusBadRequest || len(w.Result().Cookies()) != 0 {
 		t.Errorf("bad body = %d with %d cookies", w.Code, len(w.Result().Cookies()))
-	}
-}
-
-func TestAnalyze(t *testing.T) {
-	_, r := newTestSite(t, cfg)
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, httptest.NewRequest(http.MethodPost, "/analyze", nil))
-	if w.Code != http.StatusServiceUnavailable {
-		t.Errorf("disabled analyze = %d", w.Code)
-	}
-
-	var gotType, gotBody string
-	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		gotType = r.Header.Get("Content-Type")
-		b, _ := io.ReadAll(r.Body)
-		gotBody = string(b)
-		w.Write([]byte(`{"birds":[]}`))
-	}))
-	defer upstream.Close()
-
-	c := cfg
-	c.AnalyzeEndpoint = upstream.URL + "/analyze"
-	_, r = newTestSite(t, c)
-	var buf bytes.Buffer
-	mw := multipart.NewWriter(&buf)
-	fw, _ := mw.CreateFormFile("audio", "recording.wav")
-	fw.Write([]byte{1, 2, 3})
-	mw.WriteField("meta", `{"save":false}`)
-	mw.Close()
-	// A real server: the reverse proxy needs CloseNotify, which
-	// httptest.ResponseRecorder lacks.
-	srv := httptest.NewServer(r)
-	defer srv.Close()
-	res, err := http.Post(srv.URL+"/analyze", mw.FormDataContentType(), &buf)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer res.Body.Close()
-	resBody, _ := io.ReadAll(res.Body)
-	if res.StatusCode != http.StatusOK || string(resBody) != `{"birds":[]}` {
-		t.Fatalf("analyze = %d %s", res.StatusCode, resBody)
-	}
-	if !strings.HasPrefix(gotType, "multipart/form-data; boundary=") || !strings.Contains(gotBody, `filename="recording.wav"`) {
-		t.Errorf("upload not forwarded unchanged: %s", gotType)
 	}
 }
 

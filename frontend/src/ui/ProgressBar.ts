@@ -10,11 +10,7 @@ namespace Ui {
 			this.addClass("uix-progress-bar");
 
 			this.mProgression = new Div();
-			this.mProgression.style.width = "0%";
-			this.mProgression.style.height = "100%";
-			this.mProgression.style.backgroundColor = "var(--seen)";
-			this.mProgression.style.borderRadius = "3px";
-			this.mProgression.style.transitionDuration = "1s";
+			this.mProgression.addClass("uix-progress-fill");
 
 			this.attach(this.mProgression);
 		}

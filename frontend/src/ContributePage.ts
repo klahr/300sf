@@ -14,6 +14,7 @@ class ContributePage extends Page {
 		this.container.appendChild(title);
 
 		const description = document.createElement("p");
+		description.className = "lead";
 		description.innerHTML = App.translations.ContributionDescription;
 		this.container.appendChild(description);
 	}

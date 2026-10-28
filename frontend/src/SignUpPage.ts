@@ -6,6 +6,7 @@ class SignUpPage extends Page {
 
 	constructor(appListener: IAppListener) {
 		super(appListener);
+		this.addClass("auth-page");
 
 		const content = new Ui.Div();
 		content.style.position = "relative";
@@ -14,7 +15,7 @@ class SignUpPage extends Page {
 		this.attach(content);
 		const logo = document.createElement("img");
 		logo.src = "/img/birds-192.webp";
-		logo.alt = "TODO";
+		logo.alt = "";
 		logo.width = 192;
 		logo.height = 192;
 		logo.style.borderRadius = "50%";
@@ -40,26 +41,20 @@ class SignUpPage extends Page {
 		password.setPlaceHolder(App.translations.Password);
 		this.attach(password);
 
+		const termsRow = document.createElement("div");
+		termsRow.className = "check-row";
+		this.container.appendChild(termsRow);
+
 		const acceptTerms = new Ui.Input("checkbox");
-		acceptTerms.style.position = "relative";
 		acceptTerms.container.setAttribute("name", "accept_terms");
 		acceptTerms.container.id = "accept_terms";
-		this.attach(acceptTerms);
+		this.mChildren.push(acceptTerms);
+		termsRow.appendChild(acceptTerms.container);
 
 		const acceptTermsLbl = document.createElement("label");
 		acceptTermsLbl.setAttribute("for", acceptTerms.container.id);
-		acceptTermsLbl.innerHTML = App.translations.AcceptTerms;
-		this.container.appendChild(acceptTermsLbl);
-
-		this.container.appendChild(document.createElement("br"));
-		const help = document.createElement("a");
-		help.style.fontSize = "0.8rem";
-		help.style.margin = "var(--small-distance)";
-		help.style.display = "block";
-		help.target = "_blank";
-		help.innerHTML = App.translations.TermsOfService;
-		help.href = "/terms";
-		this.container.appendChild(help);
+		acceptTermsLbl.innerHTML = App.translations.AcceptTerms + " (<a target='_blank' href='/terms'>" + App.translations.TermsOfService.toLowerCase() + "</a>)";
+		termsRow.appendChild(acceptTermsLbl);
 
 		const signUp = document.createElement("button");
 		signUp.disabled = false;
@@ -75,12 +70,29 @@ class SignUpPage extends Page {
 				accepted_terms: termsAccepted,
 			};
 
+			Ui.setBusy(signUp, true);
 			const r = new HttpRequest("POST", "/v1/users", content);
 			r.process(function (status: any, data: any) {
-				password.value = "",
-					self.appListener.showPage("home", { "email": email.value, "display_name": self.mDisplayName.value });
+				// Signed up: sign in right away instead of asking for the password again.
+				const auth = new HttpRequest("POST", "/v1/auth", {
+					grant_type: "password",
+					email: content.email,
+					password: content.password,
+					scopes: ["user"],
+					stay_signed_in: true
+				});
+				auth.setNoRetry();
+				auth.process(function (status: any, data: Responses.AuthenticationResponse) {
+					Session.store(data);
+					window.open("/home", "_self");
+				}, function () {
+					Ui.setBusy(signUp, false);
+					password.value = "";
+					self.appListener.showPage("home", { "email": content.email, "display_name": content.display_name });
+				});
 			}, function (status: any, data: Responses.GeneralErrorResponse, error: any) {
-				switch (data.code) {
+				Ui.setBusy(signUp, false);
+				switch (data ? data.code : 0) {
 					case Responses.ErrorCode.ErrorSignUpInvalidDisplayName:
 						new Ui.MessageBox(App.translations.Error, App.translations.InvalidDisplayName, "/img/messagebox-256.webp", "var(--error-color)", function () { });
 						break;
@@ -112,10 +124,15 @@ class SignUpPage extends Page {
 		this.container.appendChild(alreadyHaveAccount);
 	}
 
+	// The server only accepts a-z, 0-9 and ".#-" in usernames, so "Åsa Ödman" becomes "asa-odman#123".
 	private getUsername(): string {
-		let username = this.mDisplayName.value.toLowerCase();
+		let username = this.mDisplayName.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+		username = username.replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").substring(0, 24);
+		if (username.length < 3) {
+			username = "birder";
+		}
 		const randomNumber = Math.floor(Math.random() * (999 - 100 + 1)) + 100;
-		return username.replace(/ /g, "-") + "#" + randomNumber;
+		return username + "#" + randomNumber;
 	}
 
 	public get id(): string {

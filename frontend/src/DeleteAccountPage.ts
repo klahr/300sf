@@ -4,6 +4,7 @@
 class DeleteAccountPage extends Page {
 	constructor(appListener: IAppListener) {
 		super(appListener);
+		this.addClass("auth-page");
 
 		const content = new Ui.Div();
 		content.style.position = "relative";
@@ -12,7 +13,8 @@ class DeleteAccountPage extends Page {
 		this.attach(content);
 		const logo = document.createElement("img");
 		logo.src = "/img/birds-192.webp";
-		logo.alt = "TODO";
+		logo.alt = "";
+		logo.classList.add("shadow");
 		logo.width = 192;
 		logo.height = 192;
 		logo.style.borderRadius = "50%";
@@ -29,6 +31,7 @@ class DeleteAccountPage extends Page {
 
 		const self = this;
 		const set = document.createElement("button");
+		set.className = "danger";
 		set.innerHTML = App.translations.DeleteAccount;
 		set.addEventListener("click", function () {
 			password.setDisabled(true);

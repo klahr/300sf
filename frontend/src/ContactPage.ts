@@ -21,6 +21,7 @@ class ContactPage extends Page {
 		this.container.appendChild(title);
 
 		const contactDescription = document.createElement("p");
+		contactDescription.className = "lead";
 		contactDescription.innerHTML = App.translations.ContactDescription;
 		this.container.appendChild(contactDescription);
 
@@ -32,7 +33,7 @@ class ContactPage extends Page {
 		this.attach(this.mSubject);
 
 		this.mMessage = document.createElement("textarea");
-		this.mMessage.style.height = "128px";
+		this.mMessage.rows = 6;
 		this.mMessage.placeholder = App.translations.Message;
 		this.mMessage.addEventListener("input", function () {
 			self.verify();
@@ -40,6 +41,7 @@ class ContactPage extends Page {
 		this.container.appendChild(this.mMessage);
 
 		this.mSendButton = document.createElement("button");
+		this.mSendButton.className = "inline end";
 		this.mSendButton.innerHTML = App.translations.Send;
 		this.mSendButton.disabled = true;
 		this.mSendButton.addEventListener("click", function () {
@@ -48,7 +50,7 @@ class ContactPage extends Page {
 				message: self.mMessage.value
 			};
 
-			self.mSendButton.disabled = true;
+			Ui.setBusy(self.mSendButton, true);
 			self.mSendButton.innerHTML = App.translations.Sending + "...";
 			self.mSubject.container.setAttribute("disabled", "disabled");
 			self.mMessage.setAttribute("disabled", "disabled");
@@ -62,13 +64,17 @@ class ContactPage extends Page {
 				new Ui.MessageBox(App.translations.Contact, App.translations.MessageNotDelivered, "/img/messagebox-256.webp", "var(--error-color)", function () { });
 			}, function () {
 				self.mSendButton.innerHTML = App.translations.Send;
-				self.mSendButton.disabled = false;
+				Ui.setBusy(self.mSendButton, false);
+				// Stays disabled until there is a new message to send.
+				self.verify();
 				self.mSubject.container.removeAttribute("disabled");
 				self.mMessage.removeAttribute("disabled");
 			});
 		});
 
 		this.container.appendChild(this.mSendButton);
+
+		this.wrapInCard(this.mSubject.container);
 	}
 
 	private verify(): void {

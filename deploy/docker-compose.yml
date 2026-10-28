@@ -22,3 +22,18 @@ services:
       options:
         max-size: "10m"
         max-file: "5"
+
+  # Bird sound identification (BirdNET). Set site.analyze-endpoint to
+  # http://127.0.0.1:8095/analyze to use it; leave it empty to disable the feature.
+  analyzer:
+    container_name: 300sf-analyzer
+    build:
+      context: ../analyzer
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8095:8080"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

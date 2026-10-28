@@ -1,4 +1,117 @@
-/* Older names used throughout the TypeScript, mapped onto the shared tokens. */
+/* The app's theme, layered on the shared tokens. Dark is the 300sf look; light follows the system unless
+ * the user picks one (data-theme on <html>, set before the first paint in app-head.html). */
+:root {
+	--font-body: 'Inter', 'Roboto', system-ui, sans-serif;
+
+	--paper: #0b0a0d;
+	--surface: #141317;
+	--surface-raised: #1c1b20;
+	--surface-sunk: #24222a;
+	--surface-hover: #2b2932;
+	--line: #2e2c35;
+	--line-strong: #403d48;
+	--ink: #f4f2f7;
+	--ink-soft: #a9a5b3;
+	--ink-faint: #75717f;
+	--primary: #c0118a;
+	--primary-strong: #d9289f;
+	--primary-soft: color-mix(in srgb, var(--primary) 18%, transparent);
+	--primary-ink: #f070c4;
+	--on-primary: #ffffff;
+	--accent: #e8b46c;
+	--blue: #3aa0d4;
+	--seen: #7cc24c;
+	--seen-soft: color-mix(in srgb, var(--seen) 16%, transparent);
+	--on-seen: #0b1a05;
+	--danger: #f7768e;
+	--scrim: rgba(4, 3, 6, 0.66);
+	--comment: #1b3640;
+
+	--shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.25);
+	--shadow-2: 0 4px 12px -2px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.3);
+	--shadow-3: 0 24px 64px -12px rgba(0, 0, 0, 0.75), 0 8px 24px -8px rgba(0, 0, 0, 0.5);
+	--glass: color-mix(in srgb, var(--paper) 78%, transparent);
+
+	--radius-s: 8px;
+	--radius-m: 14px;
+	--radius-l: 22px;
+
+	--ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+	--ease-in: cubic-bezier(0.55, 0, 1, 0.45);
+	--dur-fast: 140ms;
+	--dur: 240ms;
+	--dur-slow: 380ms;
+
+	--sidebar-width: 264px;
+	/* Width taken by the navigation beside the page: the sidebar when signed in on large screens. */
+	--nav-width: 0px;
+	--tab-bar-height: 64px;
+	--app-bar-height: 60px;
+	--content-width: 880px;
+
+	color-scheme: dark;
+}
+
+/* Light: same hues, tuned for contrast on white. */
+:root[data-theme="light"] {
+	--paper: #f5f3f7;
+	--surface: #ffffff;
+	--surface-raised: #ffffff;
+	--surface-sunk: #eeebf1;
+	--surface-hover: #e7e3eb;
+	--line: #e3dfe7;
+	--line-strong: #cfc9d6;
+	--ink: #1a1720;
+	--ink-soft: #5d5866;
+	--ink-faint: #8b8693;
+	--primary: #a80c78;
+	--primary-strong: #8f0966;
+	--primary-ink: #a80c78;
+	--accent: #9a6514;
+	--blue: #1478a8;
+	--seen: #3f8a1c;
+	--danger: #c8354f;
+	--scrim: rgba(26, 20, 32, 0.42);
+	--comment: #e1f0f5;
+
+	--shadow-1: 0 1px 2px rgba(30, 20, 40, 0.06), 0 1px 3px rgba(30, 20, 40, 0.08);
+	--shadow-2: 0 6px 16px -4px rgba(30, 20, 40, 0.14), 0 2px 4px rgba(30, 20, 40, 0.06);
+	--shadow-3: 0 24px 64px -12px rgba(30, 20, 40, 0.3), 0 8px 24px -8px rgba(30, 20, 40, 0.12);
+
+	color-scheme: light;
+}
+
+@media (prefers-color-scheme: light) {
+	:root:not([data-theme="dark"]) {
+		--paper: #f5f3f7;
+		--surface: #ffffff;
+		--surface-raised: #ffffff;
+		--surface-sunk: #eeebf1;
+		--surface-hover: #e7e3eb;
+		--line: #e3dfe7;
+		--line-strong: #cfc9d6;
+		--ink: #1a1720;
+		--ink-soft: #5d5866;
+		--ink-faint: #8b8693;
+		--primary: #a80c78;
+		--primary-strong: #8f0966;
+		--primary-ink: #a80c78;
+		--accent: #9a6514;
+		--blue: #1478a8;
+		--seen: #3f8a1c;
+		--danger: #c8354f;
+		--scrim: rgba(26, 20, 32, 0.42);
+		--comment: #e1f0f5;
+
+		--shadow-1: 0 1px 2px rgba(30, 20, 40, 0.06), 0 1px 3px rgba(30, 20, 40, 0.08);
+		--shadow-2: 0 6px 16px -4px rgba(30, 20, 40, 0.14), 0 2px 4px rgba(30, 20, 40, 0.06);
+		--shadow-3: 0 24px 64px -12px rgba(30, 20, 40, 0.3), 0 8px 24px -8px rgba(30, 20, 40, 0.12);
+
+		color-scheme: light;
+	}
+}
+
+/* Older names used throughout the TypeScript, mapped onto the tokens. */
 :root {
 	--primary-color: var(--primary);
 	--primary-variant-color: var(--accent);

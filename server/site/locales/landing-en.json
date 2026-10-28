@@ -1,64 +1,120 @@
 {
 	"Name": "300 Swedish Birds",
-	"MetaDescription": "A checklist for birders in Sweden. Tick off species, log where and when you saw them, and compare lists with friends.",
+	"MetaDescription": "The checklist for birders in Sweden. Tick off species, log where and when you saw them, identify birds by their song and compete with friends. Free, in your browser.",
 	"Language": "Language",
+	"Menu": "Main menu",
+	"NavFeatures": "Features",
+	"NavHow": "How it works",
+	"NavFaq": "Questions",
 	"SignIn": "Sign in",
+	"CreateAccountShort": "Create account",
+	"Eyebrow": "The checklist for birders in Sweden",
 	"Headline": "Every bird you see in Sweden, in one list.",
-	"Lede": "Tick off species as you see them, note the place and the date, and watch your year list grow. Free, in your browser.",
+	"Lede": "Tick off species as you see them, note where and when, and watch your year list grow. Free, on your phone and your computer.",
 	"CreateAccount": "Create a free account",
 	"HaveAccount": "I already have an account",
-	"PlateLabel": "Example of a checklist",
-	"PlateTitle": "Year list 2026",
-	"PlateExample": "Example",
+	"HeroFacts": ["Free", "Nothing to install", "Svenska · English · Deutsch"],
+	"MockLabel": "Example of the app: a year list with 87 of 300 species, a bird identified by its song and a new species added.",
+	"MockListTitle": "Year list 2026",
+	"MockProgress": "87 of 300",
+	"MockProgressShort": "species",
 	"NotYet": "Not yet",
-	"PlateProgress": "87 of 300",
-	"PlateSpecies": [
+	"MockSpecies": [
+		{ "name": "Great tit", "latin": "Parus major", "date": "2 Jan" },
+		{ "name": "Eurasian bullfinch", "latin": "Pyrrhula pyrrhula", "date": "14 Jan" },
+		{ "name": "Common blackbird", "latin": "Turdus merula", "date": "3 Feb" },
+		{ "name": "European robin", "latin": "Erithacus rubecula", "date": "" },
+		{ "name": "Common crane", "latin": "Grus grus", "date": "" }
+	],
+	"MockIdentified": "Identified by sound",
+	"MockIdentifiedName": "Common blackbird",
+	"MockNewTitle": "New species!",
+	"MockNewText": "Common crane · number 88 this year",
+	"StatsLabel": "300sf in numbers",
+	"StatBirders": "birders",
+	"StatSightings": "sightings logged",
+	"StatSpecies": "species reported",
+	"FeaturesEyebrow": "Features",
+	"FeaturesTitle": "Everything your birding year needs",
+	"FeaturesLede": "Built by birders for birders in Sweden: quick to use in the field, and with all the details when you get home.",
+	"Showcase": [
 		{
-			"name": "Great tit",
-			"latin": "Parus major",
-			"date": "2 Jan"
+			"eyebrow": "Checklists",
+			"title": "A list for every goal",
+			"text": "Start from the 300 most common Swedish birds, or make your own list for the year, the garden or a single trip.",
+			"points": ["Ready-made list of the 300 most common species", "Your own lists, as many as you like", "Progress for every list at a glance"]
 		},
 		{
-			"name": "Eurasian blue tit",
-			"latin": "Cyanistes caeruleus",
-			"date": "2 Jan"
+			"eyebrow": "Sightings",
+			"title": "Where and when, kept for you",
+			"text": "Each sighting keeps its date and position and is placed in the right county and municipality automatically.",
+			"points": ["Position from your phone or a pin on the map", "Count, age, sex and a comment when you want them", "Export everything as CSV or JSON"]
 		},
 		{
-			"name": "Eurasian bullfinch",
-			"latin": "Pyrrhula pyrrhula",
-			"date": "14 Jan"
+			"eyebrow": "Identify by sound",
+			"title": "Hear a bird you don't know?",
+			"text": "Record up to ten seconds of song and get the most likely species, with how sure the guess is. Pick one to report it.",
+			"points": ["Works with the phone's microphone", "Suggests species that occur in Sweden at this time of year", "Recognition by BirdNET"]
 		},
 		{
-			"name": "European robin",
-			"latin": "Erithacus rubecula",
-			"date": ""
-		},
-		{
-			"name": "Common blackbird",
-			"latin": "Turdus merula",
-			"date": "3 Feb"
-		},
-		{
-			"name": "Common crane",
-			"latin": "Grus grus",
-			"date": ""
+			"eyebrow": "Competitions",
+			"title": "Bird together with friends",
+			"text": "Set a period and a species list, invite your friends and follow who gets furthest.",
+			"points": ["Your own rules: period, list and number of participants", "Optionally the first to reach a number of species wins", "Invite friends or open it to everyone"]
 		}
 	],
-	"FeaturesLabel": "What you can do",
-	"Features": [
-		{
-			"title": "Lists for every goal",
-			"text": "Start from the 300 most common Swedish birds or build your own list: a year list, a list for your garden, or one for a single trip."
-		},
-		{
-			"title": "Where and when",
-			"text": "Each sighting keeps its date and position, and is placed in the right county and municipality automatically. Export everything as CSV whenever you like."
-		},
-		{
-			"title": "Bird with friends",
-			"text": "Share a list and compare it with friends' lists species by species, or set up a competition for a season."
-		}
+	"MockSighting": "Sighting",
+	"MockSightingSpecies": "Eurasian bullfinch",
+	"MockSightingDate": "14 Jan 2026 · 08:42",
+	"MockSightingPlace": "Kalmar county · Mörbylånga",
+	"MockSightingCount": "3 individuals",
+	"MockLists": [
+		{ "name": "Year list 2026", "seen": 87, "total": 300 },
+		{ "name": "The garden", "seen": 23, "total": 40 },
+		{ "name": "Öland, May", "seen": 64, "total": 120 }
 	],
+	"MockRecording": "Recording…",
+	"MockResults": [
+		{ "name": "Common blackbird", "latin": "Turdus merula", "percent": 99 },
+		{ "name": "Song thrush", "latin": "Turdus philomelos", "percent": 12 }
+	],
+	"MockCompetition": "Spring race 2026",
+	"MockCompetitionMeta": "1 March – 31 May · 300 species",
+	"MockStandings": [
+		{ "name": "Anna", "count": 142 },
+		{ "name": "Erik", "count": 137 },
+		{ "name": "You", "count": 131 },
+		{ "name": "Maja", "count": 118 }
+	],
+	"More": [
+		{ "icon": "photo", "title": "Know the bird", "text": "Photos and a short description from Wikipedia for every species." },
+		{ "icon": "import", "title": "Bring your old sightings", "text": "Import everything from the 300 Svenska Fåglar app in one go." },
+		{ "icon": "devices", "title": "Phone and computer", "text": "The same lists everywhere, in the browser you already have." }
+	],
+	"HowEyebrow": "How it works",
+	"HowTitle": "Up and running in a minute",
+	"Steps": [
+		{ "title": "Create an account", "text": "All you need is an email address. It's free." },
+		{ "title": "Choose a list", "text": "Start with the 300 most common species, or make your own." },
+		{ "title": "Tick off birds", "text": "Report what you see. Your lists and statistics update right away." }
+	],
+	"FaqEyebrow": "Questions",
+	"FaqTitle": "Good to know",
+	"Faq": [
+		{ "q": "Does it cost anything?", "a": "No. 300 Swedish Birds is free to use. You can support the project with a donation if you like." },
+		{ "q": "Which birds are included?", "a": "The ready-made list has the 300 most common birds in Sweden. Your own lists can include any of over 2,000 species in the catalogue." },
+		{ "q": "I used the 300 Svenska Fåglar app. Can I keep my sightings?", "a": "Yes. Sign in, open Account and import your sightings with the app's email and password." },
+		{ "q": "Do I need to install an app?", "a": "No. 300 Swedish Birds runs in the browser on your phone, tablet and computer." },
+		{ "q": "Can I get my data out?", "a": "Yes. Download a list as a spreadsheet (CSV) or all your data at once, whenever you like." },
+		{ "q": "How reliable is the sound identification?", "a": "It is a suggestion, not a certain identification. It works best with a clear recording of a singing bird, close by." }
+	],
+	"CtaTitle": "Start your list today",
+	"CtaText": "Free, and ready in a minute. The next bird you see could be the first one on it.",
+	"FooterTagline": "The checklist for birders in Sweden.",
+	"FooterProduct": "300sf",
+	"FooterLegal": "Legal",
+	"ApiDocs": "API",
 	"Terms": "Terms of service",
-	"Privacy": "Privacy policy"
+	"Privacy": "Privacy policy",
+	"Credits": "Species photos and texts from Wikipedia. Sound identification by BirdNET."
 }

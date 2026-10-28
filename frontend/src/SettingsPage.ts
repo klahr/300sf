@@ -4,6 +4,7 @@
 /// <reference path="ui/Input.ts"/>
 /// <reference path="ui/MessageBox.ts"/>
 /// <reference path="App.ts"/>
+/// <reference path="Theme.ts"/>
 
 class SettingsPage extends Page {
 	private mEmail: Ui.Input;
@@ -18,8 +19,48 @@ class SettingsPage extends Page {
 		this.addProfile();
 
 		const title = document.createElement("h1");
-		title.innerHTML = App.translations.Account;
+		title.innerHTML = App.translations.Settings;
 		this.container.appendChild(title);
+
+		const appearanceLbl = document.createElement("h2");
+		appearanceLbl.innerHTML = App.translations.Appearance;
+		this.container.appendChild(appearanceLbl);
+
+		const themes = document.createElement("div");
+		themes.className = "segmented";
+		themes.setAttribute("role", "radiogroup");
+		this.container.appendChild(themes);
+		[["system", "contrast", App.translations.ThemeSystem], ["light", "light_mode", App.translations.ThemeLight], ["dark", "dark_mode", App.translations.ThemeDark]].forEach(t => {
+			const capitalize = (v: string) => v.charAt(0).toUpperCase() + v.slice(1);
+			const b = document.createElement("button");
+			b.setAttribute("role", "radio");
+			b.dataset.theme = t[0];
+			// "Theme: light" reads as just "light" next to the others.
+			b.innerHTML = "<span class='material-symbols-outlined'>" + t[1] + "</span>" + Utils.escapeHtml(capitalize(t[2].split(": ").pop()!));
+			b.addEventListener("click", function () {
+				Theme.set(t[0]);
+				self.updateTheme(themes);
+			});
+			themes.appendChild(b);
+		});
+		this.updateTheme(themes);
+
+		// Labels: few use them, so they live here rather than in the navigation.
+		const labelsLbl = document.createElement("h2");
+		labelsLbl.innerHTML = App.translations.Tags;
+		this.container.appendChild(labelsLbl);
+
+		const labelsDescription = document.createElement("p");
+		labelsDescription.textContent = App.translations.LabelsDescription;
+		this.container.appendChild(labelsDescription);
+
+		const labelsButton = document.createElement("button");
+		labelsButton.className = "secondary";
+		labelsButton.innerHTML = "<span class='material-symbols-outlined'>label</span>" + App.translations.ManageLabels;
+		labelsButton.addEventListener("click", function () {
+			appListener.showPage("tags", null);
+		});
+		this.container.appendChild(labelsButton);
 
 		const importSubmissionsLbl = document.createElement("h2");
 		importSubmissionsLbl.innerHTML = App.translations.ImportData;
@@ -68,10 +109,10 @@ class SettingsPage extends Page {
 			r.process(function (status: any, data: any) {
 				self.refresh();
 				new Ui.MessageBox(App.translations.Success, App.translations.SightingsImportSuccess, "/img/messagebox-256.webp", "var(--success-color)", function () { });
-				self.mPassword.container.innerHTML = "";
+				self.mPassword.value = "";
 			}, function () {
 				self.mImportButton.disabled = false;
-				self.mImportButton.innerHTML = "Import";
+				self.mImportButton.innerHTML = App.translations.Import;
 				self.mEmail.container.removeAttribute("disabled");
 				self.mPassword.container.removeAttribute("disabled");
 				new Ui.MessageBox(App.translations.Error, App.translations.WrongImportCredentials, "/img/messagebox-256.webp", "var(--error-color)", function () { });
@@ -91,14 +132,14 @@ class SettingsPage extends Page {
 		const exportDataButton = document.createElement("button");
 		exportDataButton.innerHTML = App.translations.ExportMyData;
 		exportDataButton.addEventListener("click", function () {
-			exportDataButton.disabled = true;
+			Ui.setBusy(exportDataButton, true);
 			const r = new HttpRequest("GET", "/v1/users/export");
 			r.process(function (status: any, data: any) {
-				DownloadFile("data.json", JSON.stringify(data, null, 2));
+				DownloadFile(Utils.exportFileName("export", "json"), JSON.stringify(data, null, 2));
 			}, function () {
 				new Ui.MessageBox(App.translations.Error, App.translations.SomethingWentWrong, "/img/messagebox-256.webp", "var(--error-color)", function () { });
 			}, function () {
-				exportDataButton.disabled = false;
+				Ui.setBusy(exportDataButton, false);
 			});
 		});
 
@@ -126,7 +167,7 @@ class SettingsPage extends Page {
 		this.attach(deleteAccountPassword);
 
 		deleteAccountButton.innerHTML = App.translations.DeleteAccount;
-		deleteAccountButton.style.backgroundColor = "red";
+		deleteAccountButton.className = "danger";
 		deleteAccountButton.addEventListener("click", function () {
 			deleteAccountButton.disabled = true;
 			deleteAccountPassword.container.setAttribute("disabled", "");
@@ -137,7 +178,7 @@ class SettingsPage extends Page {
 			r.process(function (status: any, data: any) {
 				self.refresh();
 				new Ui.MessageBox(App.translations.Success, App.translations.CheckEmailInstructions, "/img/messagebox-256.webp", "var(--success-color)", function () { });
-				deleteAccountPassword.container.innerHTML = "";
+				deleteAccountPassword.value = "";
 			}, function () {
 				deleteAccountButton.disabled = false;
 				deleteAccountPassword.container.removeAttribute("disabled");
@@ -146,6 +187,18 @@ class SettingsPage extends Page {
 		});
 
 		this.container.appendChild(deleteAccountButton);
+
+		const cards = this.groupSections();
+		cards[cards.length - 1].classList.add("danger");
+	}
+
+	private updateTheme(themes: HTMLElement): void {
+		const theme = Theme.get();
+		themes.querySelectorAll("button").forEach(b => {
+			const selected = b.dataset.theme === theme;
+			b.classList.toggle("selected", selected);
+			b.setAttribute("aria-checked", selected ? "true" : "false");
+		});
 	}
 
 	public get id(): string {

@@ -52,4 +52,9 @@ setup.
 
 ## License
 
-The server is GPL-2.0-or-later (`server/COPYING`); the CLI is MIT (`cli/LICENSE`).
+300sf (server, web app, CLI and analyzer) is licensed under the GNU Affero
+General Public License v3.0 or later; see [`LICENSE`](LICENSE). If you run a
+modified version as a service, its users must be able to get its source.
+
+Sound identification uses the BirdNET model, which is licensed separately
+under CC BY-NC-SA 4.0 (non-commercial use only).

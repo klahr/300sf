@@ -3,6 +3,7 @@
 class SetPasswordPage extends Page {
 	constructor(appListener: IAppListener) {
 		super(appListener);
+		this.addClass("auth-page");
 
 		const content = new Ui.Div();
 		content.style.position = "relative";
@@ -11,14 +12,14 @@ class SetPasswordPage extends Page {
 		this.attach(content);
 		const logo = document.createElement("img");
 		logo.src = "/img/birds-192.webp";
-		logo.alt = "TODO";
+		logo.alt = "";
 		logo.width = 192;
 		logo.height = 192;
 		logo.style.borderRadius = "50%";
 		content.container.appendChild(logo);
 
 		const title = document.createElement("h1");
-		title.innerHTML = "New password";
+		title.innerHTML = App.translations.NewPassword;
 		this.container.appendChild(title);
 
 		const password = new Ui.Input("password");
@@ -29,7 +30,7 @@ class SetPasswordPage extends Page {
 		const self = this;
 		let inFlight = false;
 		const set = document.createElement("button");
-		set.innerHTML = "Set Password";
+		set.innerHTML = App.translations.SaveNewPassword;
 		set.addEventListener("click", function () {
 			// The token is single use, a second submission would report the link as
 			// expired right after the first one succeeded.
