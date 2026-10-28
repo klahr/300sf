@@ -1,0 +1,247 @@
+/// <reference path="ui/Table.ts"/>
+/// <reference path="ui/ProgressBar.ts"/>
+/// <reference path="ui/Image.ts"/>
+/// <reference path="utils/Report.ts"/>
+/// <reference path="HttpRequest.ts"/>
+/// <reference path="Page.ts"/>
+/// <reference path="models/Order.ts"/>
+/// <reference path="models/Report.ts"/>
+/// <reference path="models/List.ts"/>
+/// <reference path="SpeciesPopUp.ts"/>
+/// <reference path="OrderPopUp.ts"/>
+
+class ListPage extends Page {
+	private mTitle: HTMLHeadingElement;
+	private mTable: Ui.Table;
+	private mProgress: Ui.ProgressBar;
+	private mProgressLbl: HTMLParagraphElement;
+	private mFilterInput: Ui.Input;
+	private mFilterTitle: HTMLParagraphElement;
+
+	constructor(appListener: IAppListener) {
+		super(appListener);
+
+		const self = this;
+
+		this.mTitle = document.createElement("h1");
+		this.container.appendChild(this.mTitle);
+
+		const download = document.createElement("span");
+		download.className = "material-symbols-outlined";
+		download.innerHTML = "download";
+		download.style.color = "var(--primary-color)";
+		download.style.fontSize = "32px";
+		download.style.cursor = "pointer";
+		download.addEventListener("click", function (event) {
+			event.stopPropagation();
+			const d = {
+				"list_uuid": self.mData.uuid,
+				"format": "csv",
+				"timezone_offset": Utils.getTimezoneOffset()
+			};
+			const r = new HttpRequest("PUT", "/v1/reports/export", d);
+			r.process(function (status: any, data: any) {
+				DownloadFile("data.csv", JSON.stringify(data), "text/csv");
+			}, function () {
+				new Ui.MessageBox(App.translations.Error, App.translations.SomethingWentWrong, "/img/messagebox-256.webp", "var(--error-color)", function () { });
+			});
+		});
+		this.container.appendChild(download);
+
+		this.mProgressLbl = document.createElement("p");
+		this.mProgressLbl.style.margin = "0";
+		this.mProgressLbl.style.fontWeight = "bold";
+		this.mProgressLbl.style.cssFloat = "right";
+		this.mProgressLbl.style.color = "var(--success-color)";
+		this.container.appendChild(this.mProgressLbl);
+
+		this.mProgress = new Ui.ProgressBar();
+		this.mProgress.container.style.position = "relative";
+		this.attach(this.mProgress);
+
+		this.mTable = new Ui.Table();
+		this.attach(this.mTable);
+
+		this.addProfile();
+
+		const filter = new Ui.Div
+		filter.addClass("filter");
+		this.attach(filter);
+
+		this.mFilterTitle = document.createElement("p");
+		this.mFilterTitle.style.fontSize = "0.8rem";
+		this.mFilterTitle.style.lineHeight = "normal";
+		this.mFilterTitle.style.textAlign = "center";
+		this.mFilterTitle.style.color = "#ffffffad";
+		filter.container.appendChild(this.mFilterTitle);
+
+		this.mFilterInput = new Ui.Input("text");
+		this.mFilterInput.setPlaceHolder(App.translations.Search + "...");
+		filter.attach(this.mFilterInput);
+		this.mFilterInput.container.addEventListener("focus", function () {
+			self.mFilterInput.select();
+		});
+		(this.mFilterInput.container as HTMLInputElement).addEventListener("keydown", function (e) {
+			if (e.key === "Enter") {
+				this.blur();
+			}
+		});
+		(this.mFilterInput.container as HTMLInputElement).addEventListener("keyup", function () {
+			const listEntries = self.mTable.container.getElementsByTagName("tr");
+			const value = this.value.toLowerCase();
+			let previousOrder: HTMLTableRowElement | null = null;
+			for (let i = 0; i < listEntries.length; ++i) {
+				const h3s = listEntries[i].getElementsByTagName("h3");
+				if (h3s.length > 0) {
+					for (let j = 0; j < h3s.length; ++j) {
+						if (h3s[j].innerHTML.toLocaleLowerCase().indexOf(value) > -1) {
+							(listEntries[i] as HTMLElement).style.display = "";
+							if (previousOrder) {
+								previousOrder.style.display = "";
+								previousOrder = null;
+							}
+						} else {
+							(listEntries[i] as HTMLElement).style.display = "none";
+						}
+					}
+				} else {
+					previousOrder = listEntries[i];
+					previousOrder.style.display = "none";
+				}
+			}
+		});
+	}
+
+	public get id(): string {
+		return "list";
+	}
+
+	public requireSignIn(): boolean {
+		return true;
+	}
+
+	public onBecomeVisible(): void {
+		super.onBecomeVisible();
+		this.refresh();
+	}
+
+	private refresh(): void {
+		this.mProfile.setImage("/img/portraits/" + App.user.portrait);
+	}
+
+	public setData(data: any): void {
+		this.mData = data;
+		const self = this;
+		if (data.name === undefined) {
+			// TODO: Optimize this call that returns more then necessary.
+			const r = new HttpRequest("GET", "/v1/lists/list");
+			const superSetData = super.setData;
+			r.process(function (status: any, data: any) {
+				data.result.forEach(e => {
+					if (e.uuid === self.data.uuid) {
+						superSetData.call(self, e);
+						self.updateLists();
+						return;
+					}
+				});
+			});
+		} else {
+			this.updateLists();
+		}
+	}
+
+	private updateLists(): void {
+		history.pushState({}, "", "/" + this.id + "/" + this.data.uuid);
+		const scrollPostion = this.container.scrollTop;
+
+		this.mFilterInput.value = "";
+		this.mTitle.innerHTML = "";
+		this.mTable.clear();
+		this.mProgress.setProgress(0);
+		this.mProgressLbl.innerHTML = "";
+		const self = this;
+
+		const r = new HttpRequest("GET", "/v1/lists/" + (this.data as Models.List).uuid + "/reports");
+		r.process(function (status: any, data: any) {
+			self.mTitle.innerHTML = App.getTranslation((self.data as Models.List).name);
+			self.mFilterTitle.innerHTML = self.mTitle.innerHTML;
+			const reports = data.result as Models.Report[];
+			let lastOrder: Models.Order;
+			self.data.species.forEach(e => {
+				if (!lastOrder || lastOrder.uuid !== e.order.uuid) {
+					lastOrder = e.order;
+
+					const entry = document.createElement("div");
+					entry.style.textAlign = "center";
+					entry.style.backgroundColor = "var(--background-color)";
+					entry.className = "list-entry";
+
+					const name = document.createElement("p");
+					name.innerHTML = App.getTranslation(e.order.name).toUpperCase();
+					name.style.cursor = "pointer";
+					name.style.fontWeight = "bold";
+					name.style.fontStyle = "initial";
+					name.style.color = "var(--primary-variant-color)";
+					entry.appendChild(name);
+					name.addEventListener("click", function () {
+						openOrderPopUp(e.order);
+					});
+
+					const subName = document.createElement("p");
+					subName.innerHTML = e.order.name.la;
+					entry.appendChild(subName);
+					self.mTable.addRow([entry]);
+				}
+				const entry = document.createElement("div");
+				entry.className = "list-entry";
+
+				const name = document.createElement("h3");
+				name.innerHTML = App.getTranslation(e.name);
+				name.style.cursor = "pointer";
+				entry.appendChild(name);
+				entry.addEventListener("click", function () {
+					openSpeciesPopUp(e, self.data, (boolean) => { });
+				});
+
+				const uniqueSpeciesInReports = Utils.numberOfUniqueSpeciesInReports(reports);
+				self.mProgress.setProgress(uniqueSpeciesInReports / self.data.species.length * 100);
+				self.mProgressLbl.innerHTML = uniqueSpeciesInReports + "/" + self.data.species.length;
+
+				const subName = document.createElement("p");
+				subName.innerHTML = e.name.la;
+				entry.appendChild(subName);
+
+				const check = document.createElement("span");
+				check.className = "material-symbols-outlined";
+				check.innerHTML = "check_circle";
+				check.style.color = "var(--secondary-color)";
+				check.style.cursor = "pointer";
+				check.addEventListener("click", function (event) {
+					event.stopPropagation();
+					openReportPopUp(e, self.data, function () {
+						self.setData(self.data);
+					});
+				});
+				entry.appendChild(check);
+
+				let found = false;
+				reports.forEach(r => {
+					if (r.species.uuid === e.uuid) {
+						found = true;
+						return;
+					}
+				});
+
+				if (found) {
+					name.style.color = "var(--success-color)";
+					check.style.color = "var(--success-color)";
+				}
+
+				self.mTable.addRow([entry]);
+			});
+			self.container.scrollTop = scrollPostion;
+		}, function (status: any, data: any) {
+			console.log(data);
+		});
+	}
+}

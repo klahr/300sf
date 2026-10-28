@@ -1,0 +1,41 @@
+<%- contentFor('body') %>
+
+	<div class="surface" style="max-height: none;">
+		<a href="/"><img style="border-radius: 50%; float: left; margin-right: 16px;" width="64" src="/img/birds-256.png" alt="TODO" /></a>
+		<h1><%- data.reference_list.name.sv %></h1>
+		<table>
+			<tr>
+				<th></th>
+				<% for (let i=0; i < data.result.length; ++i) { %>
+					<th style="min-width: 100px;">
+						<p><%- data.result[i].user.display_name %></p>
+					</th>
+					<% } %>
+						</th>
+						<% for (let i=0; i < data.species.length; ++i) { %>
+			<tr>
+				<td>
+					<div class="list-entry">
+						<h3><%- data.species[i].name.sv %></h3>
+						<p><%- data.species[i].name.la %></p>
+					</div>
+				</td>
+				<% for (let j=0; j < data.result.length; ++j) { let found=false; for (let k=0; k <
+					data.result[j].reports.length; ++k) { if
+					(data.result[j].reports[k].species.uuid===data.species[i].uuid) { found=true; break; } } if (found)
+					{ %>
+					<td
+						style="border-bottom: 1px inset var(--widget-color); text-align: center; background-color: var(--secondary-variant-color);">
+						<span class="material-symbols-outlined" style="color: var(--success-color);">check_circle</span>
+					</td>
+					<% } else { %>
+						<td
+							style="border-bottom: 1px inset var(--widget-color); background-color: var(--secondary-variant-color);">
+						</td>
+						<% } } %>
+			</tr>
+			<% } %>
+		</table>
+		<input id="list-id" placeholder="ID">
+		<button onclick="window.open(window.location + ',' + document.getElementById('list-id').value, '_self');">Lägg till</button>
+	</div>

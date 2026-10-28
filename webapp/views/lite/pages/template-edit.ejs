@@ -1,0 +1,85 @@
+<%- contentFor('body') %>
+
+<h1>Edit Template</h1>
+<h2>Name</h2>
+<table border="1">
+    <form method="POST" action="/lite/list_template/<%- data.list.result.uuid %>/name">
+        <tr>
+            <td>Swedish</td>
+            <td><input name="name_sv" value="<%- data.list.result.name.sv %>"></td>
+        </tr>
+        <tr>
+            <td>English</td>
+            <td><input name="name_en" value="<%- data.list.result.name.en %>"></td>
+        </tr>
+        <tr>
+            <td colspan="2"><button type="submit">Save</td>
+        </tr>
+    </form>
+</table>
+
+<h2>Description</h2>
+<table border="1">
+    <form method="POST" action="/lite/list_template/<%- data.list.result.uuid %>/description">
+        <tr>
+            <td>Swedish</td>
+            <td><textarea name="description_sv"><%- data.list.result.description.sv %></textarea></td>
+        </tr>
+        <tr>
+            <td>English</td>
+            <td><textarea name="description_en"><%- data.list.result.description.en %></textarea></td>
+        </tr>
+        <tr>
+            <td colspan="2"><button type="submit">Save</td>
+        </tr>
+    </form>
+</table>
+
+<h2>Species (<%- data.list.result.species.length %>)</h2>
+<table border="1">
+    <form method="POST" action="/lite/list_template/<%- data.list.result.uuid %>/add_species">
+        <tr>
+            <td>
+                <select name="species_id">
+                    <% for (species of data.species.result) { %>
+                        <% if (lang == 'sv') { %>
+                            <option value="<%- species.uuid %>"><%- species.name.sv %></option>
+                        <% } else { %>
+                            <option value="<%- species.uuid %>"><%- species.name.en %></option>
+                        <% } %>
+                    <% } %>
+                </select>
+            </td>
+            <td colspan="2"><button type="submit">Add</button></td>
+        </tr>
+    </form>
+    <% for (species of data.list.result.species) { %>
+        <form method="POST" action="/lite/list_template/<%- data.list.result.uuid %>/remove_species">
+            <tr>
+                <td>
+                    <% if (lang == 'sv') { %>
+                        <a href="/lite/species/<%- species.uuid %>"><%- species.name.sv %></a>
+                    <% } else { %>
+                        <a href="/lite/species/<%- species.uuid %>"><%- species.name.en %></a>
+                    <% } %>
+                </td>
+                <td>
+                    <% if (lang == 'sv') { %>
+                        <%- species.order.name.sv %>
+                    <% } else { %>
+                        <%- species.order.name.en %>
+                    <% } %>
+                </td>
+                <td>
+                    <input type="hidden" name="species_id" value="<%- species.uuid %>"></input>
+                    <button type="submit">Remove</button>
+                </td>
+            </tr>
+        </form>
+    <% } %>
+</table>
+
+<h2>Archive Template</h2>
+<form method="POST" action="/lite/list_template/<%- data.list.result.uuid %>/archive">
+    <button type="submit">Archive Now</button>
+</form>

@@ -1,0 +1,219 @@
+<%- contentFor('body') %>
+
+<h1><%= __('title') %></h1>
+<ul>
+	<li><a href="lite/api">API</a></li>
+	<li><a href="lite/account">Account</a></li>
+	<li><a href="lite/templates">Templates</a></li>
+	<li><a href="lite/lists">Lists</a></li>
+	<li><a href="lite/translations">Translations</a></li>
+</ul>
+
+<form method="POST" action="/lite/logout">
+	<button type="submit">Log Out</button>
+</form>
+
+<h2>Lists</h2>
+<% for (list of data.report_basis.lists) { %>
+	<% if (lang == 'sv') { %>
+		<a href="/lite/list/<%- list.uuid %>"><%- list.name.sv %></a>
+	<% } else { %>
+		<a href="/lite/list/<%- list.uuid %>"><%- list.name.en %></a>
+	<% } %>
+	<br/>
+<% } %>
+
+<h2>Reports</h2>
+<form method="POST" action="/lite/report/create">
+	<table border="1">
+		<tr>
+			<td>Species</td>
+			<td>
+				<select name="species_id" required>
+					<option></option>
+					<% for (species of data.report_basis.species) { %>
+						<% if (lang == 'sv') { %>
+                            <option value="<%- species.uuid %>"><%- species.name.sv %></option>
+                        <% } else { %>
+                            <option value="<%- species.uuid %>"><%- species.name.en %></option>
+                        <% } %>
+					<% } %>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>Age</td>
+			<td>
+				<select name="age_id">
+					<option></option>
+					<% for (age of data.report_basis.ages) { %>
+						<% if (lang == 'sv') { %>
+                            <option value="<%- age.uuid %>"><%- age.name.sv %></option>
+                        <% } else { %>
+                            <option value="<%- age.uuid %>"><%- age.name.en %></option>
+                        <% } %>
+					<% } %>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>Gender</td>
+			<td>
+				<select name="gender_id">
+					<option></option>
+					<% for (gender of data.report_basis.genders) { %>
+						<% if (lang == 'sv') { %>
+                            <option value="<%- gender.uuid %>"><%- gender.name.sv %></option>
+                        <% } else { %>
+                            <option value="<%- gender.uuid %>"><%- gender.name.en %></option>
+                        <% } %>
+					<% } %>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>Method</td>
+			<td>
+				<select name="method_id">
+					<option></option>
+					<% for (method of data.report_basis.methods) { %>
+						<% if (lang == 'sv') { %>
+                            <option value="<%- method.uuid %>"><%- method.name.sv %></option>
+                        <% } else { %>
+                            <option value="<%- method.uuid %>"><%- method.name.en %></option>
+                        <% } %>
+					<% } %>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>Activity</td>
+			<td>
+				<select name="activity_id">
+					<option></option>
+					<% for (activity of data.report_basis.activities) { %>
+						<% if (lang == 'sv') { %>
+                            <option value="<%- activity.uuid %>"><%- activity.name.sv %></option>
+                        <% } else { %>
+                            <option value="<%- activity.uuid %>"><%- activity.name.en %></option>
+                        <% } %>
+					<% } %>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>Quantity</td>
+			<td>
+				<input name="quantity" type="number" value="1" step="1" min="1" required/>
+			</td>
+		</tr>
+		<tr>
+			<td>Position</td>
+			<td>
+				<input name="latitude" type="number" step="any"/><input name="longitude" type="number" step="any"/>
+			</td>
+		</tr>
+		<tr>
+			<td>From/until</td>
+			<td>
+				<input name="from" type="date"/><input name="until" type="date"/>
+			</td>
+		</tr>
+		<tr>
+			<td>Private Comment</td>
+			<td>
+				<textarea name="comment"></textarea>
+			</td>
+		</tr>
+		<tr>
+			<td>Notification Comment</td>
+			<td>
+				<textarea name="notification_comment"></textarea>
+			</td>
+		</tr>
+		<tr>
+			<td>Silent</td>
+			<td>
+				<input type="checkbox" name="silent"/>
+			</td>
+		</tr>
+		<tr>
+			<td>Lists</td>
+			<td>
+				<select name="lists" multiple>
+					<% for (list of data.report_basis.lists) { %>
+						<% if (lang == 'sv') { %>
+							<option value="<%- list.uuid %>"><%- list.name.sv %></option>
+						<% } else { %>
+							<option value="<%- list.uuid %>"><%- list.name.en %></option>
+						<% } %>
+					<% } %>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>Tags</td>
+			<td>
+				<select name="tags" multiple>
+					<% for (list of data.report_basis.tags) { %>
+						<% if (lang == 'sv') { %>
+							<option value="<%- tag.uuid %>"><%- tag.name.sv %></option>
+						<% } else { %>
+							<option value="<%- tag.uuid %>"><%- tag.name.en %></option>
+						<% } %>
+					<% } %>
+				</select>
+			</td>
+		</tr>
+	</table>
+	<br/>
+	<button type="submit">Report Now</button>
+</form>
+
+<table border="1">
+	<tr>
+		<th>From</th>
+		<th>Until</th>
+		<th>Species</th>
+		<th>Quantity</th>
+		<th>Age</th>
+		<th>Gender</th>
+		<th>Activity</th>
+		<th>Method</th>
+		<th>Where</th>
+	</tr>
+	<% for (report of data.reports.result) { %>
+		<tr>
+			<td><%- report.from %></td>
+			<td><%- report.until %></td>
+			<% if (lang == 'sv') { %>
+				<td><a href="/lite/species/<%- report.species.uuid %>"><%- report.species.name.sv %></a></td>
+			<% } else { %>
+				<td><a href="/lite/species/<%- report.species.uuid %>"><%- report.species.name.en %></a></td>
+			<% } %>
+			<td><%- report.quantity %></td>
+			<% if (lang == 'sv') { %>
+				<td><%- report.age ? report.age.name.sv : "" %></a></td>
+				<td><%- report.gender ? report.gender.name.sv : "" %></a></td>
+				<td><%- report.activity ? report.activity.name.sv : "" %></a></td>
+				<td><%- report.method ? report.method.name.sv : "" %></a></td>
+				<td><a href="https://www.google.com/maps/place/<%- report.latitude %>,<%- report.longitude %>" target="_blank"><%- report.zone ? report.zone.name.sv : (report.latitude == 0 && report.longitude == 0 ? "" : (report.latitude + "," + report.longitude)) %></a></td>
+			<% } else { %>
+				<td><%- report.age ? report.age.name.en : "" %></a></td>
+				<td><%- report.gender ? report.gender.name.en : "" %></a></td>
+				<td><%- report.activity ? report.activity.name.en : "" %></a></td>
+				<td><%- report.method ? report.method.name.en : "" %></a></td>
+				<td><a href="https://www.google.com/maps/place/<%- report.latitude %>,<%- report.longitude %>" target="_blank"><%- report.zone ? report.zone.name.en : (report.latitude == 0 && report.longitude == 0 ? "" : (report.latitude + "," + report.longitude)) %></a></td>
+			<% } %>
+		</tr>
+	<% } %>
+</table>
+
+<h2>Subscriptions</h2>
+<table border="1">
+	<tr>
+		<th>Where</th>
+		<th>Species</th>
+		<th>Paused</th>
+	</tr>
+</table>
