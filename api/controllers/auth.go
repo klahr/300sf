@@ -52,40 +52,54 @@ func Auth(c *gin.Context) {
 	var scopes string
 	var user models.User
 	if r.GrantType == "refresh_token" {
-		if token, err := ValidateToken(r.RefreshToken); token != nil {
-			t, _ := jwt.Parse(r.RefreshToken, func(token *jwt.Token) (interface{}, error) {
-				secretKey := []byte(config.AppConfig.HashingSecret)
-				return secretKey, nil
-			})
-			claims := t.Claims.(jwt.MapClaims)
-			userUuid = claims["sub"].(string)
-			scopes = claims["scp"].(string)
-
-			var user models.User
-			if err := models.DB.Where("uuid=?", userUuid).Preload("Language").First(&user).Error; err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{
-					"code":    ErrorAuthInvalid,
-					"message": "invalid email or password",
-				})
-				return
+		token, err := ValidateToken(r.RefreshToken)
+		if token == nil {
+			message := "invalid refresh token"
+			if err != nil {
+				message = err.Error()
 			}
-
-			if user.DeactivatedAt.Valid {
-				c.JSON(http.StatusBadRequest, gin.H{
-					"code":    ErrorAccountDeactivated,
-					"message": "account is deactivated",
-				})
-				return
-			}
-
-			lang = user.Language.Code
-		} else {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"code":    ErrorAuthInvalid,
-				"message": err.Error(),
+				"message": message,
 			})
 			return
 		}
+		claims := token.Claims.(jwt.MapClaims)
+		userUuid, _ = claims["sub"].(string)
+		oldScopes, _ := claims["scp"].(string)
+		clientId, _ := claims["aud"].(string)
+
+		// The refresh token is bound to the API key it was issued for; that key
+		// must still be valid, and scopes are re-checked against the user and key.
+		if clientId == "" || (r.ClientId != "" && r.ClientId != clientId) {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid client_id", "code": ErrorAuthInvalid})
+			return
+		}
+		var apiKey models.ApiKey
+		if err := models.DB.Where("client_id=?", clientId).First(&apiKey).Error; err != nil || apiKey.RevokedAt.Valid {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid api key", "code": ErrorInvalidApiKey})
+			return
+		}
+		r.ClientId = clientId
+
+		if err := models.DB.Where("uuid=?", userUuid).Preload("Language").First(&user).Error; err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"code":    ErrorAuthInvalid,
+				"message": "invalid refresh token",
+			})
+			return
+		}
+
+		if user.DeactivatedAt.Valid {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    ErrorAccountDeactivated,
+				"message": "account is deactivated",
+			})
+			return
+		}
+
+		scopes = intersectScopes(strings.Split(oldScopes, " "), user.Scopes, apiKey.Scopes)
+		lang = user.Language.Code
 	} else if r.GrantType == "password" {
 		if r.ClientId == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "missing client_id", "code": ErrorMissingApiKey})
@@ -140,25 +154,7 @@ func Auth(c *gin.Context) {
 		userUuid = user.Uuid
 		lang = user.Language.Code
 
-		apiKeyScopes := strings.Split(apiKey.Scopes, " ")
-		userScopes := strings.Split(user.Scopes, " ")
-		var first = true
-		for _, s := range r.Scopes {
-			for _, t := range userScopes {
-				if s == t {
-					for _, u := range apiKeyScopes {
-						if s == u {
-							if first {
-								first = false
-							} else {
-								scopes += " "
-							}
-							scopes += s
-						}
-					}
-				}
-			}
-		}
+		scopes = intersectScopes(r.Scopes, user.Scopes, apiKey.Scopes)
 	} else {
 		c.JSON(http.StatusBadRequest, GeneralErrorResponse{
 			Message: "invalid grant_type",
@@ -202,6 +198,25 @@ func Auth(c *gin.Context) {
 		Lang:         lang,
 	}
 	c.JSON(http.StatusOK, response)
+}
+
+// intersectScopes keeps the requested scopes that both the user and the API key have.
+func intersectScopes(requested []string, userScopes, apiKeyScopes string) string {
+	has := func(list string, scope string) bool {
+		for _, s := range strings.Split(list, " ") {
+			if s == scope {
+				return true
+			}
+		}
+		return false
+	}
+	var result []string
+	for _, s := range requested {
+		if s != "" && has(userScopes, s) && has(apiKeyScopes, s) {
+			result = append(result, s)
+		}
+	}
+	return strings.Join(result, " ")
 }
 
 func generateToken(userUuid, clientId string, scopes string, expiry int64) (string, error) {

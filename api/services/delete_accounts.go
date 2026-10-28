@@ -12,18 +12,17 @@ import (
 func DeleteAccounts(interval int64) {
 	for {
 		var users []models.User
-		tx := models.DB.Begin()
-		if err := tx.Select("users.*").Where("delete_at<=NOW()").Joins("JOIN delete_account_requests ON delete_account_request_id=delete_account_requests.id").Find(&users).Error; err != nil {
+		if err := models.DB.Select("users.*").Where("delete_at<=NOW()").Joins("JOIN delete_account_requests ON delete_account_request_id=delete_account_requests.id").Find(&users).Error; err != nil {
 			log.Error(nil, 0, err.Error())
-			tx.Rollback()
-		} else {
-			for _, u := range users {
-				if err := deleteUser(u, tx); err != nil {
-					log.Error(nil, 0, err.Error())
-				}
-			}
+		}
 
-			tx.Commit()
+		for _, u := range users {
+			// One transaction per user so a failure never leaves an account half deleted.
+			if err := models.DB.Transaction(func(tx *gorm.DB) error {
+				return deleteUser(u, tx)
+			}); err != nil {
+				log.Error(nil, 0, err.Error())
+			}
 		}
 
 		time.Sleep(time.Duration(interval) * time.Second)
@@ -31,6 +30,10 @@ func DeleteAccounts(interval int64) {
 }
 
 func deleteUser(user models.User, tx *gorm.DB) error {
+	// reports.user_id is not guaranteed to cascade (see db.sql), so remove them first.
+	if err := tx.Table(table.Reports).Where("user_id=?", user.Id).Delete(&models.Report{}).Error; err != nil {
+		return err
+	}
 	if err := tx.Table(table.Users).Where("id=?", user.Id).Delete(&models.User{}).Error; err != nil {
 		return err
 	}

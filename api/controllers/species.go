@@ -34,6 +34,7 @@ func Species(c *gin.Context) {
 	}
 
 	tx := models.DB.Begin()
+	defer tx.Rollback()
 
 	name := r.Name
 	name.Timestamp = time.Now()
@@ -131,6 +132,7 @@ func SpeciesSetRarity(c *gin.Context) {
 	}
 
 	tx := models.DB.Begin()
+	defer tx.Rollback()
 
 	var species models.Species
 	if err := tx.Where("uuid=?", c.Param("uuid")).First(&species).Error; err != nil {
@@ -205,8 +207,8 @@ func SpeciesDetails(c *gin.Context) {
 		Wikipedia  wikipedia.Data     `json:"wikipedia"`
 	}
 
-	lang := c.GetString("app_language")
-	cacheKey := c.Request.RequestURI + lang
+	lang := wikipedia.Language(c.GetString("app_language"))
+	cacheKey := c.Request.URL.Path + "?lang=" + lang
 	cached, err := models.Cache.Get(cacheKey).Result()
 	if err == redis.Nil {
 	} else if err != nil {

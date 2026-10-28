@@ -2,6 +2,7 @@
 package controllers
 
 import (
+	"github.com/klahr/300sf/api/config"
 	"net/http"
 	"time"
 
@@ -14,6 +15,7 @@ import (
 
 func EmailsSendAll(c *gin.Context) {
 	tx := models.DB.Begin()
+	defer tx.Rollback()
 
 	var emails []models.Email
 	if err := tx.Where("send_at <= NOW()").Where("sent_at IS NULL").Find(&emails).Error; err != nil {
@@ -49,7 +51,7 @@ func EmailsSendAll(c *gin.Context) {
 		messagesInfo = append(messagesInfo, mi)
 	}
 	if len(messagesInfo) > 0 {
-		if err := sf_mailjet.SendEmails(messagesInfo, "", ""); err != nil {
+		if err := sf_mailjet.SendEmails(messagesInfo, config.AppConfig.MailjetPublicKey, config.AppConfig.MailjetSecretKey); err != nil {
 			tx.Rollback()
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),

@@ -85,7 +85,7 @@ func CreateList(template zero.String, name models.Translation, visibility int64,
 
 	if template.Valid {
 		var t models.ListTemplate
-		if err := models.DB.Where("uuid=?", template.String).Preload("Species").First(&t).Error; err != nil {
+		if err := models.DB.Where("uuid=?", template.String).Where("user_id=? OR visibility=?", user.Id, models.VisibilityPublic).Preload("Species").First(&t).Error; err != nil {
 			return nil, err
 		}
 		list.ListTemplateId = zero.IntFrom(t.Id)
@@ -195,6 +195,7 @@ func ListsTimespan(c *gin.Context) {
 	}
 
 	tx := models.DB.Begin()
+	defer tx.Rollback()
 
 	var user models.User
 	if err := tx.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
@@ -253,7 +254,15 @@ func ListsTimespan(c *gin.Context) {
 func ListsDetails(c *gin.Context) {
 	var result models.List
 
-	if err := models.DB.Where("uuid=?", c.Param("uuid")).Preload("Name").Preload("Species.Name").Preload("Species.Order.Name").First(&result).Error; err != nil {
+	var user models.User
+	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("user_id=? OR visibility<>?", user.Id, models.VisibilityPrivate).Where("archived IS NULL").Preload("Name").Preload("Species.Name").Preload("Species.Order.Name").First(&result).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -273,6 +282,7 @@ func ListsReports(c *gin.Context) {
 	var result []models.Report
 
 	tx := models.DB.Begin()
+	defer tx.Rollback()
 
 	var user models.User
 	if err := tx.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
@@ -374,14 +384,29 @@ func ListsForSpecies(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+// ListsCompare is public: it shows which species each list has, for lists
+// that are not private. Only display names and species are returned, never
+// positions, times or comments.
 func ListsCompare(c *gin.Context) {
 	type request struct {
 		Uuids []string `json:"uuids"`
 	}
 
+	type user struct {
+		DisplayName string `json:"display_name"`
+	}
+
+	type species struct {
+		Uuid string `json:"uuid"`
+	}
+
+	type report struct {
+		Species species `json:"species"`
+	}
+
 	type result struct {
-		User    models.User     `json:"user"`
-		Reports []models.Report `json:"reports"`
+		User    user     `json:"user"`
+		Reports []report `json:"reports"`
 	}
 
 	type response struct {
@@ -397,59 +422,75 @@ func ListsCompare(c *gin.Context) {
 		})
 		return
 	}
+	if len(r.Uuids) == 0 || len(r.Uuids) > 20 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "between 1 and 20 uuids required",
+		})
+		return
+	}
 
-	tx := models.DB.Begin()
+	var lists []models.List
+	if err := models.DB.Where("uuid IN ?", r.Uuids).Where("visibility<>?", models.VisibilityPrivate).Where("archived IS NULL").Preload("Name").Find(&lists).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
 	var resp response
-	if err := models.DB.Table("lists").
-		Select("distinct(list_species.species_id),species.*").
-		Joins("JOIN list_species ON list_species.list_id=lists.id JOIN species ON species_id=species.id").
-		Where("lists.uuid = ?", r.Uuids[0]).
+	found := false
+	for _, list := range lists {
+		if list.Uuid == r.Uuids[0] {
+			resp.ReferenceList = list
+			found = true
+			break
+		}
+	}
+	if !found {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "not found",
+		})
+		return
+	}
+
+	if err := models.DB.Table("species").
+		Select("species.*").
+		Joins("JOIN list_species ON list_species.species_id=species.id").
+		Where("list_species.list_id = ?", resp.ReferenceList.Id).
 		Preload("Name").
 		Find(&resp.Species).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
-		tx.Rollback()
 		return
 	}
-
-	var lists []models.List
-	if err := tx.Where("uuid IN ?", r.Uuids).Preload("Name").Find(&lists).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
-		})
-		tx.Rollback()
-		return
-	}
-	if len(lists) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "not found",
-		})
-		tx.Rollback()
-		return
-	}
-	resp.ReferenceList = lists[0]
 
 	for _, list := range lists {
-		var res result
-		if err := tx.Where("id=?", list.UserId).First(&res.User).Error; err != nil {
+		var owner models.User
+		if err := models.DB.Where("id=?", list.UserId).First(&owner).Error; err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": err.Error(),
 			})
-			tx.Rollback()
 			return
 		}
-		if err := tx.Table("list_reports").Select("reports.*").Preload("Species").Where("list_id=?", list.Id).Joins("JOIN reports ON reports.id=report_id").Find(&res.Reports).Error; err != nil {
+		var uuids []string
+		if err := models.DB.Table("list_reports").
+			Select("DISTINCT species.uuid").
+			Joins("JOIN reports ON reports.id=list_reports.report_id JOIN species ON species.id=reports.species_id").
+			Where("list_reports.list_id=?", list.Id).
+			Where("reports.archived IS NULL").
+			Pluck("species.uuid", &uuids).Error; err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": err.Error(),
 			})
-			tx.Rollback()
 			return
+		}
+		res := result{User: user{DisplayName: owner.DisplayName}, Reports: []report{}}
+		for _, u := range uuids {
+			res.Reports = append(res.Reports, report{Species: species{Uuid: u}})
 		}
 		resp.Result = append(resp.Result, res)
 	}
-
-	tx.Commit()
 
 	c.JSON(http.StatusOK, resp)
 }

@@ -15,7 +15,6 @@ import (
 	"github.com/klahr/300sf/api/controllers"
 	"github.com/klahr/300sf/api/log"
 	"github.com/klahr/300sf/api/models"
-	"github.com/klahr/300sf/api/utils"
 )
 
 func parseToken(accessToken string) *jwt.Token {
@@ -105,20 +104,24 @@ func apiKeyMiddleware(c *gin.Context) {
 		return
 	}
 
-	callCounter, _ := models.Cache.Get("/api-key/" + apiKey.Uuid).Result()
-	iCallCounter := utils.Str2Int(callCounter)
-	if iCallCounter >= apiKey.HardLimit {
-		log.Warning(c, controllers.ErrorTooManyApiCalls, "too many calls on api key")
-		c.JSON(http.StatusTooManyRequests, gin.H{"message": "too many calls on api key", "code": controllers.ErrorTooManyApiCalls})
-		c.Abort()
-		return
-	}
-
-	ttl := models.Cache.TTL("/api-key/" + apiKey.Uuid)
-	if ttl.Val() > 0 {
-		models.Cache.Set("/api-key/"+apiKey.Uuid, iCallCounter+1, ttl.Val())
+	// INCR is atomic, so concurrent requests can't slip past the limit. If
+	// Redis is unavailable the request is let through rather than failing the
+	// whole API.
+	key := "/api-key/" + apiKey.Uuid
+	calls, err := models.Cache.Incr(key).Result()
+	if err != nil {
+		log.Warning(c, 0, "rate limit counter unavailable: "+err.Error())
 	} else {
-		models.Cache.Set("/api-key/"+apiKey.Uuid, iCallCounter+1, time.Second*time.Duration(config.AppConfig.ApiCallCounterTTL))
+		// Also repair a counter left without expiry, or the key would be locked forever.
+		if calls == 1 || models.Cache.TTL(key).Val() < 0 {
+			models.Cache.Expire(key, time.Second*time.Duration(config.AppConfig.ApiCallCounterTTL))
+		}
+		if calls > apiKey.HardLimit {
+			log.Warning(c, controllers.ErrorTooManyApiCalls, "too many calls on api key")
+			c.JSON(http.StatusTooManyRequests, gin.H{"message": "too many calls on api key", "code": controllers.ErrorTooManyApiCalls})
+			c.Abort()
+			return
+		}
 	}
 
 	c.Next()
@@ -160,15 +163,16 @@ func SetupRoutes(r *gin.Engine) {
 
 	r.GET("/health", Health)
 
-	// Competitions
-	r.POST("/v1/competitions", apiKeyMiddleware, controllers.Competitions)
-	r.GET("/v1/competitions/list", apiKeyMiddleware, controllers.CompetitionsGetCompetitions)
-	r.GET("/v1/competitions/list/me", apiKeyMiddleware, controllers.CompetitionsListMe)
-	r.GET("/v1/competitions/:uuid", apiKeyMiddleware, controllers.CompetitionsDetails)
-	r.PUT("/v1/competitions/:uuid/invite", apiKeyMiddleware, controllers.CompetitionsInvite)
-	r.PUT("/v1/competitions/:uuid/archive", apiKeyMiddleware, controllers.CompetitionArchive)
-	r.GET("/v1/competitions/:uuid/result", noneMiddleware, controllers.CompetitionsResult)
-	r.GET("/v1/competitions/basis", apiKeyMiddleware, controllers.CompetitionsBasis)
+	// Competitions are not finished: creation never stored the competition and
+	// the other handlers were empty. Answer 501 until the feature is built.
+	r.POST("/v1/competitions", apiKeyMiddleware, basicMiddleware, controllers.NotImplemented)
+	r.GET("/v1/competitions/list", apiKeyMiddleware, basicMiddleware, controllers.NotImplemented)
+	r.GET("/v1/competitions/list/me", apiKeyMiddleware, basicMiddleware, controllers.NotImplemented)
+	r.GET("/v1/competitions/:uuid", apiKeyMiddleware, basicMiddleware, controllers.NotImplemented)
+	r.PUT("/v1/competitions/:uuid/invite", apiKeyMiddleware, basicMiddleware, controllers.NotImplemented)
+	r.PUT("/v1/competitions/:uuid/archive", apiKeyMiddleware, basicMiddleware, controllers.NotImplemented)
+	r.GET("/v1/competitions/:uuid/result", noneMiddleware, controllers.NotImplemented)
+	r.GET("/v1/competitions/basis", apiKeyMiddleware, basicMiddleware, controllers.CompetitionsBasis)
 
 	// Lists
 	r.GET("/v1/lists/list", apiKeyMiddleware, basicMiddleware, controllers.ListsList)

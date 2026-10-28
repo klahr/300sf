@@ -1231,3 +1231,14 @@ ADD COLUMN `site` VARCHAR(256) NULL AFTER `archived`;
 ALTER TABLE `300sf`.`users` 
 DROP INDEX `password_UNIQUE`,
 DROP INDEX `password_salt_UNIQUE`;
+
+-- Deleting an account must remove its reports. An earlier migration in this
+-- file reset fk_reports_2 to NO ACTION, which made account deletion fail.
+ALTER TABLE `300sf`.`reports`
+DROP FOREIGN KEY `fk_reports_2`;
+ALTER TABLE `300sf`.`reports`
+ADD CONSTRAINT `fk_reports_2`
+  FOREIGN KEY (`user_id`)
+  REFERENCES `300sf`.`users` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;

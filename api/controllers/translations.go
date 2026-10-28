@@ -48,6 +48,7 @@ func TranslationUpdate(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
+		return
 	} else {
 		if r.En.Valid {
 			translation.En = zero.StringFrom(r.En.String)
@@ -61,7 +62,12 @@ func TranslationUpdate(c *gin.Context) {
 		if r.La.Valid {
 			translation.La = zero.StringFrom(r.La.String)
 		}
-		models.DB.Where("id=?", translation.Model.Id).Updates(&translation)
+		if err := models.DB.Where("id=?", translation.Model.Id).Updates(&translation).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": err.Error(),
+			})
+			return
+		}
 	}
 
 	c.JSON(http.StatusNoContent, nil)

@@ -57,9 +57,17 @@ func migrate(user models.User, username, password string) (interface{}, int, err
 		return nil, ErrorMigrateCompleted, fmt.Errorf("already imported")
 	}
 
-	loginJsonRequest := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"method\":\"SessionManager.create\",\"params\": {\"email\":\"%s\",\"password\":\"%s\"},\"id\":1}", username, password)
+	loginJsonRequest, err := json.Marshal(map[string]interface{}{
+		"jsonrpc": "2.0",
+		"method":  "SessionManager.create",
+		"params":  map[string]string{"email": username, "password": password},
+		"id":      1,
+	})
+	if err != nil {
+		return nil, ErrorInternalServerError, err
+	}
 	loginResponse, err := http.PostForm("https://300sf.se/legacy/ajax_api.php", url.Values{
-		"data": {loginJsonRequest},
+		"data": {string(loginJsonRequest)},
 	})
 
 	if err != nil {
@@ -112,6 +120,17 @@ func migrate(user models.User, username, password string) (interface{}, int, err
 	species := fetchAllSpecies()
 
 	tx := models.DB.Begin()
+	defer tx.Rollback()
+
+	// Claim the import first: the row lock makes a concurrent second import
+	// wait and then see imported_at set, instead of importing twice.
+	claim := tx.Table(table.Users).Where("id=? AND imported_at IS NULL", user.Id).UpdateColumn("imported_at", time.Now())
+	if claim.Error != nil {
+		return nil, ErrorInternalServerError, claim.Error
+	}
+	if claim.RowsAffected == 0 {
+		return nil, ErrorMigrateCompleted, fmt.Errorf("already imported")
+	}
 
 	var userLists []models.List
 	if err := tx.Where("lists.user_id=?", user.Id).Preload("ListTemplate.Species").Joins("JOIN list_templates ON list_templates.id=lists.list_template_id").Where("list_templates.uuid IN (?)", config.AppConfig.DefaultLists).Find(&userLists).Error; err != nil {
@@ -184,9 +203,9 @@ func migrate(user models.User, username, password string) (interface{}, int, err
 		}
 	}
 
-	tx.Table(table.Users).Where("id=?", user.Id).UpdateColumn("imported_at", time.Now())
-
-	tx.Commit()
+	if err := tx.Commit().Error; err != nil {
+		return nil, ErrorInternalServerError, err
+	}
 
 	return nil, 0, nil
 }

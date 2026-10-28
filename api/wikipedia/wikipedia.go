@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/klahr/300sf/api/config"
@@ -22,10 +23,30 @@ type Data struct {
 	Images    []string `json:"images"`
 }
 
+const userAgent = "300sf/1.0 (https://app.300sf.se; support@300sf.se)"
+
+// gowiki keeps its language in package state, so concurrent lookups in
+// different languages must not interleave.
+var gowikiMu sync.Mutex
+
+var client = &http.Client{Timeout: 10 * time.Second}
+
+// Language maps an app language to a supported Wikipedia edition. It is also
+// what callers must use in cache keys.
+func Language(lang string) string {
+	switch lang {
+	case "sv", "en", "de":
+		return lang
+	}
+	return "en"
+}
+
 func GetData(lang string, pageName models.Translation) Data {
 	var data Data
+	lang = Language(lang)
 
-	userAgent := "300sf/1.0 (https://app.300sf.se; support@300sf.se)"
+	gowikiMu.Lock()
+	defer gowikiMu.Unlock()
 
 	gowiki.SetUserAgent(userAgent)
 	gowiki.SetLanguage(lang)
@@ -70,7 +91,6 @@ func GetData(lang string, pageName models.Translation) Data {
 	)
 	req.Header.Set("Accept", "application/json")
 
-	client := &http.Client{}
 	r, err := client.Do(req)
 	if err == nil {
 		defer r.Body.Close()

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"html"
 	"net/http"
 	"time"
 
@@ -26,6 +27,7 @@ func Contact(c *gin.Context) {
 	}
 
 	tx := models.DB.Begin()
+	defer tx.Rollback()
 
 	var user models.User
 	if err := tx.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
@@ -49,7 +51,7 @@ func Contact(c *gin.Context) {
 		ToName:     "300sf",
 		Subject:    r.Subject,
 		TextPart:   r.Message,
-		HtmlPart:   r.Message,
+		HtmlPart:   html.EscapeString(r.Message),
 		SendAt:     time.Now(),
 		ReplyEmail: user.Email,
 		ReplyName:  user.DisplayName,

@@ -34,10 +34,14 @@ func AnalyzeResolve(c *gin.Context) {
 	}
 
 	tx := models.DB.Begin()
+	defer tx.Rollback()
 
 	var res response
 	for _, b := range r.Birds {
 		names := strings.Split(b.Name, "_")
+		if len(names) < 2 {
+			continue
+		}
 		var species models.Species
 		if err := tx.Preload("Name").Joins("JOIN translations ON translations.id=name_id").Where("translations.en=? OR translations.la=?", names[1], names[0]).First(&species).Error; err != nil {
 			continue

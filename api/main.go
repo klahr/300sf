@@ -3,14 +3,17 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	_ "time/tzdata" // the alpine image has no zoneinfo; reports export uses IANA zones
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/klahr/300sf/api/config"
+	"github.com/klahr/300sf/api/controllers"
 	"github.com/klahr/300sf/api/log"
 	"github.com/klahr/300sf/api/models"
 	"github.com/klahr/300sf/api/services"
@@ -54,6 +57,10 @@ func main() {
 	gin.SetMode(config.AppConfig.Mode)
 	r := gin.New()
 	r.SetTrustedProxies([]string{})
+	r.Use(gin.CustomRecovery(func(c *gin.Context, err any) {
+		log.Error(c, 0, fmt.Sprintf("panic: %v", err))
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "internal server error", "code": controllers.ErrorInternalServerError})
+	}))
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
 	r.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")

@@ -21,8 +21,8 @@ func OrderDetails(c *gin.Context) {
 		Wikipedia wikipedia.Data `json:"wikipedia"`
 	}
 
-	lang := c.GetString("app_language")
-	cacheKey := c.Request.RequestURI + lang
+	lang := wikipedia.Language(c.GetString("app_language"))
+	cacheKey := c.Request.URL.Path + "?lang=" + lang
 	cached, err := models.Cache.Get(cacheKey).Result()
 	if err == redis.Nil {
 	} else if err != nil {

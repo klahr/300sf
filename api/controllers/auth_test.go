@@ -101,3 +101,49 @@ func TestAuthRejectsBadRequests(t *testing.T) {
 		}
 	}
 }
+
+func TestIntersectScopes(t *testing.T) {
+	cases := []struct {
+		requested []string
+		user, key string
+		want      string
+	}{
+		{[]string{"user", "admin"}, "user admin", "user admin", "user admin"},
+		{[]string{"user", "admin"}, "user", "user admin", "user"},
+		{[]string{"user", "admin"}, "user admin", "user", "user"},
+		{[]string{"admin"}, "user", "user admin", ""},
+		{[]string{"user", ""}, "user", "user", "user"},
+		{nil, "user", "user", ""},
+		{[]string{"adm"}, "admin", "admin", ""},
+	}
+	for _, c := range cases {
+		if got := intersectScopes(c.requested, c.user, c.key); got != c.want {
+			t.Errorf("intersectScopes(%v, %q, %q) = %q, want %q", c.requested, c.user, c.key, got, c.want)
+		}
+	}
+}
+
+func TestListsCompareRejectsBadInput(t *testing.T) {
+	setup()
+	r := gin.New()
+	r.POST("/v1/lists/compare", ListsCompare)
+	tooMany := `{"uuids":["a"` + strings.Repeat(`,"a"`, 20) + `]}`
+	for _, body := range []string{"{", `{}`, `{"uuids":[]}`, tooMany} {
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, httptest.NewRequest(http.MethodPost, "/v1/lists/compare", strings.NewReader(body)))
+		if w.Code != http.StatusBadRequest {
+			t.Errorf("body %.30s: status = %d, want 400", body, w.Code)
+		}
+	}
+}
+
+func TestNotImplemented(t *testing.T) {
+	setup()
+	r := gin.New()
+	r.GET("/x", NotImplemented)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/x", nil))
+	if w.Code != http.StatusNotImplemented {
+		t.Errorf("status = %d", w.Code)
+	}
+}

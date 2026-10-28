@@ -46,6 +46,7 @@ func Reports(c *gin.Context) {
 	}
 
 	tx := models.DB.Begin()
+	defer tx.Rollback()
 
 	var user models.User
 	if err := tx.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
@@ -149,13 +150,9 @@ func Reports(c *gin.Context) {
 		report.MethodId = zero.IntFrom(method.Id)
 	}
 
-	for i := range r.ListUuids {
-		r.ListUuids[i] = "'" + r.ListUuids[i] + "'"
-	}
-
 	var lists []models.List
 	if len(r.ListUuids) > 0 {
-		if err := tx.Where("uuid IN (" + strings.Join(r.ListUuids, ",") + ")").Find(&lists).Error; err != nil {
+		if err := tx.Where("uuid IN ?", r.ListUuids).Where("user_id=?", user.Id).Find(&lists).Error; err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"code":    -10001,
 				"message": err.Error(),
@@ -167,13 +164,9 @@ func Reports(c *gin.Context) {
 
 	report.Lists = lists
 
-	for i := range r.TagUuids {
-		r.TagUuids[i] = "'" + r.TagUuids[i] + "'"
-	}
-
 	var tags []models.Tag
 	if len(r.TagUuids) > 0 {
-		if err := tx.Where("uuid IN (" + strings.Join(r.TagUuids, ",") + ")").Where("archived IS NULL").Find(&tags).Error; err != nil {
+		if err := tx.Where("uuid IN ?", r.TagUuids).Where("user_id=?", user.Id).Where("archived IS NULL").Find(&tags).Error; err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"code":    -10001,
 				"message": err.Error(),
@@ -272,7 +265,7 @@ func ReportsListByList(c *gin.Context) {
 	}
 
 	var list models.List
-	if err := models.DB.Where("uuid=?", r.ListUuid).First(&list).Error; err != nil {
+	if err := models.DB.Where("uuid=?", r.ListUuid).Where("user_id=?", user.Id).First(&list).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -280,7 +273,7 @@ func ReportsListByList(c *gin.Context) {
 	}
 
 	var reports []models.Report
-	if err := models.DB.Table(table.ListReports).Select("reports.*").Where("archived IS NULL").Where("list_reports.list_id=?", list.Id).Joins("JOIN reports ON list_reports.report_id=reports.id").Preload("Species.Name").Preload("Zone.Name").Find(&reports).Error; err != nil {
+	if err := models.DB.Table(table.ListReports).Select("reports.*").Where("reports.archived IS NULL").Where("list_reports.list_id=?", list.Id).Joins("JOIN reports ON list_reports.report_id=reports.id").Preload("Species.Name").Preload("Zone.Name").Find(&reports).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -447,6 +440,7 @@ func ReportsExport(c *gin.Context) {
 		ListUuid       string `json:"list_uuid"`
 		Format         string `json:"format"`
 		TimezoneOffset int64  `json:"timezone_offset"`
+		TimeZone       string `json:"time_zone"`
 	}
 
 	var r request
@@ -476,11 +470,22 @@ func ReportsExport(c *gin.Context) {
 	}
 
 	var reports []models.Report
-	if err := models.DB.Table("list_reports").Select("reports.*").Preload("Comment").Preload("Zone.Name").Preload("Method.Name").Preload("Gender.Name").Preload("Activity.Name").Preload("Species.Name").Preload("Age.Name").Where("list_id=?", list.Id).Joins("JOIN reports ON reports.id=report_id").Order("`from` DESC").Find(&reports).Error; err != nil {
+	if err := models.DB.Table("list_reports").Select("reports.*").Preload("Comment").Preload("Zone.Name").Preload("Method.Name").Preload("Gender.Name").Preload("Activity.Name").Preload("Species.Name").Preload("Age.Name").Where("list_id=?", list.Id).Where("reports.archived IS NULL").Joins("JOIN reports ON reports.id=report_id").Order("`from` DESC").Find(&reports).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
 		return
+	}
+
+	// Prefer an IANA zone so each date gets the offset (DST) of its own day;
+	// timezone_offset is kept for older clients.
+	localTime := func(t time.Time) time.Time {
+		return t.Add(time.Duration(r.TimezoneOffset) * time.Minute).UTC()
+	}
+	if loc, err := time.LoadLocation(r.TimeZone); r.TimeZone != "" && err == nil {
+		localTime = func(t time.Time) time.Time {
+			return t.In(loc)
+		}
 	}
 
 	encountered := make(map[int64]bool)
@@ -501,12 +506,12 @@ func ReportsExport(c *gin.Context) {
 		row := []string{}
 		row = append(row, utils.Translation2Value(report.Species.Name, user.Language.Code))
 		if report.From.Valid {
-			row = append(row, string(report.From.Time.Add(time.Duration(r.TimezoneOffset)*time.Minute).Format("2006-01-02 15:04:05")))
+			row = append(row, string(localTime(report.From.Time).Format("2006-01-02 15:04:05")))
 		} else {
 			row = append(row, "")
 		}
 		if report.Until.Valid {
-			row = append(row, string(report.Until.Time.Add(time.Duration(r.TimezoneOffset)*time.Minute).Format("2006-01-02 15:04:05")))
+			row = append(row, string(localTime(report.Until.Time).Format("2006-01-02 15:04:05")))
 		} else {
 			row = append(row, "")
 		}
@@ -620,42 +625,49 @@ func ReportsBasis(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
+		return
 	}
 
 	if err := models.DB.Preload("Name").Find(&resp.Ages).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
+		return
 	}
 
 	if err := models.DB.Preload("Name").Find(&resp.Genders).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
+		return
 	}
 
 	if err := models.DB.Preload("Name").Find(&resp.Methods).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
+		return
 	}
 
 	if err := models.DB.Preload("Name").Find(&resp.Activities).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
+		return
 	}
 
-	if err := models.DB.Preload("Name").Where("user_id=?", user.Id).Find(&resp.Lists).Error; err != nil {
+	if err := models.DB.Preload("Name").Where("user_id=?", user.Id).Where("archived IS NULL").Find(&resp.Lists).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
+		return
 	}
 
 	if err := models.DB.Where("user_id=?", user.Id).Where("archived IS NULL").Find(&resp.Tags).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
+		return
 	}
 
 	c.JSON(http.StatusOK, resp)

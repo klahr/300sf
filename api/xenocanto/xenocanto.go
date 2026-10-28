@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 )
 
 type Sono struct {
@@ -36,12 +37,14 @@ type RecordingsResponse struct {
 	Recordings    []Recording `json:"recordings"`
 }
 
+var client = &http.Client{Timeout: 10 * time.Second}
+
 func Recordings(query string) RecordingsResponse {
 	var response RecordingsResponse
 
 	q := fmt.Sprintf("https://xeno-canto.org/api/2/recordings?query=%s%%20q:A", query)
 
-	r, err := http.Get(q)
+	r, err := client.Get(q)
 	if err == nil {
 		defer r.Body.Close()
 		body, _ := io.ReadAll(r.Body)

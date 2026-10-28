@@ -1,5 +1,18 @@
 package controllers
 
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
+
+func NotImplemented(c *gin.Context) {
+	c.JSON(http.StatusNotImplemented, GeneralErrorResponse{
+		Message: "not implemented",
+		Code:    ErrorInvalidRequest,
+	})
+}
+
 type SingleItemDataResponse struct {
 	Data interface{} `json:"data"`
 }

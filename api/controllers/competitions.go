@@ -40,6 +40,7 @@ func Competitions(c *gin.Context) {
 	}
 
 	tx := models.DB.Begin()
+	defer tx.Rollback()
 
 	var user models.User
 	if err := tx.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
@@ -113,7 +114,7 @@ func Competitions(c *gin.Context) {
 		competition.PasswordSalt = zero.StringFrom(p.Salt)
 	}
 
-	for z := range r.CompetitionZonesUuids {
+	for _, z := range r.CompetitionZonesUuids {
 		var zone models.Zone
 		if err := tx.Where("uuid=?", z).First(&zone).Error; err != nil {
 			tx.Rollback()
@@ -142,30 +143,6 @@ func Competitions(c *gin.Context) {
 	tx.Commit()
 
 	c.JSON(http.StatusOK, competition)
-}
-
-func CompetitionsGetCompetitions(c *gin.Context) {
-	c.Abort()
-}
-
-func CompetitionsListMe(c *gin.Context) {
-	c.Abort()
-}
-
-func CompetitionsDetails(c *gin.Context) {
-	c.Abort()
-}
-
-func CompetitionsInvite(c *gin.Context) {
-	c.Abort()
-}
-
-func CompetitionArchive(c *gin.Context) {
-	c.Abort()
-}
-
-func CompetitionsResult(c *gin.Context) {
-	c.Abort()
 }
 
 func CompetitionsBasis(c *gin.Context) {

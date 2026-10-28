@@ -25,6 +25,7 @@ func CreateNamedRecord[T models.Age | models.Order | models.Gender | models.Acti
 	}
 
 	tx := models.DB.Begin()
+	defer tx.Rollback()
 
 	name := r.Name
 	name.Timestamp = time.Now()

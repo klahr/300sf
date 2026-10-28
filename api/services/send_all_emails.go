@@ -30,7 +30,7 @@ func SendAllEmails(interval int64) {
 						To: &mailjet.RecipientsV31{
 							mailjet.RecipientV31{
 								Email: e.ToEmail,
-								Name:  e.ToEmail,
+								Name:  e.ToName,
 							},
 						},
 						ReplyTo: &mailjet.RecipientV31{

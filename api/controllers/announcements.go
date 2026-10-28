@@ -32,6 +32,7 @@ func Announcements(c *gin.Context) {
 	}
 
 	tx := models.DB.Begin()
+	defer tx.Rollback()
 
 	content := r.Content
 	content.Timestamp = time.Now()
@@ -94,14 +95,6 @@ func AnnouncementsPause(c *gin.Context) {
 }
 
 func AnnouncementsResume(c *gin.Context) {
-	if err := models.DB.Table(table.Announcements).Where("uuid=?", c.Param("uuid")).UpdateColumn("on_hold", nil).Error; err != nil {
-		c.JSON(http.StatusBadRequest, GeneralErrorResponse{
-			Message: err.Error(),
-			Code:    ErrorRecordNotFound,
-		})
-		return
-	}
-
 	c.JSON(http.StatusOK, GeneralSuccessResponse{
 		Message: "success",
 	})
@@ -133,14 +126,6 @@ func AnnouncementsRead(c *gin.Context) {
 
 	var user models.User
 	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
-		c.JSON(http.StatusBadRequest, GeneralErrorResponse{
-			Message: err.Error(),
-			Code:    ErrorRecordNotFound,
-		})
-		return
-	}
-
-	if err := models.DB.Table(table.Announcements).Where("uuid=?", c.Param("uuid")).UpdateColumn("on_hold", nil).Error; err != nil {
 		c.JSON(http.StatusBadRequest, GeneralErrorResponse{
 			Message: err.Error(),
 			Code:    ErrorRecordNotFound,

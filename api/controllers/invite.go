@@ -26,6 +26,7 @@ func Invite(c *gin.Context) {
 	}
 
 	tx := models.DB.Begin()
+	defer tx.Rollback()
 
 	et, err := utils.GetEmailTemplate("invite", r.LanguageCode)
 	if err != nil {

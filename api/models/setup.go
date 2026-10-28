@@ -2,6 +2,8 @@
 package models
 
 import (
+	"time"
+
 	"github.com/go-redis/redis"
 	"github.com/klahr/300sf/api/log"
 	"gorm.io/driver/mysql"
@@ -20,6 +22,14 @@ func SetupDB(dataSource string, logLevel int) error {
 		log.Error(nil, 0, err.Error())
 		return err
 	}
+
+	sqlDB, err := database.DB()
+	if err != nil {
+		return err
+	}
+	sqlDB.SetMaxOpenConns(50)
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetConnMaxLifetime(30 * time.Minute)
 
 	DB = database
 	return nil

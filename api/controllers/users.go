@@ -113,7 +113,7 @@ func Users(c *gin.Context) {
 	}
 
 	var language models.Language
-	if err := models.DB.Where("code=?", c.GetString("app_language")).First(&language).Error; err != nil {
+	if err := models.DB.Where("code=?", defaultLanguageCode(c.GetString("app_language"))).First(&language).Error; err != nil {
 		log.Error(c, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    ErrorInternalServerError,
@@ -125,6 +125,7 @@ func Users(c *gin.Context) {
 	user.LanguageId = language.Id
 
 	tx := models.DB.Begin()
+	defer tx.Rollback()
 
 	if err := tx.Create(&user).Error; err != nil {
 		log.Error(c, ErrorInternalServerError, err.Error())
@@ -231,6 +232,7 @@ func UsersMe(c *gin.Context) {
 	}
 
 	tx := models.DB.Begin()
+	defer tx.Rollback()
 
 	var user models.User
 	if err := tx.Where("uuid=?", c.GetString("uuid")).Where("deleted_at IS NULL").Preload("Language").First(&user).Error; err != nil {
@@ -672,6 +674,16 @@ func UsersResetPassword(c *gin.Context) {
 		return
 	}
 
+	// One reset email per account every two minutes, so the endpoint can't be
+	// used to flood someone's inbox.
+	var recent int64
+	models.DB.Model(&models.ChangePasswordRequest{}).Where("user_id=?", user.Id).Where("timestamp>?", time.Now().Add(-2*time.Minute)).Count(&recent)
+	if recent > 0 {
+		log.Info(c, 0, user.Uuid+" password reset throttled")
+		c.JSON(http.StatusNoContent, nil)
+		return
+	}
+
 	cpr := models.ChangePasswordRequest{
 		Model: models.Model{
 			Timestamp: time.Now(),
@@ -720,6 +732,7 @@ func UsersResetPassword(c *gin.Context) {
 	}
 
 	tx := models.DB.Begin()
+	defer tx.Rollback()
 
 	email.Checksum = utils.ComputeHmac256(email.Subject+email.HtmlPart+email.SendAt.String(), config.AppConfig.HashingSecret)
 	if err := tx.Create(&email).Error; err != nil {
@@ -765,6 +778,7 @@ func UsersSetPassword(c *gin.Context) {
 	}
 
 	tx := models.DB.Begin()
+	defer tx.Rollback()
 
 	var cpr models.ChangePasswordRequest
 	if err := tx.Where("token=?", c.Param("token")).First(&cpr).Error; err != nil {
@@ -858,6 +872,7 @@ func UsersRequestDelete(c *gin.Context) {
 	}
 
 	tx := models.DB.Begin()
+	defer tx.Rollback()
 
 	var user models.User
 	if err := tx.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
@@ -965,6 +980,7 @@ func UsersConfirmDelete(c *gin.Context) {
 	}
 
 	tx := models.DB.Begin()
+	defer tx.Rollback()
 
 	var user models.User
 	if err := tx.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {

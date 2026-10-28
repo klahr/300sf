@@ -27,6 +27,6 @@ type Competition struct {
 	CompetitionZones []Zone       `json:"zones" gorm:"many2many:competition_zones"`
 	Archived         zero.Time    `json:"-"`
 	Participants     []User       `json:"participants" gorm:"many2many:competition_participants"`
-	Password         zero.String  `json:"password"`
-	PasswordSalt     zero.String  `json:"password_salt"`
+	Password         zero.String  `json:"-"`
+	PasswordSalt     zero.String  `json:"-"`
 }
