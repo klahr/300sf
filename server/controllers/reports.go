@@ -17,6 +17,8 @@ import (
 
 func Reports(c *gin.Context) {
 	type request struct {
+		// Optional, from apps that report offline: the same sighting sent again is stored once.
+		Uuid                string      `json:"uuid"`
 		SpeciesUuid         string      `json:"species_uuid"`
 		From                zero.Time   `json:"from" time_format:"2006-01-02T15:04Z"`
 		Until               zero.Time   `json:"until" time_format:"2006-01-02T15:04Z"`
@@ -57,6 +59,37 @@ func Reports(c *gin.Context) {
 		return
 	}
 
+	uuid := utils.GenerateShortUuid()
+	if r.Uuid != "" {
+		if !utils.IsClientUuid(r.Uuid) {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    -10001,
+				"message": "invalid uuid",
+			})
+			return
+		}
+		// Sent before, but the answer was lost on the way: it is already stored.
+		var existing models.Report
+		if err := tx.Where("uuid=?", r.Uuid).Limit(1).Find(&existing).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": err.Error(),
+			})
+			return
+		}
+		if existing.Id != 0 {
+			if existing.UserId != user.Id {
+				c.JSON(http.StatusConflict, gin.H{
+					"code":    -10001,
+					"message": "uuid already in use",
+				})
+				return
+			}
+			c.JSON(http.StatusOK, existing)
+			return
+		}
+		uuid = r.Uuid
+	}
+
 	var species models.Species
 	if err := tx.Where("uuid=?", r.SpeciesUuid).First(&species).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -70,7 +103,7 @@ func Reports(c *gin.Context) {
 	report := models.Report{
 		Model: models.Model{
 			Timestamp: time.Now(),
-			Uuid:      utils.GenerateShortUuid(),
+			Uuid:      uuid,
 		},
 		UserId:    user.Id,
 		SpeciesId: species.Id,

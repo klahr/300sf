@@ -3,6 +3,7 @@ package utils
 
 import (
 	"crypto/rand"
+	"strings"
 )
 
 // shortUuidLength gives about 50 random bits. Some of these ids are the only
@@ -26,4 +27,18 @@ func GenerateUuidWithFixedLength(n int) string {
 		b[i] = letterBytes[b[i]%byte(len(letterBytes))]
 	}
 	return string(b)
+}
+
+// Clients that work offline name their own records, so sending one twice
+// can't make two. At least 16 characters (80 bits), from the same letters.
+func IsClientUuid(s string) bool {
+	if len(s) < 16 || len(s) > 32 {
+		return false
+	}
+	for i := 0; i < len(s); i++ {
+		if strings.IndexByte(letterBytes, s[i]) < 0 {
+			return false
+		}
+	}
+	return true
 }

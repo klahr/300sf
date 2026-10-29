@@ -1,5 +1,6 @@
 namespace Requests {
 	export class Reports {
+		public uuid: string;
 		public species_uuid: string;
 		public from: string;
 		public until: string;

@@ -13,6 +13,7 @@
 /// <reference path="SpeciesCatalog.ts"/>
 /// <reference path="AnalyzePopUp.ts"/>
 /// <reference path="ui/SpeciesSearch.ts"/>
+/// <reference path="Outbox.ts"/>
 
 declare const L;
 
@@ -60,44 +61,89 @@ class ReportPopUp {
 
 		const positionNote = document.createElement("p");
 		positionNote.className = "details hidden";
-		positionNote.textContent = App.translations.NoPositionYet;
 		where.appendChild(positionNote);
+		const showNote = function (text: string | null) {
+			positionNote.textContent = text || "";
+			positionNote.classList.toggle("hidden", text === null);
+		};
 
 		setTimeout(function () {
 			if (closed) {
 				return;
 			}
-			map = L.map(mapDiv.container).setView([58.1801188016368, 13.959220108737176], 13);
+			// Where the user last was, as a better first guess than the middle of Sweden.
+			const ks = new LocalStorage();
+			const last = ks.get("last-position") as any;
+			map = L.map(mapDiv.container).setView(last ? [last.lat, last.lng] : [62.0, 16.0], last ? 13 : 5);
 			L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				maxZoom: 19,
 				attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 			}).addTo(map);
 			const markerGroup = L.layerGroup().addTo(map);
+
+			// The position keeps improving while the GPS settles; stop once it is good enough, or
+			// when the user puts the marker where they want it.
+			const goodEnoughMeters = 25;
+			let watching = false;
+			let fixes = 0;
+			let watchTimer = 0;
+			const stopWatching = function () {
+				if (watching) {
+					map.stopLocate();
+					watching = false;
+				}
+				clearTimeout(watchTimer);
+				Ui.setBusy(locateButton, false);
+			};
+			const offlineNote = function (): string | null {
+				return navigator.onLine ? null : App.translations.MapOffline;
+			};
+
 			map.on("click", function (e) {
+				stopWatching();
 				markerGroup.clearLayers();
 				L.marker(e.latlng).addTo(markerGroup);
 				self.mLocation = e.latlng;
-				positionNote.classList.add("hidden");
+				showNote(offlineNote());
 			});
 			map.on('locationfound', function (e) {
+				if (!watching) {
+					return;
+				}
+				const first = fixes++ === 0;
 				markerGroup.clearLayers();
+				L.circle(e.latlng, { radius: e.accuracy, weight: 1, fillOpacity: 0.1 }).addTo(markerGroup);
 				L.marker(e.latlng).addTo(markerGroup);
 				self.mLocation = e.latlng;
-				map.setZoom(16);
-				Ui.setBusy(locateButton, false);
-				positionNote.classList.add("hidden");
+				ks.set("last-position", { lat: e.latlng.lat, lng: e.latlng.lng }, 0);
+				map.setView(e.latlng, first ? 16 : map.getZoom());
+				const accuracy = App.translations.PositionAccuracy.replace("{0}", String(Math.round(e.accuracy)));
+				const offline = offlineNote();
+				showNote(offline ? accuracy + " " + offline : accuracy);
+				if (e.accuracy <= goodEnoughMeters) {
+					stopWatching();
+				}
 			});
 			// Not an error worth a dialog: the position is optional and can be set on the map.
+			// A later fix may still come once there is one; without, give up.
 			map.on('locationerror', function () {
-				Ui.setBusy(locateButton, false);
+				if (!watching || fixes > 0) {
+					return;
+				}
+				stopWatching();
 				if (self.mLocation === null) {
-					positionNote.classList.remove("hidden");
+					showNote(App.translations.NoPositionYet);
 				}
 			});
 
 			locateButton.addEventListener("click", function () {
+				stopWatching();
+				fixes = 0;
+				watching = true;
 				Ui.setBusy(locateButton, true);
-				map.locate({ setView: true, maxZoom: 19 });
+				map.locate({ watch: true, enableHighAccuracy: true, timeout: 30000, maximumAge: 10000 });
+				// Whatever it has by then will do.
+				watchTimer = setTimeout(stopWatching, 60000);
 			});
 			setTimeout(function() {
 				if (!closed) {
@@ -111,64 +157,93 @@ class ReportPopUp {
 		this.mSpeciesList.value = App.getTranslation(species.name);
 		this.mSpeciesList.setData(species);
 
-		const loadLists = function () {
-			new HttpRequest("GET", "/v1/lists/species/" + species.uuid).process(function (status: any, data: any) {
-				const d = data as Responses.ListsSpecies;
-				self.mChecklistContainer.detachAll();
-				self.mChecklistContainer.container.innerHTML = "";
+		const showLists = function (d: Responses.ListsSpecies) {
+			self.mChecklistContainer.detachAll();
+			self.mChecklistContainer.container.innerHTML = "";
 
-				// No checklist at all: offer to start one right here.
-				if (!d.result || d.result.length === 0) {
-					const intro = document.createElement("p");
-					intro.className = "details";
-					intro.textContent = App.translations.NoChecklistForReport;
-					self.mChecklistContainer.container.appendChild(intro);
-					self.mChecklistContainer.container.appendChild(Onboarding.starterCard(function () {
-						loadLists();
-					}));
+			// No checklist at all: offer to start one right here.
+			if (!d.result || d.result.length === 0) {
+				const intro = document.createElement("p");
+				intro.className = "details";
+				intro.textContent = App.translations.NoChecklistForReport;
+				self.mChecklistContainer.container.appendChild(intro);
+				self.mChecklistContainer.container.appendChild(Onboarding.starterCard(function () {
+					loadLists();
+				}));
+				self.validate();
+				return;
+			}
+			if (!d.result.some(e => e.available)) {
+				const none = document.createElement("p");
+				none.className = "details";
+				none.textContent = App.translations.NotOnYourLists;
+				self.mChecklistContainer.container.appendChild(none);
+			}
+
+			(d.result || []).forEach(e => {
+				const dd = new Ui.Div();
+				dd.addClass("check-row");
+				self.mChecklistContainer.attach(dd);
+				const c = new Ui.Input("checkbox");
+				c.container.setAttribute("name", e.list.uuid);
+				c.container.id = "report-list-" + e.list.uuid;
+				c.container.addEventListener("click", function () {
 					self.validate();
-					return;
-				}
-				if (!d.result.some(e => e.available)) {
-					const none = document.createElement("p");
-					none.className = "details";
-					none.textContent = App.translations.NotOnYourLists;
-					self.mChecklistContainer.container.appendChild(none);
-				}
-
-				(d.result || []).forEach(e => {
-					const dd = new Ui.Div();
-					dd.addClass("check-row");
-					self.mChecklistContainer.attach(dd);
-					const c = new Ui.Input("checkbox");
-					c.container.setAttribute("name", e.list.uuid);
-					c.container.id = "report-list-" + e.list.uuid;
-					c.container.addEventListener("click", function () {
-						self.validate();
-					});
-
-					dd.attach(c);
-					const cLbl = document.createElement("label");
-					cLbl.setAttribute("for", c.container.id);
-					cLbl.textContent = App.getTranslation(e.list.name);
-					dd.container.appendChild(cLbl);
-
-					if (!e.available) {
-						c.container.setAttribute("disabled", "");
-						dd.addClass("unavailable");
-					} else if (list && e.list.uuid === list.uuid) {
-						(c.container as HTMLInputElement).checked = true;
-						(c.container as HTMLInputElement).disabled = true;
-					}
 				});
 
-				// With only one list that can hold the species, choose it for the user.
-				const open = Array.from(self.mChecklistContainer.container.querySelectorAll("input")).filter(c => !c.disabled);
-				if (open.length === 1 && !self.mChecklistContainer.container.querySelector("input:checked")) {
-					open[0].checked = true;
-				}
+				dd.attach(c);
+				const cLbl = document.createElement("label");
+				cLbl.setAttribute("for", c.container.id);
+				cLbl.textContent = App.getTranslation(e.list.name);
+				dd.container.appendChild(cLbl);
 
-				self.validate();
+				if (!e.available) {
+					c.container.setAttribute("disabled", "");
+					dd.addClass("unavailable");
+				} else if (list && e.list.uuid === list.uuid) {
+					(c.container as HTMLInputElement).checked = true;
+					(c.container as HTMLInputElement).disabled = true;
+				}
+			});
+
+			// With only one list that can hold the species, choose it for the user.
+			const open = Array.from(self.mChecklistContainer.container.querySelectorAll("input")).filter(c => !c.disabled);
+			if (open.length === 1 && !self.mChecklistContainer.container.querySelector("input:checked")) {
+				open[0].checked = true;
+			}
+
+			self.validate();
+		};
+		const loadLists = function () {
+			const r = new HttpRequest("GET", "/v1/lists/species/" + species.uuid);
+			r.setQuiet();
+			r.process(function (status: any, data: any) {
+				showLists(data as Responses.ListsSpecies);
+			}, function (status: number) {
+				if (!Outbox.isTemporary(status)) {
+					return;
+				}
+				// Offline, and this bird's lists were never fetched: work them out from the user's
+				// lists, if the app kept those.
+				const all = new HttpRequest("GET", "/v1/lists/list");
+				all.setQuiet();
+				all.process(function (status: any, data: any) {
+					const d = new Responses.ListsSpecies();
+					d.result = (data.result || []).map(function (l: Models.List) {
+						const a = new Responses.ListAvailable();
+						a.list = l;
+						a.available = (l.species || []).some(s => s.uuid === species.uuid);
+						return a;
+					});
+					showLists(d);
+				}, function () {
+					self.mChecklistContainer.container.innerHTML = "";
+					const note = document.createElement("p");
+					note.className = "details";
+					note.textContent = App.translations.ListsUnavailableOffline;
+					self.mChecklistContainer.container.appendChild(note);
+					self.validate();
+				});
 			});
 		};
 		loadLists();
@@ -244,9 +319,7 @@ class ReportPopUp {
 		this.mTagsContainer.addClass("chips");
 		tagsSection.appendChild(this.mTagsContainer.container);
 
-		const r = new HttpRequest("PUT", "/v1/reports/basis", { species_uuid: species.uuid });
-		r.process(function (status: any, data: any) {
-			const d = data as Responses.ReportsBasis;
+		const fillBasis = function (d: Responses.ReportsBasis) {
 
 			if (list) {
 				let found = false;
@@ -286,12 +359,27 @@ class ReportPopUp {
 			});
 
 			self.addNewTagTag();
+		};
+		// The choices are the same for every bird, so the last ones fetched do offline.
+		const basis = new HttpRequest("PUT", "/v1/reports/basis", { species_uuid: species.uuid });
+		basis.setQuiet();
+		basis.process(function (status: any, data: any) {
+			const d = data as Responses.ReportsBasis;
+			new LocalStorage().set("report-basis", { ages: d.ages, genders: d.genders, methods: d.methods, activities: d.activities, tags: d.tags }, 0);
+			fillBasis(d);
+		}, function (status: number) {
+			const kept = new LocalStorage().get("report-basis") as any;
+			if (kept && Outbox.isTemporary(status)) {
+				kept.species = species;
+				fillBasis(kept as Responses.ReportsBasis);
+			}
 		});
 
 		this.mReportButton = sheet.addAction(Ui.actionButton(App.translations.SubmitSighting, "check", "success"));
 		this.mReportButton.disabled = true;
 		this.mReportButton.addEventListener("click", function () {
 			const r = new Requests.Reports();
+			r.uuid = Outbox.newUuid();
 			r.species_uuid = self.mSpeciesList.data.uuid;
 			if (from.value !== "") {
 				r.from = Utils.toISODate(new Date(from.value));
@@ -338,9 +426,23 @@ class ReportPopUp {
 
 			// TODO: Tags and notifications.
 
+			// No connection: keep it on this device and send it later.
+			const keep = function () {
+				Outbox.add(r, species.name);
+				new Ui.Toast(App.translations.SavedOffline, App.translations.SavedOfflineDescription.replace("{0}", Utils.escapeHtml(self.mSpeciesList.value)), null, "var(--success-color)", function () { });
+				self.mPopUp.close();
+			};
+			if (!navigator.onLine && App.user) {
+				keep();
+				return;
+			}
+
 			// Disabled while saving so a double tap can't create two sightings.
 			Ui.setBusy(self.mReportButton, true);
 			const rr = new HttpRequest("POST", "/v1/reports", r);
+			rr.setQuiet();
+			// A weak signal in the field shouldn't keep the user waiting a minute.
+			rr.setTimeLimit(20000);
 			rr.process(function (status: any, data: any) {
 				new Ui.Toast(App.translations.Congratulations, App.translations.YouFoundA.replace("{0}", Utils.escapeHtml(self.mSpeciesList.value)), null, "var(--success-color)", function () { });
 				speciesAdded = true;
@@ -348,8 +450,12 @@ class ReportPopUp {
 				// Every page that shows sightings or progress updates from this, wherever the form was
 				// opened from.
 				window.dispatchEvent(new Event("sightingadded"));
-			}, function () {
+			}, function (status: number) {
 				Ui.setBusy(self.mReportButton, false);
+				if (Outbox.isTemporary(status) && App.user) {
+					keep();
+					return;
+				}
 				new Ui.MessageBox(App.translations.Error, App.translations.SomethingWentWrong, "/img/messagebox-256.webp", "var(--error-color)", function () { });
 			}, function () {
 				// Also after network errors, which skip the handler above.

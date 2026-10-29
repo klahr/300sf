@@ -21,6 +21,7 @@
 /// <reference path="models/User.ts"/>
 /// <reference path="LocalStorage.ts"/>
 /// <reference path="Session.ts"/>
+/// <reference path="Outbox.ts"/>
 
 interface IAppListener {
 	showPage(id: string, data: any): void;
@@ -87,6 +88,9 @@ class App implements IAppListener {
 		window.addEventListener("sightingadded", function () {
 			self.showPage(self.mCurrentPage, self.mCurrentData);
 		});
+		// Sightings saved while offline, from this visit or an earlier one.
+		Outbox.send();
+
 		window.addEventListener("popstate", function () {
 			if (Ui.PopUp.handleBack()) {
 				return;
@@ -143,13 +147,27 @@ class App implements IAppListener {
 		});
 	}
 
+	// Kept for when the app opens without a connection.
 	private fetchUser(): void {
+		const ks = new LocalStorage();
 		const me = new HttpRequest("GET", "/v1/users/whoami");
 		me.setSync();
+		me.setQuiet();
 		me.process(function (status: any, data: any) {
 			const user = data as Responses.UsersWhoAmI;
+			const before = ks.get("user") as any as Models.User | null;
+			if (before && before.uuid !== user.data.uuid) {
+				Session.forgetOfflineCopies();
+			}
+			ks.set("user", user.data, 0);
 			App.setUser(user.data);
 			App.setLanguage(user.data.language.code);
+		}, function (status: number) {
+			const user = ks.get("user") as any as Models.User | null;
+			if (user && Outbox.isTemporary(status)) {
+				App.setUser(user);
+				App.setLanguage(user.language.code);
+			}
 		});
 	}
 

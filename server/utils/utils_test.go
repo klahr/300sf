@@ -102,6 +102,23 @@ func TestGenerateUuidWithFixedLength(t *testing.T) {
 	}
 }
 
+func TestIsClientUuid(t *testing.T) {
+	cases := map[string]bool{
+		GenerateUuidWithFixedLength(16): true,
+		GenerateUuidWithFixedLength(32): true,
+		GenerateShortUuid():             false, // too short to be unguessable
+		GenerateUuidWithFixedLength(33): false,
+		"abcdefghjkmnpqr0":              false, // 0 is not one of the letters
+		"ABCDEFGHJKMNPQRS":              false,
+		"abcdefghjkmnpq'; --":           false,
+	}
+	for in, want := range cases {
+		if got := IsClientUuid(in); got != want {
+			t.Errorf("IsClientUuid(%q) = %v, want %v", in, got, want)
+		}
+	}
+}
+
 func TestVerify(t *testing.T) {
 	cases := []struct {
 		name string

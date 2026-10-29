@@ -12,6 +12,8 @@ class HttpRequest {
 	private mNoRetry = false;
 	private mRetried = false;
 	private mDataType = "json";
+	private mQuiet = false;
+	private mTimeLimit = 60000;
 	private static sNumRequests = 0;
 
 	constructor(private mMethod: string, private mUrl: string, private mData: any = {}) {
@@ -34,7 +36,18 @@ class HttpRequest {
 		this.mDataType = "text";
 	}
 
-	public setNoRetry(): void {		this.mNoRetry = true;
+	public setNoRetry(): void {
+		this.mNoRetry = true;
+	}
+
+	// No connection, an overloaded server or a timeout go to the fail handler, with status 0, 429
+	// or 503, instead of a dialog: for requests that know what to do offline.
+	public setQuiet(): void {
+		this.mQuiet = true;
+	}
+
+	public setTimeLimit(ms: number): void {
+		this.mTimeLimit = ms;
 	}
 
 	public process(success: (status: any, data: any) => void = function () { }, fail: (status: any, data: Responses.GeneralErrorResponse, error: any) => void = function () { }, complete: () => void = function () { }): void {
@@ -65,7 +78,9 @@ class HttpRequest {
 				}
 			},
 			error: function (xhr, _textStatus, errorThrown) {
-				if (xhr.status === 503 || xhr.status === 429 || xhr.status === 0) {
+				if ((xhr.status === 503 || xhr.status === 429 || xhr.status === 0) && self.mQuiet) {
+					fail(xhr.status, xhr.responseJSON, errorThrown);
+				} else if (xhr.status === 503 || xhr.status === 429 || xhr.status === 0) {
 					new Ui.MessageBox(App.translations.ConnectionError, App.translations.ConnectionErrorDescription, null, "var(--error-color)", () => void {});
 				} else if (xhr.status == 401 && !self.mNoRetry && xhr.responseJSON?.code !== Responses.ErrorCode.ErrorMissingPermission) {
 					// Expired or missing access token: refresh once and retry once.
@@ -89,7 +104,7 @@ class HttpRequest {
 					fail(xhr.status, xhr.responseJSON, errorThrown);
 				}
 			},
-			timeout: 60000,
+			timeout: self.mTimeLimit,
 			dataType: self.mDataType,
 			contentType: "application/json",
 			complete: function () {

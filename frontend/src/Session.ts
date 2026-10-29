@@ -59,6 +59,8 @@ class Session {
 		let ok = false;
 		const r = Session.refreshRequest();
 		r.setSync();
+		// Offline the old token will do for what the app keeps; the next request online renews it.
+		r.setQuiet();
 		r.process(function (status: any, response: Responses.AuthenticationResponse) {
 			Session.store(response);
 			ok = true;
@@ -97,8 +99,19 @@ class Session {
 		r.setNoRetry();
 		r.process(function () { }, function () { }, function () {
 			new LocalStorage().remove("scope");
+			Session.forgetOfflineCopies();
 			done();
 		});
+	}
+
+	// What was kept to work offline is the signed-in user's: their profile and the answers the service
+	// worker stored. Sightings still to send stay; they carry their user and wait for them.
+	public static forgetOfflineCopies(): void {
+		new LocalStorage().remove("user");
+		new LocalStorage().remove("report-basis");
+		if ("caches" in window) {
+			caches.delete("300sf-api");
+		}
 	}
 
 	// Sends the user to sign in, then back to where they were.
