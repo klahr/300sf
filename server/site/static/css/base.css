@@ -965,15 +965,20 @@ div.list-entry.seen span.seen-mark {
 }
 
 p.comment {
-	background-color: var(--comment);
 	color: var(--ink) !important;
-	margin-top: 8px;
-	padding: 8px 12px;
-	border-radius: 4px var(--radius-m) var(--radius-m) var(--radius-m);
-	width: fit-content;
-	max-width: 100%;
-	box-sizing: border-box;
+	margin-top: 10px;
+	padding: 1px 0 1px 10px;
+	border-left: 2px solid var(--line-strong);
 	line-height: 1.45 !important;
+	overflow-wrap: anywhere;
+}
+
+/* On cards a long comment is cut after three lines; the report shows all of it. */
+div.list-entry>p.comment {
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
 }
 
 /* Empty states. */
@@ -1125,28 +1130,49 @@ div.filter>p+input {
 	margin-top: 4px;
 }
 
-/* Tags as coloured chips. */
+/* Tags as chips tinted with their colour (--tag), filled when selected. */
 
 div.tag {
-	background-color: var(--blue);
-	padding: 4px 12px;
+	--tag: var(--blue);
+	background-color: color-mix(in srgb, var(--tag) 16%, transparent);
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tag) 38%, transparent);
+	padding: 3px 10px 3px 8px;
 	border-radius: var(--radius-pill);
 	margin: 6px 6px 0 0;
 	width: fit-content;
 	cursor: pointer;
 	display: inline-flex;
 	align-items: center;
-	gap: 4px;
+	gap: 6px;
 	min-width: 16px;
-	transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast), opacity var(--dur-fast);
+	transition: transform var(--dur-fast) var(--ease-out), background-color var(--dur-fast), box-shadow var(--dur-fast), opacity var(--dur-fast);
+}
+
+div.tag::before {
+	content: "";
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background-color: var(--tag);
+	flex: none;
 }
 
 div.tag:hover {
 	transform: translateY(-1px);
+	background-color: color-mix(in srgb, var(--tag) 24%, transparent);
 }
 
 div.tag.selected {
-	box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--ink);
+	background-color: var(--tag);
+	box-shadow: none;
+}
+
+div.tag.selected::before {
+	display: none;
+}
+
+div.tag.selected>p {
+	color: #fff;
 }
 
 div.tag.selected>p::before {
@@ -1158,21 +1184,23 @@ div.tag.selected>p::before {
 
 div.tag#add-tag {
 	background-color: transparent !important;
-	box-shadow: inset 0 0 0 1.5px var(--line-strong);
+	box-shadow: inset 0 0 0 1px var(--line-strong);
+}
+
+div.tag#add-tag::before {
+	display: none;
 }
 
 div.tag#add-tag>p {
 	color: var(--ink-soft);
-	text-shadow: none;
 }
 
 div.tag>p {
-	color: #fff;
+	color: color-mix(in srgb, var(--tag) 40%, var(--ink));
 	font-weight: 600;
-	font-size: 0.8125rem;
+	font-size: 0.75rem;
 	line-height: 1.4;
 	user-select: none;
-	text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
 }
 
 /* Map in the report form. */
@@ -1496,6 +1524,24 @@ div.manage-row>p.meta {
 	font-variant-numeric: tabular-nums;
 }
 
+/* Archived lists: quieter, and not opened on a tap; they are restored or deleted from their buttons. */
+div.manage-row.archived {
+	cursor: default;
+}
+
+div.manage-row.archived:hover {
+	background-color: transparent;
+}
+
+div.manage-row.archived>span.list-dot,
+div.manage-row.archived>p {
+	opacity: 0.6;
+}
+
+button.icon-button.delete:hover {
+	color: var(--error-color);
+}
+
 div.manage-row>span.material-symbols-outlined {
 	color: var(--ink-faint);
 	font-size: 22px;
@@ -1700,6 +1746,22 @@ span.chip {
 
 span.chip>span.list-dot {
 	margin: 0 2px;
+}
+
+span.chip.removable {
+	gap: 2px;
+	padding: 2px 2px 2px 12px;
+}
+
+span.chip.removable>button.icon-button {
+	width: 28px;
+	height: 28px;
+	min-width: 0;
+	padding: 0;
+}
+
+span.chip.removable>button.icon-button>span {
+	font-size: 1.1rem;
 }
 
 div.uix-popup-body {

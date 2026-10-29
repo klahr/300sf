@@ -143,7 +143,7 @@ class ReportsPage extends Page {
 					self.filter();
 				});
 				if (e.color !== "") {
-					tag.style.backgroundColor = e.color;
+					tag.style.setProperty("--tag", e.color);
 				}
 				const c = document.createElement("p");
 				c.textContent = e.name;
@@ -214,7 +214,7 @@ class ReportsPage extends Page {
 						tag.className = "tag";
 						tag.setAttribute("uuid", e.uuid);
 						if (e.color !== "") {
-							tag.style.backgroundColor = e.color;
+							tag.style.setProperty("--tag", e.color);
 						}
 						const c = document.createElement("p");
 						c.textContent = e.name;

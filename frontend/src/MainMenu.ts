@@ -70,11 +70,11 @@ class MainMenu extends Ui.Widget {
 		main.appendChild(this.navItem("home", "/home", "home", App.translations.Dashboard));
 		main.appendChild(this.navItem("reports", "/reports", "raven", App.translations.Sightings));
 		main.appendChild(this.navItem("checklists", "/checklists", "checklist", App.translations.Checklists));
-		main.appendChild(this.navItem("competitions", "/competitions", "emoji_events", App.translations.Competitions));
 
 		this.mLists = document.createElement("div");
 		this.mLists.className = "sidebar-lists";
 		main.appendChild(this.mLists);
+		main.appendChild(this.navItem("competitions", "/competitions", "emoji_events", App.translations.Competitions));
 
 		const account = document.createElement("button");
 		account.className = "sidebar-account";

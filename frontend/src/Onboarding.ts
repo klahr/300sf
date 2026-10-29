@@ -8,12 +8,12 @@
 // account needs.
 namespace Onboarding {
 	// Creates the "300 Swedish Birds" list (or the first template if it is missing) for the user.
-	export function createStarterList(done: (ok: boolean) => void): void {
+	export function createStarterList(done: (uuid: string | null) => void): void {
 		new HttpRequest("GET", "/v1/list_templates/list").process(function (status: any, data: any) {
 			const templates = (data.result || []) as Array<any>;
 			const template = templates.find(t => (t.name.en || "").indexOf("300") === 0) || templates[0];
 			if (!template) {
-				done(false);
+				done(null);
 				return;
 			}
 			const r = new Requests.Lists();
@@ -24,19 +24,19 @@ namespace Onboarding {
 			r.template = template.uuid;
 			r.visibility = Models.Visibility.Hidden;
 			r.color = Colors.fallback;
-			new HttpRequest("POST", "/v1/lists", r).process(function () {
+			new HttpRequest("POST", "/v1/lists", r).process(function (status: any, data: any) {
 				window.dispatchEvent(new Event("listschanged"));
-				done(true);
+				done(data.uuid);
 			}, function () {
-				done(false);
+				done(null);
 			});
 		}, function () {
-			done(false);
+			done(null);
 		});
 	}
 
 	// A card that explains checklists and creates the starter list in one tap.
-	export function starterCard(onCreated: () => void): HTMLElement {
+	export function starterCard(onCreated: (uuid: string) => void): HTMLElement {
 		const card = document.createElement("div");
 		card.className = "starter-card";
 
@@ -62,9 +62,9 @@ namespace Onboarding {
 		start.innerHTML = "<span class='material-symbols-outlined'>add</span>" + App.translations.StartStarterList;
 		start.addEventListener("click", function () {
 			Ui.setBusy(start, true);
-			createStarterList(function (ok: boolean) {
-				if (ok) {
-					onCreated();
+			createStarterList(function (uuid: string | null) {
+				if (uuid) {
+					onCreated(uuid);
 				} else {
 					Ui.setBusy(start, false);
 					new Ui.MessageBox(App.translations.Error, App.translations.SomethingWentWrong, "/img/messagebox-256.webp", "var(--error-color)", function () { });

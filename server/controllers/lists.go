@@ -106,11 +106,14 @@ func ListsList(c *gin.Context) {
 	}
 
 	var lists []models.List
-	if err := models.DB.Table(table.Lists).Where("user_id=?", user.Id).Where("archived IS NULL").Preload("Name").Preload("Species.Name").Preload("Species.Order.Name").Find(&lists).Error; err != nil {
+	if err := models.DB.Table(table.Lists).Where("user_id=?", user.Id).Where("archived IS NULL").Preload("Name").Preload("Species.Name").Preload("Species.Order.Name").Preload("ListTemplate").Find(&lists).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
 		return
+	}
+	for i := range lists {
+		lists[i].Template = lists[i].ListTemplate.Uuid
 	}
 
 	type response struct {
@@ -133,6 +136,96 @@ func ListsArchive(c *gin.Context) {
 
 	if err := models.DB.Table(table.Lists).Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).Where("archived IS NULL").UpdateColumn("archived", time.Now()).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
+}
+
+func ListsArchived(c *gin.Context) {
+	var user models.User
+	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var lists []models.List
+	if err := models.DB.Table(table.Lists).Where("user_id=?", user.Id).Where("archived IS NOT NULL").Order("archived DESC").Preload("Name").Preload("Species").Find(&lists).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	type response struct {
+		Result []models.List `json:"result"`
+	}
+
+	c.JSON(http.StatusOK, response{
+		Result: lists,
+	})
+}
+
+func ListsRestore(c *gin.Context) {
+	var user models.User
+	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if err := models.DB.Table(table.Lists).Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).Where("archived IS NOT NULL").UpdateColumn("archived", nil).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
+}
+
+// ListsDelete removes an archived list for good. Its sightings stay; only their link to the list goes.
+func ListsDelete(c *gin.Context) {
+	tx := models.DB.Begin()
+	defer tx.Rollback()
+
+	var user models.User
+	if err := tx.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var list models.List
+	if err := tx.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).Where("archived IS NOT NULL").First(&list).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if err := tx.Delete(&list).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if err := tx.Where("id=?", list.NameId).Delete(&models.Translation{}).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
 		return
@@ -172,6 +265,46 @@ func ListsRename(c *gin.Context) {
 	}
 
 	if err := models.DB.Model(&models.Translation{}).Where("id=?", list.NameId).Updates(translationText(r.Name)).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
+}
+
+func ListsColor(c *gin.Context) {
+	type request struct {
+		Color zero.String `json:"color"`
+	}
+
+	var r request
+	if err := c.ShouldBindJSON(&r); err != nil || len(r.Color.String) > 16 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "invalid color",
+		})
+		return
+	}
+
+	var user models.User
+	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var list models.List
+	if err := models.DB.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).First(&list).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if err := models.DB.Model(&list).Update("color", r.Color).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})

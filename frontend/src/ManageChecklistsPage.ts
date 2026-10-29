@@ -9,11 +9,14 @@
 /// <reference path="models/Visibility.ts"/>
 /// <reference path="models/ListTemplate.ts"/>
 /// <reference path="Colors.ts"/>
+/// <reference path="SpeciesListPopUp.ts"/>
 
 class ManageCheckListsPage extends Page {
 	private mTitle: HTMLHeadingElement;
 	private mTemplatesTitle: HTMLHeadingElement;
 	private mChecklists: Ui.Div;
+	private mArchivedTitle: HTMLHeadingElement;
+	private mArchived: Ui.Div;
 	private mTemplates: Ui.Div;
 	private mTemplateSelect: Ui.Select;
 	private mTemplateDescription: HTMLParagraphElement;
@@ -38,6 +41,16 @@ class ManageCheckListsPage extends Page {
 		const newChecklistsLbl = document.createElement("h2");
 		newChecklistsLbl.innerHTML = App.translations.NewChecklist;
 		this.container.appendChild(newChecklistsLbl);
+
+		const own = document.createElement("button");
+		own.className = "inline secondary";
+		own.innerHTML = "<span class='material-symbols-outlined'>playlist_add</span>" + App.translations.OwnSpeciesList;
+		own.addEventListener("click", function () {
+			openSpeciesListPopUp(null, function (uuid: string) {
+				self.appListener.showPage("list", { uuid: uuid });
+			});
+		});
+		this.container.appendChild(own);
 
 		this.mName = new Ui.Input("text");
 		this.mName.setPlaceHolder(App.translations.Name);
@@ -134,6 +147,17 @@ class ManageCheckListsPage extends Page {
 		});
 
 		this.groupSections();
+
+		// Archived lists can be restored, or deleted for good; only archived lists can be deleted.
+		this.mArchivedTitle = document.createElement("h2");
+		this.mArchivedTitle.className = "archived-title";
+		this.mArchivedTitle.textContent = App.translations.ArchivedChecklists;
+		this.mArchivedTitle.hidden = true;
+		this.container.appendChild(this.mArchivedTitle);
+
+		this.mArchived = new Ui.Div();
+		this.mArchived.addClass("manage-list");
+		this.attach(this.mArchived);
 	}
 
 	public get id(): string {
@@ -172,12 +196,13 @@ class ManageCheckListsPage extends Page {
 	private refresh(): void {
 		this.mProfile.setImage("/img/portraits/" + App.user.portrait);
 		const self = this;
+		this.refreshArchived();
 		const r = new HttpRequest("GET", "/v1/lists/list");
 		r.process(function (status: any, data: any) {
 			self.mChecklists.clear();
 			if (!data.result || data.result.length === 0) {
-				self.mChecklists.container.appendChild(Onboarding.starterCard(function () {
-					location.reload();
+				self.mChecklists.container.appendChild(Onboarding.starterCard(function (uuid: string) {
+					self.appListener.showPage("list", { uuid: uuid });
 				}));
 			}
 			(data.result || []).forEach(e => {
@@ -253,6 +278,56 @@ class ManageCheckListsPage extends Page {
 				c.addEventListener("click", function () {
 					new Ui.MessageBox(App.translations.Error, App.translations.NotAvailableYet, "/img/messagebox-256.webp", "var(--error-color)", function () { });
 				});
+			});
+		});
+	}
+
+	private refreshArchived(): void {
+		const self = this;
+		new HttpRequest("GET", "/v1/lists/archived").process(function (status: any, data: any) {
+			self.mArchived.clear();
+			const lists = (data.result || []) as Array<Models.List>;
+			self.mArchivedTitle.hidden = lists.length === 0;
+			lists.forEach(e => {
+				const c = document.createElement("div");
+				c.className = "manage-row archived";
+				c.innerHTML = "<span class='list-dot' style='--dot: " + Utils.escapeHtml(e.color !== "" ? e.color : "var(--blue)") + ";'></span><p>" + Utils.escapeHtml(App.getTranslation(e.name)) + "</p><p class='meta'>" + App.translations.SpeciesCount.replace("{0}", e.species.length.toString()) + "</p>";
+
+				const restore = document.createElement("button");
+				restore.className = "icon-button";
+				restore.title = App.translations.RestoreChecklist;
+				restore.setAttribute("aria-label", App.translations.RestoreChecklist + ": " + App.getTranslation(e.name));
+				restore.innerHTML = "<span class='material-symbols-outlined'>unarchive</span>";
+				restore.addEventListener("click", function () {
+					Ui.setBusy(restore, true);
+					new HttpRequest("POST", "/v1/lists/" + e.uuid + "/restore").process(function () {
+						window.dispatchEvent(new Event("listschanged"));
+						self.refresh();
+					}, function () {
+						Ui.setBusy(restore, false);
+						new Ui.MessageBox(App.translations.Error, App.translations.SomethingWentWrong, "/img/messagebox-256.webp", "var(--error-color)", function () { });
+					});
+				});
+				c.appendChild(restore);
+
+				const remove = document.createElement("button");
+				remove.className = "icon-button delete";
+				remove.title = App.translations.DeleteChecklist;
+				remove.setAttribute("aria-label", App.translations.DeleteChecklist + ": " + App.getTranslation(e.name));
+				remove.innerHTML = "<span class='material-symbols-outlined'>delete_forever</span>";
+				remove.addEventListener("click", function () {
+					new Ui.ConfirmBox(App.translations.DeleteChecklist, App.translations.ConfirmDeleteChecklist, "/img/messagebox-256.webp", "var(--error-color)", function () {
+						new HttpRequest("DELETE", "/v1/lists/" + e.uuid).process(function () {
+							self.refreshArchived();
+						}, function () {
+							new Ui.MessageBox(App.translations.Error, App.translations.SomethingWentWrong, "/img/messagebox-256.webp", "var(--error-color)", function () { });
+						});
+					}, function () {
+					}, App.translations.DeleteChecklist, App.translations.Cancel);
+				});
+				c.appendChild(remove);
+
+				self.mArchived.container.appendChild(c);
 			});
 		});
 	}

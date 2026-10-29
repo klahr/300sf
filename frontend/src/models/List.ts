@@ -8,5 +8,6 @@ namespace Models {
 		color: string;
 		from: Date;
 		until: Date;
+		template?: string;
 	}
 }

@@ -2,20 +2,24 @@
 package controllers
 
 import (
+	"errors"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/klahr/300sf/server/auth"
 	"github.com/klahr/300sf/server/models"
 	"github.com/klahr/300sf/server/table"
 	"github.com/klahr/300sf/server/utils"
+	"gorm.io/gorm"
 )
 
 func ListTemplates(c *gin.Context) {
 	type request struct {
-		Name        models.Translation `json:"name"`
-		Visibility  int64              `json:"visibility"`
-		Description models.Translation `json:"description"`
+		Name         models.Translation `json:"name"`
+		Visibility   int64              `json:"visibility"`
+		Description  models.Translation `json:"description"`
+		SpeciesUuids []string           `json:"species_uuids"`
 	}
 
 	var r request
@@ -37,6 +41,11 @@ func ListTemplates(c *gin.Context) {
 			"message": err.Error(),
 		})
 		return
+	}
+
+	// Only admins share species lists with everyone.
+	if r.Visibility == models.VisibilityPublic && !user.HasScope(auth.AuthScopeAdmin) {
+		r.Visibility = models.VisibilityPrivate
 	}
 
 	name := r.Name
@@ -78,6 +87,15 @@ func ListTemplates(c *gin.Context) {
 			"message": err.Error(),
 		})
 		return
+	}
+
+	if len(r.SpeciesUuids) > 0 {
+		if err := setListTemplateSpecies(tx, listTemplate.Id, r.SpeciesUuids); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": err.Error(),
+			})
+			return
+		}
 	}
 
 	tx.Commit()
@@ -345,4 +363,120 @@ func ListTemplatesDetails(c *gin.Context) {
 	c.JSON(http.StatusOK, response{
 		Result: result,
 	})
+}
+
+// setListTemplateSpecies makes speciesUuids the species of the template, and of every checklist made
+// from it, so the lists follow their species list. Sightings stay on the checklists.
+func setListTemplateSpecies(tx *gorm.DB, templateId int64, speciesUuids []string) error {
+	var species []models.Species
+	if err := tx.Where("uuid IN ?", speciesUuids).Find(&species).Error; err != nil {
+		return err
+	}
+	if len(species) != len(speciesUuids) {
+		return errors.New("unknown species")
+	}
+	ids := make([]int64, len(species))
+	for i := range species {
+		ids[i] = species[i].Id
+	}
+
+	if err := tx.Where("list_template_id=?", templateId).Delete(&models.ListTemplateSpecies{}).Error; err != nil {
+		return err
+	}
+	rows := make([]models.ListTemplateSpecies, len(ids))
+	for i := range ids {
+		rows[i] = models.ListTemplateSpecies{ListTemplateId: templateId, SpeciesId: ids[i]}
+	}
+	if len(rows) > 0 {
+		if err := tx.Table(table.ListTemplateSpecies).Create(&rows).Error; err != nil {
+			return err
+		}
+	}
+
+	lists := tx.Table(table.Lists).Select("id").Where("list_template_id=?", templateId)
+	if err := tx.Exec("DELETE FROM list_species WHERE list_id IN (?)", lists).Error; err != nil {
+		return err
+	}
+	if len(ids) > 0 {
+		return tx.Exec("INSERT INTO list_species (list_id, species_id) SELECT l.id, s.id FROM lists l JOIN species s ON s.id IN ? WHERE l.list_template_id=?", ids, templateId).Error
+	}
+	return nil
+}
+
+// ListTemplatesSpecies replaces the species on the user's own species list.
+func ListTemplatesSpecies(c *gin.Context) {
+	type request struct {
+		SpeciesUuids []string `json:"species_uuids"`
+	}
+
+	var r request
+	if err := c.ShouldBindJSON(&r); err != nil || len(r.SpeciesUuids) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "species required",
+		})
+		return
+	}
+
+	tx := models.DB.Begin()
+	defer tx.Rollback()
+
+	var user models.User
+	if err := tx.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var listTemplate models.ListTemplate
+	if err := tx.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).Where("archived IS NULL").First(&listTemplate).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "template not found",
+		})
+		return
+	}
+
+	if err := setListTemplateSpecies(tx, listTemplate.Id, r.SpeciesUuids); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	tx.Commit()
+
+	c.JSON(http.StatusNoContent, nil)
+}
+
+// ListTemplatesVisibility shares an admin's species list with everyone, or makes it private again.
+func ListTemplatesVisibility(c *gin.Context) {
+	type request struct {
+		Visibility int64 `json:"visibility"`
+	}
+
+	var r request
+	if err := c.ShouldBindJSON(&r); err != nil || (r.Visibility != models.VisibilityPrivate && r.Visibility != models.VisibilityPublic) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "invalid visibility",
+		})
+		return
+	}
+
+	var user models.User
+	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	result := models.DB.Table(table.ListTemplates).Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).Where("archived IS NULL").UpdateColumn("visibility", r.Visibility)
+	if result.Error != nil || result.RowsAffected == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "template not found",
+		})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
 }

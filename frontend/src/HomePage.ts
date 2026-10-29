@@ -185,9 +185,8 @@ class HomePage extends Page {
 				}));
 			});
 			if (d.list_reports.length === 0) {
-				// The menu lists the checklists too, so reload rather than refresh this page alone.
-				self.mProgressBoxes.container.appendChild(Onboarding.starterCard(function () {
-					location.reload();
+				self.mProgressBoxes.container.appendChild(Onboarding.starterCard(function (uuid: string) {
+					self.appListener.showPage("list", { uuid: uuid });
 				}));
 			}
 
@@ -250,7 +249,7 @@ class HomePage extends Page {
 						const tag = document.createElement("div");
 						tag.className = "tag";
 						if (e.color !== "") {
-							tag.style.backgroundColor = e.color;
+							tag.style.setProperty("--tag", e.color);
 						}
 						const c = document.createElement("p");
 						c.textContent = e.name;

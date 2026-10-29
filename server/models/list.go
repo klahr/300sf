@@ -18,4 +18,6 @@ type List struct {
 	ListTemplateId zero.Int     `json:"-"`
 	ListTemplate   ListTemplate `json:"-"`
 	Color          zero.String  `json:"color"`
+	// Template is the uuid of the species list the list was made from, when the list is shown to its owner.
+	Template string `json:"template,omitempty" gorm:"-"`
 }

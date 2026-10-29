@@ -121,7 +121,7 @@ class EditReportPopUp {
 				const tag = document.createElement("div");
 				tag.className = "tag";
 				if (e.color !== "") {
-					tag.style.backgroundColor = e.color;
+					tag.style.setProperty("--tag", e.color);
 				}
 				const c = document.createElement("p");
 				c.textContent = e.name;
@@ -141,6 +141,21 @@ class EditReportPopUp {
 				});
 			}, function () {
 			}, App.translations.ArchiveSighting, App.translations.Cancel);
+		});
+
+		sheet.addAction(Ui.actionButton(App.translations.DeleteSighting, "delete_forever", "danger")).addEventListener("click", function () {
+			new Ui.ConfirmBox(App.translations.DeleteSighting, App.translations.ConfirmDeleteSighting, "/img/messagebox-256.webp", "var(--error-color)", function () {
+				const r = new HttpRequest("DELETE", "/v1/reports/" + report.uuid);
+				r.process(function (status: any, data: any) {
+					self.mSheet.close();
+					setTimeout(() => {
+						location.reload();
+					}, 150);
+				}, function () {
+					new Ui.MessageBox(App.translations.Error, App.translations.SomethingWentWrong, "/img/messagebox-256.webp", "var(--error-color)", function () { });
+				});
+			}, function () {
+			}, App.translations.DeleteSighting, App.translations.Cancel);
 		});
 
 		// The species photo for the header.

@@ -97,7 +97,7 @@ class ManageTagsPage extends Page {
 				const tag = document.createElement("div");
 				tag.className = "tag";
 				if (t.color !== "") {
-					tag.style.backgroundColor = t.color;
+					tag.style.setProperty("--tag", t.color);
 				}
 				const c = document.createElement("p");
 				c.textContent = t.name;

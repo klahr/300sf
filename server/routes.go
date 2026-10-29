@@ -181,9 +181,13 @@ func SetupRoutes(r gin.IRouter, signIn, signOut gin.HandlerFunc) {
 
 	// Lists
 	r.GET("/v1/lists/list", apiKeyMiddleware, basicMiddleware, controllers.ListsList)
+	r.GET("/v1/lists/archived", apiKeyMiddleware, basicMiddleware, controllers.ListsArchived)
 	r.POST("/v1/lists", apiKeyMiddleware, basicMiddleware, controllers.Lists)
 	r.POST("/v1/lists/:uuid/archive", apiKeyMiddleware, basicMiddleware, controllers.ListsArchive)
+	r.POST("/v1/lists/:uuid/restore", apiKeyMiddleware, basicMiddleware, controllers.ListsRestore)
+	r.DELETE("/v1/lists/:uuid", apiKeyMiddleware, basicMiddleware, controllers.ListsDelete)
 	r.POST("/v1/lists/:uuid/rename", apiKeyMiddleware, basicMiddleware, controllers.ListsRename)
+	r.POST("/v1/lists/:uuid/color", apiKeyMiddleware, basicMiddleware, controllers.ListsColor)
 	r.POST("/v1/lists/:uuid/timespan", apiKeyMiddleware, basicMiddleware, controllers.ListsTimespan)
 	r.GET("/v1/lists/:uuid", apiKeyMiddleware, basicMiddleware, controllers.ListsDetails)
 	r.GET("/v1/lists/:uuid/reports", apiKeyMiddleware, basicMiddleware, controllers.ListsReports)
@@ -199,6 +203,8 @@ func SetupRoutes(r gin.IRouter, signIn, signOut gin.HandlerFunc) {
 	r.POST("/v1/list_templates/:uuid/remove_species", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesRemoveSpecies)
 	r.POST("/v1/list_templates/:uuid/name", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesName)
 	r.POST("/v1/list_templates/:uuid/description", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesDescription)
+	r.POST("/v1/list_templates/:uuid/species", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesSpecies)
+	r.POST("/v1/list_templates/:uuid/visibility", apiKeyMiddleware, adminMiddleware, controllers.ListTemplatesVisibility)
 	r.GET("/v1/list_templates/:uuid", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesDetails)
 
 	// Tags
@@ -223,6 +229,7 @@ func SetupRoutes(r gin.IRouter, signIn, signOut gin.HandlerFunc) {
 	r.POST("/v1/reports/list", apiKeyMiddleware, basicMiddleware, controllers.ReportsListByList)
 	r.POST("/v1/reports", apiKeyMiddleware, basicMiddleware, controllers.Reports)
 	r.POST("/v1/reports/:uuid/archive", apiKeyMiddleware, basicMiddleware, controllers.ReportsArchive)
+	r.DELETE("/v1/reports/:uuid", apiKeyMiddleware, basicMiddleware, controllers.ReportsDelete)
 	r.GET("/v1/reports/:uuid", apiKeyMiddleware, basicMiddleware, controllers.ReportsDetails)
 	r.POST("/v1/reports/:uuid/remove_tag", apiKeyMiddleware, basicMiddleware, controllers.ReportsRemoveTag)
 	r.POST("/v1/reports/:uuid/add_tag", apiKeyMiddleware, basicMiddleware, controllers.ReportsAddTag)

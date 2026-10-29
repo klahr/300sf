@@ -24,8 +24,6 @@ class ReportPopUp {
 	// Null until the user taps the map or their position is found.
 	private mLocation: { lat: number, lng: number } | null = null;
 	private mPopUp: Ui.Sheet;
-	private mListHint: HTMLParagraphElement;
-	private mEmptyLists = false;
 
 	constructor(species: Models.Species, list: Models.List | null, closeCallback: (speciesAdded: boolean) => void) {
 		const self = this;
@@ -38,13 +36,9 @@ class ReportPopUp {
 		this.mChecklistContainer = new Ui.Div();
 		this.mChecklistContainer.style.position = "relative";
 
-		// Which lists: required, so it comes first.
+		// Which lists. Optional: a sighting on no list still counts in competitions.
 		const listsSection = sheet.section(App.translations.AvailableChecklists);
 		listsSection.appendChild(self.mChecklistContainer.container);
-		this.mListHint = document.createElement("p");
-		this.mListHint.className = "details hidden";
-		this.mListHint.textContent = App.translations.ChooseAtLeastOneList;
-		listsSection.appendChild(this.mListHint);
 
 		// The map looks up the position after a moment; stop that if the sheet closes first.
 		let closed = false;
@@ -122,11 +116,9 @@ class ReportPopUp {
 				const d = data as Responses.ListsSpecies;
 				self.mChecklistContainer.detachAll();
 				self.mChecklistContainer.container.innerHTML = "";
-				self.mEmptyLists = false;
 
 				// No checklist at all: offer to start one right here.
 				if (!d.result || d.result.length === 0) {
-					self.mEmptyLists = true;
 					const intro = document.createElement("p");
 					intro.className = "details";
 					intro.textContent = App.translations.NoChecklistForReport;
@@ -138,7 +130,6 @@ class ReportPopUp {
 					return;
 				}
 				if (!d.result.some(e => e.available)) {
-					self.mEmptyLists = true;
 					const none = document.createElement("p");
 					none.className = "details";
 					none.textContent = App.translations.NotOnYourLists;
@@ -408,7 +399,7 @@ class ReportPopUp {
 			}
 		});
 		if (e.color !== "") {
-			tag.style.backgroundColor = e.color;
+			tag.style.setProperty("--tag", e.color);
 		}
 		const c = document.createElement("p");
 		c.textContent = e.name;
@@ -420,22 +411,6 @@ class ReportPopUp {
 
 	private validate(): void {
 		this.mReportButton.disabled = false;
-
-		const checklists = this.mChecklistContainer.container.getElementsByTagName("input");
-		let isAnyChecked = false;
-		for (let i = 0; i < checklists.length; ++i) {
-			if (checklists[i].checked) {
-				isAnyChecked = true;
-				break;
-			}
-		}
-
-		// Say why the button is disabled, unless the list section already explains it.
-		this.mListHint.classList.toggle("hidden", isAnyChecked || this.mEmptyLists);
-		if (!isAnyChecked) {
-			this.mReportButton.disabled = true;
-			return;
-		}
 	}
 }
 

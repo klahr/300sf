@@ -288,6 +288,53 @@ func ReportsListByList(c *gin.Context) {
 	})
 }
 
+// ReportsDelete removes a sighting for good with its comment; its links to lists, labels and notifications go with it.
+func ReportsDelete(c *gin.Context) {
+	tx := models.DB.Begin()
+	defer tx.Rollback()
+
+	var user models.User
+	if err := tx.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var report models.Report
+	if err := tx.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).First(&report).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if err := tx.Delete(&report).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if report.CommentId.Valid {
+		if err := tx.Where("id=?", report.CommentId.Int64).Delete(&models.Comment{}).Error; err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": err.Error(),
+			})
+			return
+		}
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
+}
+
 func ReportsArchive(c *gin.Context) {
 	var user models.User
 	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
