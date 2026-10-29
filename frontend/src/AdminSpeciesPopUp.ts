@@ -10,6 +10,8 @@ class AdminSpeciesPopUp {
 	private mGerman: Ui.Input;
 	private mLatin: Ui.Input;
 	private mSpecies: Array<Models.Species> = new Array();
+	private mRaritySpecies: Ui.Select;
+	private mRarityZone: Ui.Select;
 
 	constructor(closeCallback: () => void) {
 		const self = this;
@@ -117,7 +119,47 @@ class AdminSpeciesPopUp {
 			}, App.translations.AddSpecies, App.translations.Cancel);
 		});
 
+		this.addRarity(content);
 		this.refresh();
+	}
+
+	// A species' rarity category (A–E) in a zone; "-" removes it.
+	private addRarity(content: Ui.Div): void {
+		const self = this;
+		const rarityLbl = document.createElement("h2");
+		rarityLbl.textContent = App.translations.SetRarity;
+		content.container.appendChild(rarityLbl);
+
+		this.mRaritySpecies = new Ui.Select(App.translations.Species, App.translations.Search, () => verify());
+		content.attach(this.mRaritySpecies);
+		this.mRarityZone = new Ui.Select(App.translations.Zones, App.translations.Search, () => verify());
+		content.attach(this.mRarityZone);
+		const category = new Ui.Select(App.translations.Rarity, App.translations.Search, () => verify());
+		["A", "B", "C", "D", "E"].forEach(c => category.addOption(c, c.toLowerCase()));
+		category.addOption(App.translations.NotRated, "-");
+		content.attach(category);
+
+		const set = document.createElement("button");
+		set.textContent = App.translations.SetRarity;
+		content.container.appendChild(set);
+		const verify = function () {
+			set.disabled = !self.mRaritySpecies.value || !self.mRarityZone.value || !category.value;
+		};
+		verify();
+		set.addEventListener("click", function () {
+			set.disabled = true;
+			new HttpRequest("POST", "/v1/species/" + self.mRaritySpecies.value + "/set_rarity", { zone_uuid: self.mRarityZone.value, category: category.value }).process(function () {
+				new Ui.Toast(App.translations.Saved, "", null, "var(--success-color)", function () { });
+			}, function (status: any, data: Responses.GeneralErrorResponse, error: any) {
+				new Ui.MessageBox(App.translations.Error, error, "/img/messagebox-256.webp", "var(--error-color)", function () { });
+			}, verify);
+		});
+
+		new HttpRequest("GET", "/v1/zones/list", null).process(function (status: any, data: any) {
+			const zones = data.result as Array<Models.Zone>;
+			zones.sort(Utils.sortByNameOnCurrentLanguage);
+			zones.forEach(z => self.mRarityZone.addOption(App.getTranslation(z.name), z.uuid));
+		});
 	}
 
 	private refresh(): void {
@@ -127,9 +169,11 @@ class AdminSpeciesPopUp {
 			self.mSpecies = data.result;
 			self.mSpecies.sort(Utils.sortByNameOnCurrentLanguage);
 			self.mSpeciesList.clear();
+			self.mRaritySpecies.clear();
 			self.mSpecies.forEach(e => {
 				const s = e as Models.Species;
 				self.mSpeciesList.addOption(App.getTranslation(s.name), s.uuid);
+				self.mRaritySpecies.addOption(App.getTranslation(s.name), s.uuid);
 			});
 		}, (status: any, data: Responses.GeneralErrorResponse, error: any) => {
 		}, undefined);

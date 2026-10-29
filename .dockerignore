@@ -2,7 +2,6 @@
 **/node_modules
 server/site/static/js
 server/bin
-cli
 # Local configs hold secrets; the config is mounted at runtime.
 server/*.yml
 server/*.conf

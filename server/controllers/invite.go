@@ -28,7 +28,7 @@ func Invite(c *gin.Context) {
 	tx := models.DB.Begin()
 	defer tx.Rollback()
 
-	et, err := utils.GetEmailTemplate("invite", r.LanguageCode)
+	et, err := utils.GetEmailTemplate("invite", r.LanguageCode, config.AppConfig.Domain, nil)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
@@ -49,7 +49,7 @@ func Invite(c *gin.Context) {
 		TextPart:   et.Txt,
 		HtmlPart:   et.Html,
 		SendAt:     time.Now(),
-		ReplyEmail: et.Email,
+		ReplyEmail: et.ReplyTo,
 		ReplyName:  et.Name,
 	}
 

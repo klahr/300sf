@@ -12,6 +12,7 @@ import (
 	"github.com/klahr/300sf/server/utils"
 	"github.com/tidwall/geojson"
 	"gopkg.in/guregu/null.v4/zero"
+	"gorm.io/gorm"
 )
 
 func Zones(c *gin.Context) {
@@ -107,7 +108,8 @@ func Zones(c *gin.Context) {
 
 func ZonesList(c *gin.Context) {
 	var zones []models.Zone
-	if err := models.DB.Table(table.Zones).Preload("Name").Preload("ParentZone").Find(&zones).Error; err != nil {
+	// Without the polygons, which can be megabytes each.
+	if err := models.DB.Table(table.Zones).Omit("polygon").Preload("Name").Preload("ParentZone", func(db *gorm.DB) *gorm.DB { return db.Omit("polygon") }).Preload("ParentZone.Name").Find(&zones).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})

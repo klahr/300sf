@@ -11,7 +11,6 @@ One Go server runs everything on one domain, 300sf.se — the landing page on
 |---|---|
 | [`server/`](server/) | Go server: the REST API (gin, MariaDB, Redis, Mailjet) and the websites, embedded from `server/site/` |
 | [`frontend/`](frontend/) | TypeScript source of the app; compiled into `server/site/static/js/` at build time |
-| [`cli/`](cli/) | Python command line client, also used for admin tasks |
 | [`deploy/`](deploy/) | `docker-compose.yml` and the reverse proxy setup |
 
 ## Local development
@@ -36,7 +35,6 @@ the API docs.
 ```bash
 (cd server && go test ./...)
 (cd frontend && npm run typecheck)
-(cd cli && python -m unittest discover -s tests)
 ```
 
 CI runs these and builds the image on every push and pull request.
@@ -53,7 +51,7 @@ setup.
 
 ## License
 
-300sf (server, web app, CLI and analyzer) is licensed under the GNU Affero
+300sf (server, web app and analyzer) is licensed under the GNU Affero
 General Public License v3.0 or later; see [`LICENSE`](LICENSE). If you run a
 modified version as a service, its users must be able to get its source.
 

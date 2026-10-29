@@ -143,17 +143,35 @@ func TestTranslation2Value(t *testing.T) {
 
 func TestEmailTemplatesComplete(t *testing.T) {
 	t.Chdir("..")
+	vars := map[string]string{"DISPLAY_NAME": "<b>Kalle</b>", "LINK": "https://300sf.se/set-password?token=abc123"}
 	for _, lang := range []string{"en", "sv", "de"} {
 		for _, name := range []string{"welcome", "invite", "set_password", "delete_account"} {
-			e, err := GetEmailTemplate(name, lang)
+			e, err := GetEmailTemplate(name, lang, "https://300sf.se", vars)
 			if err != nil {
 				t.Errorf("%s/%s: %v", lang, name, err)
 				continue
 			}
-			if e.Subject == "" || (e.Txt == "" && e.Html == "") {
-				t.Errorf("%s/%s: missing subject or body", lang, name)
+			if e.Subject == "" || e.Email == "" || e.Name == "" || e.ReplyTo == "" {
+				t.Errorf("%s/%s: missing subject, sender or reply-to", lang, name)
+			}
+			for part, body := range map[string]string{"html": e.Html, "text": e.Txt} {
+				if strings.Contains(body, "${") {
+					t.Errorf("%s/%s %s: unreplaced variable", lang, name, part)
+				}
+				if (name == "set_password" || name == "delete_account") && !strings.Contains(body, "token=abc123") {
+					t.Errorf("%s/%s %s: link missing", lang, name, part)
+				}
+			}
+			if strings.Contains(e.Html, "<b>Kalle</b>") {
+				t.Errorf("%s/%s: display name not escaped", lang, name)
+			}
+			if !strings.Contains(e.Html, `lang="`+lang+`"`) {
+				t.Errorf("%s/%s: rendered in the wrong language", lang, name)
 			}
 		}
+	}
+	if e, err := GetEmailTemplate("welcome", "../../etc", "https://300sf.se", nil); err != nil || !strings.Contains(e.Html, `lang="en"`) {
+		t.Errorf("unknown language should fall back to English: %v", err)
 	}
 }
 

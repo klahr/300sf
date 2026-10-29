@@ -29,6 +29,8 @@ type ApiKeyClean struct {
 	SoftLimit int64     `json:"soft_limit"`
 	HardLimit int64     `json:"hard_limit"`
 	RevokedAt zero.Time `json:"revoked_at"`
+	// Website is set on the key the website signs in with, which must not be revoked.
+	Website bool `json:"website" gorm:"-"`
 }
 
 func (a *ApiKey) HasScope(scope string) bool {

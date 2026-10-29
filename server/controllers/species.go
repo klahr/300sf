@@ -169,7 +169,7 @@ func SpeciesSetRarity(c *gin.Context) {
 				return
 			}
 		} else {
-			if err := models.DB.Table(table.Rarities).Where("id=?", rarity.Id).UpdateColumn("category", string(strings.ToUpper(r.Category)[0])).Error; err != nil {
+			if err := tx.Table(table.Rarities).Where("id=?", rarity.Id).UpdateColumn("category", string(strings.ToUpper(r.Category)[0])).Error; err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{
 					"message": err.Error(),
 				})

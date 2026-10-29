@@ -101,6 +101,10 @@ func ApiKeysList(c *gin.Context) {
 		return
 	}
 
+	for i := range apiKeys {
+		apiKeys[i].Website = apiKeys[i].ClientId == config.AppConfig.Site.ClientId
+	}
+
 	type response struct {
 		ApiKeys []models.ApiKeyClean `json:"api_keys"`
 	}
@@ -123,6 +127,14 @@ func ApiKeysRevoke(c *gin.Context) {
 	if err := models.DB.Where("prefix=?", c.Param("prefix")).Where("user_id=?", user.Id).First(&apiKey).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
+		})
+		return
+	}
+
+	// Revoking it would sign everyone out of the website.
+	if apiKey.ClientId == config.AppConfig.Site.ClientId {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "this key is used by the website",
 		})
 		return
 	}

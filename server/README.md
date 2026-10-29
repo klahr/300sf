@@ -62,5 +62,5 @@ Routes are declared in `routes.go`; the OpenAPI spec in
 
 Zones are GeoJSON polygons nested country → county → municipality
 (`admin_level` 2, 4, 7). Reports are matched to zones by point-in-polygon
-(`utils/location.go`). Zones are inserted with `300sf zone --insert` from the
-CLI.
+(`utils/location.go`). Zones are added on the Admin page of the web app, from a
+GeoJSON file.

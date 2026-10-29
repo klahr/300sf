@@ -1278,3 +1278,29 @@ UPDATE `300sf`.`competitions` t JOIN `300sf`.`color_palette_map` m ON m.old = LO
 UPDATE `300sf`.`announcements` t JOIN `300sf`.`color_palette_map` m ON m.old = LOWER(t.color) SET t.color = m.new;
 
 DROP TEMPORARY TABLE `300sf`.`color_palette_map`;
+
+-- Competition invites (models.CompetitionInvite). The code has used this table
+-- since competitions were added, but it was never created here. IF NOT EXISTS
+-- keeps this safe on databases where it was created by hand.
+CREATE TABLE IF NOT EXISTS `300sf`.`competition_invites` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `timestamp` DATETIME NOT NULL,
+  `uuid` VARCHAR(32) NOT NULL,
+  `user_id` INT NOT NULL,
+  `competition_id` INT NOT NULL,
+  `accepted_at` DATETIME NULL,
+  `rejected_at` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) VISIBLE,
+  INDEX `fk_competition_invites_1_idx` (`user_id` ASC) VISIBLE,
+  INDEX `fk_competition_invites_2_idx` (`competition_id` ASC) VISIBLE,
+  CONSTRAINT `fk_competition_invites_1`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `300sf`.`users` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_competition_invites_2`
+    FOREIGN KEY (`competition_id`)
+    REFERENCES `300sf`.`competitions` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION);

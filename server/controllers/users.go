@@ -3,7 +3,6 @@ package controllers
 
 import (
 	"fmt"
-	"html"
 	"net/http"
 	"strings"
 	"time"
@@ -187,7 +186,7 @@ func Users(c *gin.Context) {
 		}
 	}
 
-	et, err := utils.GetEmailTemplate("welcome", language.Code)
+	et, err := utils.GetEmailTemplate("welcome", language.Code, config.AppConfig.Domain, map[string]string{"DISPLAY_NAME": r.DisplayName})
 	if err != nil {
 		log.Error(c, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -196,9 +195,6 @@ func Users(c *gin.Context) {
 		tx.Rollback()
 		return
 	}
-
-	et.Txt = strings.ReplaceAll(et.Txt, "${DISPLAY_NAME}", r.DisplayName)
-	et.Html = strings.ReplaceAll(et.Html, "${DISPLAY_NAME}", html.EscapeString(r.DisplayName))
 
 	email := models.Email{
 		Model: models.Model{
@@ -213,7 +209,7 @@ func Users(c *gin.Context) {
 		TextPart:   et.Txt,
 		HtmlPart:   et.Html,
 		SendAt:     time.Now(),
-		ReplyEmail: et.Email,
+		ReplyEmail: et.ReplyTo,
 		ReplyName:  et.Name,
 	}
 
@@ -763,7 +759,8 @@ func UsersResetPassword(c *gin.Context) {
 		languageCode = defaultLanguageCode(c.GetString("app_language"))
 	}
 
-	et, err := utils.GetEmailTemplate("set_password", languageCode)
+	resetLink := fmt.Sprintf("%s/set-password?token=%s", config.AppConfig.Domain, token)
+	et, err := utils.GetEmailTemplate("set_password", languageCode, config.AppConfig.Domain, map[string]string{"LINK": resetLink})
 	if err != nil {
 		log.Error(c, 0, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -771,10 +768,6 @@ func UsersResetPassword(c *gin.Context) {
 		})
 		return
 	}
-
-	resetLink := fmt.Sprintf("%s/set-password?token=%s", config.AppConfig.Domain, token)
-	et.Txt = strings.ReplaceAll(et.Txt, "${LINK}", resetLink)
-	et.Html = strings.ReplaceAll(et.Html, "${LINK}", resetLink)
 
 	email := models.Email{
 		Model: models.Model{
@@ -789,7 +782,7 @@ func UsersResetPassword(c *gin.Context) {
 		TextPart:   et.Txt,
 		HtmlPart:   et.Html,
 		SendAt:     time.Now(),
-		ReplyEmail: et.Email,
+		ReplyEmail: et.ReplyTo,
 		ReplyName:  et.Name,
 	}
 
@@ -994,7 +987,8 @@ func UsersRequestDelete(c *gin.Context) {
 		UserId:   user.Id,
 	}
 
-	et, err := utils.GetEmailTemplate("delete_account", language.Code)
+	deleteLink := fmt.Sprintf("%s/delete-account?token=%s", config.AppConfig.Domain, token)
+	et, err := utils.GetEmailTemplate("delete_account", language.Code, config.AppConfig.Domain, map[string]string{"LINK": deleteLink})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
@@ -1002,10 +996,6 @@ func UsersRequestDelete(c *gin.Context) {
 		tx.Rollback()
 		return
 	}
-
-	deleteLink := fmt.Sprintf("%s/delete-account?token=%s", config.AppConfig.Domain, token)
-	et.Txt = strings.ReplaceAll(et.Txt, "${LINK}", deleteLink)
-	et.Html = strings.ReplaceAll(et.Html, "${LINK}", deleteLink)
 
 	email := models.Email{
 		Model: models.Model{
@@ -1020,7 +1010,7 @@ func UsersRequestDelete(c *gin.Context) {
 		TextPart:   et.Txt,
 		HtmlPart:   et.Html,
 		SendAt:     time.Now(),
-		ReplyEmail: et.Email,
+		ReplyEmail: et.ReplyTo,
 		ReplyName:  et.Name,
 	}
 

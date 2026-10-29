@@ -8,5 +8,7 @@ namespace Models {
 		imported_at: Date;
 		language: Language;
 		portrait: string;
+		scopes?: string;
+		last_seen_at?: string;
 	}
 }

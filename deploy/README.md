@@ -7,7 +7,7 @@ One container serves everything on one domain, `300sf.se` (`site.host`):
 | `/` | landing page (signed-in visitors go on to `/home`) |
 | `/home`, `/checklists`, `/list/…` and the other app pages | the app |
 | `/api/v1/…` | the API, as used by the app |
-| `/v1/…` | the API, for the CLI and other API key users |
+| `/v1/…` | the API, for API key users |
 | `/docs` | API docs (Swagger UI) |
 
 The old domains in `site.redirect-hosts` redirect permanently to the same path
@@ -18,8 +18,7 @@ existing API clients.
 
 Everyone signs in once more after this version is deployed: sessions now live
 in cookies on `300sf.se` instead of `localStorage` on `app.300sf.se`, and
-tokens issued before it are no longer accepted. API key users (such as the
-CLI) sign in again with their password. Redis now holds the sessions, so
+tokens issued before it are no longer accepted. API key users sign in again with their password. Redis now holds the sessions, so
 flushing it signs everyone out.
 
 ## Run
@@ -86,7 +85,6 @@ This replaces the previous upstreams (webapp on `:3000`, landing page on
 
 1. Merge the API config (`300sf-albatross.conf`) and the webapp's
    `routes/config.js` into `/etc/300sf/300sf.yml` (see `site:` in the sample).
-   Point the CLI's `api-endpoint` at `https://300sf.se`.
 2. Stop the old containers: `docker rm -f albatross blackbird yellowhammer woodpecker swagger-ui`.
 3. `docker compose up -d --build`, then reload nginx with the config above.
 4. Set `domain: "https://300sf.se"` in the config so emails link to the new
