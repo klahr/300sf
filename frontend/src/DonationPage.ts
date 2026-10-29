@@ -63,6 +63,15 @@ class DonationPage extends Page {
 	public onBecomeVisible(): void {
 		super.onBecomeVisible();
 		this.refresh();
+
+		// Stripe's script sets its own cookies, so it is loaded only here, when someone may donate.
+		if (!document.getElementById("stripe-buy-button")) {
+			const script = document.createElement("script");
+			script.id = "stripe-buy-button";
+			script.async = true;
+			script.src = "https://js.stripe.com/v3/buy-button.js";
+			document.head.appendChild(script);
+		}
 	}
 
 	private refresh(): void {

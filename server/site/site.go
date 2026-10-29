@@ -122,8 +122,8 @@ func (s *Site) Register(r *gin.Engine) {
 	r.GET("/list/:uuid", func(c *gin.Context) {
 		s.app(c, "list", map[string]string{"uuid": c.Param("uuid")})
 	})
-	r.GET("/terms", s.page("pages/terms.html"))
-	r.GET("/privacy-policy", s.page("pages/privacy-policy.html"))
+	r.GET("/terms", s.page("terms"))
+	r.GET("/privacy-policy", s.page("privacy-policy"))
 	r.GET("/compare", s.comparePage)
 }
 
@@ -366,9 +366,14 @@ func (s *Site) docs(c *gin.Context) {
 	s.render(c, http.StatusOK, "docs.html", nil)
 }
 
+// page serves pages/<name>.html, or its Swedish version pages/<name>-sv.html.
 func (s *Site) page(name string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		raw, err := fs.ReadFile(s.files, name)
+		file := "pages/" + name + ".html"
+		if language(c, []string{"en", "sv"}, "en") == "sv" {
+			file = "pages/" + name + "-sv.html"
+		}
+		raw, err := fs.ReadFile(s.files, file)
 		if err != nil {
 			c.Status(http.StatusNotFound)
 			return

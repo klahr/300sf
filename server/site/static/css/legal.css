@@ -1,0 +1,60 @@
+/* The terms and the privacy policy: plain reading pages. */
+
+body {
+	margin: 0;
+	padding: 32px 16px 64px;
+	background-color: var(--paper);
+	color: var(--ink);
+	font-family: "Inter", system-ui, sans-serif;
+	font-size: 1rem;
+	line-height: 1.6;
+}
+
+main {
+	max-width: 44rem;
+	margin: 0 auto;
+}
+
+h1 {
+	font-size: 2rem;
+	line-height: 1.2;
+	margin: 16px 0 4px;
+}
+
+h2 {
+	font-size: 1.2rem;
+	margin: 32px 0 8px;
+}
+
+p.updated,
+nav.legal-nav {
+	color: var(--ink-soft, var(--ink));
+	font-size: 0.875rem;
+}
+
+nav.legal-nav {
+	display: flex;
+	gap: 16px;
+}
+
+a {
+	color: var(--blue);
+}
+
+li {
+	margin-bottom: 6px;
+}
+
+table {
+	border-collapse: collapse;
+	width: 100%;
+	font-size: 0.9rem;
+}
+
+th,
+td {
+	text-align: left;
+	vertical-align: top;
+	padding: 8px 8px 8px 0;
+	border-bottom: 1px solid var(--line, #ccc);
+}

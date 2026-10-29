@@ -3,100 +3,99 @@
 
 <head>
 	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" href="/favicon.png" type="image/png">
+	<link rel="stylesheet" href="/css/tokens.css">
+	<link rel="stylesheet" href="/css/theme.css">
+	<link rel="stylesheet" href="/css/fonts.css">
+	<link rel="stylesheet" href="/css/legal.css">
+	<title>Privacy Policy · 300sf</title>
 </head>
 
 <body>
+<main>
 
-<h1>300sf Privacy Policy</h1>
-<p>This privacy policy will explain how our organization uses the personal data we collect from you when you use our
-	website.</p>
+<nav class="legal-nav"><a href="/">300sf</a><a href="/terms?lang=en">Terms of service</a><a href="/privacy-policy?lang=sv">På svenska</a></nav>
 
-<p>Topics:</p>
+<h1>Privacy Policy</h1>
+<p class="updated">Last updated: 29 October 2026</p>
+
+<p>This policy explains what personal data 300sf (the website and app at 300sf.se and its API) handles, why, and what you can do about it.</p>
+
+<h2>Who is responsible</h2>
+<p>AW Entertainment AB, Sweden, is the controller of your personal data. Contact: <a href="mailto:support@300sf.se">support@300sf.se</a>.</p>
+
+<h2>What we collect, and why</h2>
+<table>
+	<tr><th>Data</th><th>Why</th><th>Legal basis</th></tr>
+	<tr><td>Account: email address, username, display name, portrait, password (stored only as a secure hash), language</td><td>To sign you in, show who you are to others in competitions, and email you about your account</td><td>Contract (providing the Service)</td></tr>
+	<tr><td>Sightings: species, time, position (if you place it on the map), county, quantity, age, sex, method, activity, comments, labels</td><td>To keep your checklists and statistics, and count your sightings in competitions</td><td>Contract</td></tr>
+	<tr><td>Checklists, species lists and competitions you create or join</td><td>To provide those features</td><td>Contract</td></tr>
+	<tr><td>Sound recordings you send for identification</td><td>To suggest which bird is singing. Recordings are analysed on our own server and deleted as soon as the answer is sent; they are not kept</td><td>Contract</td></tr>
+	<tr><td>Your device's position, if you allow it</td><td>To centre the map when you report a sighting. It is only stored if you save it with a sighting</td><td>Consent (given in your browser, and you can withdraw it there)</td></tr>
+	<tr><td>IP address</td><td>To limit how often sign-ups, password resets and similar requests can be made. It is kept in memory for at most an hour</td><td>Legitimate interest (protecting the Service and its users)</td></tr>
+</table>
+<p>We do not sell your data, use it for advertising, or track you across other websites.</p>
+
+<h2>Who can see your data</h2>
 <ul>
-	<li>What data do we collect?</li>
-	<li>How do we collect your data?</li>
-	<li>How will we use your data?</li>
-	<li>How do we store your data?</li>
-	<li>What are your data protection rights?</li>
-	<li>What are cookies?</li>
-	<li>How do we use cookies?</li>
-	<li>What types of cookies do we use?</li>
-	<li>How to manage your cookies</li>
-	<li>Privacy policies of other websites</li>
-	<li>Changes to our privacy policy</li>
-	<li>How to contact us</li>
-	<li>How to contact the appropriate authorities</li>
+	<li><b>Only you</b>: your email address, your sightings with their positions and comments, your labels and your private checklists.</li>
+	<li><b>Other participants in a competition you join</b>: your display name, username, portrait, and how many species you have and when you reached them.</li>
+	<li><b>Anyone with the link</b>: the standings of public competitions, and checklists you share for comparison.</li>
+	<li><b>Our administrators</b>: account details, when needed to run the Service and help you.</li>
 </ul>
 
-<h2>What data do we collect?</h2>
-<p>You directly provide 300sf with most of the data we collect. We collect data and process data when you:</p>
+<h2>Subcontractors and other services</h2>
+<p>We use these subcontractors (processors) to run the Service, under data processing agreements:</p>
 <ul>
-	<li>Register an account.</li>
-	<li>Create sightings, labels, checklists and more.</li>
+	<li><b>DigitalOcean</b>: servers and database, in Amsterdam, the Netherlands (EU).</li>
+	<li><b>Mailjet</b>: sends our emails (EU).</li>
+</ul>
+<p>Some parts of the app load content directly from other services. Your browser then sends them your IP address, as any website visit does:</p>
+<ul>
+	<li><b>OpenStreetMap</b> (OpenStreetMap Foundation, United Kingdom): map tiles.</li>
+	<li><b>Wikipedia and Wikimedia Commons</b> (Wikimedia Foundation, USA): species photos and articles.</li>
+	<li><b>xeno-canto</b> (Netherlands): bird song recordings.</li>
+	<li><b>Stripe</b> (Stripe Payments Europe, Ireland): only on the donation page, where Stripe handles the payment. Stripe is responsible for the payment data under its own privacy policy.</li>
+</ul>
+<p>The United Kingdom has an EU adequacy decision. For the USA, transfers are covered by the EU–US Data Privacy Framework or standard contractual clauses.</p>
+
+<h2>How long we keep your data</h2>
+<ul>
+	<li>Your account and everything in it are kept until you delete your account.</li>
+	<li>When you delete your account (in the app, confirmed by email), it is closed at once and permanently deleted after 7 days, so a mistake can still be undone by contacting us.</li>
+	<li>Sightings you delete are removed at once. Archived sightings and checklists are kept until you delete them.</li>
+	<li>Deleted data can remain in database backups until those backups are replaced.</li>
 </ul>
 
-<h2>How will we use your data?</h2>
-<p>300sf collects your data so that we can:</p>
+<h2>Cookies and local storage</h2>
+<p>We only use what is strictly necessary to keep you signed in, so no consent is needed:</p>
+<table>
+	<tr><th>Name</th><th>Purpose</th><th>Lifetime</th></tr>
+	<tr><td>__Secure-sf_at</td><td>Proves you are signed in</td><td>1 hour</td></tr>
+	<tr><td>__Secure-sf_rt</td><td>Renews your sign-in</td><td>Until you close the browser, or 30 days if you choose "Stay signed in"</td></tr>
+	<tr><td>sf_session</td><td>Tells the app when the sign-in needs renewing</td><td>As above</td></tr>
+</table>
+<p>The app also keeps some settings in your browser's local storage, such as your access level. On the donation page, Stripe sets its own cookies for fraud prevention.</p>
+
+<h2>Your rights</h2>
+<p>You have the right to:</p>
 <ul>
-	<li>Manage your account.</li>
+	<li><b>access</b> your data, and <b>take it with you</b>: export your sightings and account data from the app, or ask us;</li>
+	<li><b>correct</b> your data: most of it you can edit in the app;</li>
+	<li><b>delete</b> your data: delete sightings, lists or your whole account in the app;</li>
+	<li><b>restrict</b> or <b>object to</b> our processing, under certain conditions;</li>
+	<li><b>withdraw consent</b>, such as access to your position, at any time.</li>
 </ul>
+<p>Email <a href="mailto:support@300sf.se">support@300sf.se</a> for anything you cannot do in the app. We answer within one month.</p>
 
-<h2>How do we store your data?</h2>
-<p>300sf securely stores your data at Digital Ocean's data center in Amsterdam, The Netherlands, EU.</p>
-<p>300sf will retain your data for a duration of one year from your last sign-in date. After this predetermined
-	period has elapsed, your data will be subject to deletion. We will notify you via email prior to the scheduled
-	deletion to provide you with an opportunity to log in and prevent the removal of your data.</p>
+<h2>Complaints</h2>
+<p>If you think we handle your data wrongly, please contact us first. You can also complain to the Swedish Authority for Privacy Protection (Integritetsskyddsmyndigheten, IMY), <a href="https://www.imy.se/en/">imy.se</a>, or the data protection authority where you live.</p>
 
-<h2>What are your data protection rights?</h2>
-<p>300sf would like to make sure you are fully aware of all of your data protection rights. Every user is entitled
-	to the following:</p>
-<p><b>The right to access</b> – You have the right to request 300sf for copies of your personal data.</p>
-<p><b>The right to rectification</b> – You have the right to request that 300sf correct any information you believe
-	is inaccurate. You also have the right to request 300sf to complete the information you believe is incomplete.
-</p>
-<p><b>The right to erasure</b> – You have the right to request that 300sf erase your personal data, under certain
-	conditions.</p>
-<p><b>The right to restrict processing</b> – You have the right to request that 300sf restrict the processing of
-	your personal data, under certain conditions.</p>
-<p><b>The right to object to processing</b> – You have the right to object to 300sf's processing of your personal
-	data, under certain conditions.</p>
-<p><b>The right to data portability</b> – You have the right to request that 300sf transfer the data that we have
-	collected to another organization, or directly to you, under certain conditions.</p>
-<p>If you make a request, we have one month to respond to you. If you would like to exercise any of these rights,
-	please contact us at our email: <a href="mailto:support@300sf.se">support@300sf.se</a></p>
+<h2>Changes to this policy</h2>
+<p>We update this policy when the Service changes. We will tell you about important changes by email or in the app.</p>
 
-<h2>Cookies</h2>
-<p>Cookies are text files placed on your computer to collect standard Internet log information and visitor behavior
-	information.</p>
-<p>For further information, visit <a href="allaboutcookies.org">allaboutcookies.org</a>.</p>
-
-<h2>How do we use cookies?</h2>
-<p>We do not use cookies or any other tracking technologies to collect personal information about our visitors. We do
-	not collect or store any personally identifiable information automatically when you browse our website.</p>
-
-<h2>What types of cookies do we use?</h2>
-<p>None.</p>
-
-<h2>How to manage cookies</h2>
-<p>You can set your browser not to accept cookies, and the above website tells you how to remove cookies from your
-	browser.</p>
-
-<h2>Privacy policies of other websites</h2>
-<p>The 300sf website contains links to other websites. Our privacy policy applies only to our website, so if you click
-	on a link to another website, you should read their privacy policy.</p>
-
-<h2>Changes to our privacy policy</h2>
-<p>300sf keeps its privacy policy under regular review and places any updates on this web page. This privacy policy was
-	last updated on 31 October 2023.</p>
-
-<h2>How to contact us</h2>
-<p>If you have any questions about 300sf's privacy policy, the data we hold on you, or you would like to exercise one of
-	your data protection rights, please do not hesitate to contact us.</p>
-<p>Email us at: <a href="support@300sf.se">support@300sf.se</a></p>
-
-<h2>How to contact the appropriate authority</h2>
-<p>Should you wish to report a complaint or if you feel that 300sf has not addressed your concern in a satisfactory
-	manner, you may contact the Information Commissioner's Office, <a
-		href="https://www.di.ax/kontakta-oss">Datainspektionen</a>.</p>
+</main>
 </body>
+
 </html>
