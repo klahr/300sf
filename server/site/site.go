@@ -63,7 +63,7 @@ func New(cfg config.Site, files fs.FS) (*Site, error) {
 	s := &Site{files: files, cfg: cfg, landing: map[string]map[string]any{}, compare: controllers.CompareLists, stats: controllers.GetSiteStats}
 
 	funcs := template.FuncMap{
-		"year": func() int { return time.Now().Year() },
+		"year":   func() int { return time.Now().Year() },
 		"number": formatNumber,
 		"translate": func(t models.Translation, lang string) string {
 			if lang == "sv" && t.Sv.String != "" {
