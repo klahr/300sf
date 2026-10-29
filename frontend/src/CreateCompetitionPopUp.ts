@@ -5,6 +5,7 @@
 /// <reference path="models/Visibility.ts"/>
 /// <reference path="responses/Competitions.ts"/>
 /// <reference path="requests/Competitions.ts"/>
+/// <reference path="Colors.ts"/>
 
 // The form for a new competition. created is called with it once it exists.
 function openCreateCompetition(created: (competition: Models.Competition) => void): void {
@@ -159,8 +160,8 @@ function openCreateCompetition(created: (competition: Models.Competition) => voi
 	const swatches = document.createElement("div");
 	swatches.className = "color-swatches";
 	swatches.setAttribute("role", "radiogroup");
-	let color = "#0d81b4";
-	["#0d81b4", "#8227ac", "#b40d81", "#e06868", "#ac7827", "#75b98e"].forEach(c => {
+	let color = Colors.fallback;
+	Colors.palette.forEach(c => {
 		const b = document.createElement("button");
 		b.type = "button";
 		b.setAttribute("role", "radio");

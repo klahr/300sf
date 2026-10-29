@@ -1242,3 +1242,39 @@ ADD CONSTRAINT `fk_reports_2`
   REFERENCES `300sf`.`users` (`id`)
   ON DELETE CASCADE
   ON UPDATE NO ACTION;
+
+-- New colour palette (frontend/src/Colors.ts). The old colours are kept in
+-- color_palette_backup so this can be undone:
+--   UPDATE `300sf`.`lists` t JOIN `300sf`.`color_palette_backup` b ON b.table_name = 'lists' AND b.row_id = t.id SET t.color = b.color;
+--   UPDATE `300sf`.`tags` t JOIN `300sf`.`color_palette_backup` b ON b.table_name = 'tags' AND b.row_id = t.id SET t.color = b.color;
+--   UPDATE `300sf`.`competitions` t JOIN `300sf`.`color_palette_backup` b ON b.table_name = 'competitions' AND b.row_id = t.id SET t.color = b.color;
+--   UPDATE `300sf`.`announcements` t JOIN `300sf`.`color_palette_backup` b ON b.table_name = 'announcements' AND b.row_id = t.id SET t.color = b.color;
+CREATE TABLE IF NOT EXISTS `300sf`.`color_palette_backup` (
+  `table_name` VARCHAR(16) NOT NULL,
+  `row_id` INT NOT NULL,
+  `color` VARCHAR(16) NOT NULL,
+  PRIMARY KEY (`table_name`, `row_id`));
+
+CREATE TEMPORARY TABLE `300sf`.`color_palette_map` (
+  `old` VARCHAR(16) NOT NULL PRIMARY KEY,
+  `new` VARCHAR(16) NOT NULL);
+INSERT INTO `300sf`.`color_palette_map` VALUES
+  ('#0d81b4', '#1273a3'),
+  ('#68e060', '#297b44'),
+  ('#75b98e', '#297b44'),
+  ('#ac7827', '#8d651e'),
+  ('#e06868', '#c5382e'),
+  ('#8227ac', '#9546c9'),
+  ('#b40d81', '#c13082');
+
+INSERT IGNORE INTO `300sf`.`color_palette_backup` SELECT 'lists', t.id, t.color FROM `300sf`.`lists` t JOIN `300sf`.`color_palette_map` m ON m.old = LOWER(t.color);
+INSERT IGNORE INTO `300sf`.`color_palette_backup` SELECT 'tags', t.id, t.color FROM `300sf`.`tags` t JOIN `300sf`.`color_palette_map` m ON m.old = LOWER(t.color);
+INSERT IGNORE INTO `300sf`.`color_palette_backup` SELECT 'competitions', t.id, t.color FROM `300sf`.`competitions` t JOIN `300sf`.`color_palette_map` m ON m.old = LOWER(t.color);
+INSERT IGNORE INTO `300sf`.`color_palette_backup` SELECT 'announcements', t.id, t.color FROM `300sf`.`announcements` t JOIN `300sf`.`color_palette_map` m ON m.old = LOWER(t.color);
+
+UPDATE `300sf`.`lists` t JOIN `300sf`.`color_palette_map` m ON m.old = LOWER(t.color) SET t.color = m.new;
+UPDATE `300sf`.`tags` t JOIN `300sf`.`color_palette_map` m ON m.old = LOWER(t.color) SET t.color = m.new;
+UPDATE `300sf`.`competitions` t JOIN `300sf`.`color_palette_map` m ON m.old = LOWER(t.color) SET t.color = m.new;
+UPDATE `300sf`.`announcements` t JOIN `300sf`.`color_palette_map` m ON m.old = LOWER(t.color) SET t.color = m.new;
+
+DROP TEMPORARY TABLE `300sf`.`color_palette_map`;

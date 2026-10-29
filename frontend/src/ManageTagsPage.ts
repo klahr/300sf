@@ -3,6 +3,7 @@
 /// <reference path="App.ts"/>
 /// <reference path="EditLabelPopUp.ts"/>
 /// <reference path="requests/Tags.ts"/>
+/// <reference path="Colors.ts"/>
 
 class ManageTagsPage extends Page {
 	private mTitle: HTMLHeadingElement;
@@ -42,14 +43,9 @@ class ManageTagsPage extends Page {
 
 		const colorSelect = new Ui.DivSelect();
 		colorSelect.addClass("swatches");
-		colorSelect.addOption("", "#8227ac").style.backgroundColor = "#8227ac";
-		colorSelect.addOption("", "#0d81b4").style.backgroundColor = "#0d81b4";
-		colorSelect.addOption("", "#75b98e").style.backgroundColor = "#75b98e";
-		colorSelect.addOption("", "#68e060").style.backgroundColor = "#68e060";
-		colorSelect.addOption("", "#e06868").style.backgroundColor = "#e06868";
-		colorSelect.addOption("", "#ac7827").style.backgroundColor = "#ac7827";
+		Colors.palette.forEach(c => colorSelect.addOption("", c).style.backgroundColor = c);
 		this.attach(colorSelect);
-		colorSelect.select("#0d81b4");
+		colorSelect.select(Colors.fallback);
 
 		this.mCreateButton = document.createElement("button");
 		this.mCreateButton.innerHTML = App.translations.CreateTag;

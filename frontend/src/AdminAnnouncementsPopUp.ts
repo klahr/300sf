@@ -1,6 +1,7 @@
 /// <reference path="ui/Sheet.ts"/>
 /// <reference path="App.ts"/>
 /// <reference path="models/Announcement.ts"/>
+/// <reference path="Colors.ts"/>
 
 class AdminAnnouncementsPopUp {
 	private mAddButton: HTMLButtonElement;
@@ -81,14 +82,9 @@ class AdminAnnouncementsPopUp {
 
 		const colorSelect = new Ui.DivSelect();
 		colorSelect.addClass("swatches");
-		colorSelect.addOption("", "#8227ac").style.backgroundColor = "#8227ac";
-		colorSelect.addOption("", "#0d81b4").style.backgroundColor = "#0d81b4";
-		colorSelect.addOption("", "#75b98e").style.backgroundColor = "#75b98e";
-		colorSelect.addOption("", "#68e060").style.backgroundColor = "#68e060";
-		colorSelect.addOption("", "#e06868").style.backgroundColor = "#e06868";
-		colorSelect.addOption("", "#ac7827").style.backgroundColor = "#ac7827";
+		Colors.palette.forEach(c => colorSelect.addOption("", c).style.backgroundColor = c);
 		content.attach(colorSelect);
-		colorSelect.select("#0d81b4");
+		colorSelect.select(Colors.fallback);
 
 		const onHold = new Ui.Input("checkbox");
 		onHold.style.position = "relative";

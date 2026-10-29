@@ -2,6 +2,7 @@
 /// <reference path="requests/Lists.ts"/>
 /// <reference path="models/Visibility.ts"/>
 /// <reference path="ui/Progress.ts"/>
+/// <reference path="Colors.ts"/>
 
 // Helps people without a checklist: every sighting belongs to one, so this is the first thing a new
 // account needs.
@@ -22,7 +23,7 @@ namespace Onboarding {
 			r.name.de = template.name.de;
 			r.template = template.uuid;
 			r.visibility = Models.Visibility.Hidden;
-			r.color = "#0d81b4";
+			r.color = Colors.fallback;
 			new HttpRequest("POST", "/v1/lists", r).process(function () {
 				window.dispatchEvent(new Event("listschanged"));
 				done(true);
