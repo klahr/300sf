@@ -52,6 +52,15 @@ type discovered struct {
 	Discovered  bool   `json:"discovered"`
 }
 
+const (
+	legacyEndpoint         = "https://300sf.se/legacy/ajax_api.php"
+	maxLegacyResponseBytes = 50 << 20
+)
+
+// legacyClient talks to the old site; a hung request must not hold the
+// handler forever.
+var legacyClient = &http.Client{Timeout: 30 * time.Second}
+
 func migrate(user models.User, username, password string) (interface{}, int, error) {
 	if user.ImportedAt.Valid {
 		return nil, ErrorMigrateCompleted, fmt.Errorf("already imported")
@@ -66,7 +75,7 @@ func migrate(user models.User, username, password string) (interface{}, int, err
 	if err != nil {
 		return nil, ErrorInternalServerError, err
 	}
-	loginResponse, err := http.PostForm("https://300sf.se/legacy/ajax_api.php", url.Values{
+	loginResponse, err := legacyClient.PostForm(legacyEndpoint, url.Values{
 		"data": {string(loginJsonRequest)},
 	})
 
@@ -75,7 +84,7 @@ func migrate(user models.User, username, password string) (interface{}, int, err
 	}
 
 	defer loginResponse.Body.Close()
-	body, _ := io.ReadAll(loginResponse.Body)
+	body, _ := io.ReadAll(io.LimitReader(loginResponse.Body, maxLegacyResponseBytes))
 
 	type jsonrpc_response struct {
 		Result struct {
@@ -92,7 +101,7 @@ func migrate(user models.User, username, password string) (interface{}, int, err
 	}
 
 	dataJsonRequest := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"method\":\"DataManager.sync\",\"params\": {\"userid\":%d},\"id\":1}", response.Result.UserId)
-	dataResponse, err := http.PostForm("https://300sf.se/legacy/ajax_api.php", url.Values{
+	dataResponse, err := legacyClient.PostForm(legacyEndpoint, url.Values{
 		"data": {dataJsonRequest},
 	})
 
@@ -101,7 +110,7 @@ func migrate(user models.User, username, password string) (interface{}, int, err
 	}
 
 	defer dataResponse.Body.Close()
-	body, _ = io.ReadAll(dataResponse.Body)
+	body, _ = io.ReadAll(io.LimitReader(dataResponse.Body, maxLegacyResponseBytes))
 
 	type data struct {
 		JsonRpc string `json:"jsonrpc"`

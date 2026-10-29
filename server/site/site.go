@@ -383,6 +383,11 @@ func (s *Site) comparePage(c *gin.Context) {
 		c.Redirect(http.StatusFound, "/")
 		return
 	}
+	// Same limit as the API's compare, so list ids can't be guessed here instead.
+	if controllers.Throttled("compare/"+c.ClientIP(), 60, time.Minute) {
+		c.String(http.StatusTooManyRequests, "Too many requests, try again in a minute.")
+		return
+	}
 	result, err := s.compare(uuids)
 	if err != nil {
 		c.Redirect(http.StatusFound, "/")

@@ -22,6 +22,25 @@ import (
 	"github.com/klahr/300sf/server/site"
 )
 
+// maxBodyBytes caps request bodies. Recordings sent for identification
+// (/v1/analyze) have a larger limit of their own.
+const maxBodyBytes = 1 << 20
+
+// securityHeaders applies to every response. Pages may not be framed by other
+// sites (clickjacking) and browsers must use HTTPS once they have seen it.
+func securityHeaders(c *gin.Context) {
+	h := c.Writer.Header()
+	h.Set("X-Content-Type-Options", "nosniff")
+	h.Set("Referrer-Policy", "strict-origin-when-cross-origin")
+	h.Set("X-Frame-Options", "DENY")
+	h.Set("Content-Security-Policy", "frame-ancestors 'none'; base-uri 'self'; object-src 'none'")
+	h.Set("Strict-Transport-Security", "max-age=31536000")
+	if c.Request.Body != nil && !strings.HasSuffix(c.Request.URL.Path, "/v1/analyze") {
+		c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, maxBodyBytes)
+	}
+	c.Next()
+}
+
 // apiHeaders marks API responses as JSON. The public API (/v1) allows calls
 // from any origin; the app's API (/api) is same-origin only, since it is
 // authenticated with cookies. Website pages are left alone.
@@ -53,11 +72,14 @@ func apiHeaders(c *gin.Context) {
 // newRouter serves the API (at the root and under /api) and the websites.
 func newRouter(web *site.Site) *gin.Engine {
 	r := gin.New()
-	r.SetTrustedProxies([]string{})
+	// nginx runs on the same host and passes the client address in
+	// X-Forwarded-For; nobody else is trusted to set it.
+	r.SetTrustedProxies([]string{"127.0.0.1", "::1"})
 	r.Use(gin.CustomRecovery(func(c *gin.Context, err any) {
 		log.Error(c, 0, fmt.Sprintf("panic: %v", err))
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "internal server error", "code": controllers.ErrorInternalServerError})
 	}))
+	r.Use(securityHeaders)
 	r.Use(web.Redirect)
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
 	r.Use(apiHeaders)

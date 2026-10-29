@@ -2,6 +2,7 @@
 package config
 
 import (
+	"errors"
 	"os"
 
 	"gopkg.in/yaml.v2"
@@ -61,6 +62,16 @@ func SetupAppConfig(filename string) error {
 	AppConfig = new(App)
 	if err := AppConfig.Parse(raw); err != nil {
 		return err
+	}
+	return AppConfig.Validate()
+}
+
+// Validate refuses settings that would make the server unsafe to run.
+func (c *App) Validate() error {
+	// The secret signs every token: with a known one anyone can sign in as
+	// anyone, admins included.
+	if c.HashingSecret == "" || c.HashingSecret == "change-me" {
+		return errors.New("hashing-secret is not set; generate one with: openssl rand -hex 32")
 	}
 	return nil
 }

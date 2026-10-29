@@ -4,14 +4,23 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
 func TestSampleConfigParses(t *testing.T) {
-	if err := SetupAppConfig(filepath.Join("..", "config.yml.sample")); err != nil {
+	// The sample's placeholder secret must be replaced before the server starts.
+	sample := filepath.Join("..", "config.yml.sample")
+	if err := SetupAppConfig(sample); err == nil || !strings.Contains(err.Error(), "hashing-secret") {
+		t.Fatalf("sample config with placeholder secret: err = %v", err)
+	}
+	raw, _ := os.ReadFile(sample)
+	configured := filepath.Join(t.TempDir(), "300sf.yml")
+	os.WriteFile(configured, []byte(strings.Replace(string(raw), `"change-me"`, `"0123456789abcdef0123456789abcdef"`, 1)), 0o600)
+	if err := SetupAppConfig(configured); err != nil {
 		t.Fatal(err)
 	}
-	if AppConfig.Address != ":8090" {
+	if AppConfig.Address != "127.0.0.1:8090" {
 		t.Errorf("address = %q", AppConfig.Address)
 	}
 	if AppConfig.AccessTokenLifetime != 3600 {

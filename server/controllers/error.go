@@ -19,6 +19,7 @@ const (
 	ErrorInvalidApiKey   = 3003
 	ErrorTooManyApiCalls = 3004
 	ErrorMissingScope    = 3005
+	ErrorTooManyApiKeys  = 3006
 
 	ErrorSignUpInvalidDisplayName = 4001
 	ErrorSignUpInvalidEmail       = 4002
@@ -33,6 +34,7 @@ const (
 
 	ErrorAuthInvalid          = 7001
 	ErrorTooManyLoginAttempts = 7002
+	ErrorTooManyRequests      = 7003
 
 	// The bird sound identification service is not configured or not answering.
 	ErrorAnalyzeUnavailable = 8001

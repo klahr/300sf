@@ -275,7 +275,7 @@ func ListTemplatesName(c *gin.Context) {
 		return
 	}
 
-	if err := models.DB.Where("id=?", listTemplate.NameId).Updates(&r.Name).Error; err != nil {
+	if err := models.DB.Model(&models.Translation{}).Where("id=?", listTemplate.NameId).Updates(translationText(r.Name)).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -315,7 +315,7 @@ func ListTemplatesDescription(c *gin.Context) {
 		return
 	}
 
-	if err := models.DB.Where("id=?", listTemplate.DescriptionId).Updates(&r.Description).Error; err != nil {
+	if err := models.DB.Model(&models.Translation{}).Where("id=?", listTemplate.DescriptionId).Updates(translationText(r.Description)).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})

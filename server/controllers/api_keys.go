@@ -14,6 +14,8 @@ import (
 	"gopkg.in/guregu/null.v4/zero"
 )
 
+const maxApiKeysPerUser = 10
+
 func ApiKeys(c *gin.Context) {
 	type request struct {
 		Name string `json:"name"`
@@ -33,6 +35,17 @@ func ApiKeys(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
 			"message": err.Error(),
+		})
+		return
+	}
+
+	// Rate limits are per key, so unlimited keys would mean no limit at all.
+	var active int64
+	models.DB.Model(&models.ApiKey{}).Where("user_id=?", user.Id).Where("revoked_at IS NULL").Count(&active)
+	if active >= maxApiKeysPerUser {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorTooManyApiKeys,
+			"message": "too many api keys, revoke one first",
 		})
 		return
 	}

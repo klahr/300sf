@@ -171,7 +171,7 @@ func ListsRename(c *gin.Context) {
 		return
 	}
 
-	if err := models.DB.Where("id=?", list.NameId).Updates(&r.Name).Error; err != nil {
+	if err := models.DB.Model(&models.Translation{}).Where("id=?", list.NameId).Updates(translationText(r.Name)).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -487,6 +487,11 @@ func ListsCompare(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
+		return
+	}
+
+	// Anyone can call this, so limit how fast list ids can be guessed.
+	if throttle(c, "compare/"+c.ClientIP(), 60, time.Minute) {
 		return
 	}
 

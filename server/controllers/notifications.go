@@ -39,8 +39,9 @@ func NotificationsComment(c *gin.Context) {
 		return
 	}
 
+	// Only on notifications about the user's own reports.
 	var notification models.Notification
-	if err := tx.Where("uuid=?", c.Param("uuid")).First(&notification).Error; err != nil {
+	if err := tx.Joins("JOIN reports ON reports.id=notifications.report_id").Where("notifications.uuid=?", c.Param("uuid")).Where("reports.user_id=?", user.Id).First(&notification).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
 			"message": err.Error(),

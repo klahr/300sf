@@ -161,7 +161,7 @@ class AdminAnnouncementsPopUp {
 			const announcements = data.data as Array<Models.Announcement>;
 			announcements.forEach(e => {
 				const n = document.createElement("h2");
-				n.innerHTML = e.name;
+				n.textContent = e.name;
 				self.mAnnouncementsDiv.container.appendChild(n);
 
 				if (Utils.isValidDate(e.from) || Utils.isValidDate(e.until)) {
@@ -223,7 +223,12 @@ class AdminAnnouncementsPopUp {
 				a.className = "announcement";
 				self.mAnnouncementsDiv.container.appendChild(a);
 				const img = document.createElement("p");
-				img.innerHTML = "<span style='font-size: 2rem; color: " + e.color + ";' class='material-symbols-outlined'>" + e.icon + "</span>";
+				const icon = document.createElement("span");
+				icon.className = "material-symbols-outlined";
+				icon.style.fontSize = "2rem";
+				icon.style.color = e.color;
+				icon.textContent = e.icon;
+				img.appendChild(icon);
 				a.style.boxShadow = "inset 0 0 0px 1px " + e.color;
 
 				a.appendChild(img);

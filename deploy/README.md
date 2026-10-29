@@ -90,8 +90,15 @@ This replaces the previous upstreams (webapp on `:3000`, landing page on
 2. Stop the old containers: `docker rm -f albatross blackbird yellowhammer woodpecker swagger-ui`.
 3. `docker compose up -d --build`, then reload nginx with the config above.
 4. Set `domain: "https://300sf.se"` in the config so emails link to the new
-   address.
-5. Check `https://300sf.se/`, signing in on `https://300sf.se/home`,
+   address. Keep the existing `hashing-secret`: it signs sessions and API
+   keys are stored hashed with it, so changing it signs everyone out and
+   invalidates every API key. The server refuses to start without one.
+   Set `address: "127.0.0.1:8090"` so only nginx can reach the server; it
+   trusts `X-Forwarded-For` from loopback only, for per-client rate limits.
+5. If importing from the old site should keep working, keep routing
+   `/legacy/` on 300sf.se to it in nginx; everything else goes to the
+   container.
+6. Check `https://300sf.se/`, signing in on `https://300sf.se/home`,
    `https://300sf.se/docs`, `https://300sf.se/health`, and that
    `https://app.300sf.se/` redirects.
 
@@ -99,5 +106,5 @@ This replaces the previous upstreams (webapp on `:3000`, landing page on
 
 The old setup ran two API containers. With one container, `up --build` has a
 few seconds of downtime while it restarts. If that matters, run a second copy
-with `address: ":8091"` in its own config and list both in the nginx
+with `address: "127.0.0.1:8091"` in its own config and list both in the nginx
 `upstream`; nginx retries the other while one restarts.

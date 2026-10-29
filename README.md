@@ -22,11 +22,12 @@ Needs Go, Node (only to compile the app), MariaDB and Redis.
 (cd frontend && npm install && npm run dev)     # compiles the app in watch mode; leave running
 cd server
 cp config.yml.sample config.yml                # see server/README.md for the database
+sed -i "s/change-me/$(openssl rand -hex 32)/; s/\"release\"/\"debug\"/" config.yml
 go run . -config config.yml
 ```
 
-With `mode: debug` the server reads `server/site/` from disk, so CSS and app
-changes show up on reload. Open <http://localhost:8090> for the landing page,
+The server won't start until `hashing-secret` is set. With `mode: debug` it
+reads `server/site/` from disk, so CSS and app changes show up on reload. Open <http://localhost:8090> for the landing page,
 <http://localhost:8090/home> for the app and <http://localhost:8090/docs> for
 the API docs.
 

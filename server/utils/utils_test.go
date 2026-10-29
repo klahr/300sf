@@ -3,10 +3,12 @@ package utils
 
 import (
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/klahr/300sf/server/models"
+	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/guregu/null.v4/zero"
 )
 
@@ -33,9 +35,6 @@ func TestPassword(t *testing.T) {
 	if err := p.Create("hunter22"); err != nil {
 		t.Fatal(err)
 	}
-	if len(p.Salt) != 40 {
-		t.Errorf("salt length = %d, want 40", len(p.Salt))
-	}
 	if !p.IsMatching("hunter22", p.Value, p.Salt) {
 		t.Error("correct password did not match")
 	}
@@ -44,6 +43,30 @@ func TestPassword(t *testing.T) {
 	}
 	if p.IsMatching("hunter22", p.Value, RandomSha1()) {
 		t.Error("password matched with wrong salt")
+	}
+
+	long := strings.Repeat("correct horse battery staple ", 10)
+	if err := p.Create(long); err != nil {
+		t.Fatalf("long password: %v", err)
+	}
+	if !p.IsMatching(long, p.Value, p.Salt) || p.IsMatching(long[:len(long)-1], p.Value, p.Salt) {
+		t.Error("long password not compared in full")
+	}
+}
+
+// Hashes made before passwords were prehashed must keep working.
+func TestPasswordLegacy(t *testing.T) {
+	salt := RandomSha1()
+	hash, err := bcrypt.GenerateFromPassword([]byte("hunter22"+salt), bcrypt.MinCost)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var p Password
+	if !p.IsMatching("hunter22", string(hash), salt) {
+		t.Error("legacy hash did not match")
+	}
+	if p.IsMatching("hunter23", string(hash), salt) {
+		t.Error("legacy hash matched wrong password")
 	}
 }
 
@@ -68,7 +91,7 @@ func TestComputeHmac256(t *testing.T) {
 }
 
 func TestGenerateUuidWithFixedLength(t *testing.T) {
-	valid := regexp.MustCompile(`^[abcdefghjkmnpqrstuvwxyz1-9]{6}$`)
+	valid := regexp.MustCompile(`^[abcdefghjkmnpqrstuvwxyz1-9]{10}$`)
 	for i := 0; i < 100; i++ {
 		if s := GenerateShortUuid(); !valid.MatchString(s) {
 			t.Fatalf("GenerateShortUuid = %q", s)
@@ -88,12 +111,15 @@ func TestVerify(t *testing.T) {
 	}{
 		{"display name ok", VerifyDisplayName, "Kalle", true},
 		{"display name short", VerifyDisplayName, "Kal", false},
+		{"display name long", VerifyDisplayName, strings.Repeat("a", 65), false},
+		{"display name markup", VerifyDisplayName, "<a href=x>hi</a>", false},
+		{"display name accents", VerifyDisplayName, "Åsa Öberg", true},
 		{"username ok", VerifyUsername, "kalle.anka", true},
 		{"username short", VerifyUsername, "abc", false},
 		{"username bad char", VerifyUsername, "kalle anka", false},
 		{"username trailing dot", VerifyUsername, "kalle.", false},
-		{"password ok", VerifyPassword, "abcd", true},
-		{"password short", VerifyPassword, "abc", false},
+		{"password ok", VerifyPassword, "abcdefgh", true},
+		{"password short", VerifyPassword, "abcdefg", false},
 	}
 	for _, c := range cases {
 		if got := c.fn(c.in); got != c.want {
@@ -128,5 +154,23 @@ func TestEmailTemplatesComplete(t *testing.T) {
 				t.Errorf("%s/%s: missing subject or body", lang, name)
 			}
 		}
+	}
+}
+
+func TestVerifyPortrait(t *testing.T) {
+	for in, want := range map[string]bool{"3.webp": true, "10.png": true, "": false, "../../evil.svg": false, "https://evil/x.png": false, "3.svg": false} {
+		if got := VerifyPortrait(in); got != want {
+			t.Errorf("VerifyPortrait(%q) = %v, want %v", in, got, want)
+		}
+	}
+}
+
+func TestNewToken(t *testing.T) {
+	token, hash := NewToken()
+	if len(token) != 64 || hash == token || HashToken(token) != hash {
+		t.Errorf("token %q hash %q", token, hash)
+	}
+	if other, _ := NewToken(); other == token {
+		t.Error("tokens repeat")
 	}
 }

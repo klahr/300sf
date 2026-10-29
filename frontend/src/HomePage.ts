@@ -206,7 +206,7 @@ class HomePage extends Page {
 				entry.className = "list-entry";
 
 				const name = document.createElement("h3");
-				name.innerHTML = App.getTranslation(species.name);
+				name.textContent = App.getTranslation(species.name);
 				name.classList.add("species-name");
 				entry.appendChild(name);
 				name.addEventListener("click", function (event) {
@@ -215,7 +215,7 @@ class HomePage extends Page {
 				});
 
 				const subName = document.createElement("p");
-				subName.innerHTML = species.name.la;
+				subName.textContent = species.name.la;
 				entry.appendChild(subName);
 
 				const dateInterval = document.createElement("p");
@@ -231,7 +231,7 @@ class HomePage extends Page {
 				const location = document.createElement("p");
 				location.className = "meta place";
 				if (d.zone) {
-					location.innerHTML = App.getTranslation(d.zone.name);
+					location.textContent = App.getTranslation(d.zone.name);
 				}
 				entry.appendChild(location);
 

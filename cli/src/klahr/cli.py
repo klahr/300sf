@@ -156,6 +156,8 @@ def login(email, password):
         if r.status_code == 200:
             os.makedirs(CONFIG_DIR, exist_ok=True)
             fd = os.open(SESSION_FILENAME, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+            # The mode above only applies to a new file; tighten an old one too.
+            os.fchmod(fd, 0o600)
             with os.fdopen(fd, "w", encoding="utf8") as file:
                 file.write(json.dumps(r.json(), indent=4))
         else:

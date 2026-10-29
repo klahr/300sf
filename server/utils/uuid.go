@@ -2,40 +2,28 @@
 package utils
 
 import (
-	"math/rand"
-	"time"
+	"crypto/rand"
 )
 
-/*func GenerateUuid() string {
-	return strings.ReplaceAll(uuid.New().String(), "-", "")
-}*/
+// shortUuidLength gives about 50 random bits. Some of these ids are the only
+// thing that keeps a link-shared list private, so they must not be guessable.
+// Ids made before were 6 characters and keep working.
+const shortUuidLength = 10
 
 func GenerateShortUuid() string {
-	return GenerateUuidWithFixedLength(6)
+	return GenerateUuidWithFixedLength(shortUuidLength)
 }
 
-var src = rand.NewSource(time.Now().UnixNano())
-
+// 32 characters, so each random byte maps onto one without bias. Easily
+// confused characters (0, o, i, l) are left out.
 const letterBytes = "abcdefghjkmnpqrstuvwxyz123456789"
-const (
-	letterIdxBits = 6
-	letterIdxMask = 1<<letterIdxBits - 1
-	letterIdxMax  = 63 / letterIdxBits
-)
 
 func GenerateUuidWithFixedLength(n int) string {
 	b := make([]byte, n)
-	l := len(letterBytes)
-	for i, cache, remain := n-1, src.Int63(), letterIdxMax; i >= 0; {
-		if remain == 0 {
-			cache, remain = src.Int63(), letterIdxMax
-		}
-		if idx := int(cache & letterIdxMask); idx < l {
-			b[i] = letterBytes[idx]
-			i--
-		}
-		cache >>= letterIdxBits
-		remain--
+	// crypto/rand.Read never fails, it fills b entirely or crashes the process.
+	_, _ = rand.Read(b)
+	for i := range b {
+		b[i] = letterBytes[b[i]%byte(len(letterBytes))]
 	}
 	return string(b)
 }

@@ -319,7 +319,7 @@ func ReportsDetails(c *gin.Context) {
 	}
 
 	// TODO: Preload("Lists.Name") is not working and returns an empty list.
-	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("user_id=?", user.Id).Preload("Zone.Name").Preload("Species.Name").Preload("Age.Name").Preload("Method.Name").Preload("Activity.Name").Preload("Lists.Name").Preload("Tags", "archived IS NULL").Preload("Comment").Preload("Notification.Comment").Preload("Notification.Comments.User").First(&result).Error; err != nil {
+	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("user_id=?", user.Id).Preload("Zone.Name").Preload("Species.Name").Preload("Age.Name").Preload("Method.Name").Preload("Activity.Name").Preload("Lists.Name").Preload("Tags", "archived IS NULL").Preload("Comment").Preload("Notification.Comment").Preload("Notification.Comments").First(&result).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "report not found",
 		})

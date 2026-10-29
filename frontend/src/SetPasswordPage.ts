@@ -46,7 +46,7 @@ class SetPasswordPage extends Page {
 			}
 			inFlight = true;
 			password.setDisabled(true);
-			const r = new HttpRequest("POST", "/v1/users/set_password/" + token, {
+			const r = new HttpRequest("POST", "/v1/users/set_password/" + encodeURIComponent(token), {
 				password: password.value,
 			});
 			r.process(function (status: any, data: any) {

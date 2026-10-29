@@ -21,10 +21,17 @@ namespace Utils {
 	}
 
 	// Only same-origin paths are allowed as post-login redirects.
+	// The browser decides where a path leads (it drops tabs and newlines and
+	// treats "\\" as "/"), so resolve it the same way and check the origin.
 	export function safeRedirect(path: string | null): string | null {
-		if (!path || !path.startsWith("/") || path.startsWith("//") || path.startsWith("/\\")) {
+		if (!path || !path.startsWith("/")) {
 			return null;
 		}
-		return path;
+		try {
+			const u = new URL(path, window.location.origin);
+			return u.origin === window.location.origin ? u.pathname + u.search + u.hash : null;
+		} catch (e) {
+			return null;
+		}
 	}
 }

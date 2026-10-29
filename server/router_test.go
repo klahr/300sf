@@ -68,3 +68,27 @@ func TestOnlyAPIGetsCORS(t *testing.T) {
 		}
 	}
 }
+
+func TestSecurityHeaders(t *testing.T) {
+	r := fullRouter(t)
+	for _, path := range []string{"/", "/home", "/health", "/css/base.css"} {
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
+		if w.Header().Get("X-Frame-Options") != "DENY" || !strings.Contains(w.Header().Get("Content-Security-Policy"), "frame-ancestors 'none'") {
+			t.Errorf("%s can be framed", path)
+		}
+		if w.Header().Get("X-Content-Type-Options") != "nosniff" {
+			t.Errorf("%s: missing nosniff", path)
+		}
+	}
+}
+
+func TestRequestBodyIsCapped(t *testing.T) {
+	r := fullRouter(t)
+	body := `{"email":"` + strings.Repeat("a", maxBodyBytes) + `"}`
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, httptest.NewRequest(http.MethodPost, "/v1/auth", strings.NewReader(body)))
+	if w.Code != http.StatusBadRequest || !strings.Contains(w.Body.String(), "request body too large") {
+		t.Errorf("oversized body: %d %s, want it rejected as too large", w.Code, w.Body.String())
+	}
+}

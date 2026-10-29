@@ -3,6 +3,7 @@ package controllers
 
 import (
 	"fmt"
+	"html"
 	"net/http"
 	"strings"
 	"time"
@@ -36,6 +37,19 @@ func Users(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
 			"message": err.Error(),
+		})
+		return
+	}
+
+	// Each sign-up sends an email, so limit how many one address can make.
+	if throttle(c, "signup/"+c.ClientIP(), 10, time.Hour) {
+		return
+	}
+
+	if r.Portrait != "" && !utils.VerifyPortrait(r.Portrait) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorParse,
+			"message": "invalid portrait",
 		})
 		return
 	}
@@ -88,9 +102,9 @@ func Users(c *gin.Context) {
 	p := utils.Password{}
 	if err := p.Create(r.Password); err != nil {
 		log.Error(c, ErrorInternalServerError, err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    ErrorInternalServerError,
-			"message": err.Error(),
+			"message": "could not create account",
 		})
 		return
 	}
@@ -129,7 +143,8 @@ func Users(c *gin.Context) {
 	if err := tx.Create(&user).Error; err != nil {
 		log.Error(c, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err.Error(),
+			"code":    ErrorInternalServerError,
+			"message": "could not create account",
 		})
 		tx.Rollback()
 		return
@@ -183,7 +198,7 @@ func Users(c *gin.Context) {
 	}
 
 	et.Txt = strings.ReplaceAll(et.Txt, "${DISPLAY_NAME}", r.DisplayName)
-	et.Html = strings.ReplaceAll(et.Html, "${DISPLAY_NAME}", r.DisplayName)
+	et.Html = strings.ReplaceAll(et.Html, "${DISPLAY_NAME}", html.EscapeString(r.DisplayName))
 
 	email := models.Email{
 		Model: models.Model{
@@ -576,6 +591,12 @@ func UsersMigrate(c *gin.Context) {
 		return
 	}
 
+	// Each attempt tries a password on the old site; don't let this be used
+	// to guess them.
+	if throttle(c, "migrate/"+c.GetString("uuid"), 10, time.Hour) {
+		return
+	}
+
 	var user models.User
 	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
 		log.Error(c, -10001, err.Error())
@@ -658,7 +679,14 @@ func UsersPortrait(c *gin.Context) {
 		return
 	}
 
-	// TODO: This supports anything, which is not OK.
+	if !utils.VerifyPortrait(r.Portrait) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "invalid portrait",
+			"code":    ErrorParse,
+		})
+		return
+	}
+
 	models.DB.Table(table.Users).Where("uuid=?", c.GetString("uuid")).UpdateColumn("portrait", r.Portrait)
 
 	c.JSON(http.StatusNoContent, nil)
@@ -692,15 +720,18 @@ func UsersResetPassword(c *gin.Context) {
 		return
 	}
 
+	if throttle(c, "reset-password/"+c.ClientIP(), 10, time.Hour) {
+		return
+	}
+
 	emailAddress := strings.TrimSpace(r.Email)
 
+	// The answer is the same whether or not there is an account, so this
+	// can't be used to find out who has one.
 	var user models.User
 	if err := models.DB.Preload("Language").Where("email=?", emailAddress).First(&user).Error; err != nil {
-		log.Error(c, ErrorRecordNotFound, err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    ErrorRecordNotFound,
-			"message": "no account with that email address",
-		})
+		log.Info(c, 0, "password reset for unknown email")
+		c.JSON(http.StatusNoContent, nil)
 		return
 	}
 
@@ -714,13 +745,14 @@ func UsersResetPassword(c *gin.Context) {
 		return
 	}
 
+	token, tokenHash := utils.NewToken()
 	cpr := models.ChangePasswordRequest{
 		Model: models.Model{
 			Timestamp: time.Now(),
 			Uuid:      utils.GenerateShortUuid(),
 		},
 		ExpireAt: time.Now().Add(24 * time.Hour),
-		Token:    utils.ComputeHmac256(user.Email+time.Now().String(), config.AppConfig.HashingSecret),
+		Token:    tokenHash,
 		UserId:   user.Id,
 	}
 
@@ -740,7 +772,7 @@ func UsersResetPassword(c *gin.Context) {
 		return
 	}
 
-	resetLink := fmt.Sprintf("%s/set-password?token=%s", config.AppConfig.Domain, cpr.Token)
+	resetLink := fmt.Sprintf("%s/set-password?token=%s", config.AppConfig.Domain, token)
 	et.Txt = strings.ReplaceAll(et.Txt, "${LINK}", resetLink)
 	et.Html = strings.ReplaceAll(et.Html, "${LINK}", resetLink)
 
@@ -811,7 +843,7 @@ func UsersSetPassword(c *gin.Context) {
 	defer tx.Rollback()
 
 	var cpr models.ChangePasswordRequest
-	if err := tx.Where("token=?", c.Param("token")).First(&cpr).Error; err != nil {
+	if err := tx.Where("token=?", utils.HashToken(c.Param("token"))).First(&cpr).Error; err != nil {
 		log.Error(c, ErrorRecordNotFound, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    ErrorRecordNotFound,
@@ -873,7 +905,8 @@ func UsersSetPassword(c *gin.Context) {
 		return
 	}
 
-	if err := tx.Table(table.ChangePasswordRequests).Where("id=?", cpr.Id).UpdateColumn("expire_at", time.Now()).Error; err != nil {
+	// Use up this link and any other reset link sent to the user.
+	if err := tx.Table(table.ChangePasswordRequests).Where("user_id=?", user.Id).Where("expire_at>?", time.Now()).UpdateColumn("expire_at", time.Now()).Error; err != nil {
 		log.Error(c, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
@@ -883,6 +916,9 @@ func UsersSetPassword(c *gin.Context) {
 	}
 
 	tx.Commit()
+
+	// Whoever knew the old password may still be signed in.
+	RevokeUserSessions(user.Uuid)
 
 	c.JSON(http.StatusNoContent, nil)
 }
@@ -924,8 +960,16 @@ func UsersRequestDelete(c *gin.Context) {
 		return
 	}
 
+	if PasswordLocked(user.Email) {
+		c.JSON(http.StatusTooManyRequests, gin.H{
+			"code":    ErrorTooManyLoginAttempts,
+			"message": "too many wrong passwords, try again later",
+		})
+		return
+	}
 	p := utils.Password{}
 	if !p.IsMatching(r.Password, user.Password, user.PasswordSalt) {
+		PasswordFailed(user.Email)
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -30002,
 			"message": "invalid password",
@@ -934,13 +978,19 @@ func UsersRequestDelete(c *gin.Context) {
 		return
 	}
 
+	// Each request sends an email.
+	if throttle(c, "request-delete/"+user.Uuid, 3, time.Hour) {
+		return
+	}
+
+	token, tokenHash := utils.NewToken()
 	dr := models.DeleteAccountRequest{
 		Model: models.Model{
 			Timestamp: time.Now(),
 			Uuid:      utils.GenerateShortUuid(),
 		},
 		ExpireAt: time.Now().Add(1 * time.Hour),
-		Token:    utils.ComputeHmac256(user.Email+time.Now().String(), config.AppConfig.HashingSecret),
+		Token:    tokenHash,
 		UserId:   user.Id,
 	}
 
@@ -953,7 +1003,7 @@ func UsersRequestDelete(c *gin.Context) {
 		return
 	}
 
-	deleteLink := fmt.Sprintf("%s/delete-account?token=%s", config.AppConfig.Domain, dr.Token)
+	deleteLink := fmt.Sprintf("%s/delete-account?token=%s", config.AppConfig.Domain, token)
 	et.Txt = strings.ReplaceAll(et.Txt, "${LINK}", deleteLink)
 	et.Html = strings.ReplaceAll(et.Html, "${LINK}", deleteLink)
 
@@ -1032,8 +1082,16 @@ func UsersConfirmDelete(c *gin.Context) {
 		return
 	}
 
+	if PasswordLocked(user.Email) {
+		c.JSON(http.StatusTooManyRequests, gin.H{
+			"code":    ErrorTooManyLoginAttempts,
+			"message": "too many wrong passwords, try again later",
+		})
+		return
+	}
 	p := utils.Password{}
 	if !p.IsMatching(r.Password, user.Password, user.PasswordSalt) {
+		PasswordFailed(user.Email)
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -30002,
 			"message": "invalid password",
@@ -1043,7 +1101,7 @@ func UsersConfirmDelete(c *gin.Context) {
 	}
 
 	var dr models.DeleteAccountRequest
-	if err := tx.Table(table.DeleteAccountRequests).Where("token=?", c.Param("token")).Where("delete_at IS NULL").First(&dr).Error; err != nil {
+	if err := tx.Table(table.DeleteAccountRequests).Where("token=?", utils.HashToken(c.Param("token"))).Where("user_id=?", user.Id).Where("delete_at IS NULL").First(&dr).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    ErrorRecordNotFound,
 			"message": "not found",
@@ -1080,6 +1138,8 @@ func UsersConfirmDelete(c *gin.Context) {
 	}
 
 	tx.Commit()
+
+	RevokeUserSessions(user.Uuid)
 
 	c.JSON(http.StatusNoContent, nil)
 }

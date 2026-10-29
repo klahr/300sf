@@ -168,7 +168,7 @@ class ReportsPage extends Page {
 				entry.className = "list-entry";
 
 				const name = document.createElement("h3");
-				name.innerHTML = App.getTranslation(e.species.name);
+				name.textContent = App.getTranslation(e.species.name);
 				name.classList.add("species-name");
 				entry.appendChild(name);
 				name.addEventListener("click", function (event) {
@@ -177,7 +177,7 @@ class ReportsPage extends Page {
 				});
 
 				const subName = document.createElement("p");
-				subName.innerHTML = e.species.name.la;
+				subName.textContent = e.species.name.la;
 				entry.appendChild(subName);
 
 				const dateInterval = document.createElement("p");
@@ -193,7 +193,7 @@ class ReportsPage extends Page {
 				const location = document.createElement("p");
 				location.className = "meta place";
 				if (e.zone) {
-					location.innerHTML = App.getTranslation(e.zone.name);
+					location.textContent = App.getTranslation(e.zone.name);
 				}
 				entry.appendChild(location);
 

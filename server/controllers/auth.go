@@ -52,11 +52,21 @@ func ValidateAccessToken(token string) (jwt.MapClaims, bool) {
 	if typ, _ := claims["typ"].(string); typ != TokenTypeAccess {
 		return nil, false
 	}
-	if _, ok := claims["sub"].(string); !ok {
+	sub, ok := claims["sub"].(string)
+	if !ok {
 		return nil, false
 	}
 	if _, ok := claims["scp"].(string); !ok {
 		return nil, false
+	}
+	// Tokens issued before the user was signed out everywhere. If Redis is
+	// unavailable the token is accepted, like the rest of the API does.
+	if models.Cache != nil {
+		if revokedBefore, err := models.Cache.Get(revokedBeforeKey(sub)).Int64(); err == nil {
+			if iat, _ := claims["iat"].(float64); int64(iat) < revokedBefore {
+				return nil, false
+			}
+		}
 	}
 	return claims, true
 }
@@ -102,6 +112,44 @@ func loginFailKey(email string) string {
 	return "/login-fail/" + strings.ToLower(strings.TrimSpace(email))
 }
 
+// userSessionsKey holds the jti of every refresh token a user has out.
+func userSessionsKey(userUuid string) string {
+	return "/user-sessions/" + userUuid
+}
+
+// revokedBeforeKey holds the time before which the user's access tokens are
+// no longer accepted.
+func revokedBeforeKey(userUuid string) string {
+	return "/revoked-before/" + userUuid
+}
+
+// PasswordLocked reports whether too many wrong passwords have been tried
+// for the account with this email.
+func PasswordLocked(email string) bool {
+	failures, _ := models.Cache.Get(loginFailKey(email)).Int64()
+	return failures >= maxLoginFailures
+}
+
+// PasswordFailed counts a wrong password for the account with this email.
+func PasswordFailed(email string) {
+	key := loginFailKey(email)
+	if n, err := models.Cache.Incr(key).Result(); err == nil && n == 1 {
+		models.Cache.Expire(key, loginFailWindow)
+	}
+}
+
+// RevokeUserSessions signs the user out everywhere: every refresh token is
+// revoked and access tokens issued until now are rejected.
+func RevokeUserSessions(userUuid string) {
+	if jtis, err := models.Cache.SMembers(userSessionsKey(userUuid)).Result(); err == nil {
+		for _, jti := range jtis {
+			models.Cache.Del(refreshKey(jti))
+		}
+	}
+	models.Cache.Del(userSessionsKey(userUuid))
+	models.Cache.Set(revokedBeforeKey(userUuid), time.Now().Unix(), time.Duration(config.AppConfig.AccessTokenLifetime)*time.Second)
+}
+
 // Authenticate signs in with a password or a refresh token and issues a new
 // access and refresh token. Refresh tokens are single use: each refresh
 // replaces the one it was given, and a revoked or reused one is rejected.
@@ -142,6 +190,7 @@ func Authenticate(r AuthRequest) (*AuthTokens, *AuthError) {
 		if n, err := models.Cache.Del(refreshKey(jti)).Result(); err != nil || n != 1 {
 			return nil, authError(http.StatusUnauthorized, ErrorAuthInvalid, "refresh token revoked or already used")
 		}
+		models.Cache.SRem(userSessionsKey(userUuid), jti)
 
 		if err := models.DB.Where("uuid=?", userUuid).Preload("Language").First(&user).Error; err != nil {
 			return nil, authError(http.StatusUnauthorized, ErrorAuthInvalid, "invalid refresh token")
@@ -172,14 +221,11 @@ func Authenticate(r AuthRequest) (*AuthTokens, *AuthError) {
 		}
 
 		// Slow down password guessing per account.
-		failKey := loginFailKey(r.Email)
-		if failures, _ := models.Cache.Get(failKey).Int64(); failures >= maxLoginFailures {
+		if PasswordLocked(r.Email) {
 			return nil, authError(http.StatusTooManyRequests, ErrorTooManyLoginAttempts, "too many failed sign-ins, try again later")
 		}
 		fail := func() *AuthError {
-			if n, err := models.Cache.Incr(failKey).Result(); err == nil && n == 1 {
-				models.Cache.Expire(failKey, loginFailWindow)
-			}
+			PasswordFailed(r.Email)
 			return authError(http.StatusBadRequest, ErrorAuthInvalid, "invalid email or password")
 		}
 
@@ -193,7 +239,7 @@ func Authenticate(r AuthRequest) (*AuthTokens, *AuthError) {
 		if !p.IsMatching(r.Password, user.Password, user.PasswordSalt) {
 			return nil, fail()
 		}
-		models.Cache.Del(failKey)
+		models.Cache.Del(loginFailKey(r.Email))
 
 		clientId = r.ClientId
 		stay = r.StaySignedIn
@@ -212,9 +258,12 @@ func Authenticate(r AuthRequest) (*AuthTokens, *AuthError) {
 	if err != nil {
 		return nil, authError(http.StatusInternalServerError, ErrorUnknown, err.Error())
 	}
-	if err := models.Cache.Set(refreshKey(jti), user.Uuid, time.Duration(config.AppConfig.RefreshTokenLifetime)*time.Second).Err(); err != nil {
+	refreshLifetime := time.Duration(config.AppConfig.RefreshTokenLifetime) * time.Second
+	if err := models.Cache.Set(refreshKey(jti), user.Uuid, refreshLifetime).Err(); err != nil {
 		return nil, authError(http.StatusServiceUnavailable, ErrorUnknown, "could not store session")
 	}
+	models.Cache.SAdd(userSessionsKey(user.Uuid), jti)
+	models.Cache.Expire(userSessionsKey(user.Uuid), refreshLifetime)
 
 	models.DB.Model(&user).UpdateColumn("last_seen_at", time.Now())
 
@@ -235,8 +284,12 @@ func RevokeRefreshToken(refreshToken string) {
 	if token == nil {
 		return
 	}
-	if jti, _ := token.Claims.(jwt.MapClaims)["jti"].(string); jti != "" {
+	claims := token.Claims.(jwt.MapClaims)
+	if jti, _ := claims["jti"].(string); jti != "" {
 		models.Cache.Del(refreshKey(jti))
+		if sub, _ := claims["sub"].(string); sub != "" {
+			models.Cache.SRem(userSessionsKey(sub), jti)
+		}
 	}
 }
 

@@ -26,6 +26,10 @@ func Contact(c *gin.Context) {
 		return
 	}
 
+	if throttle(c, "contact/"+c.GetString("uuid"), 5, time.Hour) {
+		return
+	}
+
 	tx := models.DB.Begin()
 	defer tx.Rollback()
 

@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/klahr/300sf/server/models"
 	"github.com/klahr/300sf/server/utils"
+	"gopkg.in/guregu/null.v4/zero"
 )
 
 func CreateNamedRecord[T models.Age | models.Order | models.Gender | models.Activity | models.Method](c *gin.Context) {
@@ -96,4 +97,16 @@ func NamedRecordDetails[T models.Age | models.Gender | models.Activity | models.
 	c.JSON(http.StatusOK, response{
 		Result: result,
 	})
+}
+
+// translationText is the text of t to save over an existing translation:
+// only the languages that were sent, and never its uuid or other columns.
+func translationText(t models.Translation) map[string]any {
+	text := map[string]any{}
+	for column, value := range map[string]zero.String{"sv": t.Sv, "en": t.En, "de": t.De, "la": t.La} {
+		if value.Valid {
+			text[column] = value
+		}
+	}
+	return text
 }

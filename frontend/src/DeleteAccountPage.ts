@@ -35,7 +35,7 @@ class DeleteAccountPage extends Page {
 		set.innerHTML = App.translations.DeleteAccount;
 		set.addEventListener("click", function () {
 			password.setDisabled(true);
-			const r = new HttpRequest("DELETE", "/v1/users/confirm_delete/" + self.data.token, {
+			const r = new HttpRequest("DELETE", "/v1/users/confirm_delete/" + encodeURIComponent(self.data.token), {
 				password: password.value
 			});
 			r.process(function (status: any, data: any) {

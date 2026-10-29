@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"crypto/sha1"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
 
 	"golang.org/x/crypto/bcrypt"
@@ -16,10 +17,20 @@ type Password struct {
 	Salt  string
 }
 
+// prehashSalt is stored as the salt of passwords hashed by Create. Older
+// hashes have a random salt appended to the password instead, which left only
+// 32 bytes of bcrypt's 72-byte input for the password itself.
+const prehashSalt = "sha256"
+
+// prehash lets passwords of any length use all of bcrypt's input.
+func prehash(str string) []byte {
+	sum := sha256.Sum256([]byte(str))
+	return []byte(base64.StdEncoding.EncodeToString(sum[:]))
+}
+
 func (p *Password) Create(str string) error {
-	salt := RandomSha1()
-	p.Salt = salt
-	if hashedPassword, err := bcrypt.GenerateFromPassword([]byte(str+salt), bcrypt.DefaultCost); err != nil {
+	p.Salt = prehashSalt
+	if hashedPassword, err := bcrypt.GenerateFromPassword(prehash(str), bcrypt.DefaultCost); err != nil {
 		return err
 	} else {
 		p.Value = string(hashedPassword)
@@ -28,6 +39,9 @@ func (p *Password) Create(str string) error {
 }
 
 func (p *Password) IsMatching(str, password, salt string) bool {
+	if salt == prehashSalt {
+		return bcrypt.CompareHashAndPassword([]byte(password), prehash(str)) == nil
+	}
 	return bcrypt.CompareHashAndPassword([]byte(password), []byte(str+salt)) == nil
 }
 
@@ -56,4 +70,17 @@ func ComputeHmac256(message string, secret string) string {
 	h := hmac.New(sha256.New, key)
 	h.Write([]byte(message))
 	return hex.EncodeToString(h.Sum(nil))
+}
+
+// NewToken returns a random token for a link sent by email, and the hash to
+// store in its place, so a copy of the database can't be used to follow it.
+func NewToken() (token string, hash string) {
+	token = RandomSha256()
+	return token, HashToken(token)
+}
+
+// HashToken returns the stored form of a token made by NewToken.
+func HashToken(token string) string {
+	sum := sha256.Sum256([]byte(token))
+	return hex.EncodeToString(sum[:])
 }
