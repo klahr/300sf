@@ -141,6 +141,38 @@ func Health(c *gin.Context) {
 	})
 }
 
+// ServerConfig tells clients what this server offers: the app gets the same
+// from its page, other clients need it from the API. No token needed.
+func ServerConfig(c *gin.Context) {
+	type mapConfig struct {
+		Tiles       string `json:"tiles"`
+		Attribution string `json:"attribution"`
+	}
+	type features struct {
+		Analyze      bool `json:"analyze"`
+		Contact      bool `json:"contact"`
+		RegionSearch bool `json:"region_search"`
+	}
+	type response struct {
+		Version   string    `json:"version"`
+		SourceUrl string    `json:"source_url"`
+		Map       mapConfig `json:"map"`
+		Features  features  `json:"features"`
+	}
+
+	cfg := config.AppConfig
+	c.JSON(http.StatusOK, response{
+		Version:   version,
+		SourceUrl: cfg.Site.SourceUrl,
+		Map:       mapConfig{Tiles: cfg.Site.MapTiles, Attribution: cfg.Site.MapAttribution},
+		Features: features{
+			Analyze:      cfg.Site.AnalyzeEndpoint != "",
+			Contact:      cfg.ContactEmail != "",
+			RegionSearch: cfg.GeocoderEndpoint != "",
+		},
+	})
+}
+
 // SetupRoutes registers the API on r. It is mounted twice: at /v1 for API
 // clients, which sign in with controllers.Auth and get tokens back, and under
 // /api for the app, which signs in with cookie-based handlers instead.
@@ -167,6 +199,7 @@ func SetupRoutes(r gin.IRouter, signIn, signOut gin.HandlerFunc) {
 	r.DELETE("/v1/users/confirm_delete/:token", apiKeyMiddleware, basicMiddleware, controllers.UsersConfirmDelete)
 
 	r.GET("/health", Health)
+	r.GET("/v1/config", noneMiddleware, ServerConfig)
 
 	// Competitions
 	r.POST("/v1/competitions", apiKeyMiddleware, basicMiddleware, controllers.Competitions)
@@ -223,6 +256,7 @@ func SetupRoutes(r gin.IRouter, signIn, signOut gin.HandlerFunc) {
 	// Api keys
 	r.GET("/v1/api_keys/list", apiKeyMiddleware, basicMiddleware, controllers.ApiKeysList)
 	r.POST("/v1/api_keys", apiKeyMiddleware, basicMiddleware, controllers.ApiKeys)
+	r.POST("/v1/api_keys/password", noneMiddleware, controllers.ApiKeysPassword)
 	r.POST("/v1/api_keys/:prefix/revoke", apiKeyMiddleware, basicMiddleware, controllers.ApiKeysRevoke)
 
 	// Species
@@ -235,6 +269,8 @@ func SetupRoutes(r gin.IRouter, signIn, signOut gin.HandlerFunc) {
 	r.POST("/v1/reports/list", apiKeyMiddleware, basicMiddleware, controllers.ReportsListByList)
 	r.POST("/v1/reports", apiKeyMiddleware, basicMiddleware, controllers.Reports)
 	r.POST("/v1/reports/:uuid/archive", apiKeyMiddleware, basicMiddleware, controllers.ReportsArchive)
+	r.POST("/v1/reports/:uuid/add_list", apiKeyMiddleware, basicMiddleware, controllers.ReportsAddList)
+	r.POST("/v1/reports/:uuid/remove_list", apiKeyMiddleware, basicMiddleware, controllers.ReportsRemoveList)
 	r.DELETE("/v1/reports/:uuid", apiKeyMiddleware, basicMiddleware, controllers.ReportsDelete)
 	r.PUT("/v1/reports/:uuid", apiKeyMiddleware, basicMiddleware, controllers.ReportsUpdate)
 	r.GET("/v1/reports/:uuid", apiKeyMiddleware, basicMiddleware, controllers.ReportsDetails)

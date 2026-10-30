@@ -2,7 +2,9 @@
 package controllers
 
 import (
+	"encoding/json"
 	"errors"
+	"mime"
 	"net/http"
 	"strconv"
 	"strings"
@@ -19,11 +21,28 @@ import (
 	"gorm.io/gorm/clause"
 )
 
+// reportTime is a sighting time: RFC 3339, or a bare "YYYY-MM-DD", which is
+// stored as midnight UTC, the API's "date only".
+type reportTime struct{ zero.Time }
+
+func (t *reportTime) UnmarshalJSON(b []byte) error {
+	var s string
+	if err := json.Unmarshal(b, &s); err == nil && len(s) == len("2006-01-02") {
+		d, err := time.Parse("2006-01-02", s)
+		if err != nil {
+			return err
+		}
+		t.Time = zero.TimeFrom(d)
+		return nil
+	}
+	return t.Time.UnmarshalJSON(b)
+}
+
 // reportFields are what a sighting is made of, for both reporting and editing one.
 type reportFields struct {
 	SpeciesUuid  string      `json:"species_uuid"`
-	From         zero.Time   `json:"from" time_format:"2006-01-02T15:04Z"`
-	Until        zero.Time   `json:"until" time_format:"2006-01-02T15:04Z"`
+	From         reportTime  `json:"from"`
+	Until        reportTime  `json:"until"`
 	Latitude     zero.Float  `json:"latitude"`
 	Longitude    zero.Float  `json:"longitude"`
 	Quantity     zero.Int    `json:"quantity"`
@@ -56,9 +75,17 @@ func setReportFields(tx *gorm.DB, user models.User, report *models.Report, r rep
 	if err := tx.Where("uuid=?", r.SpeciesUuid).First(&species).Error; err != nil {
 		return false, errors.New("species not found")
 	}
+	switch {
+	case r.Quantity.Int64 < 0:
+		return false, errors.New("quantity must not be negative")
+	case r.Latitude.Float64 < -90 || r.Latitude.Float64 > 90 || r.Longitude.Float64 < -180 || r.Longitude.Float64 > 180:
+		return false, errors.New("position out of range")
+	case r.From.Valid && r.Until.Valid && r.Until.Time.Time.Before(r.From.Time.Time):
+		return false, errors.New("until is before from")
+	}
 	report.SpeciesId = species.Id
-	report.From = r.From
-	report.Until = r.Until
+	report.From = r.From.Time
+	report.Until = r.Until.Time
 	report.Latitude = r.Latitude
 	report.Longitude = r.Longitude
 	report.Quantity = r.Quantity
@@ -114,7 +141,7 @@ func setReportFields(tx *gorm.DB, user models.User, report *models.Report, r rep
 // loadReport reads a sighting with everything a client shows of it.
 func loadReport(db *gorm.DB, id int64) (models.Report, error) {
 	var report models.Report
-	err := db.Where("id=?", id).Preload("Zone.Name").Preload("Species.Name").Preload("Species.Order.Name").Preload("Age.Name").Preload("Gender.Name").Preload("Method.Name").Preload("Activity.Name").Preload("Lists.Name").Preload("Tags", "archived IS NULL").Preload("Comment").Preload("Notification.Comment").Preload("Notification.Comments").First(&report).Error
+	err := db.Where("id=?", id).Preload("Zone", withoutPolygon).Preload("Zone.Name").Preload("Species.Name").Preload("Species.Order.Name").Preload("Age.Name").Preload("Gender.Name").Preload("Method.Name").Preload("Activity.Name").Preload("Lists.Name").Preload("Tags", "archived IS NULL").Preload("Comment").Preload("Notification.Comment").Preload("Notification.Comments").First(&report).Error
 	return report, err
 }
 
@@ -378,7 +405,7 @@ func ReportsList(c *gin.Context) {
 	}
 
 	var reports []models.Report
-	if err := models.DB.Table(table.Reports).Where("user_id=?", user.Id).Where("archived IS NULL").Preload("Tags", "archived IS NULL").Preload("Zone.Name").Preload("Lists").Preload("Species.Name").Preload("Age.Name").Preload("Gender.Name").Preload("Activity.Name").Preload("Method.Name").Preload("Lists.Name").Preload("Comment").Order("timestamp DESC").Find(&reports).Error; err != nil {
+	if err := models.DB.Table(table.Reports).Where("user_id=?", user.Id).Where("archived IS NULL").Preload("Tags", "archived IS NULL").Preload("Zone", withoutPolygon).Preload("Zone.Name").Preload("Lists").Preload("Species.Name").Preload("Age.Name").Preload("Gender.Name").Preload("Activity.Name").Preload("Method.Name").Preload("Lists.Name").Preload("Comment").Order("timestamp DESC").Find(&reports).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -424,7 +451,7 @@ func ReportsListByList(c *gin.Context) {
 	}
 
 	var reports []models.Report
-	if err := models.DB.Table(table.ListReports).Select("reports.*").Where("reports.archived IS NULL").Where("list_reports.list_id=?", list.Id).Joins("JOIN reports ON list_reports.report_id=reports.id").Preload("Species.Name").Preload("Zone.Name").Find(&reports).Error; err != nil {
+	if err := models.DB.Table(table.ListReports).Select("reports.*").Where("reports.archived IS NULL").Where("list_reports.list_id=?", list.Id).Joins("JOIN reports ON list_reports.report_id=reports.id").Preload("Species.Name").Preload("Zone", withoutPolygon).Preload("Zone.Name").Find(&reports).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -517,7 +544,7 @@ func ReportsDetails(c *gin.Context) {
 		return
 	}
 
-	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("user_id=?", user.Id).Preload("Zone.Name").Preload("Species.Name").Preload("Age.Name").Preload("Gender.Name").Preload("Method.Name").Preload("Activity.Name").Preload("Lists.Name").Preload("Tags", "archived IS NULL").Preload("Comment").Preload("Notification.Comment").Preload("Notification.Comments").First(&result).Error; err != nil {
+	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("user_id=?", user.Id).Preload("Zone", withoutPolygon).Preload("Zone.Name").Preload("Species.Name").Preload("Age.Name").Preload("Gender.Name").Preload("Method.Name").Preload("Activity.Name").Preload("Lists.Name").Preload("Tags", "archived IS NULL").Preload("Comment").Preload("Notification.Comment").Preload("Notification.Comments").First(&result).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "report not found",
 		})
@@ -540,9 +567,7 @@ func ReportsAddTag(c *gin.Context) {
 
 	var r request
 	if err := c.ShouldBindJSON(&r); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorParse, Message: "could not parse request"})
 		return
 	}
 
@@ -564,11 +589,16 @@ func ReportsAddTag(c *gin.Context) {
 	}
 
 	var tag models.Tag
-	if err := models.DB.Where("uuid=?", r.TagUuid).Where("user_id=?", user.Id).First(&tag).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
-		})
+	// An archived tag would be stored but never shown.
+	if err := models.DB.Where("uuid=?", r.TagUuid).Where("user_id=?", user.Id).Where("archived IS NULL").First(&tag).Error; err != nil {
+		c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorRecordNotFound, Message: "tag not found"})
 		return
+	}
+	for _, t := range report.Tags {
+		if t.Id == tag.Id {
+			c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorInsert, Message: "already on the sighting"})
+			return
+		}
 	}
 
 	if err := models.DB.Table("report_tags").Create(&models.ReportTag{
@@ -659,7 +689,7 @@ func ReportsExport(c *gin.Context) {
 	}
 
 	var list models.List
-	if err := models.DB.Where("uuid=?", r.ListUuid).Where("user_id=?", user.Id).First(&list).Error; err != nil {
+	if err := models.DB.Where("uuid=?", r.ListUuid).Where("user_id=?", user.Id).Preload("Name").First(&list).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -668,7 +698,7 @@ func ReportsExport(c *gin.Context) {
 
 	// Oldest first, so the row kept for each species is the sighting that ticked it off the list.
 	var reports []models.Report
-	if err := models.DB.Table("list_reports").Select("reports.*").Preload("Comment").Preload("Zone.Name").Preload("Method.Name").Preload("Gender.Name").Preload("Activity.Name").Preload("Species.Name").Preload("Age.Name").Preload("Tags").Where("list_id=?", list.Id).Where("reports.archived IS NULL").Joins("JOIN reports ON reports.id=report_id").Order("reports.`from` IS NULL, reports.`from` ASC").Find(&reports).Error; err != nil {
+	if err := models.DB.Table("list_reports").Select("reports.*").Preload("Comment").Preload("Zone", withoutPolygon).Preload("Zone.Name").Preload("Method.Name").Preload("Gender.Name").Preload("Activity.Name").Preload("Species.Name").Preload("Age.Name").Preload("Tags").Where("list_id=?", list.Id).Where("reports.archived IS NULL").Joins("JOIN reports ON reports.id=report_id").Order("reports.`from` IS NULL, reports.`from` ASC").Find(&reports).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -755,7 +785,17 @@ func ReportsExport(c *gin.Context) {
 		return
 	}
 
+	// Named after the list; FormatMediaType encodes non-ASCII names (RFC 2231).
+	filename := list.Uuid
+	names := map[string]zero.String{"sv": list.Name.Sv, "en": list.Name.En, "de": list.Name.De}
+	for _, n := range []zero.String{names[user.Language.Code], list.Name.Sv, list.Name.En, list.Name.De} {
+		if n.String != "" {
+			filename = n.String
+			break
+		}
+	}
 	c.Header("Content-Type", "text/csv; charset=utf-8")
+	c.Header("Content-Disposition", mime.FormatMediaType("attachment", map[string]string{"filename": filename + ".csv"}))
 	c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
 	c.String(http.StatusOK, data)
 }
@@ -845,4 +885,59 @@ func ReportsBasis(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, resp)
+}
+
+// ReportsAddList puts a sighting on one of the user's checklists, without
+// resending the whole sighting.
+func ReportsAddList(c *gin.Context) {
+	report, list, ok := reportAndList(c)
+	if !ok {
+		return
+	}
+	if err := models.DB.Table(table.ListReports).Create(&models.ListReport{ListId: list.Id, ReportId: report.Id}).Error; err != nil {
+		c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorInsert, Message: "already on the list"})
+		return
+	}
+	c.Status(http.StatusNoContent)
+}
+
+// ReportsRemoveList takes a sighting off one of the user's checklists.
+func ReportsRemoveList(c *gin.Context) {
+	report, list, ok := reportAndList(c)
+	if !ok {
+		return
+	}
+	if err := models.DB.Where("report_id=? AND list_id=?", report.Id, list.Id).Delete(&models.ListReport{}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, GeneralErrorResponse{Code: ErrorDelete, Message: err.Error()})
+		return
+	}
+	c.Status(http.StatusNoContent)
+}
+
+// reportAndList finds the user's non-archived sighting in the path and their
+// checklist in the body, or answers 400.
+func reportAndList(c *gin.Context) (models.Report, models.List, bool) {
+	var r struct {
+		ListUuid string `json:"list_uuid"`
+	}
+	var report models.Report
+	var list models.List
+	if err := c.ShouldBindJSON(&r); err != nil {
+		c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorParse, Message: err.Error()})
+		return report, list, false
+	}
+	user, err := currentUser(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorRecordNotFound, Message: err.Error()})
+		return report, list, false
+	}
+	if err := models.DB.Where("uuid=? AND user_id=? AND archived IS NULL", c.Param("uuid"), user.Id).First(&report).Error; err != nil {
+		c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorRecordNotFound, Message: "sighting not found"})
+		return report, list, false
+	}
+	if err := models.DB.Where("uuid=? AND user_id=?", r.ListUuid, user.Id).First(&list).Error; err != nil {
+		c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorRecordNotFound, Message: "list not found"})
+		return report, list, false
+	}
+	return report, list, true
 }

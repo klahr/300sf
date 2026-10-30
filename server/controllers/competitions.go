@@ -683,8 +683,12 @@ func CompetitionsInvite(c *gin.Context) {
 		Usernames []string `json:"usernames"`
 	}
 	var r request
-	if err := c.ShouldBindJSON(&r); err != nil || len(r.Usernames) == 0 || len(r.Usernames) > 50 {
+	if err := c.ShouldBindJSON(&r); err != nil || len(r.Usernames) == 0 {
 		competitionError(c, http.StatusBadRequest, "usernames required")
+		return
+	}
+	if len(r.Usernames) > 50 {
+		competitionError(c, http.StatusBadRequest, "at most 50 usernames at a time")
 		return
 	}
 	user, err := currentUser(c)
@@ -716,7 +720,7 @@ func CompetitionsInvite(c *gin.Context) {
 		return
 	}
 
-	invited, notFound := []string{}, []string{}
+	invited, alreadyIn, notFound := []string{}, []string{}, []string{}
 	for _, username := range r.Usernames {
 		username = strings.TrimPrefix(strings.TrimSpace(username), "@")
 		if username == "" {
@@ -727,9 +731,14 @@ func CompetitionsInvite(c *gin.Context) {
 			notFound = append(notFound, username)
 			continue
 		}
+		// The creator joins like anyone else, so this covers them too.
 		var n int64
 		models.DB.Table("competition_users").Where("competition_id=? AND user_id=?", competition.Id, invitee.Id).Count(&n)
-		if n == 0 && !pendingInvite(competition.Id, invitee.Id) {
+		if n > 0 {
+			alreadyIn = append(alreadyIn, invitee.Username)
+			continue
+		}
+		if !pendingInvite(competition.Id, invitee.Id) {
 			invite := models.CompetitionInvite{
 				Model:         models.Model{Timestamp: time.Now(), Uuid: utils.GenerateShortUuid()},
 				UserId:        invitee.Id,
@@ -742,7 +751,7 @@ func CompetitionsInvite(c *gin.Context) {
 		}
 		invited = append(invited, invitee.Username)
 	}
-	c.JSON(http.StatusOK, gin.H{"invited": invited, "not_found": notFound})
+	c.JSON(http.StatusOK, gin.H{"invited": invited, "already_in": alreadyIn, "not_found": notFound})
 }
 
 func CompetitionsDecline(c *gin.Context) {

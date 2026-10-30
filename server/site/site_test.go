@@ -223,6 +223,7 @@ func TestComparePage(t *testing.T) {
 				Name:  models.Translation{Sv: zero.StringFrom("Talgoxe"), La: zero.StringFrom("Parus major")},
 			}},
 			Result: []controllers.CompareEntry{{
+				List:    controllers.CompareList{Uuid: "a", Name: models.Translation{Sv: zero.StringFrom("Årslista"), En: zero.StringFrom("Year list")}},
 				User:    controllers.CompareUser{DisplayName: "<script>alert(1)</script>"},
 				Reports: []controllers.CompareReport{{Species: controllers.CompareSpecies{Uuid: "s1"}}},
 			}},
@@ -233,7 +234,7 @@ func TestComparePage(t *testing.T) {
 	if w.Code != http.StatusOK || strings.Join(gotUuids, ",") != "a,b" {
 		t.Fatalf("status %d, uuids %v", w.Code, gotUuids)
 	}
-	if !strings.Contains(body, "Talgoxe") || !strings.Contains(body, "check_circle") {
+	if !strings.Contains(body, "Talgoxe") || !strings.Contains(body, "check_circle") || !strings.Contains(body, "Årslista") {
 		t.Error("species or check mark missing")
 	}
 	if strings.Contains(body, "<script>alert") || !strings.Contains(body, "&lt;script&gt;") {

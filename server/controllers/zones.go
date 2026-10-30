@@ -22,6 +22,12 @@ import (
 	"gorm.io/gorm"
 )
 
+// withoutPolygon leaves out a preloaded zone's outline: it can be megabytes and
+// nothing that shows a sighting's place needs it.
+func withoutPolygon(db *gorm.DB) *gorm.DB {
+	return db.Omit("polygon")
+}
+
 func Zones(c *gin.Context) {
 	type request struct {
 		Name           models.Translation `json:"name"`

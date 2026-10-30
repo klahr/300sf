@@ -3,6 +3,8 @@ package controllers
 
 import (
 	"net/http"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -12,6 +14,8 @@ import (
 	"gopkg.in/guregu/null.v4/zero"
 )
 
+var tagColor = regexp.MustCompile(`^#[0-9a-fA-F]{6}$`)
+
 func Tags(c *gin.Context) {
 	type request struct {
 		Name  string      `json:"name"`
@@ -20,10 +24,16 @@ func Tags(c *gin.Context) {
 
 	var r request
 	if err := c.ShouldBindJSON(&r); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    -10001,
-			"message": err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorParse, Message: "could not parse request"})
+		return
+	}
+	r.Name = strings.TrimSpace(r.Name)
+	if r.Name == "" {
+		c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorInvalidRequest, Message: "name required"})
+		return
+	}
+	if r.Color.String != "" && !tagColor.MatchString(r.Color.String) {
+		c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorInvalidRequest, Message: "color is #rrggbb"})
 		return
 	}
 
@@ -119,10 +129,12 @@ func TagsRename(c *gin.Context) {
 
 	var r request
 	if err := c.ShouldBindJSON(&r); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    -10001,
-			"message": err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorParse, Message: "could not parse request"})
+		return
+	}
+	r.Name = strings.TrimSpace(r.Name)
+	if r.Name == "" {
+		c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorInvalidRequest, Message: "name required"})
 		return
 	}
 

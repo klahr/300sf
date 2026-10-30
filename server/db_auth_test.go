@@ -26,6 +26,10 @@ func TestDBSignInAndSessions(t *testing.T) {
 	other := *u
 	other.Token = r.Body["access_token"].(string)
 	s.must(t, &other, http.StatusUnauthorized, "GET", "/v1/users/list", nil)
+	// Asking only for scopes it can't have fails at once, not on the next call.
+	if r := s.signIn(t, u, "admin"); r.Status != http.StatusBadRequest || get(r.Body, "code") != float64(3005) {
+		t.Errorf("asking only for admin = %d: %s", r.Status, r.Raw)
+	}
 
 	// Refresh tokens are single use.
 	refresh := func(token string) response {

@@ -43,8 +43,12 @@ func ListTemplates(c *gin.Context) {
 		return
 	}
 
-	// Only admins share species lists with everyone.
-	if r.Visibility == models.VisibilityPublic && !user.HasScope(auth.AuthScopeAdmin) {
+	if !models.ValidVisibility(r.Visibility) {
+		c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorInvalidRequest, Message: "visibility is 0, 1 or 2"})
+		return
+	}
+	// A template is private or public; only admins share species lists with everyone.
+	if r.Visibility != models.VisibilityPublic || !user.HasScope(auth.AuthScopeAdmin) {
 		r.Visibility = models.VisibilityPrivate
 	}
 
@@ -91,9 +95,7 @@ func ListTemplates(c *gin.Context) {
 
 	if len(r.SpeciesUuids) > 0 {
 		if err := setListTemplateSpecies(tx, listTemplate.Id, r.SpeciesUuids); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"message": err.Error(),
-			})
+			c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorInvalidRequest, Message: err.Error()})
 			return
 		}
 	}
@@ -373,6 +375,13 @@ func setListTemplateSpecies(tx *gorm.DB, templateId int64, speciesUuids []string
 		return err
 	}
 	if len(species) != len(speciesUuids) {
+		seen := map[string]bool{}
+		for _, u := range speciesUuids {
+			if seen[u] {
+				return errors.New("duplicate species")
+			}
+			seen[u] = true
+		}
 		return errors.New("unknown species")
 	}
 	ids := make([]int64, len(species))
@@ -410,10 +419,12 @@ func ListTemplatesSpecies(c *gin.Context) {
 	}
 
 	var r request
-	if err := c.ShouldBindJSON(&r); err != nil || len(r.SpeciesUuids) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "species required",
-		})
+	if err := c.ShouldBindJSON(&r); err != nil {
+		c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorParse, Message: "could not parse request"})
+		return
+	}
+	if len(r.SpeciesUuids) == 0 {
+		c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorInvalidRequest, Message: "species required"})
 		return
 	}
 
@@ -430,16 +441,12 @@ func ListTemplatesSpecies(c *gin.Context) {
 
 	var listTemplate models.ListTemplate
 	if err := tx.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).Where("archived IS NULL").First(&listTemplate).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "template not found",
-		})
+		c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorRecordNotFound, Message: "template not found"})
 		return
 	}
 
 	if err := setListTemplateSpecies(tx, listTemplate.Id, r.SpeciesUuids); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorInvalidRequest, Message: err.Error()})
 		return
 	}
 

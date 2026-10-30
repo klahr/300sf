@@ -26,6 +26,18 @@ Versions are git tags `X.Y.Z`, cut with `make patch|minor|major`.
 - Licenses of the bundled libraries, fonts and data (`THIRD_PARTY_NOTICES.md`).
 - A contributing guide, issue templates and Dependabot.
 - Tests of the API against a real database and Redis (`make test-db`), also in CI.
+- API clients can let a new account get its first API key with its email and
+  password (`POST /v1/api_keys/password`), without the website.
+- `GET /v1/config` tells API clients the server's map tiles, source link and
+  which optional features (sound identification, contact, region search) are on.
+- Comparing checklists names each list (`result[].list`), in the order asked
+  for, so two lists of one person can be told apart; the compare page shows it.
+- Inviting to a competition lists who already takes part (`already_in`)
+  instead of reporting them as invited.
+- `POST /v1/reports/{uuid}/add_list` and `remove_list` move a sighting between
+  checklists without resending all of it.
+- Sightings take a bare date (`"2026-05-03"`) for a date-only time.
+- The CSV export is named after its checklist (`Content-Disposition`).
 - A news feed: announcements are posts with a title, kept under the bell in
   the top bar (News in the sidebar), with unread ones counted and shown on
   the home page. New accounts don't start with old posts unread.
@@ -80,7 +92,24 @@ Versions are git tags `X.Y.Z`, cut with `make patch|minor|major`.
 
 ### Fixed
 
+- Sightings came with their zone's whole outline, which made sighting lists
+  much larger than needed.
+- A checklist from an unknown or someone else's private template is refused
+  with 400 (code 1001), not a server error, and leaves no name behind.
 - Resuming a paused announcement did nothing.
+- Text too long for the database (a name, label, site or note) is refused with
+  400 (code 2001, "… is too long"), and a duplicate with 400 (code 1002),
+  instead of a server error with the database's message.
+- Setting a checklist's visibility without one made it private; a checklist or
+  template with a visibility other than 0, 1 or 2 was stored.
+- Labels could be empty, have any color text, or be put on a sighting while
+  archived (and then not show); adding one twice gave a database error.
+- Sightings with a negative quantity, a position off the globe or an end
+  before their start were stored.
+- Signing in asking only for scopes the account or key lacks gave a token no
+  route accepts; it is now refused (code 3005).
+- Parse errors on the display name, username and template species routes have
+  code 2001; an unknown language no longer says "could not find species".
 
 - Browsers could keep running old code after a release.
 - The health check reported the wrong version.

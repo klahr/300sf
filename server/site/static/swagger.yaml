@@ -17,13 +17,20 @@ info:
     ## Getting an API key
 
     Every client signs in with an API key that belongs to a user account. Create one in the app under
-    **Settings → API keys**, or with `POST /v1/api_keys` while signed in. You get two values:
+    **Settings → API keys**, with `POST /v1/api_keys` while signed in, or, without signing in, with the
+    account's email and password on `POST /v1/api_keys/password` (so a client can let a brand-new account
+    get its first key). You get two values:
 
     - the **secret**, `"<prefix>.<secret>"` (for example `abc1234.Zm9vYmFy…`). It is shown **only once**; store it.
     - the **client_id**, which is also listed by `GET /v1/api_keys/list`.
 
     Signing in needs **both**: `client_id` plus the secret as `client_secret`, together with the account's email and
     password.
+
+    A key identifies the **client**, not who signs in: any account's email and password work with it (the website
+    signs everyone in with one key). The key's scopes cap every session made through it, its daily call limit
+    counts the calls of all of them, and revoking it ends all of them. Don't share a key you don't want others
+    to sign in through.
 
     ## Signing in
 
@@ -72,11 +79,16 @@ info:
       `""` and an unset number `0` (a latitude/longitude of 0 means "no position"). Relations (`zone`, `age`,
       `comment`, …) and lists of relations can be `null` when unset or not loaded by that route; treat a `null` list
       as empty. On input, `""`, `0` and `null` usually mean "not given".
-    - Times are RFC 3339. A sighting time at exactly 00:00:00 UTC means "date only".
+    - Times are RFC 3339, written in the server's time zone (e.g. `"2026-02-01T01:00:00+01:00"`), not
+      necessarily UTC; send them in any offset. A sighting time at exactly 00:00:00 UTC means "date only": compare
+      the instant, not the text (`"2026-02-01T01:00:00+01:00"` is a date-only time).
     - Ids (`uuid`) are short strings (10 characters for new records; competitions use 24 hex characters).
     - **Not found is usually 400**, not 404 (competitions and some announcement routes use 404).
     - Errors are JSON `{"message": "…", "code": 1234}`. `code` is missing on some errors; `message` may be a raw
       database or parse error.
+    - Text longer than its column is 400 code 2001 `"<column> is too long"`, and a duplicate is 400 code 1002.
+      Names (each language of a `Translation`) hold 128 characters, tag names 64, a sighting's `site` 256 and
+      its `comment` 65,535 bytes.
     - The optional header `X-App-Language` (`en`, `sv`, `de`) picks the language of a new account and of Wikipedia
       texts.
 
@@ -172,6 +184,49 @@ paths:
                       version:
                         type: string
 
+  /v1/config:
+    get:
+      tags: [Health]
+      summary: What this server offers
+      description: |
+        No token needed. Bare object. The map tiles and attribution the server's owner chose (OpenStreetMap's by
+        default), the link to its source code (the AGPL asks clients to offer it), and which optional features are
+        turned on. A turned-off feature answers 503: `analyze` is `POST /v1/analyze`, `contact` is
+        `POST /v1/contact`, and `region_search` is `GET /v1/zones/search` and `POST /v1/zones/osm`.
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+                  source_url:
+                    type: string
+                    example: "https://github.com/klahr/300sf"
+                  map:
+                    type: object
+                    properties:
+                      tiles:
+                        type: string
+                        description: A Leaflet-style tile URL template.
+                        example: "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      attribution:
+                        type: string
+                        description: HTML to show on the map.
+                  features:
+                    type: object
+                    properties:
+                      analyze:
+                        type: boolean
+                      contact:
+                        type: boolean
+                      region_search:
+                        type: boolean
+
   # ---------------------------------------------------------------- Auth
   /v1/auth:
     post:
@@ -185,7 +240,8 @@ paths:
           token was issued for. The refresh token is used up; keep the new one from the response.
 
         `scopes` is optional and defaults to `["user"]`. The token gets the requested scopes that both the user and
-        the API key have.
+        the API key have; if that leaves none, sign-in fails with 400 code 3005 (and a refresh whose scopes the user
+        or key has lost fails with 401 code 7001).
       security: []
       requestBody:
         required: true
@@ -215,8 +271,8 @@ paths:
                 $ref: "#/components/schemas/AuthTokens"
         "400":
           description: |
-            Parse error (2001), unknown `grant_type` (1005), wrong email or password (7001) or deactivated
-            account (6001).
+            Parse error (2001), unknown `grant_type` (1005), wrong email or password (7001), deactivated
+            account (6001), or none of the requested scopes allowed (3005).
           content:
             application/json:
               schema:
@@ -341,7 +397,8 @@ paths:
       description: |
         Bare object. `last_reports`: non-archived sightings created in the last 14 days, newest first, max 50
         (`species.order` and `activity` are not filled in). `list_reports`: one entry per active list with its
-        non-archived sightings (`comment` and `activity` not filled in); `null` when the user has no lists.
+        non-archived sightings (`comment` and `activity` not filled in); `null` when the user has no lists. Each
+        `list` has its target `species` with `name` and `order`.
       responses:
         "200":
           description: OK
@@ -630,7 +687,8 @@ paths:
       summary: Send a password reset email
       description: |
         No token needed. Always 204 for a parseable body, whether or not the account exists. The email links to
-        `/set-password?token=<token>`, valid 24 hours; a new one is not sent within 2 minutes of the last. Throttled
+        the website's `/set-password?token=<token>`, valid 24 hours; other clients can let the user paste the link
+        or token and call `POST /v1/users/set_password/{token}`; a new one is not sent within 2 minutes of the last. Throttled
         to 10 an hour per client IP (429 code 7003).
       security: []
       parameters:
@@ -694,7 +752,10 @@ paths:
     post:
       tags: [Users]
       summary: Ask to delete the account
-      description: Emails a confirmation link (`/delete-account?token=<token>`, valid 1 hour). Throttled to 3 an hour per user.
+      description: |
+        Emails a confirmation link to the website's `/delete-account?token=<token>`, valid 1 hour; other clients can
+        let the user paste the link or token and call `DELETE /v1/users/confirm_delete/{token}`. Throttled to 3 an
+        hour per user.
       requestBody:
         required: true
         content:
@@ -841,6 +902,67 @@ paths:
           $ref: "#/components/responses/RateLimited"
         "500":
           $ref: "#/components/responses/ServerError"
+  /v1/api_keys/password:
+    post:
+      tags: [API keys]
+      summary: Create an API key with email and password
+      description: |
+        No token needed, so a client can give a new account its first key (signing in needs one). The key gets the
+        `user` scope only; make admin keys with `POST /v1/api_keys`. At most 10 active keys per user. Wrong
+        passwords count towards the same limits as signing in (429 code 7002), and the route is throttled to 10
+        calls an hour per client IP (429 code 7003). The secret in `api_key` is shown only once.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                name:
+                  type: string
+                  example: "My client"
+      responses:
+        "200":
+          description: The new key (bare), as from `POST /v1/api_keys`.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  api_key:
+                    type: string
+                    description: "`<prefix>.<secret>`, the `client_secret` for signing in. Shown only once."
+                    example: "abc1234.Zm9vYmFyYmF6"
+                  client_id:
+                    type: string
+                  prefix:
+                    type: string
+                    example: abc1234
+                  scopes:
+                    type: string
+                    example: user
+        "400":
+          description: |
+            Parse error (2001), wrong email or password (7001), deactivated account (6001) or too many keys (3006).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "429":
+          description: Too many wrong passwords (7002) or too many calls from this client (7003).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          $ref: "#/components/responses/ServerError"
   /v1/api_keys/{prefix}/revoke:
     post:
       tags: [API keys]
@@ -939,7 +1061,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/List"
         "400":
-          description: Parse error (-10001) or invalid `from`/`until` (2001).
+          description: |
+            Parse error (-10001), invalid `from`/`until` (2001), `visibility` not 0, 1 or 2 (1005), or `template`
+            unknown or another user's private one (1001).
           content:
             application/json:
               schema:
@@ -949,7 +1073,7 @@ paths:
         "429":
           $ref: "#/components/responses/RateLimited"
         "500":
-          description: Unknown or forbidden template, or a database error.
+          description: A database error.
           content:
             application/json:
               schema:
@@ -1134,7 +1258,7 @@ paths:
         "204":
           $ref: "#/components/responses/NoContent"
         "400":
-          description: Invalid visibility (1005), or list not found or not yours.
+          description: Missing or invalid visibility (1005), or list not found or not yours.
           content:
             application/json:
               schema:
@@ -1206,8 +1330,8 @@ paths:
       summary: Compare shared checklists
       description: |
         No token needed. 1–20 list uuids; the first is the reference. Only non-private, non-archived lists with
-        10-character ids are used; others are dropped silently. `result` has one entry per found list (database
-        order, reference included), each with one report per distinct species seen. Throttled to 60 a minute per
+        10-character ids are used; others are dropped silently. `result` has one entry per found list, in the order
+        asked for (the reference first) and naming its `list`, each with one report per distinct species seen. Throttled to 60 a minute per
         client IP (429 code 7003).
       security: []
       requestBody:
@@ -1243,6 +1367,13 @@ paths:
                     items:
                       type: object
                       properties:
+                        list:
+                          type: object
+                          properties:
+                            uuid:
+                              type: string
+                            name:
+                              $ref: "#/components/schemas/Translation"
                         user:
                           type: object
                           properties:
@@ -1306,7 +1437,10 @@ paths:
     post:
       tags: [List templates]
       summary: Create a list template
-      description: "`visibility: 2` (public) is lowered to 0 unless the token has the `admin` scope."
+      description: |
+        A template is private (0) or public (2). Public needs the `admin` scope; otherwise, and for 1, it is stored
+        as 0. Other values are 400 code 1005. A private template is yours alone: to give someone your species,
+        share a checklist made from it (they read its `species` and create their own template).
       requestBody:
         required: true
         content:
@@ -1510,7 +1644,7 @@ paths:
         "204":
           $ref: "#/components/responses/NoContent"
         "400":
-          description: Template not found, no species, or unknown species.
+          description: Parse error (2001), template not found (1001), or no, unknown or duplicate species (1005).
           content:
             application/json:
               schema:
@@ -1604,6 +1738,9 @@ paths:
       description: |
         `zone` is worked out by the server from the position, possibly later in the background. A client-made
         `uuid` makes the call idempotent: sending the same one again returns the stored sighting.
+
+        400 code -10001 for an unknown species, a negative `quantity`, a position outside ±90/±180, or `until`
+        before `from`.
       requestBody:
         required: true
         content:
@@ -1665,7 +1802,8 @@ paths:
       summary: Edit a sighting
       description: |
         Replaces every field: fields left out are cleared, and `list_uuids` / `tag_uuids` replace the sighting's
-        lists and tags. Archived sightings cannot be edited.
+        lists and tags. To change only its checklists or labels, use `add_list`/`remove_list` and
+        `add_tag`/`remove_tag` instead. Archived sightings cannot be edited.
       parameters:
         - $ref: "#/components/parameters/Uuid"
       requestBody:
@@ -1738,7 +1876,8 @@ paths:
         "204":
           $ref: "#/components/responses/NoContent"
         "400":
-          description: Sighting or tag not found, or the tag is already on it.
+          description: |
+            Parse error (2001), tag not found or archived (1001), the tag already on it (1002), or sighting not found.
           content:
             application/json:
               schema:
@@ -1773,13 +1912,68 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "429":
           $ref: "#/components/responses/RateLimited"
+  /v1/reports/{uuid}/add_list:
+    post:
+      tags: [Reports]
+      summary: Put a sighting on a checklist
+      description: Your own non-archived sighting and your own checklist (archived ones too). Nothing else changes.
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ListUuidBody"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          description: Parse error (2001), sighting or checklist not found or not yours (1001), or already on it (1002).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/reports/{uuid}/remove_list:
+    post:
+      tags: [Reports]
+      summary: Take a sighting off a checklist
+      description: 204 even when it was not on it. The sighting is kept.
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ListUuidBody"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          description: Parse error (2001), or sighting or checklist not found or not yours (1001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/ServerError"
   /v1/reports/basis:
     put:
       tags: [Reports]
       summary: Everything the sighting form needs
       description: |
         All ages, genders, methods and activities, the user's active lists (`species` is `null`) and tags, and the
-        species.
+        species. The four catalogs are empty on a new server until an admin adds entries (`POST /v1/ages` etc.); a
+        client should then leave those fields out.
       requestBody:
         required: true
         content:
@@ -1863,7 +2057,9 @@ paths:
                   example: 120
       responses:
         "200":
-          description: CSV file.
+          description: |
+            CSV file, with `Content-Disposition: attachment; filename="<list name>.csv"` (RFC 2231 encoded when not
+            ASCII). The header is exposed to other origins.
           content:
             text/csv:
               schema:
@@ -1910,8 +2106,10 @@ paths:
               properties:
                 name:
                   type: string
+                  description: Required; trimmed; at most 64 characters.
                 color:
                   type: string
+                  description: '`"#rrggbb"` or `""`.'
                   example: "#1273a3"
       responses:
         "200":
@@ -1921,7 +2119,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/Tag"
         "400":
-          $ref: "#/components/responses/BadRequest"
+          description: Parse error (2001), empty name or invalid color (1005), or name too long (2001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "401":
           $ref: "#/components/responses/Unauthorized"
         "429":
@@ -1980,11 +2182,12 @@ paths:
               properties:
                 name:
                   type: string
+                  description: Required; trimmed; at most 64 characters.
       responses:
         "204":
           $ref: "#/components/responses/NoContent"
         "400":
-          description: Tag not found or archived.
+          description: Parse error (2001), empty name (1005), or tag not found or archived.
           content:
             application/json:
               schema:
@@ -2193,6 +2396,7 @@ paths:
     get:
       tags: [Catalog]
       summary: All ages
+      description: Empty on a new server until an admin adds some.
       responses:
         "200":
           $ref: "#/components/responses/NamedRecordList"
@@ -2224,6 +2428,7 @@ paths:
     get:
       tags: [Catalog]
       summary: All genders
+      description: Empty on a new server until an admin adds some.
       responses:
         "200":
           $ref: "#/components/responses/NamedRecordList"
@@ -2277,6 +2482,7 @@ paths:
     get:
       tags: [Catalog]
       summary: All methods
+      description: Empty on a new server until an admin adds some.
       responses:
         "200":
           $ref: "#/components/responses/NamedRecordList"
@@ -2308,6 +2514,7 @@ paths:
     get:
       tags: [Catalog]
       summary: All activities
+      description: Empty on a new server until an admin adds some.
       responses:
         "200":
           $ref: "#/components/responses/NamedRecordList"
@@ -2538,7 +2745,8 @@ paths:
       summary: Create a competition
       description: |
         A participant's score is the number of distinct species seen in `[from, until)`, limited to the template's
-        species and the counties when given. Errors are `{"code": -10001, "message": …}`.
+        species and the counties when given. With counties, only sightings with a position inside one count; a
+        sighting without a position never does. Errors are `{"code": -10001, "message": …}`.
       requestBody:
         required: true
         content:
@@ -2784,6 +2992,12 @@ paths:
                 properties:
                   invited:
                     type: array
+                    description: Invited now, or already invited and not yet answered.
+                    items:
+                      type: string
+                  already_in:
+                    type: array
+                    description: Already taking part; not invited.
                     items:
                       type: string
                   not_found:
@@ -3559,7 +3773,11 @@ components:
     Visibility:
       type: integer
       enum: [0, 1, 2]
-      description: 0 private, 1 hidden (anyone with the link), 2 public.
+      description: |
+        0 private, 1 hidden, 2 public. For checklists the API treats hidden and public alike: any signed-in user
+        who knows the uuid can read the list (`GET /v1/lists/{uuid}`, not its sightings), and anyone, without a
+        token, can compare it (`POST /v1/lists/compare`, or on the website at `/compare?uuids=<uuid>`). No route
+        lists other users' checklists.
     Translation:
       type: object
       description: A name in several languages. `""` for a missing language; `la` is the scientific name. `uuid` is ignored on input.
@@ -3784,7 +4002,10 @@ components:
           allOf:
             - $ref: "#/components/schemas/Zone"
           nullable: true
-          description: Worked out from the position by the server, maybe later.
+          description: |
+            The most specific zone around the position, worked out by the server. Right after reporting it may be a
+            larger one (a county) and become the municipality once the server has looked the place up. `polygon` is
+            `null` here.
         quantity:
           type: integer
           description: 0 when unset.
@@ -3839,11 +4060,11 @@ components:
           type: string
         from:
           type: string
-          format: date-time
-          description: RFC 3339; a bare date is rejected.
+          description: RFC 3339, or `"YYYY-MM-DD"` for a date-only sighting (stored as midnight UTC).
+          example: "2026-05-03T07:12:00Z"
         until:
           type: string
-          format: date-time
+          description: Like `from`.
         latitude:
           type: number
         longitude:
@@ -3891,6 +4112,10 @@ components:
         - $ref: "#/components/schemas/ReportFields"
     Notification:
       type: object
+      description: |
+        A comment thread on a sighting, made when it is reported unless `silent`, starting with
+        `notification_comment`. Only the sighting's owner can add to it (`POST /v1/notifications/{uuid}/comment`);
+        the server does nothing else with it yet, and `processed` is never set.
       properties:
         uuid:
           type: string
@@ -3907,6 +4132,12 @@ components:
       required: [species_uuid]
       properties:
         species_uuid:
+          type: string
+    ListUuidBody:
+      type: object
+      required: [list_uuid]
+      properties:
+        list_uuid:
           type: string
     TagUuidBody:
       type: object
@@ -3926,7 +4157,7 @@ components:
           type: string
         notifications:
           type: integer
-          description: Bit mask.
+          description: Bit mask of notification settings, 8 for new accounts. Nothing reads or changes it yet.
         last_seen_at:
           $ref: "#/components/schemas/ZeroTime"
         confirmed_at:
@@ -4049,7 +4280,12 @@ components:
         title:
           $ref: "#/components/schemas/LocalizedText"
         body:
-          $ref: "#/components/schemas/LocalizedText"
+          allOf:
+            - $ref: "#/components/schemas/LocalizedText"
+          description: |
+            A small part of Markdown: `# heading`, `- item` lines, `**bold**`, `*italic*`, `[text](https://…)`, and a
+            blank line between paragraphs. Older posts are HTML (`p`, `br`, `b`/`strong`, `i`/`em`, `a`, `ul`/`ol`/`li`,
+            `h2`–`h4`). Render either without running scripts or keeping other attributes than a link's address.
         from:
           $ref: "#/components/schemas/ZeroTime"
         until:
@@ -4113,7 +4349,9 @@ components:
           type: integer
         zones:
           type: array
-          description: County names; empty means anywhere.
+          description: |
+            The counties' names; empty means anywhere. These are names, not zones: `uuid` is the name's, not the
+            county's.
           items:
             $ref: "#/components/schemas/Translation"
         creator:
@@ -4168,8 +4406,13 @@ components:
       properties:
         url:
           type: string
+          description: The audio file (play this).
         filename:
           type: string
+          description: The file's name only, not a link.
+        sono:
+          type: string
+          description: A sonogram image.
         type:
           type: string
         sex:
@@ -4177,8 +4420,6 @@ components:
         stage:
           type: string
         method:
-          type: string
-        sono:
           type: string
         recorder:
           type: string

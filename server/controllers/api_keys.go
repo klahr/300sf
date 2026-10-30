@@ -43,7 +43,39 @@ func ApiKeys(c *gin.Context) {
 		return
 	}
 
-	requested := r.Scopes
+	createApiKey(c, user, r.Name, r.Scopes)
+}
+
+// ApiKeysPassword makes an API key with the account's email and password, no
+// token needed: signing in takes a key, so without this a new account could
+// only get its first key from the website. Such keys get the user scope.
+func ApiKeysPassword(c *gin.Context) {
+	type request struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+		Name     string `json:"name"`
+	}
+
+	var r request
+	if err := c.ShouldBindJSON(&r); err != nil {
+		c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorParse, Message: err.Error()})
+		return
+	}
+	if throttle(c, "api-key-password/"+ClientNetwork(c.ClientIP()), 10, time.Hour) {
+		return
+	}
+
+	user, authErr := CheckPassword(r.Email, r.Password, c.ClientIP())
+	if authErr != nil {
+		c.JSON(authErr.Status, authErr.Body)
+		return
+	}
+	createApiKey(c, user, r.Name, nil)
+}
+
+// createApiKey makes a key for user with the requested scopes (the user scope
+// when none) and answers with its secret, which is shown only this once.
+func createApiKey(c *gin.Context, user models.User, name string, requested []string) {
 	if len(requested) == 0 {
 		requested = []string{auth.AuthScopeUser}
 	}
@@ -79,7 +111,7 @@ func ApiKeys(c *gin.Context) {
 			Timestamp: time.Now(),
 			Uuid:      utils.GenerateShortUuid(),
 		},
-		Name:      r.Name,
+		Name:      name,
 		ClientId:  utils.GenerateUuidWithFixedLength(32),
 		Prefix:    prefix,
 		Hash:      hashedOriginalKey,

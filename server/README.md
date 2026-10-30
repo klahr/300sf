@@ -43,7 +43,8 @@ API clients call `POST /v1/auth` with `grant_type: password` (plus their
 `grant_type: refresh_token`, and send the access token as `Authorization:
 Bearer <token>`. `POST /v1/auth/logout` with the refresh token ends the
 session. Scopes are `user` and `admin`. Users make their own API keys in the
-app under Settings → API keys (or `POST /v1/api_keys`); a key gets the
+app under Settings → API keys (or `POST /v1/api_keys`, or with email and
+password on `POST /v1/api_keys/password` for a first key); a key gets the
 `user` scope, and `admin` too when an admin asks for it. The full API is
 documented at `/docs` (`site/static/swagger.yaml`).
 
@@ -67,7 +68,7 @@ requests, and writes must carry `X-Requested-With`, so other sites can't act
 with a visitor's session.
 
 Routes are declared in `routes.go`; the OpenAPI spec in
-`site/static/swagger.yaml` is partial.
+`site/static/swagger.yaml` documents every one of them, so keep it in step.
 
 ## Zones
 

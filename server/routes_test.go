@@ -93,3 +93,18 @@ func TestHealth(t *testing.T) {
 		t.Errorf("body = %s", body)
 	}
 }
+
+func TestServerConfig(t *testing.T) {
+	config.AppConfig = &config.App{
+		ContactEmail: "owner@example.com",
+		Site:         config.Site{MapTiles: "https://tiles.example/{z}/{x}/{y}.png", MapAttribution: "Tiles", SourceUrl: "https://example.com/src"},
+	}
+	r := gin.New()
+	r.GET("/v1/config", noneMiddleware, ServerConfig)
+	w := do(r, "/v1/config", "")
+	want := `{"version":"dev","source_url":"https://example.com/src","map":{"tiles":"https://tiles.example/{z}/{x}/{y}.png","attribution":"Tiles"},` +
+		`"features":{"analyze":false,"contact":true,"region_search":false}}`
+	if w.Code != http.StatusOK || w.Body.String() != want {
+		t.Errorf("config = %d %s", w.Code, w.Body.String())
+	}
+}

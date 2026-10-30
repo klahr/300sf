@@ -173,6 +173,33 @@ func passwordSucceeded(email, ip string) {
 	models.Cache.Del(accountNet)
 }
 
+// CheckPassword finds the active account with this email and checks its
+// password, counting wrong ones against the guessing limits.
+func CheckPassword(email, password, ip string) (models.User, *AuthError) {
+	var user models.User
+	// Slow down password guessing per account.
+	if PasswordLocked(email, ip) {
+		return user, authError(http.StatusTooManyRequests, ErrorTooManyLoginAttempts, "too many failed sign-ins, try again later")
+	}
+	fail := func() *AuthError {
+		PasswordFailed(email, ip)
+		return authError(http.StatusBadRequest, ErrorAuthInvalid, "invalid email or password")
+	}
+
+	if err := models.DB.Where("email=?", email).Preload("Language").First(&user).Error; err != nil {
+		return user, fail()
+	}
+	if user.DeactivatedAt.Valid {
+		return user, authError(http.StatusBadRequest, ErrorAccountDeactivated, "account is deactivated")
+	}
+	p := utils.Password{}
+	if !p.IsMatching(password, user.Password, user.PasswordSalt) {
+		return user, fail()
+	}
+	passwordSucceeded(email, ip)
+	return user, nil
+}
+
 // RevokeUserSessions signs the user out everywhere: every refresh token is
 // revoked and access tokens issued until now are rejected.
 func RevokeUserSessions(userUuid string) {
@@ -236,6 +263,9 @@ func Authenticate(r AuthRequest) (*AuthTokens, *AuthError) {
 
 		// Scopes can only shrink: re-check them against the user and the key.
 		scopes = intersectScopes(strings.Split(oldScopes, " "), user.Scopes, apiKey.Scopes)
+		if scopes == "" {
+			return nil, authError(http.StatusUnauthorized, ErrorAuthInvalid, "the session's scopes are no longer allowed; sign in again")
+		}
 
 	case "password":
 		if r.ClientId == "" {
@@ -255,26 +285,10 @@ func Authenticate(r AuthRequest) (*AuthTokens, *AuthError) {
 			return nil, authError(http.StatusUnauthorized, ErrorInvalidApiKey, "api key has been revoked")
 		}
 
-		// Slow down password guessing per account.
-		if PasswordLocked(r.Email, r.ClientIP) {
-			return nil, authError(http.StatusTooManyRequests, ErrorTooManyLoginAttempts, "too many failed sign-ins, try again later")
+		var authErr *AuthError
+		if user, authErr = CheckPassword(r.Email, r.Password, r.ClientIP); authErr != nil {
+			return nil, authErr
 		}
-		fail := func() *AuthError {
-			PasswordFailed(r.Email, r.ClientIP)
-			return authError(http.StatusBadRequest, ErrorAuthInvalid, "invalid email or password")
-		}
-
-		if err := models.DB.Where("email=?", r.Email).Preload("Language").First(&user).Error; err != nil {
-			return nil, fail()
-		}
-		if user.DeactivatedAt.Valid {
-			return nil, authError(http.StatusBadRequest, ErrorAccountDeactivated, "account is deactivated")
-		}
-		p := utils.Password{}
-		if !p.IsMatching(r.Password, user.Password, user.PasswordSalt) {
-			return nil, fail()
-		}
-		passwordSucceeded(r.Email, r.ClientIP)
 
 		clientId = r.ClientId
 		stay = r.StaySignedIn
@@ -284,6 +298,9 @@ func Authenticate(r AuthRequest) (*AuthTokens, *AuthError) {
 			requested = []string{auth.AuthScopeUser}
 		}
 		scopes = intersectScopes(requested, user.Scopes, apiKey.Scopes)
+		if scopes == "" {
+			return nil, authError(http.StatusBadRequest, ErrorMissingScope, "none of the requested scopes are allowed for this account and key")
+		}
 
 	default:
 		return nil, authError(http.StatusBadRequest, ErrorInvalidRequest, "invalid grant_type")

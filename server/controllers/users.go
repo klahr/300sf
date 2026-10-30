@@ -264,7 +264,7 @@ func UsersMe(c *gin.Context) {
 
 	oneWeekAgo := time.Now().AddDate(0, 0, -14)
 	var lastReports []models.Report
-	if err := tx.Where("user_id=?", user.Id).Where("timestamp>=?", oneWeekAgo).Where("archived IS NULL").Preload("Tags", "archived IS NULL").Preload("Species.Name").Preload("Zone.Name").Preload("Age.Name").Preload("Gender.Name").Preload("Method.Name").Preload("Comment").Preload("Lists.Name").Order("timestamp DESC").Order("`from` DESC").Limit(50).Find(&lastReports).Error; err != nil {
+	if err := tx.Where("user_id=?", user.Id).Where("timestamp>=?", oneWeekAgo).Where("archived IS NULL").Preload("Tags", "archived IS NULL").Preload("Species.Name").Preload("Zone", withoutPolygon).Preload("Zone.Name").Preload("Age.Name").Preload("Gender.Name").Preload("Method.Name").Preload("Comment").Preload("Lists.Name").Order("timestamp DESC").Order("`from` DESC").Limit(50).Find(&lastReports).Error; err != nil {
 		log.Error(c, 0, err.Error())
 		tx.Rollback()
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -292,7 +292,7 @@ func UsersMe(c *gin.Context) {
 		listReport := listReports{
 			List: list,
 		}
-		if err := tx.Table("list_reports").Select("reports.*").Where("reports.archived IS NULL").Where("list_id=?", list.Id).Joins("JOIN reports ON reports.id=report_id").Preload("Lists.Name").Preload("Species.Order.Name").Preload("Species.Name").Preload("Zone.Name").Preload("Age.Name").Preload("Gender.Name").Preload("Method.Name").Preload("Tags", "archived IS NULL").Find(&listReport.Reports).Error; err != nil {
+		if err := tx.Table("list_reports").Select("reports.*").Where("reports.archived IS NULL").Where("list_id=?", list.Id).Joins("JOIN reports ON reports.id=report_id").Preload("Lists.Name").Preload("Species.Order.Name").Preload("Species.Name").Preload("Zone", withoutPolygon).Preload("Zone.Name").Preload("Age.Name").Preload("Gender.Name").Preload("Method.Name").Preload("Tags", "archived IS NULL").Find(&listReport.Reports).Error; err != nil {
 			log.Error(c, 0, err.Error())
 			tx.Rollback()
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -524,7 +524,7 @@ func UsersExportData(c *gin.Context) {
 	}
 
 	var reports []models.Report
-	if err := models.DB.Preload("Species.Name").Preload("Age.Name").Preload("Activity.Name").Preload("Gender.Name").Preload("Method.Name").Preload("Comment").Preload("Zone.Name").Preload("Lists.Name").Preload("Tags").Where("user_id=?", user.Id).Order("`from` IS NULL, `from` ASC").Find(&reports).Error; err != nil {
+	if err := models.DB.Preload("Species.Name").Preload("Age.Name").Preload("Activity.Name").Preload("Gender.Name").Preload("Method.Name").Preload("Comment").Preload("Zone", withoutPolygon).Preload("Zone.Name").Preload("Lists.Name").Preload("Tags").Where("user_id=?", user.Id).Order("`from` IS NULL, `from` ASC").Find(&reports).Error; err != nil {
 		fail(err)
 		return
 	}
@@ -598,7 +598,7 @@ func UsersLanguage(c *gin.Context) {
 	if err := models.DB.Where("code=?", r.LanguageCode).First(&language).Error; err != nil {
 		log.Error(c, ErrorRecordNotFound, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "could not find species",
+			"message": "unknown language",
 			"code":    ErrorRecordNotFound,
 		})
 		return
@@ -655,7 +655,14 @@ func UsersDisplayName(c *gin.Context) {
 	}
 
 	var r request
-	if err := c.ShouldBindJSON(&r); err != nil || !utils.VerifyDisplayName(strings.TrimSpace(r.DisplayName)) {
+	if err := c.ShouldBindJSON(&r); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorParse,
+			"message": "could not parse request",
+		})
+		return
+	}
+	if !utils.VerifyDisplayName(strings.TrimSpace(r.DisplayName)) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    ErrorSignUpInvalidDisplayName,
 			"message": "invalid display name",
@@ -686,7 +693,14 @@ func UsersUsername(c *gin.Context) {
 	}
 
 	var r request
-	if err := c.ShouldBindJSON(&r); err != nil || !utils.VerifyUsername(r.Username) {
+	if err := c.ShouldBindJSON(&r); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorParse,
+			"message": "could not parse request",
+		})
+		return
+	}
+	if !utils.VerifyUsername(r.Username) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    ErrorSignUpInvalidUsername,
 			"message": "invalid username",

@@ -9,6 +9,7 @@ import (
 
 	"github.com/klahr/300sf/server/models"
 	"github.com/klahr/300sf/server/utils"
+	"gopkg.in/guregu/null.v4/zero"
 )
 
 // someSpecies is a species from the starter data.
@@ -127,5 +128,129 @@ func TestDBExportHasEverything(t *testing.T) {
 	r := s.must(t, u, http.StatusOK, "GET", "/v1/users/export", nil)
 	if len(r.Raw) < 100 || !strings.Contains(r.Raw, "Exported") {
 		t.Errorf("export lacks the list: %.300s", r.Raw)
+	}
+}
+
+// Compare names each entry's list, in the order asked for: one user can share several.
+func TestDBCompareNamesLists(t *testing.T) {
+	s := testDB(t)
+	owner, other := s.signUp(t), s.signUp(t)
+	species := someSpecies(t, 2)
+	a := newList(t, s, owner, "Year", models.VisibilityHidden)
+	b := newList(t, s, other, "Garden", models.VisibilityPublic)
+	c := newList(t, s, owner, "Holiday", models.VisibilityHidden)
+	newReport(t, s, owner, species[0], a)
+	newReport(t, s, owner, species[1], c)
+
+	for _, order := range [][]string{{a, b, c}, {c, a, b}} {
+		r := s.do(t, "10.250.1.4", "", "POST", "/v1/lists/compare", map[string]any{"uuids": append(order, "unknown123")})
+		if r.Status != http.StatusOK {
+			t.Fatalf("compare = %d: %s", r.Status, r.Raw)
+		}
+		entries := items(r.Body["result"])
+		if len(entries) != 3 {
+			t.Fatalf("entries = %v", entries)
+		}
+		for i, uuid := range order {
+			if get(entries[i], "list", "uuid") != uuid {
+				t.Errorf("entry %d is list %v, want %s", i, get(entries[i], "list", "uuid"), uuid)
+			}
+		}
+		if get(r.Body, "reference_list", "uuid") != order[0] {
+			t.Errorf("reference = %v", get(r.Body, "reference_list", "uuid"))
+		}
+	}
+	r := s.do(t, "10.250.1.4", "", "POST", "/v1/lists/compare", map[string]any{"uuids": []string{a, c}})
+	if get(r.Body, "result", 0, "list", "name", "en") != "Year" || get(r.Body, "result", 1, "list", "name", "en") != "Holiday" {
+		t.Errorf("names = %s", r.Raw)
+	}
+}
+
+// A template that can't be used is the caller's mistake, and leaves nothing behind.
+func TestDBListFromUnusableTemplate(t *testing.T) {
+	s := testDB(t)
+	owner, other := s.signUp(t), s.signUp(t)
+	species := someSpecies(t, 1)
+	private := s.must(t, other, http.StatusOK, "POST", "/v1/list_templates", map[string]any{
+		"name": map[string]any{"en": "Mine"}, "species_uuids": species,
+	}).Body["uuid"].(string)
+
+	var before, after int64
+	models.DB.Table("translations").Count(&before)
+	for _, template := range []string{private, "nope"} {
+		r := s.call(t, owner, "POST", "/v1/lists", map[string]any{"name": map[string]any{"en": "X"}, "template": template})
+		if r.Status != http.StatusBadRequest || get(r.Body, "code") != float64(1001) {
+			t.Errorf("template %s = %d: %s", template, r.Status, r.Raw)
+		}
+	}
+	models.DB.Table("translations").Count(&after)
+	if after != before {
+		t.Errorf("failed creates left %d names behind", after-before)
+	}
+	// Your own private template works.
+	s.must(t, other, http.StatusOK, "POST", "/v1/lists", map[string]any{"name": map[string]any{"en": "Y"}, "template": private})
+}
+
+// A sighting's zone comes without its outline, which can be megabytes.
+func TestDBSightingZoneHasNoPolygon(t *testing.T) {
+	s := testDB(t)
+	u := s.signUp(t)
+	species := someSpecies(t, 1)
+	poly := `{"type":"Polygon","coordinates":[[[10,50],[11,50],[11,51],[10,51],[10,50]]]}`
+	zone := models.Zone{
+		Model:      models.Model{Timestamp: time.Now(), Uuid: utils.GenerateShortUuid()},
+		Name:       models.Translation{Model: models.Model{Timestamp: time.Now(), Uuid: utils.GenerateShortUuid()}, En: zero.StringFrom("Testland")},
+		Polygon:    []byte(poly),
+		AdminLevel: models.ZoneTypeCounty,
+	}
+	if err := models.DB.Create(&zone).Error; err != nil {
+		t.Fatal(err)
+	}
+	list := newList(t, s, u, "Zoned", models.VisibilityPrivate)
+	created := s.must(t, u, http.StatusOK, "POST", "/v1/reports", map[string]any{
+		"uuid": utils.GenerateUuidWithFixedLength(20), "species_uuid": species[0], "from": "2026-05-01T06:30:00Z",
+		"latitude": 50.5, "longitude": 10.5, "list_uuids": []string{list},
+	})
+	uuid := created.Body["uuid"].(string)
+	// Matching positions to zones is the geocoder's business; set it here.
+	if err := models.DB.Table("reports").Where("uuid=?", uuid).Update("zone_id", zone.Id).Error; err != nil {
+		t.Fatal(err)
+	}
+	answers := map[string]any{
+		"get":          get(s.must(t, u, http.StatusOK, "GET", "/v1/reports/"+uuid, nil).Body, "result"),
+		"list":         get(s.must(t, u, http.StatusOK, "GET", "/v1/reports/list", nil).Body, "result", 0),
+		"list reports": get(s.must(t, u, http.StatusOK, "GET", "/v1/lists/"+list+"/reports", nil).Body, "result", 0),
+		"me":           get(s.must(t, u, http.StatusOK, "GET", "/v1/users/me", nil).Body, "last_reports", 0),
+	}
+	for name, report := range answers {
+		if get(report, "zone", "name", "en") != "Testland" {
+			t.Errorf("%s: zone = %v", name, get(report, "zone"))
+		}
+		if get(report, "zone", "polygon") != nil {
+			t.Errorf("%s: zone has its polygon", name)
+		}
+	}
+}
+
+// Visibility must be given and be 0, 1 or 2; a template is private or public.
+func TestDBVisibilityIsChecked(t *testing.T) {
+	s := testDB(t)
+	u := s.signUp(t)
+	list := newList(t, s, u, "Shared", models.VisibilityPublic)
+	if r := s.call(t, u, "POST", "/v1/lists/"+list+"/visibility", map[string]any{}); r.Status != http.StatusBadRequest {
+		t.Errorf("no visibility = %d", r.Status)
+	}
+	if r := s.must(t, u, http.StatusOK, "GET", "/v1/lists/"+list, nil); get(r.Body, "result", "visibility") != float64(models.VisibilityPublic) {
+		t.Errorf("visibility after a refused change = %v", get(r.Body, "result", "visibility"))
+	}
+	if r := s.call(t, u, "POST", "/v1/lists", map[string]any{"name": map[string]any{"en": "x"}, "visibility": 9}); r.Status != http.StatusBadRequest || get(r.Body, "code") != float64(1005) {
+		t.Errorf("list with visibility 9 = %d: %s", r.Status, r.Raw)
+	}
+	if r := s.call(t, u, "POST", "/v1/list_templates", map[string]any{"name": map[string]any{"en": "x"}, "visibility": 9}); r.Status != http.StatusBadRequest {
+		t.Errorf("template with visibility 9 = %d", r.Status)
+	}
+	r := s.must(t, u, http.StatusOK, "POST", "/v1/list_templates", map[string]any{"name": map[string]any{"en": "x"}, "visibility": 1})
+	if r.Body["visibility"] != float64(models.VisibilityPrivate) {
+		t.Errorf("hidden template stored as %v", r.Body["visibility"])
 	}
 }

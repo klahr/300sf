@@ -2,6 +2,7 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -11,6 +12,7 @@ import (
 	"github.com/klahr/300sf/server/table"
 	"github.com/klahr/300sf/server/utils"
 	"gopkg.in/guregu/null.v4/zero"
+	"gorm.io/gorm"
 )
 
 func Lists(c *gin.Context) {
@@ -51,7 +53,16 @@ func Lists(c *gin.Context) {
 		return
 	}
 
+	if !models.ValidVisibility(r.Visibility) {
+		c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorInvalidRequest, Message: "visibility is 0, 1 or 2"})
+		return
+	}
+
 	list, err := CreateList(r.Template, r.Name, r.Visibility, user, r.Color)
+	if errors.Is(err, ErrTemplateNotFound) {
+		c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorRecordNotFound, Message: err.Error()})
+		return
+	}
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
@@ -88,7 +99,21 @@ func parseListDate(s string) (zero.Time, error) {
 	return zero.TimeFrom(t), nil
 }
 
+// ErrTemplateNotFound: the template is unknown, or another user's private one.
+var ErrTemplateNotFound = errors.New("template not found")
+
 func CreateList(template zero.String, name models.Translation, visibility int64, user models.User, color zero.String) (*models.List, error) {
+	// The template first, so a bad one leaves no name behind.
+	var t models.ListTemplate
+	if template.Valid {
+		if err := models.DB.Where("uuid=?", template.String).Where("user_id=? OR visibility=?", user.Id, models.VisibilityPublic).Preload("Species").First(&t).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, ErrTemplateNotFound
+			}
+			return nil, err
+		}
+	}
+
 	name.Timestamp = time.Now()
 	name.Uuid = utils.GenerateShortUuid()
 	if err := models.DB.Create(&name).Error; err != nil {
@@ -107,10 +132,6 @@ func CreateList(template zero.String, name models.Translation, visibility int64,
 	}
 
 	if template.Valid {
-		var t models.ListTemplate
-		if err := models.DB.Where("uuid=?", template.String).Where("user_id=? OR visibility=?", user.Id, models.VisibilityPublic).Preload("Species").First(&t).Error; err != nil {
-			return nil, err
-		}
 		list.ListTemplateId = zero.IntFrom(t.Id)
 		list.Species = t.Species
 	}
@@ -404,11 +425,12 @@ func ListsTimespan(c *gin.Context) {
 // ListsVisibility sets who can see a list: private, anyone with the link, or public.
 func ListsVisibility(c *gin.Context) {
 	type request struct {
-		Visibility int64 `json:"visibility"`
+		Visibility *int64 `json:"visibility"`
 	}
 
+	// A missing visibility must not quietly make the list private.
 	var r request
-	if err := c.ShouldBindJSON(&r); err != nil || r.Visibility < models.VisibilityPrivate || r.Visibility > models.VisibilityPublic {
+	if err := c.ShouldBindJSON(&r); err != nil || r.Visibility == nil || !models.ValidVisibility(*r.Visibility) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    ErrorInvalidRequest,
 			"message": "visibility is 0, 1 or 2",
@@ -433,7 +455,7 @@ func ListsVisibility(c *gin.Context) {
 		return
 	}
 
-	if err := models.DB.Model(&list).UpdateColumn("visibility", r.Visibility).Error; err != nil {
+	if err := models.DB.Model(&list).UpdateColumn("visibility", *r.Visibility).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
@@ -493,7 +515,7 @@ func ListsReports(c *gin.Context) {
 		return
 	}
 
-	if err := tx.Table("list_reports").Select("reports.*").Where("reports.archived IS NULL").Where("list_id=?", list.Id).Joins("JOIN reports ON reports.id=report_id").Preload("Species.Name").Preload("Zone.Name").Preload("Age.Name").Preload("Gender.Name").Preload("Method.Name").Preload("Tags", "archived IS NULL").Find(&result).Error; err != nil {
+	if err := tx.Table("list_reports").Select("reports.*").Where("reports.archived IS NULL").Where("list_id=?", list.Id).Joins("JOIN reports ON reports.id=report_id").Preload("Species.Name").Preload("Zone", withoutPolygon).Preload("Zone.Name").Preload("Age.Name").Preload("Gender.Name").Preload("Method.Name").Preload("Tags", "archived IS NULL").Find(&result).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -588,7 +610,14 @@ type CompareReport struct {
 	Species CompareSpecies `json:"species"`
 }
 
+// CompareList says which list an entry is: one user can share several.
+type CompareList struct {
+	Uuid string             `json:"uuid"`
+	Name models.Translation `json:"name"`
+}
+
 type CompareEntry struct {
+	List    CompareList     `json:"list"`
 	User    CompareUser     `json:"user"`
 	Reports []CompareReport `json:"reports"`
 }
@@ -645,7 +674,17 @@ func CompareLists(uuids []string) (*CompareResult, error) {
 		return nil, err
 	}
 
+	// In the order asked for, so the reference comes first.
+	byUuid := map[string]models.List{}
 	for _, list := range lists {
+		byUuid[list.Uuid] = list
+	}
+	for _, uuid := range uuids {
+		list, ok := byUuid[uuid]
+		if !ok {
+			continue
+		}
+		delete(byUuid, uuid)
 		var owner models.User
 		if err := models.DB.Where("id=?", list.UserId).First(&owner).Error; err != nil {
 			return nil, err
@@ -659,7 +698,11 @@ func CompareLists(uuids []string) (*CompareResult, error) {
 			Pluck("species.uuid", &speciesUuids).Error; err != nil {
 			return nil, err
 		}
-		entry := CompareEntry{User: CompareUser{DisplayName: owner.DisplayName}, Reports: []CompareReport{}}
+		entry := CompareEntry{
+			List:    CompareList{Uuid: list.Uuid, Name: list.Name},
+			User:    CompareUser{DisplayName: owner.DisplayName},
+			Reports: []CompareReport{},
+		}
 		for _, u := range speciesUuids {
 			entry.Reports = append(entry.Reports, CompareReport{Species: CompareSpecies{Uuid: u}})
 		}

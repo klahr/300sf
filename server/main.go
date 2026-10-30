@@ -69,6 +69,8 @@ func apiHeaders(c *gin.Context) {
 	c.Writer.Header().Set("Access-Control-Allow-Headers", "Authorization,Content-Type,X-App-Version,X-App-Language")
 	c.Writer.Header().Set("Content-Type", "application/json")
 	c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
+	// So other sites' clients can name the CSV export like the server does.
+	c.Writer.Header().Set("Access-Control-Expose-Headers", "Content-Disposition")
 
 	if c.Request.Method == "OPTIONS" {
 		c.AbortWithStatus(http.StatusNoContent)
@@ -92,6 +94,7 @@ func newRouter(web *site.Site) *gin.Engine {
 	r.Use(web.Redirect)
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
 	r.Use(apiHeaders)
+	r.Use(dbErrors)
 
 	SetupRoutes(r, controllers.Auth, controllers.AuthLogout)
 	SetupRoutes(r.Group("/api", web.AppSession), web.AppSignIn, web.AppSignOut)

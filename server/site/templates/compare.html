@@ -18,6 +18,7 @@
 					{{range $result}}
 					<th style="min-width: 100px;">
 						<p>{{.User.DisplayName}}</p>
+						<p><small>{{translate .List.Name $lang}}</small></p>
 					</th>
 					{{end}}
 				</tr>

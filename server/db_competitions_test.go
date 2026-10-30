@@ -2,6 +2,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"sync"
 	"testing"
@@ -128,4 +129,21 @@ func TestDBOldPrivateCompetitionsAreHidden(t *testing.T) {
 	s.must(t, creator, http.StatusOK, "GET", "/v1/competitions/"+old, nil)
 	s.must(t, stranger, http.StatusNotFound, "GET", "/v1/competitions/"+old, nil)
 	s.must(t, stranger, http.StatusNotFound, "PUT", "/v1/competitions/"+old+"/join", nil)
+}
+
+// Inviting someone who already takes part says so instead of claiming an invite.
+func TestDBInviteSaysWhoIsAlreadyIn(t *testing.T) {
+	s := testDB(t)
+	creator, friend, newcomer := s.signUp(t), s.signUp(t), s.signUp(t)
+	id := newCompetition(t, s, creator, map[string]any{}).Body["uuid"].(string)
+	s.must(t, friend, http.StatusOK, "PUT", "/v1/competitions/"+id+"/join", map[string]any{})
+
+	r := s.must(t, creator, http.StatusOK, "PUT", "/v1/competitions/"+id+"/invite", map[string]any{
+		"usernames": []string{"@" + creator.Username, friend.Username, newcomer.Username, "nobody-at-all"},
+	})
+	if fmt.Sprint(r.Body["invited"]) != fmt.Sprint([]any{newcomer.Username}) ||
+		fmt.Sprint(r.Body["already_in"]) != fmt.Sprint([]any{creator.Username, friend.Username}) ||
+		fmt.Sprint(r.Body["not_found"]) != fmt.Sprint([]any{"nobody-at-all"}) {
+		t.Errorf("invite = %s", r.Raw)
+	}
 }
