@@ -105,6 +105,14 @@ Some things still say 300sf.se. Change them before you invite people:
 - the terms and privacy policy in `server/site/pages/`. These describe the
   300sf.se service, not yours.
 
+## Connecting AI assistants
+
+Your server can be added to Claude (or another assistant that speaks MCP) as a
+custom connector: `https://your.domain/mcp`. Users approve it on your site and
+can disconnect it under Settings → API keys. Nothing needs setting up, but
+`domain` in the config must be the public `https://` address, since apps are
+told it, and the assistant must be able to reach the server from the internet.
+
 ## Upgrading
 
 ```bash

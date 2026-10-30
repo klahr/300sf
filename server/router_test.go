@@ -92,3 +92,34 @@ func TestRequestBodyIsCapped(t *testing.T) {
 		t.Errorf("oversized body: %d %s, want it rejected as too large", w.Code, w.Body.String())
 	}
 }
+
+// Apps find how to connect from /mcp's challenge and the metadata it points to.
+func TestConnectDiscovery(t *testing.T) {
+	r := fullRouter(t)
+	config.AppConfig.Domain = "https://300sf.se"
+
+	req := httptest.NewRequest("POST", "/mcp", strings.NewReader(`{"jsonrpc":"2.0","id":1,"method":"tools/list"}`))
+	req.Host = "300sf.se"
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusUnauthorized || w.Header().Get("WWW-Authenticate") != `Bearer resource_metadata="https://300sf.se/.well-known/oauth-protected-resource/mcp"` {
+		t.Errorf("POST /mcp without a token = %d, WWW-Authenticate %q", w.Code, w.Header().Get("WWW-Authenticate"))
+	}
+	if !strings.Contains(w.Header().Get("Access-Control-Expose-Headers"), "WWW-Authenticate") {
+		t.Errorf("browsers can't read the challenge: %q", w.Header().Get("Access-Control-Expose-Headers"))
+	}
+
+	for path, want := range map[string]string{
+		"/.well-known/oauth-protected-resource/mcp": `"resource":"https://300sf.se/mcp"`,
+		"/.well-known/oauth-protected-resource":     `"authorization_servers":["https://300sf.se"]`,
+		"/.well-known/oauth-authorization-server":   `"token_endpoint":"https://300sf.se/oauth/token"`,
+	} {
+		req := httptest.NewRequest("GET", path, nil)
+		req.Host = "300sf.se"
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+		if w.Code != http.StatusOK || !strings.Contains(w.Body.String(), want) || w.Header().Get("Access-Control-Allow-Origin") != "*" {
+			t.Errorf("GET %s = %d %s", path, w.Code, w.Body.String())
+		}
+	}
+}

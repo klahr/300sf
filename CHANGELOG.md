@@ -47,6 +47,11 @@ Versions are git tags `X.Y.Z`, cut with `make patch|minor|major`.
 - Everyone can make API keys for other apps and scripts, under Settings → API keys;
   the client ID they sign in with is shown with each key. Admins can give a key admin access.
 - Read-only API keys, which can look but not change anything (the `read` scope).
+- Connect Claude and other AI assistants: add `https://300sf.se/mcp` as a connector, approve it
+  on the site, and ask about your checklists and sightings or add new ones. Choose whether it may
+  only read. Connected apps are listed, and can be disconnected, under Settings → API keys.
+- API: an MCP endpoint (`/mcp`) and OAuth 2.1 with dynamic registration and PKCE
+  (`/oauth/register`, `/oauth/authorize`, `/oauth/token`, `/oauth/revoke`, `/.well-known/oauth-*`).
 - Complete API documentation at `/docs`.
 - Edit a sighting, including which bird it was, from the sighting's page.
 - Choose who can see a checklist on comparison links: only you, anyone with the link, or everyone.

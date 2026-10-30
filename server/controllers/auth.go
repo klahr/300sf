@@ -309,6 +309,12 @@ func Authenticate(r AuthRequest) (*AuthTokens, *AuthError) {
 		return nil, authError(http.StatusBadRequest, ErrorInvalidRequest, "invalid grant_type")
 	}
 
+	return issueTokens(user, clientId, scopes, stay)
+}
+
+// issueTokens starts a session: an access token and a refresh token for the
+// user through the API key clientId, with scopes already checked.
+func issueTokens(user models.User, clientId, scopes string, stay bool) (*AuthTokens, *AuthError) {
 	accessToken, err := generateToken(TokenTypeAccess, user.Uuid, clientId, scopes, "", stay, config.AppConfig.AccessTokenLifetime)
 	if err != nil {
 		return nil, authError(http.StatusInternalServerError, ErrorUnknown, err.Error())

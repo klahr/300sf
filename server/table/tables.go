@@ -10,6 +10,7 @@ const (
 	Emails                 = "emails"
 	Genders                = "genders"
 	Lists                  = "lists"
+	OauthClients           = "oauth_clients"
 	ListTemplates          = "list_templates"
 	ListReports            = "list_reports"
 	ListTemplateSpecies    = "list_template_species"

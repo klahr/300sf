@@ -60,6 +60,28 @@ documented at `/docs` (`site/static/swagger.yaml`).
 - After 10 failed sign-ins for an email address, sign-in is refused for 15
   minutes.
 
+### Connected apps (OAuth and MCP)
+
+AI assistants such as Claude connect to an account with OAuth 2.1 and use it
+through the MCP endpoint, `/mcp` (`mcp.go`, tools in `mcp_tools.go`). The
+server is its own authorization server (`controllers/oauth.go`): apps find it
+from `/mcp`'s 401 challenge and the `/.well-known/oauth-*` metadata, register
+themselves (`POST /oauth/register`), send the user to `/oauth/authorize` (a
+page of the website, which answers through `/api/v1/oauth/approve` with the
+website session) and get tokens with PKCE from `POST /oauth/token`.
+
+- Approving makes a connection: an API key of the user's own, linked to the
+  app (`api_keys.oauth_client_id`), whose secret nobody knows. Its tokens are
+  the API's usual ones, so revoking the key in Settings disconnects the app at
+  once, and the key's call limit and scopes apply. Apps get `read` or `user`,
+  never `admin`.
+- Codes live 2 minutes in Redis, stored by hash, and work once.
+- MCP is stateless. Tools call the API in-process with the caller's token, so
+  they pass the same middleware as any API call; a `read` token is offered no
+  tools that change anything.
+- The app's name is chosen by whoever registers it, so the consent page also
+  shows the host the user is sent back to.
+
 The app (`/api/v1/...`) never handles tokens. The server adds the app's API
 key (`site.client-id`/`site.client-secret`) on sign-in and keeps the tokens in
 `HttpOnly`, `Secure`, `SameSite=Strict` cookies: the access token is sent only

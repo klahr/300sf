@@ -1336,3 +1336,25 @@ DELETE u1 FROM `300sf`.`announcement_users` u1 JOIN `300sf`.`announcement_users`
 ON u1.announcement_id = u2.announcement_id AND u1.user_id = u2.user_id AND u1.id > u2.id;
 ALTER TABLE `300sf`.`announcement_users`
 ADD UNIQUE INDEX `announcement_user_UNIQUE` (`announcement_id` ASC, `user_id` ASC) VISIBLE;
+
+-- Apps that connect to accounts with OAuth (such as Claude). They register
+-- themselves; each user who lets one in gets an API key of their own for it.
+CREATE TABLE `300sf`.`oauth_clients` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `timestamp` DATETIME NOT NULL,
+  `uuid` VARCHAR(32) NOT NULL,
+  `client_id` VARCHAR(32) NOT NULL,
+  `name` VARCHAR(128) NOT NULL,
+  `redirect_uris` TEXT NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) VISIBLE,
+  UNIQUE INDEX `client_id_UNIQUE` (`client_id` ASC) VISIBLE);
+
+ALTER TABLE `300sf`.`api_keys`
+ADD COLUMN `oauth_client_id` INT NULL AFTER `revoked_at`,
+ADD INDEX `oauth_client_idx` (`oauth_client_id` ASC, `user_id` ASC) VISIBLE,
+ADD CONSTRAINT `fk_api_keys_oauth_client`
+  FOREIGN KEY (`oauth_client_id`)
+  REFERENCES `300sf`.`oauth_clients` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;

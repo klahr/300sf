@@ -66,11 +66,12 @@ func apiHeaders(c *gin.Context) {
 		return
 	}
 	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-	c.Writer.Header().Set("Access-Control-Allow-Headers", "Authorization,Content-Type,X-App-Version,X-App-Language")
+	c.Writer.Header().Set("Access-Control-Allow-Headers", "Authorization,Content-Type,X-App-Version,X-App-Language,Mcp-Protocol-Version,Mcp-Session-Id,Last-Event-ID")
 	c.Writer.Header().Set("Content-Type", "application/json")
 	c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
-	// So other sites' clients can name the CSV export like the server does.
-	c.Writer.Header().Set("Access-Control-Expose-Headers", "Content-Disposition")
+	// So other sites' clients can name the CSV export like the server does,
+	// and browser-based MCP clients can find how to sign in.
+	c.Writer.Header().Set("Access-Control-Expose-Headers", "Content-Disposition,WWW-Authenticate,Mcp-Session-Id")
 
 	if c.Request.Method == "OPTIONS" {
 		c.AbortWithStatus(http.StatusNoContent)
@@ -97,7 +98,9 @@ func newRouter(web *site.Site) *gin.Engine {
 	r.Use(dbErrors)
 
 	SetupRoutes(r, controllers.Auth, controllers.AuthLogout)
-	SetupRoutes(r.Group("/api", web.AppSession), web.AppSignIn, web.AppSignOut)
+	app := r.Group("/api", web.AppSession)
+	SetupRoutes(app, web.AppSignIn, web.AppSignOut)
+	setupConnectRoutes(r, app)
 	web.Register(r)
 	return r
 }

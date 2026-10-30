@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="{{.Lang}}">
+
+<head>
+	{{template "app-head" .}}
+	<meta name="referrer" content="no-referrer">
+	<style nonce="{{$.Nonce}}">
+		.authorize { max-width: 440px; margin: 48px auto 16px; max-height: none; padding: 24px; box-sizing: border-box; border-radius: 16px; background-color: var(--surface-raised); }
+		.authorize #consent > p:first-child { margin-top: 16px; }
+		.authorize h1 { margin-top: 8px; }
+		.authorize ul { padding-left: 20px; }
+		.authorize .actions { display: flex; gap: 8px; margin-top: 16px; }
+		.authorize .actions button { flex: 1; }
+		.authorize .error { color: var(--error-color); }
+		.authorize [hidden] { display: none !important; }
+		.authorize form > input { display: block; width: 100%; box-sizing: border-box; margin-bottom: 8px; }
+	</style>
+</head>
+
+<body>
+	<div id="root" class="background">
+		<div class="surface authorize">
+			<a href="/"><img style="border-radius: 50%;" width="64" src="/img/birds-256.png" alt="" /></a>
+			{{if .Problem}}
+			<h1>{{.T.InvalidTitle}}</h1>
+			<p>{{.T.InvalidText}}</p>
+			<p><small>{{.Problem}}</small></p>
+			{{else}}
+			<h1>{{.AppName}}</h1>
+			<p>{{.T.WantsAccess}}</p>
+			<p><small>{{.T.SentBackTo}} <strong>{{.AppHost}}</strong></small></p>
+
+			<form id="sign-in" hidden>
+				<h3>{{.T.SignInFirst}}</h3>
+				<input id="email" type="email" autocomplete="username" placeholder="{{.T.Email}}" required>
+				<input id="password" type="password" autocomplete="current-password" placeholder="{{.T.Password}}" required>
+				<p id="sign-in-error" class="error" hidden>{{.T.SignInFailed}}</p>
+				<div class="actions"><button id="sign-in-button" type="submit">{{.T.SignIn}}</button></div>
+			</form>
+
+			<div id="consent" hidden>
+				<p>{{.T.ItCan}}</p>
+				<ul>
+					<li>{{.T.Read}}</li>
+				</ul>
+				{{if .AsksToChange}}
+				<div class="check-row">
+					<input id="allow-changes" type="checkbox" checked>
+					<label for="allow-changes">{{.T.AllowChanges}}</label>
+				</div>
+				{{end}}
+				<p><small>{{.T.Disconnect}}</small></p>
+				<p id="approve-error" class="error" hidden></p>
+				<div class="actions">
+					<button id="deny" class="secondary" type="button">{{.T.Deny}}</button>
+					<button id="allow" type="button">{{.T.Allow}}</button>
+				</div>
+			</div>
+			{{end}}
+		</div>
+	</div>
+	{{if not .Problem}}
+	<script nonce="{{$.Nonce}}">
+		(function () {
+			const request = {{.Request}};
+			const signInForm = document.getElementById("sign-in");
+			const consent = document.getElementById("consent");
+			const approveError = document.getElementById("approve-error");
+			const allowChanges = document.getElementById("allow-changes");
+			const buttons = [document.getElementById("allow"), document.getElementById("deny")];
+
+			// The app's session cookies are sent along; X-Requested-With is
+			// what /api asks of every write, which other sites can't send.
+			function post(path, body) {
+				return fetch("/api/v1/" + path, {
+					method: "POST",
+					credentials: "same-origin",
+					headers: { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest" },
+					body: JSON.stringify(body),
+				});
+			}
+
+			function show(signIn) {
+				signInForm.hidden = !signIn;
+				consent.hidden = signIn;
+			}
+
+			// As the app does, so it starts signed in afterwards.
+			function remember(data) {
+				try {
+					localStorage.setItem("lang", JSON.stringify({ value: data.lang }));
+					localStorage.setItem("scope", JSON.stringify({ value: data.scope }));
+				} catch (e) { }
+			}
+
+			function answer(allow, retried) {
+				buttons.forEach(function (b) { b.disabled = true; });
+				approveError.hidden = true;
+				const body = Object.assign({}, request, { allow: allow, allow_changes: !!(allowChanges && allowChanges.checked) });
+				post("oauth/approve", body).then(function (r) {
+					if (r.status === 401 && !retried) {
+						// The access token may have run out: refresh it once.
+						return post("auth", { grant_type: "refresh_token" }).then(function (rr) {
+							if (rr.ok) {
+								return rr.json().then(function (data) { remember(data); answer(allow, true); });
+							}
+							buttons.forEach(function (b) { b.disabled = false; });
+							show(true);
+						});
+					}
+					return r.json().then(function (data) {
+						if (r.ok && data.redirect) {
+							window.location.assign(data.redirect);
+							return;
+						}
+						if (r.status === 401) {
+							buttons.forEach(function (b) { b.disabled = false; });
+							show(true);
+							return;
+						}
+						approveError.textContent = (data && data.message) || {{.T.Failed}};
+						approveError.hidden = false;
+						buttons.forEach(function (b) { b.disabled = false; });
+					});
+				}).catch(function () {
+					approveError.textContent = {{.T.Failed}};
+					approveError.hidden = false;
+					buttons.forEach(function (b) { b.disabled = false; });
+				});
+			}
+
+			document.getElementById("allow").addEventListener("click", function () { answer(true, false); });
+			document.getElementById("deny").addEventListener("click", function () { answer(false, false); });
+
+			signInForm.addEventListener("submit", function (e) {
+				e.preventDefault();
+				const button = document.getElementById("sign-in-button");
+				const failed = document.getElementById("sign-in-error");
+				button.disabled = true;
+				failed.hidden = true;
+				post("auth", {
+					grant_type: "password",
+					email: document.getElementById("email").value,
+					password: document.getElementById("password").value,
+					scopes: ["user", "admin"],
+				}).then(function (r) {
+					button.disabled = false;
+					if (!r.ok) {
+						failed.hidden = false;
+						return;
+					}
+					return r.json().then(function (data) { remember(data); show(false); });
+				}).catch(function () {
+					button.disabled = false;
+					failed.hidden = false;
+				});
+			});
+
+			// sf_session is the app's readable sign of a session.
+			show(!/(^|;\s*)sf_session=/.test(document.cookie));
+		})();
+	</script>
+	{{end}}
+</body>
+
+</html>

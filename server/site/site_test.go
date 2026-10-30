@@ -407,3 +407,47 @@ func TestPagesCarryScriptNonce(t *testing.T) {
 		}
 	}
 }
+
+func TestAuthorizePage(t *testing.T) {
+	s, r := newTestSite(t, config.Site{})
+	var asked controllers.AuthorizeRequest
+	check := controllers.AuthorizeCheck{
+		Client:  models.OauthClient{Name: `Claude <script>alert(1)</script>`},
+		AppHost: "claude.ai", AsksToChange: true,
+	}
+	s.authorize = func(r controllers.AuthorizeRequest) controllers.AuthorizeCheck {
+		asked = r
+		return check
+	}
+
+	w := get(r, "300sf.se", "/oauth/authorize?client_id=abc&state=x%22y&code_challenge=c&code_challenge_method=S256&lang=en")
+	body := w.Body.String()
+	if w.Code != http.StatusOK || asked.ClientId != "abc" || asked.State != `x"y` {
+		t.Fatalf("authorize = %d, asked %+v", w.Code, asked)
+	}
+	// The app's name is its own word, so it must not become markup.
+	if strings.Contains(body, "<script>alert(1)") || !strings.Contains(body, "Claude &lt;script&gt;") {
+		t.Error("the app's name is not escaped")
+	}
+	if !strings.Contains(body, "claude.ai") || !strings.Contains(body, `id="allow-changes"`) || !strings.Contains(body, `"client_id":"abc"`) {
+		t.Errorf("page lacks the app's host, the changes checkbox or the request:\n%s", body)
+	}
+	if !strings.Contains(w.Header().Get("Content-Security-Policy"), "frame-ancestors 'none'") {
+		t.Error("the page can be framed")
+	}
+
+	check.AsksToChange = false
+	if body := get(r, "300sf.se", "/oauth/authorize?client_id=abc").Body.String(); strings.Contains(body, `id="allow-changes"`) {
+		t.Error("a read-only request is offered changes")
+	}
+
+	check.ErrorRedirect = "https://claude.ai/cb?error=invalid_request"
+	if w := get(r, "300sf.se", "/oauth/authorize?client_id=abc"); w.Code != http.StatusFound || w.Header().Get("Location") != check.ErrorRedirect {
+		t.Errorf("a bad request is not sent back to the app: %d %s", w.Code, w.Header().Get("Location"))
+	}
+
+	check = controllers.AuthorizeCheck{Problem: "unknown client_id"}
+	if w := get(r, "300sf.se", "/oauth/authorize?client_id=nope&lang=en"); w.Code != http.StatusBadRequest || !strings.Contains(w.Body.String(), "Can&#39;t connect the app") || strings.Contains(w.Body.String(), "oauth/approve") {
+		t.Errorf("an unknown app = %d:\n%s", w.Code, w.Body.String())
+	}
+}

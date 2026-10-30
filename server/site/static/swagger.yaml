@@ -72,6 +72,29 @@ info:
     **429** `{"message": "too many calls on api key", "code": 3004}`. Some routes have their own throttles
     (sign-up, password reset, contact, analyze, zone search, …), answered with 429 code `7003`.
 
+    ## Connecting apps (OAuth and MCP)
+
+    AI assistants such as Claude use an account through the **MCP endpoint** `POST /mcp` (Model Context Protocol,
+    Streamable HTTP, stateless). Users add it in the assistant as a custom connector with the address
+    `https://<this server>/mcp`; nothing else is needed. The assistant then connects with **OAuth 2.1**:
+
+    1. `/mcp` answers a request without a token with **401** and
+       `WWW-Authenticate: Bearer resource_metadata="…/.well-known/oauth-protected-resource/mcp"`, which names this
+       server as the authorization server (`/.well-known/oauth-authorization-server`).
+    2. The app registers itself on `POST /oauth/register` (RFC 7591) and gets a `client_id`. Apps are public
+       clients: no secret, **PKCE with S256** is required. Redirect URIs must be `https`, or `http` on localhost.
+    3. It sends the user to `/oauth/authorize`, a page where they sign in, see the app's name and where they will
+       be sent back to, and choose whether it may only read (`read`) or also change things (`user`).
+    4. It swaps the code for tokens on `POST /oauth/token`, and refreshes them there (refresh tokens are single use,
+       as on `/v1/auth`).
+
+    Approving makes a **connection**: an API key of the user's own for that app (`connected: true` in
+    `GET /v1/api_keys/list`), so the app has its own call limit and the user disconnects it by revoking that key.
+    The tokens are ordinary access tokens and work on `/v1` as well. Admin access is never given to an app.
+
+    `/mcp` also takes an access token from an API key. The tools follow the token's scopes: with only `read`, none
+    that change anything are offered.
+
     ## Conventions
 
     - **Envelopes differ per route.** Some return the object itself (bare), some `{"result": …}`, some
@@ -162,8 +185,178 @@ tags:
   - name: Admin
     description: Invites, emails and translations. All admin only.
   - name: Health
+  - name: Connect
+    description: OAuth for apps that connect to accounts, and the MCP endpoint they use.
 
 paths:
+  /mcp:
+    post:
+      tags: [Connect]
+      summary: MCP endpoint
+      description: |
+        Model Context Protocol over Streamable HTTP, stateless, answering with JSON (`Accept: application/json,
+        text/event-stream`). Tools: `whoami`, `list_checklists`, `get_checklist`, `list_sightings`, `get_sighting`,
+        `search_species`, `get_species`, `list_competitions`, `get_competition`, `compare_checklists`, `list_labels`,
+        `list_checklist_templates` and `list_sighting_options`; with the `user` scope also `add_sighting`,
+        `update_sighting`, `delete_sighting`, `add_sighting_to_checklist`, `remove_sighting_from_checklist` and
+        `create_checklist`. Tool calls count towards the key's call limit like the API calls they make.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: A JSON-RPC 2.0 message.
+            example: {"jsonrpc": "2.0", "id": 1, "method": "tools/list"}
+      responses:
+        "200":
+          description: The JSON-RPC answer.
+          content:
+            application/json:
+              schema:
+                type: object
+        "401":
+          description: >-
+            No valid token, or the app was disconnected. `WWW-Authenticate` names the resource metadata to start
+            OAuth from.
+        "403":
+          description: The token has neither the `user` nor the `read` scope.
+  /.well-known/oauth-protected-resource/mcp:
+    get:
+      tags: [Connect]
+      summary: Resource metadata of /mcp (RFC 9728)
+      description: Also served at `/.well-known/oauth-protected-resource`.
+      security: []
+      responses:
+        "200":
+          description: Bare object.
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                resource: "https://300sf.se/mcp"
+                authorization_servers: ["https://300sf.se"]
+                scopes_supported: [read, user]
+                bearer_methods_supported: [header]
+  /.well-known/oauth-authorization-server:
+    get:
+      tags: [Connect]
+      summary: Authorization server metadata (RFC 8414)
+      security: []
+      responses:
+        "200":
+          description: Bare object with the endpoints, `S256` PKCE, public clients and the scopes `read` and `user`.
+          content:
+            application/json:
+              schema:
+                type: object
+  /oauth/register:
+    post:
+      tags: [Connect]
+      summary: Register an app (RFC 7591)
+      description: |
+        No token needed; throttled to 20 an hour per client IP. Only `client_name` (shown to users, at most 128
+        characters) and `redirect_uris` (1–10; `https`, or `http` on localhost) are used. Apps are always public
+        clients (`token_endpoint_auth_method: none`).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [redirect_uris]
+              properties:
+                client_name:
+                  type: string
+                  example: Claude
+                redirect_uris:
+                  type: array
+                  items:
+                    type: string
+                  example: ["https://claude.ai/api/mcp/auth_callback"]
+      responses:
+        "201":
+          description: The app's registration, with its `client_id`.
+          content:
+            application/json:
+              schema:
+                type: object
+        "400":
+          description: "`{\"error\": \"invalid_redirect_uri\" | \"invalid_client_metadata\", \"error_description\": …}`"
+        "429":
+          description: Too many registrations.
+  /oauth/token:
+    post:
+      tags: [Connect]
+      summary: Get or refresh tokens
+      description: |
+        `grant_type=authorization_code` takes `code`, `client_id`, `redirect_uri` and `code_verifier`; codes last 2
+        minutes and work once. `grant_type=refresh_token` takes `refresh_token` and `client_id`; it only takes refresh
+        tokens of a connection, from the app it belongs to. Errors are `{"error": …, "error_description": …}` with 400
+        (`invalid_grant`, `unsupported_grant_type`).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [grant_type]
+              properties:
+                grant_type:
+                  type: string
+                  enum: [authorization_code, refresh_token]
+                code:
+                  type: string
+                client_id:
+                  type: string
+                redirect_uri:
+                  type: string
+                code_verifier:
+                  type: string
+                refresh_token:
+                  type: string
+      responses:
+        "200":
+          description: The tokens.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+                  expires_in:
+                    type: integer
+                  refresh_token:
+                    type: string
+                  scope:
+                    type: string
+                    example: user
+        "400":
+          description: See above.
+  /oauth/revoke:
+    post:
+      tags: [Connect]
+      summary: End a session (RFC 7009)
+      description: Revokes a refresh token (`token`, form encoded). Always 200.
+      security: []
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+      responses:
+        "200":
+          description: Done, or nothing to do.
   /health:
     get:
       tags: [Health]
@@ -4202,6 +4395,9 @@ components:
         website:
           type: boolean
           description: The key the website signs in with; cannot be revoked.
+        connected:
+          type: boolean
+          description: A connection to an app the user approved with OAuth. Revoking it disconnects the app.
     AuthRequest:
       type: object
       required: [grant_type]

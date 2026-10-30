@@ -5,6 +5,23 @@
 // The user's own API keys, for scripts and other clients of the API.
 function openApiKeysPopUp(closeCallback: () => void = function () { }): void {
 	const sheet = new Ui.Sheet({ title: App.translations.ApiKeys, size: "tall" });
+	// Assistants such as Claude connect with OAuth on their own; they only need the address.
+	const assistant = sheet.section(App.translations.ConnectAssistant);
+	const hint = document.createElement("p");
+	hint.textContent = App.translations.ConnectAssistantHint;
+	assistant.appendChild(hint);
+	const mcpUrl = new Ui.Input("text");
+	mcpUrl.value = window.location.origin + "/mcp";
+	(mcpUrl.container as HTMLInputElement).readOnly = true;
+	assistant.appendChild(mcpUrl.container);
+	const copyUrl = Ui.actionButton(App.translations.Copy, "content_copy", "inline");
+	assistant.appendChild(copyUrl);
+	copyUrl.addEventListener("click", function () {
+		navigator.clipboard.writeText(mcpUrl.value).then(function () {
+			new Ui.Toast(App.translations.Copied, "", null, "var(--success-color)", function () { });
+		});
+	});
+
 	const keys = Admin.list(sheet.section());
 
 	const created = sheet.section();
@@ -52,7 +69,14 @@ function openApiKeysPopUp(closeCallback: () => void = function () { }): void {
 			keys.innerHTML = "";
 			(data.api_keys as Array<Models.ApiKey>).forEach(k => {
 				const revoked = Utils.isValidDate(k.revoked_at as any);
-				const meta = revoked ? App.translations.Revoked + " " + Utils.toYYYY_MM_DD(k.revoked_at as any) : k.website ? App.translations.UsedByWebsite : App.translations.ClientId + " " + k.client_id + " · " + k.scopes;
+				let meta = App.translations.ClientId + " " + k.client_id + " · " + k.scopes;
+				if (revoked) {
+					meta = App.translations.Revoked + " " + Utils.toYYYY_MM_DD(k.revoked_at as any);
+				} else if (k.website) {
+					meta = App.translations.UsedByWebsite;
+				} else if (k.connected) {
+					meta = App.translations.ConnectedApp + " · " + (k.scopes.split(" ").includes("user") ? App.translations.CanChange : App.translations.ApiKeyReadOnly);
+				}
 				const r = Admin.row(keys, k.name + " (" + k.prefix + ")", meta, null);
 				if (revoked) {
 					r.classList.add("archived");

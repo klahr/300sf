@@ -100,10 +100,7 @@ func createApiKey(c *gin.Context, user models.User, name string, requested []str
 	slices.Sort(requested)
 	scopes := strings.Join(slices.Compact(requested), " ")
 
-	// Rate limits are per key, so unlimited keys would mean no limit at all.
-	var active int64
-	models.DB.Model(&models.ApiKey{}).Where("user_id=?", user.Id).Where("revoked_at IS NULL").Count(&active)
-	if active >= maxApiKeysPerUser {
+	if tooManyApiKeys(user.Id) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    ErrorTooManyApiKeys,
 			"message": "too many api keys, revoke one first",
@@ -111,25 +108,7 @@ func createApiKey(c *gin.Context, user models.User, name string, requested []str
 		return
 	}
 
-	originalKey := utils.RandomSha256()
-	hashedOriginalKey := utils.ComputeHmac256(originalKey, config.AppConfig.HashingSecret)
-
-	prefix := utils.GenerateUuidWithFixedLength(7)
-	apiKey := models.ApiKey{
-		Model: models.Model{
-			Timestamp: time.Now(),
-			Uuid:      utils.GenerateShortUuid(),
-		},
-		Name:      name,
-		ClientId:  utils.GenerateUuidWithFixedLength(32),
-		Prefix:    prefix,
-		Hash:      hashedOriginalKey,
-		UserId:    user.Id,
-		SoftLimit: config.AppConfig.DefaultApiSoftLimit,
-		HardLimit: config.AppConfig.DefaultApiHardLimit,
-		Scopes:    scopes,
-	}
-
+	apiKey, originalKey := newApiKey(user.Id, name, scopes)
 	if err := models.DB.Create(&apiKey).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
@@ -145,11 +124,38 @@ func createApiKey(c *gin.Context, user models.User, name string, requested []str
 		Scopes   string `json:"scopes"`
 	}
 	c.JSON(http.StatusOK, response{
-		ApiKey:   prefix + "." + originalKey,
+		ApiKey:   apiKey.Prefix + "." + originalKey,
 		ClientId: apiKey.ClientId,
-		Prefix:   prefix,
+		Prefix:   apiKey.Prefix,
 		Scopes:   scopes,
 	})
+}
+
+// tooManyApiKeys tells whether the user has as many active keys as allowed.
+// Rate limits are per key, so unlimited keys would mean no limit at all.
+func tooManyApiKeys(userId int64) bool {
+	var active int64
+	models.DB.Model(&models.ApiKey{}).Where("user_id=?", userId).Where("revoked_at IS NULL").Count(&active)
+	return active >= maxApiKeysPerUser
+}
+
+// newApiKey makes an unsaved key for the user, and its secret.
+func newApiKey(userId int64, name, scopes string) (models.ApiKey, string) {
+	originalKey := utils.RandomSha256()
+	return models.ApiKey{
+		Model: models.Model{
+			Timestamp: time.Now(),
+			Uuid:      utils.GenerateShortUuid(),
+		},
+		Name:      name,
+		ClientId:  utils.GenerateUuidWithFixedLength(32),
+		Prefix:    utils.GenerateUuidWithFixedLength(7),
+		Hash:      utils.ComputeHmac256(originalKey, config.AppConfig.HashingSecret),
+		UserId:    userId,
+		SoftLimit: config.AppConfig.DefaultApiSoftLimit,
+		HardLimit: config.AppConfig.DefaultApiHardLimit,
+		Scopes:    scopes,
+	}, originalKey
 }
 
 func ApiKeysList(c *gin.Context) {
@@ -171,6 +177,7 @@ func ApiKeysList(c *gin.Context) {
 
 	for i := range apiKeys {
 		apiKeys[i].Website = apiKeys[i].ClientId == config.AppConfig.Site.ClientId
+		apiKeys[i].Connected = apiKeys[i].OauthClientId.Valid
 	}
 
 	type response struct {

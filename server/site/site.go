@@ -55,8 +55,9 @@ type Site struct {
 	templates *template.Template
 	landing   map[string]map[string]any
 	// Overridable in tests.
-	compare func(uuids []string) (*controllers.CompareResult, error)
-	stats   func() (*controllers.SiteStats, error)
+	compare   func(uuids []string) (*controllers.CompareResult, error)
+	stats     func() (*controllers.SiteStats, error)
+	authorize func(controllers.AuthorizeRequest) controllers.AuthorizeCheck
 
 	statsMu   sync.Mutex
 	statsAt   time.Time
@@ -70,7 +71,7 @@ func New(cfg config.Site, files fs.FS) (*Site, error) {
 	if files == nil {
 		files = embedded
 	}
-	s := &Site{files: files, cfg: cfg, landing: map[string]map[string]any{}, compare: controllers.CompareLists, stats: controllers.GetSiteStats}
+	s := &Site{files: files, cfg: cfg, landing: map[string]map[string]any{}, compare: controllers.CompareLists, stats: controllers.GetSiteStats, authorize: controllers.CheckAuthorizeRequest}
 
 	funcs := template.FuncMap{
 		"year":   func() int { return time.Now().Year() },
@@ -140,6 +141,7 @@ func (s *Site) Register(r *gin.Engine) {
 	r.GET("/terms", s.page("terms"))
 	r.GET("/privacy-policy", s.page("privacy-policy"))
 	r.GET("/compare", s.comparePage)
+	r.GET("/oauth/authorize", s.authorizePage)
 }
 
 // The app's session lives in cookies the page's JavaScript can't read:
@@ -257,9 +259,14 @@ func hostname(c *gin.Context) string {
 	return host
 }
 
-// IsAPIPath reports whether path belongs to the API rather than the websites.
+// IsAPIPath reports whether path belongs to the API rather than the websites:
+// with OAuth and MCP, which apps call, but not /oauth/authorize, a page.
 func IsAPIPath(path string) bool {
-	return strings.HasPrefix(path, "/v1/") || strings.HasPrefix(path, "/api/") || path == "/health"
+	switch path {
+	case "/health", "/mcp", "/oauth/register", "/oauth/token", "/oauth/revoke":
+		return true
+	}
+	return strings.HasPrefix(path, "/v1/") || strings.HasPrefix(path, "/api/") || strings.HasPrefix(path, "/.well-known/oauth-")
 }
 
 // Redirect sends pages on the old hosts (app.300sf.se, api-docs.300sf.se, ...)
@@ -446,6 +453,88 @@ func (s *Site) comparePage(c *gin.Context) {
 	}
 	lang := language(c, []string{"sv", "en", "de"}, "sv")
 	s.render(c, http.StatusOK, "compare.html", gin.H{"Lang": lang, "Title": appNames[lang], "Data": result})
+}
+
+// authorizeTexts are the words of the page where users let an app into
+// their account.
+var authorizeTexts = map[string]map[string]string{
+	"en": {
+		"WantsAccess":  "This app wants to use your 300 Swedish Birds account.",
+		"SentBackTo":   "After you answer you are sent back to",
+		"SignInFirst":  "Sign in to continue",
+		"Email":        "Email",
+		"Password":     "Password",
+		"SignIn":       "Sign in",
+		"SignInFailed": "Wrong email or password.",
+		"ItCan":        "It will be able to:",
+		"Read":         "See your profile, checklists, sightings, labels and competitions",
+		"AllowChanges": "Also add, change and delete sightings and checklists",
+		"Disconnect":   "You can disconnect it at any time under Settings → API keys.",
+		"Allow":        "Allow",
+		"Deny":         "Deny",
+		"Failed":       "Something went wrong, try again.",
+		"InvalidTitle": "Can't connect the app",
+		"InvalidText":  "The link that brought you here is not valid. Try connecting again from the app.",
+	},
+	"sv": {
+		"WantsAccess":  "Appen vill använda ditt konto på 300 Svenska Fåglar.",
+		"SentBackTo":   "När du har svarat skickas du tillbaka till",
+		"SignInFirst":  "Logga in för att fortsätta",
+		"Email":        "E-post",
+		"Password":     "Lösenord",
+		"SignIn":       "Logga in",
+		"SignInFailed": "Fel e-post eller lösenord.",
+		"ItCan":        "Den kommer att kunna:",
+		"Read":         "Se din profil, dina listor, observationer, etiketter och tävlingar",
+		"AllowChanges": "Även lägga till, ändra och ta bort observationer och listor",
+		"Disconnect":   "Du kan koppla från den när som helst under Inställningar → API-nycklar.",
+		"Allow":        "Tillåt",
+		"Deny":         "Neka",
+		"Failed":       "Något gick fel, försök igen.",
+		"InvalidTitle": "Appen kan inte anslutas",
+		"InvalidText":  "Länken du kom hit med är inte giltig. Försök ansluta igen från appen.",
+	},
+	"de": {
+		"WantsAccess":  "Diese App möchte dein Konto bei 300 Schwedische Vögel verwenden.",
+		"SentBackTo":   "Nach deiner Antwort wirst du zurückgeschickt zu",
+		"SignInFirst":  "Melde dich an, um fortzufahren",
+		"Email":        "E-Mail",
+		"Password":     "Passwort",
+		"SignIn":       "Anmelden",
+		"SignInFailed": "Falsche E-Mail oder falsches Passwort.",
+		"ItCan":        "Sie kann dann:",
+		"Read":         "Dein Profil, deine Listen, Beobachtungen, Etiketten und Wettbewerbe sehen",
+		"AllowChanges": "Auch Beobachtungen und Listen hinzufügen, ändern und löschen",
+		"Disconnect":   "Du kannst sie jederzeit unter Einstellungen → API-Schlüssel trennen.",
+		"Allow":        "Erlauben",
+		"Deny":         "Ablehnen",
+		"Failed":       "Etwas ist schiefgelaufen, versuche es noch einmal.",
+		"InvalidTitle": "Die App kann nicht verbunden werden",
+		"InvalidText":  "Der Link, über den du hierher gekommen bist, ist ungültig. Verbinde dich erneut aus der App.",
+	},
+}
+
+// authorizePage is where an app sends users to let it into their account
+// (OAuth). The page signs them in if needed and sends their answer to
+// /api/v1/oauth/approve with their session; the server never takes an
+// answer from a link alone.
+func (s *Site) authorizePage(c *gin.Context) {
+	var r controllers.AuthorizeRequest
+	_ = c.ShouldBindQuery(&r)
+	check := s.authorize(r)
+	if check.ErrorRedirect != "" {
+		c.Redirect(http.StatusFound, check.ErrorRedirect)
+		return
+	}
+	lang := language(c, []string{"sv", "en", "de"}, "sv")
+	status := http.StatusOK
+	if check.Problem != "" {
+		status = http.StatusBadRequest
+	}
+	s.render(c, status, "authorize.html", gin.H{
+		"Lang": lang, "Title": appNames[lang], "T": authorizeTexts[lang], "Request": r,
+		"Problem": check.Problem, "AppName": check.Client.Name, "AppHost": check.AppHost, "AsksToChange": check.AsksToChange,
+	})
 }
 
 // assetURL names a static file as the current release has it.

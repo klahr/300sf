@@ -350,3 +350,22 @@ func setupPrivateRoutes(r gin.IRouter) {
 
 	r.POST("/v1/invite", apiKeyMiddleware, adminMiddleware, controllers.Invite)
 }
+
+// setupConnectRoutes lets apps such as Claude connect to accounts: OAuth
+// (controllers/oauth.go) and the MCP endpoint (mcp.go). Users approve apps
+// on /oauth/authorize, a page of the website, which answers through app, the
+// API with the website's session.
+func setupConnectRoutes(r *gin.Engine, app gin.IRouter) {
+	r.GET("/.well-known/oauth-authorization-server", controllers.OAuthServerMetadata)
+	r.GET("/.well-known/oauth-protected-resource", controllers.OAuthResourceMetadata)
+	r.GET("/.well-known/oauth-protected-resource/mcp", controllers.OAuthResourceMetadata)
+	r.POST("/oauth/register", controllers.OAuthRegister)
+	r.POST("/oauth/token", controllers.OAuthToken)
+	r.POST("/oauth/revoke", controllers.OAuthRevoke)
+	app.POST("/v1/oauth/approve", apiKeyMiddleware, basicMiddleware, controllers.OAuthApprove)
+
+	mcp := newMcpHandler(r)
+	r.POST("/mcp", mcp)
+	r.GET("/mcp", mcp)
+	r.DELETE("/mcp", mcp)
+}
