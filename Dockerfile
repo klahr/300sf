@@ -1,7 +1,7 @@
 # One image for everything: the API, the app and the landing page.
 
 # The app's TypeScript is compiled here; Node is not needed at runtime.
-FROM node:22-alpine AS frontend
+FROM node:25-alpine AS frontend
 WORKDIR /src/frontend
 COPY frontend/package*.json ./
 RUN npm ci
