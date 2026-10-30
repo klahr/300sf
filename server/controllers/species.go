@@ -3,7 +3,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -11,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
 	"github.com/klahr/300sf/server/config"
+	"github.com/klahr/300sf/server/log"
 	"github.com/klahr/300sf/server/models"
 	"github.com/klahr/300sf/server/table"
 	"github.com/klahr/300sf/server/utils"
@@ -40,7 +40,7 @@ func Species(c *gin.Context) {
 	name.Timestamp = time.Now()
 	name.Uuid = utils.GenerateShortUuid()
 	if err := tx.Create(&name).Error; err != nil {
-		fmt.Println(err)
+		log.Error(c, 0, err.Error())
 		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "could not insert translation",
@@ -51,7 +51,7 @@ func Species(c *gin.Context) {
 
 	var order models.Order
 	if err := tx.Where("uuid=?", r.OrderUuid).First(&order).Error; err != nil {
-		fmt.Println(err)
+		log.Error(c, 0, err.Error())
 		tx.Rollback()
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "could not find order",
@@ -72,7 +72,7 @@ func Species(c *gin.Context) {
 
 	if err := tx.Create(&species).Error; err != nil {
 		tx.Rollback()
-		fmt.Println(err)
+		log.Error(c, 0, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "could not insert species",
 			"code":    ErrorInsert,
@@ -89,7 +89,7 @@ func SpeciesList(c *gin.Context) {
 	var result []models.Species
 
 	if err := models.DB.Preload("Name").Preload("Order.Name").Find(&result).Error; err != nil {
-		fmt.Println(err)
+		log.Error(c, 0, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "species not found",
 			"code":    ErrorRecordNotFound,
@@ -114,7 +114,7 @@ func SpeciesSetRarity(c *gin.Context) {
 
 	var r request
 	if err := c.ShouldBindJSON(&r); err != nil {
-		fmt.Println(err)
+		log.Error(c, 0, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "could not parse request",
 			"code":    ErrorParse,
@@ -123,7 +123,6 @@ func SpeciesSetRarity(c *gin.Context) {
 	}
 
 	if r.Category != "a" && r.Category != "b" && r.Category != "c" && r.Category != "d" && r.Category != "e" && r.Category != "-" {
-		fmt.Println("invalid category")
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "invalid category",
 			"code":    ErrorRecordNotFound,
@@ -136,7 +135,7 @@ func SpeciesSetRarity(c *gin.Context) {
 
 	var species models.Species
 	if err := tx.Where("uuid=?", c.Param("uuid")).First(&species).Error; err != nil {
-		fmt.Println(err)
+		log.Error(c, 0, err.Error())
 		tx.Rollback()
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "could not find species",
@@ -147,7 +146,7 @@ func SpeciesSetRarity(c *gin.Context) {
 
 	var zone models.Zone
 	if err := tx.Where("uuid=?", r.ZoneUuid).First(&zone).Error; err != nil {
-		fmt.Println(err)
+		log.Error(c, 0, err.Error())
 		tx.Rollback()
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "could not find zone",
@@ -161,7 +160,7 @@ func SpeciesSetRarity(c *gin.Context) {
 		if r.Category == "-" {
 			if err := tx.Delete(&rarity).Error; err != nil {
 				tx.Rollback()
-				fmt.Println(err)
+				log.Error(c, 0, err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"message": "could not delete rarity",
 					"code":    ErrorDelete,
@@ -184,7 +183,7 @@ func SpeciesSetRarity(c *gin.Context) {
 		}
 		if err := tx.Create(&rarity).Error; err != nil {
 			tx.Rollback()
-			fmt.Println(err)
+			log.Error(c, 0, err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": "could not insert rarity",
 				"code":    ErrorInsert,
@@ -212,7 +211,7 @@ func SpeciesDetails(c *gin.Context) {
 	cached, err := models.Cache.Get(cacheKey).Result()
 	if err == redis.Nil {
 	} else if err != nil {
-		fmt.Println(err)
+		log.Error(c, 0, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "internal server error",
 			"code":    ErrorInternalServerError,
@@ -228,7 +227,7 @@ func SpeciesDetails(c *gin.Context) {
 	}
 
 	if err := models.DB.Where("uuid=?", c.Param("uuid")).Preload("Name").Preload("Order.Name").First(&result).Error; err != nil {
-		fmt.Println(err)
+		log.Error(c, 0, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "species not found",
 			"code":    ErrorRecordNotFound,

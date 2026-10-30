@@ -115,11 +115,13 @@ func (s *Site) Register(r *gin.Engine) {
 		if e.IsDir() {
 			sub, _ := fs.Sub(static, name)
 			files.StaticFS("/"+name, http.FS(sub))
-		} else if name != "sw.js" {
+		} else if name != "sw.js" && name != "robots.txt" && name != "sitemap.xml" {
 			files.StaticFileFS("/"+name, name, http.FS(static))
 		}
 	}
 	r.GET("/sw.js", s.serviceWorker)
+	r.GET("/robots.txt", s.robots)
+	r.GET("/sitemap.xml", s.sitemap)
 
 	r.GET("/", s.root)
 	r.GET("/landing", s.landingPage)
@@ -323,7 +325,7 @@ func (s *Site) render(c *gin.Context, status int, name string, data any) {
 
 func (s *Site) landingData(c *gin.Context, signedInGoesToApp bool) gin.H {
 	lang := language(c, []string{"en", "sv"}, "en")
-	return gin.H{"Lang": lang, "T": s.landing[lang], "SignedInGoesToApp": signedInGoesToApp, "Stats": s.siteStats()}
+	return gin.H{"Lang": lang, "T": s.landing[lang], "SignedInGoesToApp": signedInGoesToApp, "Stats": s.siteStats(), "SourceUrl": s.cfg.SourceUrl}
 }
 
 // siteStats are the landing page's community numbers, counted at most every 15 minutes. Nil when
@@ -373,7 +375,7 @@ func (s *Site) app(c *gin.Context, redirect string, query map[string]string) {
 		// html/template encodes this as JSON that is safe inside <script>.
 		"Boot": gin.H{
 			"language": lang, "redirect": redirect, "queryParameters": query, "version": Version,
-			"mapTiles": s.cfg.MapTiles, "mapAttribution": s.cfg.MapAttribution,
+			"mapTiles": s.cfg.MapTiles, "mapAttribution": s.cfg.MapAttribution, "sourceUrl": s.cfg.SourceUrl,
 		},
 	})
 }
@@ -453,4 +455,20 @@ func (s *Site) serviceWorker(c *gin.Context) {
 	body := strings.Replace(string(raw), `const VERSION = "dev";`, fmt.Sprintf("const VERSION = %q;", Version), 1)
 	c.Header("Cache-Control", "no-cache")
 	c.Data(http.StatusOK, "text/javascript; charset=utf-8", []byte(body))
+}
+
+// robots and sitemap name this installation's host, not 300sf.se.
+func (s *Site) robots(c *gin.Context) {
+	c.String(http.StatusOK, "User-agent: *\nAllow: /\nDisallow: /api/\nSitemap: https://%s/sitemap.xml\n", s.cfg.Host)
+}
+
+func (s *Site) sitemap(c *gin.Context) {
+	c.Header("Content-Type", "application/xml; charset=utf-8")
+	var b strings.Builder
+	b.WriteString(`<?xml version="1.0" encoding="UTF-8"?>` + "\n" + `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">` + "\n")
+	for _, path := range []string{"/", "/terms", "/privacy-policy", "/docs"} {
+		fmt.Fprintf(&b, "\t<url><loc>https://%s%s</loc></url>\n", s.cfg.Host, path)
+	}
+	b.WriteString("</urlset>\n")
+	c.String(http.StatusOK, b.String())
 }

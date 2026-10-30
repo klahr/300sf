@@ -16,6 +16,7 @@ wikipedia-cache-duration: 604800
 mailjet-public-key: ""
 mailjet-secret-key: ""
 send-email-interval: 0       # 0 disables the email sender
+contact-email: ""            # receives the app's contact form; empty turns the form off
 delete-accounts-interval: 0  # 0 disables account deletion job
 # Names the country, region and municipality of sightings in new places, from
 # OpenStreetMap. The public service allows at most 1 request a second for the
@@ -35,3 +36,6 @@ site:
   # https://operations.osmfoundation.org/policies/tiles/
   map-tiles: ""
   map-attribution: ""
+  # The AGPL asks you to offer your users the source of what runs here. This
+  # repository when empty; point it at your fork if you change the code.
+  source-url: ""

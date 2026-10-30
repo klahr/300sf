@@ -26,6 +26,13 @@ func Contact(c *gin.Context) {
 		return
 	}
 
+	if config.AppConfig.ContactEmail == "" {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"message": "the contact form is off",
+		})
+		return
+	}
+
 	if throttle(c, "contact/"+c.GetString("uuid"), 5, time.Hour) {
 		return
 	}
@@ -48,9 +55,8 @@ func Contact(c *gin.Context) {
 			Timestamp: time.Now(),
 			Uuid:      utils.GenerateShortUuid(),
 		},
-		// TODO: Config.
-		FromEmail:  "hej@300sf.se",
-		ToEmail:    "hej@300sf.se",
+		FromEmail:  config.AppConfig.ContactEmail,
+		ToEmail:    config.AppConfig.ContactEmail,
 		FromName:   user.DisplayName,
 		ToName:     "300sf",
 		Subject:    r.Subject,

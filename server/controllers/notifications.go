@@ -2,11 +2,11 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/klahr/300sf/server/log"
 	"github.com/klahr/300sf/server/models"
 	"github.com/klahr/300sf/server/utils"
 )
@@ -18,7 +18,7 @@ func NotificationsComment(c *gin.Context) {
 
 	var r request
 	if err := c.ShouldBindJSON(&r); err != nil {
-		fmt.Println(err)
+		log.Error(c, 0, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "could not parse request",
 			"code":    ErrorParse,

@@ -4,11 +4,13 @@
   "scripts": {
     "build": "tsc --build src/tsconfig-release.json && terser --compress --mangle -o ../server/site/static/js/app.js -- ../server/site/static/js/app.js",
     "dev": "tsc --build src/tsconfig-debug.json",
-    "typecheck": "tsc -p src/tsconfig-release.json --noEmit"
+    "typecheck": "tsc -p src/tsconfig-release.json --noEmit",
+    "translations": "cd translations && ./json2ts.sh en sv de > ../src/Translations.ts"
   },
   "dependencies": {},
   "devDependencies": {
     "terser": "^5.51.2",
     "typescript": "^5.9.3"
-  }
+  },
+  "license": "AGPL-3.0-or-later"
 }

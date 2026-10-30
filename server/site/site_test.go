@@ -27,6 +27,7 @@ var cfg = config.Site{
 	},
 	ClientId:     "web-client",
 	ClientSecret: "pfx.secret",
+	SourceUrl:    "https://example.org/fork",
 }
 
 func newTestSite(t *testing.T, c config.Site) (*Site, *gin.Engine) {
@@ -103,6 +104,9 @@ func TestLandingPage(t *testing.T) {
 	if !strings.Contains(landing, "Parus major") || strings.Contains(landing, "location.replace") {
 		t.Error("/landing should always show the landing page")
 	}
+	if !strings.Contains(landing, `href="https://example.org/fork"`) {
+		t.Error("the landing page should link the source code, as the AGPL requires")
+	}
 	if !strings.Contains(landing, `href="/sign-up"`) || strings.Contains(landing, "300sf.se") {
 		t.Error("landing links should stay on the same host")
 	}
@@ -161,6 +165,12 @@ func TestStaticFilesAndPages(t *testing.T) {
 		if w := get(r, "300sf.se", path); w.Code != http.StatusOK {
 			t.Errorf("GET %s = %d", path, w.Code)
 		}
+	}
+	if body := get(r, "300sf.se", "/robots.txt").Body.String(); !strings.Contains(body, "Sitemap: https://"+cfg.Host+"/sitemap.xml") {
+		t.Errorf("robots.txt should name the configured host: %q", body)
+	}
+	if body := get(r, "300sf.se", "/sitemap.xml").Body.String(); !strings.Contains(body, "<loc>https://"+cfg.Host+"/</loc>") {
+		t.Errorf("sitemap.xml should name the configured host: %q", body)
 	}
 	if w := get(r, "300sf.se", "/nope"); w.Code != http.StatusNotFound {
 		t.Errorf("unknown path = %d", w.Code)

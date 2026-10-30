@@ -39,6 +39,8 @@ class App implements IAppListener {
 	private mPages = new Array<Page>();
 	private static sUser: Models.User;
 	private static sVersion = "dev";
+	// Where to get the source of what runs here (site.source-url), which the AGPL asks us to offer.
+	public static sourceUrl = "https://github.com/klahr/300sf";
 
 	constructor(language: string, redirect: string, queryParameters: object, version: string) {
 		App.sVersion = version || "dev";

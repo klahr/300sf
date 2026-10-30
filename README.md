@@ -13,8 +13,9 @@ One Go server runs everything on one domain, 300sf.se — the landing page on
 | [`frontend/`](frontend/) | TypeScript source of the app; compiled into `server/site/static/js/` at build time |
 | [`deploy/`](deploy/) | `docker-compose.yml` and the reverse proxy setup |
 
-To run your own, see [`SELFHOSTING.md`](SELFHOSTING.md). To report a
-security problem, see [`SECURITY.md`](SECURITY.md).
+To run your own, see [`SELFHOSTING.md`](SELFHOSTING.md). To help, see
+[`CONTRIBUTING.md`](CONTRIBUTING.md). To report a security problem, see
+[`SECURITY.md`](SECURITY.md).
 
 ## Local development
 
@@ -74,9 +75,16 @@ setup.
 
 ## License
 
-300sf (server, web app and analyzer) is licensed under the GNU Affero
-General Public License v3.0 or later; see [`LICENSE`](LICENSE). If you run a
-modified version as a service, its users must be able to get its source.
+Copyright © 2022–2026 Angels' Ware.
+
+300sf (server, web app, analyzer and artwork: logo, icons and illustrations)
+is licensed under the GNU Affero General Public License v3.0 or later; see
+[`LICENSE`](LICENSE). If you run a
+modified version as a service, its users must be able to get its source. Set
+`site.source-url` to where they can; the app links it in its footer and Settings.
+
+The libraries, fonts and data it ships with are under their own licenses; see
+[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
 Sound identification uses the BirdNET model, which is licensed separately
 under CC BY-NC-SA 4.0 (non-commercial use only).

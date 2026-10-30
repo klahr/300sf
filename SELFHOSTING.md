@@ -97,12 +97,11 @@ Optional:
 Some things still say 300sf.se. Change them before you invite people:
 
 - the sender addresses in `server/email-templates/*/*.yml`
-- the contact form's address in `server/controllers/contact.go`
+- `contact-email` in the config, for the app's contact form (off when empty)
+- `site.source-url`, if you change the code: the AGPL requires offering your
+  users its source
 - the terms and privacy policy in `server/site/pages/`. These describe the
   300sf.se service, not yours.
-
-300sf is AGPL-3.0. If you change the code and run it for others, you must
-offer them its source.
 
 ## Upgrading
 

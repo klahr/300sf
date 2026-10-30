@@ -31,7 +31,10 @@ type App struct {
 	// municipality of sightings in places no zone covers yet. Empty disables
 	// it. See geocoder/ for the public service's usage policy.
 	GeocoderEndpoint string `yaml:"geocoder-endpoint"`
-	Site             Site   `yaml:"site"`
+	// Where the contact form's messages go, sent from this address too.
+	// Empty turns the form off.
+	ContactEmail string `yaml:"contact-email"`
+	Site         Site   `yaml:"site"`
 }
 
 // Site configures the websites served next to the API.
@@ -53,9 +56,13 @@ type Site struct {
 	// OpenStreetMap's when empty; set them to move to another tile service.
 	MapTiles       string `yaml:"map-tiles"`
 	MapAttribution string `yaml:"map-attribution"`
+	// Where visitors get the source of the code running here, which the
+	// AGPL requires: point it at your fork if you change the code.
+	SourceUrl string `yaml:"source-url"`
 }
 
 const (
+	defaultSourceUrl      = "https://github.com/klahr/300sf"
 	defaultMapTiles       = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
 	defaultMapAttribution = `&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors`
 )
@@ -63,6 +70,9 @@ const (
 func (c *App) Parse(data []byte) error {
 	if err := yaml.Unmarshal(data, c); err != nil {
 		return err
+	}
+	if c.Site.SourceUrl == "" {
+		c.Site.SourceUrl = defaultSourceUrl
 	}
 	if c.Site.MapTiles == "" {
 		c.Site.MapTiles = defaultMapTiles

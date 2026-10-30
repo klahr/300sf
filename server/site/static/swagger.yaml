@@ -1,19 +1,17 @@
 openapi: 3.0.3
 info:
-  title: "300sf Open API"
-  description: "Description"
-  version: 0.1.0
-contact:
-  name: "Joachim Klahr"
-  email: "joachim@300sf.se"
-license:
-  name: "AGPL-3.0-or-later"
-  url: "https://www.gnu.org/licenses/agpl-3.0.html"
+  title: "300sf API"
+  description: "Checklists, sightings, competitions and species for 300 Svenska Fåglar. Sign in with an API key and your password (POST /v1/auth), then send the access token as `Authorization: Bearer <token>`. This document is partial; the routes are in server/routes.go."
+  version: "1"
+  contact:
+    name: "300sf"
+    url: "https://github.com/klahr/300sf"
+  license:
+    name: "AGPL-3.0-or-later"
+    url: "https://www.gnu.org/licenses/agpl-3.0.html"
 servers:
-  - url: https://300sf.se
-    description: "Live server."
-  - url: http://localhost:8090
-    description: "Local development server."
+  - url: /
+    description: "This server"
 components:
   responses:
     GeneralErrorResponse:

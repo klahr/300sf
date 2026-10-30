@@ -193,7 +193,13 @@ class SettingsPage extends Page {
 
 		const version = document.createElement("p");
 		version.className = "details app-version";
-		version.textContent = App.translations.AppVersion.replace("{0}", App.version);
+		version.textContent = App.translations.AppVersion.replace("{0}", App.version) + " · ";
+		const source = document.createElement("a");
+		source.href = App.sourceUrl;
+		source.target = "_blank";
+		source.rel = "noopener";
+		source.textContent = App.translations.SourceCode;
+		version.appendChild(source);
 		this.container.appendChild(version);
 
 		// Zones are named from OpenStreetMap, whose licence asks for this.

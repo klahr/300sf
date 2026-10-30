@@ -28,6 +28,7 @@
 			function onAppStart() {
 				const boot = {{.Boot}};
 				Maps.configure(boot.mapTiles, boot.mapAttribution);
+				App.sourceUrl = boot.sourceUrl;
 				new App(boot.language, boot.redirect, boot.queryParameters, boot.version);
 			}
 

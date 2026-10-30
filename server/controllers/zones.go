@@ -4,7 +4,6 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -12,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/klahr/300sf/server/log"
 	"github.com/klahr/300sf/server/models"
 	"github.com/klahr/300sf/server/places"
 	"github.com/klahr/300sf/server/table"
@@ -32,7 +32,7 @@ func Zones(c *gin.Context) {
 
 	var r request
 	if err := c.ShouldBindJSON(&r); err != nil {
-		fmt.Println(err)
+		log.Error(c, 0, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "could not parse request",
 			"code":    ErrorParse,
@@ -73,7 +73,7 @@ func Zones(c *gin.Context) {
 	name.Timestamp = time.Now()
 	name.Uuid = utils.GenerateShortUuid()
 	if err := tx.Create(&name).Error; err != nil {
-		fmt.Println(err)
+		log.Error(c, 0, err.Error())
 		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "could not insert translation",

@@ -2,13 +2,13 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
 	"github.com/klahr/300sf/server/config"
+	"github.com/klahr/300sf/server/log"
 	"github.com/klahr/300sf/server/models"
 	"github.com/klahr/300sf/server/wikipedia"
 )
@@ -26,7 +26,7 @@ func OrderDetails(c *gin.Context) {
 	cached, err := models.Cache.Get(cacheKey).Result()
 	if err == redis.Nil {
 	} else if err != nil {
-		fmt.Println(err)
+		log.Error(c, 0, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "internal server error",
 			"code":    ErrorInternalServerError,
@@ -42,7 +42,7 @@ func OrderDetails(c *gin.Context) {
 	}
 
 	if err := models.DB.Where("uuid=?", c.Param("uuid")).Preload("Name").First(&result).Error; err != nil {
-		fmt.Println(err)
+		log.Error(c, 0, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "order not found",
 			"code":    ErrorRecordNotFound,
