@@ -6,6 +6,7 @@ namespace Models {
 		name: Translation;
 		species: Array<Species>;
 		color: string;
+		visibility: number;
 		from: Date;
 		until: Date;
 		template?: string;

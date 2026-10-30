@@ -41,6 +41,16 @@ func Lists(c *gin.Context) {
 		return
 	}
 
+	from, errFrom := parseListDate(r.From.String)
+	until, errUntil := parseListDate(r.Until.String)
+	if errFrom != nil || errUntil != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorParse,
+			"message": "from and until are YYYY-MM-DD or RFC 3339",
+		})
+		return
+	}
+
 	list, err := CreateList(r.Template, r.Name, r.Visibility, user, r.Color)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -49,12 +59,8 @@ func Lists(c *gin.Context) {
 		return
 	}
 
-	if r.From.Valid {
-		list.From = zero.TimeFrom(utils.Str2Time(r.From.String))
-	}
-	if r.Until.Valid {
-		list.Until = zero.TimeFrom(utils.Str2Time(r.Until.String))
-	}
+	list.From = from
+	list.Until = until
 
 	if err := models.DB.Create(&list).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -64,6 +70,22 @@ func Lists(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, list)
+}
+
+// parseListDate reads a list's from or until: a date, or a time in RFC 3339.
+// Empty is no date.
+func parseListDate(s string) (zero.Time, error) {
+	if s == "" {
+		return zero.Time{}, nil
+	}
+	if t, err := time.Parse(time.DateOnly, s); err == nil {
+		return zero.TimeFrom(t), nil
+	}
+	t, err := time.Parse(time.RFC3339, s)
+	if err != nil {
+		return zero.Time{}, err
+	}
+	return zero.TimeFrom(t), nil
 }
 
 func CreateList(template zero.String, name models.Translation, visibility int64, user models.User, color zero.String) (*models.List, error) {
@@ -314,6 +336,8 @@ func ListsColor(c *gin.Context) {
 	c.JSON(http.StatusNoContent, nil)
 }
 
+// ListsTimespan sets a list's from and until: a date or an RFC 3339 time,
+// "*" for none, and left as it is when empty.
 func ListsTimespan(c *gin.Context) {
 	type request struct {
 		From  zero.String `json:"from"`
@@ -328,11 +352,28 @@ func ListsTimespan(c *gin.Context) {
 		return
 	}
 
-	tx := models.DB.Begin()
-	defer tx.Rollback()
+	updates := map[string]interface{}{}
+	for column, value := range map[string]zero.String{"from": r.From, "until": r.Until} {
+		if !value.Valid {
+			continue
+		}
+		if value.String == "*" {
+			updates[column] = nil
+			continue
+		}
+		t, err := parseListDate(value.String)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    ErrorParse,
+				"message": "from and until are YYYY-MM-DD, RFC 3339 or *",
+			})
+			return
+		}
+		updates[column] = t
+	}
 
 	var user models.User
-	if err := tx.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
 			"message": err.Error(),
@@ -341,22 +382,15 @@ func ListsTimespan(c *gin.Context) {
 	}
 
 	var list models.List
-	if err := tx.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).First(&list).Error; err != nil {
+	if err := models.DB.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).First(&list).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
 		return
 	}
 
-	if r.From.Valid {
-		var err error
-		if r.From.String == "*" {
-			err = tx.Table(table.Lists).Where("id=?", list.Id).UpdateColumn("from", nil).Error
-		} else {
-			err = tx.Table(table.Lists).Where("id=?", list.Id).UpdateColumn("from", r.From.String).Error
-		}
-		if err != nil {
-			tx.Rollback()
+	if len(updates) > 0 {
+		if err := models.DB.Table(table.Lists).Where("id=?", list.Id).UpdateColumns(updates).Error; err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": err.Error(),
 			})
@@ -364,23 +398,47 @@ func ListsTimespan(c *gin.Context) {
 		}
 	}
 
-	if r.Until.Valid {
-		var err error
-		if r.Until.String == "*" {
-			err = tx.Table(table.Lists).Where("id=?", list.Id).UpdateColumn("until", nil).Error
-		} else {
-			err = tx.Table(table.Lists).Where("id=?", list.Id).UpdateColumn("until", r.Until.String).Error
-		}
-		if err != nil {
-			tx.Rollback()
-			c.JSON(http.StatusBadRequest, gin.H{
-				"message": err.Error(),
-			})
-			return
-		}
+	c.JSON(http.StatusNoContent, nil)
+}
+
+// ListsVisibility sets who can see a list: private, anyone with the link, or public.
+func ListsVisibility(c *gin.Context) {
+	type request struct {
+		Visibility int64 `json:"visibility"`
 	}
 
-	tx.Commit()
+	var r request
+	if err := c.ShouldBindJSON(&r); err != nil || r.Visibility < models.VisibilityPrivate || r.Visibility > models.VisibilityPublic {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorInvalidRequest,
+			"message": "visibility is 0, 1 or 2",
+		})
+		return
+	}
+
+	var user models.User
+	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var list models.List
+	if err := models.DB.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).First(&list).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if err := models.DB.Model(&list).UpdateColumn("visibility", r.Visibility).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
 
 	c.JSON(http.StatusNoContent, nil)
 }

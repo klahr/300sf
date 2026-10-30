@@ -18,6 +18,7 @@ namespace Responses {
 		public static ErrorSignUpInvalidEmail = 4002;
 		public static ErrorSignUpInvalidPassword = 4003;
 		public static ErrorSignUpTermsNotAccepted = 4004;
+		public static ErrorUsernameTaken = 4006;
 
 		public static ErrorAccountDeactivated = 6001;
 	}

@@ -26,6 +26,7 @@ const (
 	ErrorSignUpInvalidPassword    = 4003
 	ErrorSignUpTermsNotAccepted   = 4004
 	ErrorSignUpInvalidUsername    = 4005
+	ErrorUsernameTaken            = 4006
 
 	ErrorAccountDeactivated = 6001
 

@@ -1,7 +1,6 @@
 openapi: 3.0.3
 info:
   title: "300sf API"
-  description: "Checklists, sightings, competitions and species for 300 Svenska Fåglar. Sign in with an API key and your password (POST /v1/auth), then send the access token as `Authorization: Bearer <token>`. This document is partial; the routes are in server/routes.go."
   version: "1"
   contact:
     name: "300sf"
@@ -9,64 +8,3612 @@ info:
   license:
     name: "AGPL-3.0-or-later"
     url: "https://www.gnu.org/licenses/agpl-3.0.html"
+  description: |
+    Checklists, sightings, competitions and species for 300 Svenska Fåglar.
+
+    All API routes live under `/v1`. Request bodies are JSON (`Content-Type: application/json`) unless a route says
+    otherwise, and are limited to 1 MiB (10 MiB for `POST /v1/analyze`). Unknown fields are ignored.
+
+    ## Getting an API key
+
+    Every client signs in with an API key that belongs to a user account. Create one in the app under
+    **Settings → API keys**, or with `POST /v1/api_keys` while signed in. You get two values:
+
+    - the **secret**, `"<prefix>.<secret>"` (for example `abc1234.Zm9vYmFy…`). It is shown **only once**; store it.
+    - the **client_id**, which is also listed by `GET /v1/api_keys/list`.
+
+    Signing in needs **both**: `client_id` plus the secret as `client_secret`, together with the account's email and
+    password.
+
+    ## Signing in
+
+    ```
+    POST /v1/auth
+    {"grant_type": "password", "client_id": "…", "client_secret": "abc1234.…",
+     "email": "you@example.com", "password": "…", "scopes": ["user"]}
+    ```
+
+    The answer holds an `access_token` (a JWT) and a `refresh_token`. Send the access token on every call as
+    `Authorization: Bearer <access_token>`. Click **Authorize** above to try routes from this page.
+
+    ### Scopes
+
+    | Scope | Gives access to |
+    |---|---|
+    | `user` | Every normal route. |
+    | `admin` | Routes marked **Admin only**. Only granted to admin accounts. |
+
+    `scopes` is optional and defaults to `["user"]`. The token gets the requested scopes that both the user and the
+    API key have (the granted ones are in the response's `scope`, space separated). Scopes are matched exactly: an
+    admin who wants to call both normal and admin routes asks for `["user", "admin"]`. A missing scope is answered
+    with **401** and code `3005` (not 403).
+
+    ### Refreshing tokens
+
+    Access tokens are short lived (`expires_in` seconds). Before or after one expires, get a new pair with
+    `{"grant_type": "refresh_token", "refresh_token": "…"}` on `POST /v1/auth`. **Refresh tokens are single use**:
+    each refresh returns a new refresh token and the old one stops working, so always keep the latest one. Reusing a
+    spent or revoked refresh token gives 401 code `7001`. Scopes can only shrink on refresh. `POST /v1/auth/logout`
+    revokes a refresh token. Changing the password revokes every session of the account.
+
+    ### Rate limit
+
+    Each API key has a daily call limit (its `hard_limit`, see `GET /v1/api_keys/list`). The counter starts with the
+    first call and resets when its window (a day) runs out. Calls above the limit are answered with
+    **429** `{"message": "too many calls on api key", "code": 3004}`. Some routes have their own throttles
+    (sign-up, password reset, contact, analyze, zone search, …), answered with 429 code `7003`.
+
+    ## Conventions
+
+    - **Envelopes differ per route.** Some return the object itself (bare), some `{"result": …}`, some
+      `{"message": "success", "data": …}`, the news feed `{"data": […], "more": bool}`, and many mutations return
+      **204 with no body** (do not parse it). Each route below says which.
+    - **Unset values are never `null`** on model fields: an unset time is `"0001-01-01T00:00:00Z"`, an unset string
+      `""` and an unset number `0` (a latitude/longitude of 0 means "no position"). Relations (`zone`, `age`,
+      `comment`, …) and lists of relations can be `null` when unset or not loaded by that route; treat a `null` list
+      as empty. On input, `""`, `0` and `null` usually mean "not given".
+    - Times are RFC 3339. A sighting time at exactly 00:00:00 UTC means "date only".
+    - Ids (`uuid`) are short strings (10 characters for new records; competitions use 24 hex characters).
+    - **Not found is usually 400**, not 404 (competitions and some announcement routes use 404).
+    - Errors are JSON `{"message": "…", "code": 1234}`. `code` is missing on some errors; `message` may be a raw
+      database or parse error.
+    - The optional header `X-App-Language` (`en`, `sv`, `de`) picks the language of a new account and of Wikipedia
+      texts.
+
+    ## Error codes
+
+    | Code | Meaning |
+    |---|---|
+    | 1000 | Internal server error |
+    | 1001 | Record not found |
+    | 1002 | Could not insert |
+    | 1003 | Could not delete |
+    | 1004 | Missing header |
+    | 1005 | Invalid request |
+    | 2001 | Could not parse the request (or a field in it) |
+    | 2002 | Link expired |
+    | 2003 | Missing file |
+    | 2004 | Unknown error |
+    | 3001 | Logged out |
+    | 3002 | Missing API key (`client_id`) |
+    | 3003 | Invalid or revoked API key |
+    | 3004 | Too many calls on the API key (429) |
+    | 3005 | Missing scope |
+    | 3006 | Too many API keys (max 10 active) |
+    | 4001 | Invalid display name |
+    | 4002 | Invalid or taken email |
+    | 4003 | Invalid password |
+    | 4004 | Terms not accepted (also "invalid language") |
+    | 4005 | Invalid username |
+    | 4006 | Username taken (409) |
+    | 6001 | Account deactivated |
+    | 7001 | Not signed in, or invalid credentials or token |
+    | 7002 | Too many wrong passwords, try again later (429) |
+    | 7003 | Too many requests, try again later (429) |
+    | 8001 | Bird sound identification unavailable |
+    | 9001 | Wrong competition password (403) |
+    | -10001 | Generic bad request (parse or database error) |
+    | -30002 | Wrong password |
 servers:
   - url: /
     description: "This server"
+security:
+  - bearerAuth: []
+tags:
+  - name: Auth
+    description: Signing in and out.
+  - name: Users
+    description: Accounts and the signed-in user.
+  - name: API keys
+  - name: Lists
+    description: Checklists.
+  - name: List templates
+    description: Species lists that checklists are made from.
+  - name: Reports
+    description: Sightings.
+  - name: Tags
+    description: The user's labels for sightings.
+  - name: Species
+  - name: Catalog
+    description: Orders, ages, genders, methods and activities.
+  - name: Zones
+    description: Countries, counties, municipalities and habitats.
+  - name: Competitions
+  - name: Announcements
+    description: News posts.
+  - name: Notifications
+  - name: Contact
+  - name: Analyze
+    description: Bird sound identification.
+  - name: Admin
+    description: Invites, emails and translations. All admin only.
+  - name: Health
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      security: []
+      responses:
+        "200":
+          description: The server is up.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: healthy
+                  data:
+                    type: object
+                    properties:
+                      version:
+                        type: string
+
+  # ---------------------------------------------------------------- Auth
+  /v1/auth:
+    post:
+      tags: [Auth]
+      summary: Sign in or refresh tokens
+      description: |
+        No token needed.
+
+        - `grant_type: "password"` needs `client_id`, `client_secret` (`"<prefix>.<secret>"`), `email` and `password`.
+        - `grant_type: "refresh_token"` needs `refresh_token`. `client_id` is optional but must match the key the
+          token was issued for. The refresh token is used up; keep the new one from the response.
+
+        `scopes` is optional and defaults to `["user"]`. The token gets the requested scopes that both the user and
+        the API key have.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthRequest"
+            examples:
+              password:
+                value:
+                  grant_type: password
+                  client_id: "a1b2c3d4-…"
+                  client_secret: "abc1234.secret"
+                  email: "you@example.com"
+                  password: "hunter22"
+                  scopes: ["user"]
+              refresh:
+                value:
+                  grant_type: refresh_token
+                  refresh_token: "eyJhbGciOi…"
+      responses:
+        "200":
+          description: Tokens (bare).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthTokens"
+        "400":
+          description: |
+            Parse error (2001), unknown `grant_type` (1005), wrong email or password (7001) or deactivated
+            account (6001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: |
+            Missing `client_id` (3002); invalid `client_secret`, unknown or revoked API key (3003); invalid, spent or
+            revoked refresh token, or `client_id` not matching it (7001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "429":
+          description: Too many wrong passwords for this account or network (7002).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "503":
+          description: The session could not be stored (2004).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /v1/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Revoke a refresh token
+      description: No token needed. Ends the session the refresh token belongs to. Unknown or invalid tokens are ignored.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  # ---------------------------------------------------------------- Users
+  /v1/users:
+    post:
+      tags: [Users]
+      summary: Sign up
+      description: |
+        No token needed. Creates an account; sign in with `POST /v1/auth` afterwards (no tokens are returned).
+        `X-App-Language` sets the account language and the welcome email (`en`, `sv`, `de`; anything else is `en`).
+        Throttled to 10 sign-ups an hour per client IP (429 code 7003).
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/XAppLanguage"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, display_name, username, password, accepted_terms]
+              properties:
+                email:
+                  type: string
+                  format: email
+                display_name:
+                  type: string
+                  minLength: 4
+                  maxLength: 64
+                  description: 4–64 characters, no `<` or `>`.
+                username:
+                  type: string
+                  pattern: '^\w(?:[\w.#-]*\w){3,31}$'
+                  description: At least 4 characters; starts and ends with a letter, digit or `_`; `.`, `#`, `-` allowed inside.
+                password:
+                  type: string
+                  minLength: 8
+                  maxLength: 1024
+                accepted_terms:
+                  type: boolean
+                  description: Must be `true`.
+                portrait:
+                  type: string
+                  pattern: '^[0-9]{1,3}\.(webp|png)$'
+                  example: "3.webp"
+                  description: Optional built-in avatar, `1.webp` … `10.webp`.
+      responses:
+        "200":
+          description: The new user (bare). `language` is not filled in.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: |
+            Parse error (-10001), invalid portrait (2001), display name (4001), username (4005), invalid or already
+            registered email (4002), password (4003) or terms not accepted (4004).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: Username taken (4006).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: username taken
+                code: 4006
+        "429":
+          $ref: "#/components/responses/Throttled"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /v1/users/me:
+    get:
+      tags: [Users]
+      summary: Dashboard data for the signed-in user
+      description: |
+        Bare object. `last_reports`: non-archived sightings created in the last 14 days, newest first, max 50
+        (`species.order` and `activity` are not filled in). `list_reports`: one entry per active list with its
+        non-archived sightings (`comment` and `activity` not filled in); `null` when the user has no lists.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: "#/components/schemas/User"
+                  last_reports:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Report"
+                  list_reports:
+                    type: array
+                    nullable: true
+                    items:
+                      type: object
+                      properties:
+                        list:
+                          $ref: "#/components/schemas/List"
+                        reports:
+                          type: array
+                          items:
+                            $ref: "#/components/schemas/Report"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/users/whoami:
+    get:
+      tags: [Users]
+      summary: The signed-in user
+      responses:
+        "200":
+          description: "`{message, data}` with the user, language filled in."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/users/list:
+    get:
+      tags: [Users]
+      summary: All users
+      description: "**Admin only** (needs the `admin` scope). Bare array of every non-deleted user, unpaginated; `language` not filled in."
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/users/{uuid}:
+    get:
+      tags: [Users]
+      summary: One user and their sightings
+      description: |
+        **Admin only** (needs the `admin` scope). Bare `{user, reports}`. The reports have no relations filled in
+        (only uuid, times, position, quantity and site are meaningful).
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: "#/components/schemas/User"
+                  reports:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Report"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/users/export:
+    get:
+      tags: [Users]
+      summary: Export all account data as JSON
+      description: |
+        Bare JSON document with the account, every checklist, label and sighting (archived ones too). Unlike the rest
+        of the API, missing values here are real `null`s, and times are ISO 8601: a bare date when the stored time is
+        midnight UTC, else RFC 3339 in UTC. Names are `{sv?, en?, de?, la?}` with empty languages left out.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountExport"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/users/language:
+    post:
+      tags: [Users]
+      summary: Set the account language
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [language_code]
+              properties:
+                language_code:
+                  type: string
+                  enum: [en, sv, de]
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          description: Parse error (2001) or unknown language (1001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/users/portrait:
+    post:
+      tags: [Users]
+      summary: Pick a portrait
+      description: JSON, not an upload. Names a built-in avatar served at `/img/portraits/<name>`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [portrait]
+              properties:
+                portrait:
+                  type: string
+                  pattern: '^[0-9]{1,3}\.(webp|png)$'
+                  example: "3.webp"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          description: Parse error or invalid portrait (2001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/users/display_name:
+    post:
+      tags: [Users]
+      summary: Change the display name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [display_name]
+              properties:
+                display_name:
+                  type: string
+                  minLength: 4
+                  maxLength: 64
+                  description: 4–64 characters, no `<` or `>`.
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          description: Parse error (2001) or invalid display name (4001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/users/username:
+    post:
+      tags: [Users]
+      summary: Change the username
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username]
+              properties:
+                username:
+                  type: string
+                  pattern: '^\w(?:[\w.#-]*\w){3,31}$'
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          description: Parse error (2001) or invalid username (4005).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: Username taken (4006).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: username taken
+                code: 4006
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/users/email:
+    post:
+      tags: [Users]
+      summary: Change the email address
+      description: Needs the current password. A notice is sent to the old address.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  description: The current password.
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          description: Parse error (2001), invalid or taken email (4002) or wrong password (-30002).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          description: Too many wrong passwords (7002), or too many calls on the API key (3004).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /v1/users/reset_password:
+    post:
+      tags: [Users]
+      summary: Send a password reset email
+      description: |
+        No token needed. Always 204 for a parseable body, whether or not the account exists. The email links to
+        `/set-password?token=<token>`, valid 24 hours; a new one is not sent within 2 minutes of the last. Throttled
+        to 10 an hour per client IP (429 code 7003).
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/XAppLanguage"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/Throttled"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /v1/users/set_password/{token}:
+    post:
+      tags: [Users]
+      summary: Set a new password with a reset link
+      description: |
+        No token needed. `token` is the `token` value from the reset email (URL-encode it). Uses up every reset
+        link of the user and signs the user out everywhere.
+      security: []
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password:
+                  type: string
+                  minLength: 8
+                  maxLength: 1024
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          description: Parse error (2001), unknown or used link (1001), expired link (2002) or invalid password (4003).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /v1/users/request_delete:
+    post:
+      tags: [Users]
+      summary: Ask to delete the account
+      description: Emails a confirmation link (`/delete-account?token=<token>`, valid 1 hour). Throttled to 3 an hour per user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password:
+                  type: string
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          description: Parse error (2001), wrong password (-30002) or no account language (4004).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          description: Too many wrong passwords (7002), too many requests (7003) or too many calls on the API key (3004).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /v1/users/confirm_delete/{token}:
+    delete:
+      tags: [Users]
+      summary: Confirm deleting the account
+      description: |
+        Must be signed in as the account that asked. Takes a JSON body. Deactivates the account at once, schedules
+        deletion in 7 days and signs out everywhere.
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password:
+                  type: string
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          description: Parse error (2001), wrong password (-30002), unknown or used link (1001) or expired link (2002).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          description: Too many wrong passwords (7002) or too many calls on the API key (3004).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ---------------------------------------------------------------- API keys
+  /v1/api_keys/list:
+    get:
+      tags: [API keys]
+      summary: The user's API keys
+      description: All keys, revoked ones too (`revoked_at` set). Keys have no uuid; they are identified by `prefix`.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  api_keys:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ApiKey"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/api_keys:
+    post:
+      tags: [API keys]
+      summary: Create an API key
+      description: |
+        At most 10 active keys per user. `scopes` defaults to `["user"]`; each must be a scope the user has. The
+        secret in `api_key` is shown only once.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "My script"
+                scopes:
+                  type: array
+                  items:
+                    type: string
+                    enum: [user, admin]
+                  default: ["user"]
+      responses:
+        "200":
+          description: The new key.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  api_key:
+                    type: string
+                    description: "`<prefix>.<secret>`, the `client_secret` for signing in. Shown only once."
+                    example: "abc1234.Zm9vYmFyYmF6"
+                  client_id:
+                    type: string
+                  prefix:
+                    type: string
+                    example: abc1234
+                  scopes:
+                    type: string
+                    description: Space separated.
+                    example: "user admin"
+        "400":
+          description: Parse error (-10001), a scope the user does not have (3005) or too many keys (3006).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /v1/api_keys/{prefix}/revoke:
+    post:
+      tags: [API keys]
+      summary: Revoke an API key
+      description: No body needed. The key the website signs in with cannot be revoked.
+      parameters:
+        - name: prefix
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          description: Unknown key, not yours, or the website's key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+  # ---------------------------------------------------------------- Lists
+  /v1/lists/list:
+    get:
+      tags: [Lists]
+      summary: The user's active checklists
+      description: Species have `name` and `order` filled in. `template` is set when the list was made from a template (only here).
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListsResult"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/lists/archived:
+    get:
+      tags: [Lists]
+      summary: The user's archived checklists
+      description: Newest archived first. Species carry only `uuid`.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListsResult"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/lists:
+    post:
+      tags: [Lists]
+      summary: Create a checklist
+      description: |
+        With `template`, the template's species are copied to the list; without it the list has no species.
+        `from` and `until` take `"YYYY-MM-DD"` or RFC 3339; anything else is 400 code 2001.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  $ref: "#/components/schemas/Translation"
+                visibility:
+                  $ref: "#/components/schemas/Visibility"
+                template:
+                  type: string
+                  description: Uuid of the user's own or a public list template.
+                from:
+                  type: string
+                  example: "2026-01-01"
+                until:
+                  type: string
+                  example: "2026-12-31"
+                color:
+                  type: string
+                  example: "#1273a3"
+      responses:
+        "200":
+          description: The new list (bare). Species carry only `uuid`.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/List"
+        "400":
+          description: Parse error (-10001) or invalid `from`/`until` (2001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          description: Unknown or forbidden template, or a database error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /v1/lists/{uuid}:
+    get:
+      tags: [Lists]
+      summary: One checklist
+      description: |
+        Your own list, or another user's non-private list (10-character ids only). Archived lists are not found.
+        Species have `name` and `order` filled in.
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+    delete:
+      tags: [Lists]
+      summary: Delete an archived checklist
+      description: Only archived lists can be deleted. The sightings are kept; only their links to the list go.
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          description: Not found, not yours or not archived.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/lists/{uuid}/archive:
+    post:
+      tags: [Lists]
+      summary: Archive a checklist
+      description: No body. 204 even when nothing matched.
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/lists/{uuid}/restore:
+    post:
+      tags: [Lists]
+      summary: Restore an archived checklist
+      description: No body. 204 even when nothing matched.
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/lists/{uuid}/rename:
+    post:
+      tags: [Lists]
+      summary: Rename a checklist
+      description: Only languages with a non-empty value are written; a language cannot be cleared.
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  $ref: "#/components/schemas/Translation"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/lists/{uuid}/color:
+    post:
+      tags: [Lists]
+      summary: Set a checklist's color
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                color:
+                  type: string
+                  maxLength: 16
+                  description: '`""` resets the color.'
+                  example: "#157975"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          description: Invalid color (over 16 characters), or list not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/lists/{uuid}/timespan:
+    post:
+      tags: [Lists]
+      summary: Set a checklist's timespan
+      description: |
+        Each of `from` and `until` takes `"YYYY-MM-DD"` or RFC 3339. `"*"` clears the date; `""` or leaving the
+        field out keeps it. Anything else is 400 code 2001. The timespan is informational only.
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                from:
+                  type: string
+                  example: "2026-01-01"
+                until:
+                  type: string
+                  example: "*"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          description: Invalid date (2001), or list not found or not yours.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/lists/{uuid}/visibility:
+    post:
+      tags: [Lists]
+      summary: Set a checklist's visibility
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [visibility]
+              properties:
+                visibility:
+                  $ref: "#/components/schemas/Visibility"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          description: Invalid visibility (1005), or list not found or not yours.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/lists/{uuid}/reports:
+    get:
+      tags: [Lists]
+      summary: Sightings on a checklist
+      description: |
+        Non-archived sightings linked to one of your lists (archived lists allowed). `species.name`, `zone`, `age`,
+        `gender`, `method` and `tags` are filled in; `activity`, `comment` and `lists` are `null`.
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportsResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/lists/species/{species_uuid}:
+    get:
+      tags: [Lists]
+      summary: The user's checklists, and whether a species is on each
+      description: "`result` is `null` when the user has no lists. Each `list` has `name`; `species` is `null`."
+      parameters:
+        - name: species_uuid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    nullable: true
+                    items:
+                      type: object
+                      properties:
+                        list:
+                          $ref: "#/components/schemas/List"
+                        available:
+                          type: boolean
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/lists/compare:
+    post:
+      tags: [Lists]
+      summary: Compare shared checklists
+      description: |
+        No token needed. 1–20 list uuids; the first is the reference. Only non-private, non-archived lists with
+        10-character ids are used; others are dropped silently. `result` has one entry per found list (database
+        order, reference included), each with one report per distinct species seen. Throttled to 60 a minute per
+        client IP (429 code 7003).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [uuids]
+              properties:
+                uuids:
+                  type: array
+                  minItems: 1
+                  maxItems: 20
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: Bare comparison.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  species:
+                    type: array
+                    description: The reference list's target species.
+                    items:
+                      $ref: "#/components/schemas/Species"
+                  result:
+                    type: array
+                    nullable: true
+                    items:
+                      type: object
+                      properties:
+                        user:
+                          type: object
+                          properties:
+                            display_name:
+                              type: string
+                        reports:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              species:
+                                type: object
+                                properties:
+                                  uuid:
+                                    type: string
+                  reference_list:
+                    $ref: "#/components/schemas/List"
+        "400":
+          description: Wrong number of uuids, or the reference list not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "429":
+          $ref: "#/components/responses/Throttled"
+
+  # ---------------------------------------------------------------- List templates
+  /v1/list_templates/list:
+    get:
+      tags: [List templates]
+      summary: Your and public list templates
+      description: Non-archived. Species carry only `uuid`.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListTemplatesResult"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/list_templates/list/me:
+    get:
+      tags: [List templates]
+      summary: Your own list templates
+      description: Non-archived. Species carry only `uuid`.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListTemplatesResult"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/list_templates:
+    post:
+      tags: [List templates]
+      summary: Create a list template
+      description: "`visibility: 2` (public) is lowered to 0 unless the token has the `admin` scope."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  $ref: "#/components/schemas/Translation"
+                description:
+                  $ref: "#/components/schemas/Translation"
+                visibility:
+                  $ref: "#/components/schemas/Visibility"
+                species_uuids:
+                  type: array
+                  description: Must all exist and have no duplicates.
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: The new template (bare). `species` is `null`.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListTemplate"
+        "400":
+          description: Parse error (-10001) or unknown species.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /v1/list_templates/{uuid}:
+    get:
+      tags: [List templates]
+      summary: One list template
+      description: Your own or a public template (archived ones too). Species have `name` and `order` filled in.
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    $ref: "#/components/schemas/ListTemplate"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/list_templates/{uuid}/archive:
+    post:
+      tags: [List templates]
+      summary: Archive a list template
+      description: No body. 204 even when nothing matched. Lists made from it keep working.
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/list_templates/{uuid}/add_species:
+    post:
+      tags: [List templates]
+      summary: Add a species to a template
+      description: Your own template. Does not change lists made from it (use `/species` for that).
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SpeciesUuidBody"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          description: Template or species not found, or already added.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/list_templates/{uuid}/remove_species:
+    post:
+      tags: [List templates]
+      summary: Remove a species from a template
+      description: Your own template. Does not change lists made from it.
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SpeciesUuidBody"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          description: Template or species not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/list_templates/{uuid}/name:
+    post:
+      tags: [List templates]
+      summary: Rename a template
+      description: Only languages with a non-empty value are written.
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  $ref: "#/components/schemas/Translation"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/list_templates/{uuid}/description:
+    post:
+      tags: [List templates]
+      summary: Change a template's description
+      description: Only languages with a non-empty value are written.
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  $ref: "#/components/schemas/Translation"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/list_templates/{uuid}/species:
+    post:
+      tags: [List templates]
+      summary: Replace a template's species
+      description: |
+        Your own non-archived template. Also replaces the species of **every** list (any user's) made from it.
+        Sightings stay on the lists.
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [species_uuids]
+              properties:
+                species_uuids:
+                  type: array
+                  minItems: 1
+                  description: Must all exist and have no duplicates.
+                  items:
+                    type: string
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          description: Template not found, no species, or unknown species.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/list_templates/{uuid}/visibility:
+    post:
+      tags: [List templates]
+      summary: Make a template public or private
+      description: "**Admin only** (needs the `admin` scope). Only the admin's own non-archived template."
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [visibility]
+              properties:
+                visibility:
+                  type: integer
+                  enum: [0, 2]
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          description: Invalid visibility or template not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  # ---------------------------------------------------------------- Reports
+  /v1/reports/list:
+    get:
+      tags: [Reports]
+      summary: All of the user's sightings
+      description: |
+        Non-archived, newest created first, unpaginated. Everything is filled in except `species.order` and
+        `notification`.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportsResult"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+    post:
+      tags: [Reports]
+      summary: Sightings on one of your checklists (minimal)
+      description: Non-archived. Only `species.name` and `zone` are filled in.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [list_uuid]
+              properties:
+                list_uuid:
+                  type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportsResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/reports:
+    post:
+      tags: [Reports]
+      summary: Create a sighting
+      description: |
+        `zone` is worked out by the server from the position, possibly later in the background. A client-made
+        `uuid` makes the call idempotent: sending the same one again returns the stored sighting.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReportCreate"
+      responses:
+        "200":
+          description: |
+            The sighting (bare), with `species`, `zone`, `age`, `gender`, `method`, `activity`, `comment`, `lists` and
+            `tags` filled in.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+        "400":
+          description: Parse error, invalid `uuid`, unknown species or record (-10001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          description: The `uuid` belongs to another user's sighting (-10001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /v1/reports/{uuid}:
+    get:
+      tags: [Reports]
+      summary: One sighting
+      description: Your own sighting, archived ones too. Everything is filled in except `species.order`.
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    $ref: "#/components/schemas/Report"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+    put:
+      tags: [Reports]
+      summary: Edit a sighting
+      description: |
+        Replaces every field: fields left out are cleared, and `list_uuids` / `tag_uuids` replace the sighting's
+        lists and tags. Archived sightings cannot be edited.
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReportFields"
+      responses:
+        "200":
+          description: |
+            The sighting (bare), with `species`, `zone`, `age`, `gender`, `method`, `activity`, `comment`, `lists` and
+            `tags` filled in.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+        "400":
+          description: Parse error, unknown species or record, sighting not found, not yours or archived.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+    delete:
+      tags: [Reports]
+      summary: Delete a sighting
+      description: Permanent; also deletes its comment.
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/reports/{uuid}/archive:
+    post:
+      tags: [Reports]
+      summary: Archive a sighting
+      description: No body. Hides it from lists, exports and competitions; cannot be undone. 204 even when not found.
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/reports/{uuid}/add_tag:
+    post:
+      tags: [Reports]
+      summary: Add a tag to a sighting
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TagUuidBody"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          description: Sighting or tag not found, or the tag is already on it.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/reports/{uuid}/remove_tag:
+    post:
+      tags: [Reports]
+      summary: Remove a tag from a sighting
+      description: 204 even when the tag was not on it.
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TagUuidBody"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          description: Sighting or tag not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/reports/basis:
+    put:
+      tags: [Reports]
+      summary: Everything the sighting form needs
+      description: |
+        All ages, genders, methods and activities, the user's active lists (`species` is `null`) and tags, and the
+        species.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SpeciesUuidBody"
+      responses:
+        "200":
+          description: Bare object.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  species:
+                    $ref: "#/components/schemas/Species"
+                  ages:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/NamedRecord"
+                  genders:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/NamedRecord"
+                  methods:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/NamedRecord"
+                  activities:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/NamedRecord"
+                  lists:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/List"
+                  tags:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Tag"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          description: Missing or unknown species.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /v1/reports/export:
+    put:
+      tags: [Reports]
+      summary: Export a checklist as CSV
+      description: |
+        One row per species: its earliest non-archived sighting on the list. UTF-8 with a BOM; the delimiter is `;`
+        when the account language is `sv` or `de`, else `,`. Columns: `species, scientific_name, first_seen,
+        seen_until, quantity, method, age, sex, activity, comment, site, municipality, latitude, longitude, labels`.
+        Times are `YYYY-MM-DD` when stored at midnight UTC, else `YYYY-MM-DD HH:MM` in the requested time zone.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [list_uuid]
+              properties:
+                list_uuid:
+                  type: string
+                format:
+                  type: string
+                  description: Ignored; always CSV.
+                  example: csv
+                time_zone:
+                  type: string
+                  description: IANA time zone (preferred).
+                  example: Europe/Stockholm
+                timezone_offset:
+                  type: integer
+                  description: Minutes ahead of UTC; used when `time_zone` is missing or invalid.
+                  example: 120
+      responses:
+        "200":
+          description: CSV file.
+          content:
+            text/csv:
+              schema:
+                type: string
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  # ---------------------------------------------------------------- Tags
+  /v1/tags/list:
+    get:
+      tags: [Tags]
+      summary: The user's tags
+      description: Non-archived.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Tag"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/tags:
+    post:
+      tags: [Tags]
+      summary: Create a tag
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                color:
+                  type: string
+                  example: "#1273a3"
+      responses:
+        "200":
+          description: The new tag (bare).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tag"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /v1/tags/{uuid}:
+    get:
+      tags: [Tags]
+      summary: One tag
+      description: Your own tag, archived ones too.
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    $ref: "#/components/schemas/Tag"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/tags/{uuid}/archive:
+    post:
+      tags: [Tags]
+      summary: Archive a tag
+      description: No body. 204 even when nothing matched.
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/tags/{uuid}/rename:
+    post:
+      tags: [Tags]
+      summary: Rename a tag
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          description: Tag not found or archived.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  # ---------------------------------------------------------------- Species
+  /v1/species/list:
+    get:
+      tags: [Species]
+      summary: All species
+      description: Every species with `name` and `order` filled in. Unpaginated, unordered.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Species"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/species:
+    post:
+      tags: [Species]
+      summary: Create a species
+      description: "**Admin only** (needs the `admin` scope)."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, order_uuid]
+              properties:
+                name:
+                  $ref: "#/components/schemas/Translation"
+                order_uuid:
+                  type: string
+      responses:
+        "200":
+          description: The new species (bare). `order` is not filled in.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Species"
+        "400":
+          description: Parse error (2001) or unknown order (1001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /v1/species/{uuid}:
+    get:
+      tags: [Species]
+      summary: Species details with recordings and Wikipedia text
+      description: |
+        Needs a valid token with any scope. `X-App-Language` picks the Wikipedia edition (falls back to `en`).
+        Up to 25 recordings from xeno-canto (`null` when none). Cached; can be slow on a cache miss.
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+        - $ref: "#/components/parameters/XAppLanguage"
+      responses:
+        "200":
+          description: Bare object.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    $ref: "#/components/schemas/Species"
+                  recordings:
+                    type: array
+                    nullable: true
+                    items:
+                      $ref: "#/components/schemas/Recording"
+                  wikipedia:
+                    $ref: "#/components/schemas/Wikipedia"
+        "400":
+          description: Species not found (1001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /v1/species/{uuid}/set_rarity:
+    post:
+      tags: [Species]
+      summary: Set a species' rarity in a zone
+      description: "**Admin only** (needs the `admin` scope). `\"-\"` removes the rarity."
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [category, zone_uuid]
+              properties:
+                category:
+                  type: string
+                  enum: [a, b, c, d, e, "-"]
+                zone_uuid:
+                  type: string
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          description: Invalid category, or unknown species or zone (1001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  # ---------------------------------------------------------------- Catalog
+  /v1/orders/list:
+    get:
+      tags: [Catalog]
+      summary: All orders
+      responses:
+        "200":
+          $ref: "#/components/responses/NamedRecordList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/orders/{uuid}:
+    get:
+      tags: [Catalog]
+      summary: Order details with Wikipedia text
+      description: "`X-App-Language` picks the Wikipedia edition. Cached."
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+        - $ref: "#/components/parameters/XAppLanguage"
+      responses:
+        "200":
+          description: Bare object.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    $ref: "#/components/schemas/Order"
+                  wikipedia:
+                    $ref: "#/components/schemas/Wikipedia"
+        "400":
+          description: Order not found (1001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /v1/orders:
+    post:
+      tags: [Catalog]
+      summary: Create an order
+      description: "**Admin only** (needs the `admin` scope)."
+      requestBody:
+        $ref: "#/components/requestBodies/NamedRecordCreate"
+      responses:
+        "200":
+          $ref: "#/components/responses/NamedRecordCreated"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /v1/ages/list:
+    get:
+      tags: [Catalog]
+      summary: All ages
+      responses:
+        "200":
+          $ref: "#/components/responses/NamedRecordList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/ages:
+    post:
+      tags: [Catalog]
+      summary: Create an age
+      description: "**Admin only** (needs the `admin` scope)."
+      requestBody:
+        $ref: "#/components/requestBodies/NamedRecordCreate"
+      responses:
+        "200":
+          $ref: "#/components/responses/NamedRecordCreated"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /v1/genders/list:
+    get:
+      tags: [Catalog]
+      summary: All genders
+      responses:
+        "200":
+          $ref: "#/components/responses/NamedRecordList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/genders/{uuid}:
+    get:
+      tags: [Catalog]
+      summary: One gender
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    $ref: "#/components/schemas/NamedRecord"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/genders:
+    post:
+      tags: [Catalog]
+      summary: Create a gender
+      description: "**Admin only** (needs the `admin` scope)."
+      requestBody:
+        $ref: "#/components/requestBodies/NamedRecordCreate"
+      responses:
+        "200":
+          $ref: "#/components/responses/NamedRecordCreated"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /v1/methods/list:
+    get:
+      tags: [Catalog]
+      summary: All methods
+      responses:
+        "200":
+          $ref: "#/components/responses/NamedRecordList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/methods:
+    post:
+      tags: [Catalog]
+      summary: Create a method
+      description: "**Admin only** (needs the `admin` scope)."
+      requestBody:
+        $ref: "#/components/requestBodies/NamedRecordCreate"
+      responses:
+        "200":
+          $ref: "#/components/responses/NamedRecordCreated"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /v1/activities/list:
+    get:
+      tags: [Catalog]
+      summary: All activities
+      responses:
+        "200":
+          $ref: "#/components/responses/NamedRecordList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/activities:
+    post:
+      tags: [Catalog]
+      summary: Create an activity
+      description: "**Admin only** (needs the `admin` scope)."
+      requestBody:
+        $ref: "#/components/requestBodies/NamedRecordCreate"
+      responses:
+        "200":
+          $ref: "#/components/responses/NamedRecordCreated"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+  # ---------------------------------------------------------------- Zones
+  /v1/zones/list:
+    get:
+      tags: [Zones]
+      summary: All zones
+      description: "**Admin only** (needs the `admin` scope). `polygon` is `null`; `parent_zone` is filled in (one level)."
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Zone"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/zones/{uuid}:
+    get:
+      tags: [Zones]
+      summary: One zone with its polygon
+      description: "**Admin only** (needs the `admin` scope). `polygon` is base64 GeoJSON (can be megabytes); `parent_zone` is `null`."
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    $ref: "#/components/schemas/Zone"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/zones:
+    post:
+      tags: [Zones]
+      summary: Create a zone
+      description: |
+        **Admin only** (needs the `admin` scope). The whole request is limited to 1 MiB. An unknown
+        `parent_zone_uuid` is ignored.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, polygon, admin_level]
+              properties:
+                name:
+                  $ref: "#/components/schemas/Translation"
+                polygon:
+                  type: string
+                  description: GeoJSON as text.
+                admin_level:
+                  type: integer
+                  minimum: 1
+                  maximum: 10
+                  description: 2 country, 4 county, 7 municipality, 10 habitat.
+                parent_zone_uuid:
+                  type: string
+      responses:
+        "200":
+          description: The new zone (bare). `name` is empty and `parent_zone` is `null` in this response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Zone"
+        "400":
+          description: Parse error (2001), level out of range, or invalid polygon (-10001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /v1/zones/regions:
+    get:
+      tags: [Zones]
+      summary: Counties in a map view
+      description: Counties (`admin_level` 4) whose bounds meet the box, max 200, with a simplified outline.
+      parameters:
+        - name: bbox
+          in: query
+          required: true
+          description: "`west,south,east,north` in degrees."
+          schema:
+            type: string
+            example: "11.0,55.3,24.2,69.1"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegionZonesResult"
+        "400":
+          description: Invalid bbox (2001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/zones/search:
+    get:
+      tags: [Zones]
+      summary: Search regions by name
+      description: |
+        Searches OpenStreetMap. Results have `osm_id` and `country`, and `uuid` only when the zone already exists;
+        no `outline`. Shares a throttle of 10 a minute per user with `POST /v1/zones/osm` (429 without code).
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 100
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegionZonesResult"
+        "400":
+          description: "`q` must be 2 to 100 characters (2001)."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "502":
+          $ref: "#/components/responses/BadGateway"
+        "503":
+          $ref: "#/components/responses/Unavailable"
+  /v1/zones/osm:
+    post:
+      tags: [Zones]
+      summary: Get or create the zone for an OpenStreetMap region
+      description: Creates the zone (and its country) if needed. Shares the zone search throttle.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [osm_id]
+              properties:
+                osm_id:
+                  type: string
+                  example: R54220
+      responses:
+        "200":
+          description: The zone (bare).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegionZone"
+        "400":
+          description: Missing `osm_id` (2001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "502":
+          $ref: "#/components/responses/BadGateway"
+        "503":
+          $ref: "#/components/responses/Unavailable"
+
+  # ---------------------------------------------------------------- Competitions
+  /v1/competitions:
+    post:
+      tags: [Competitions]
+      summary: Create a competition
+      description: |
+        A participant's score is the number of distinct species seen in `[from, until)`, limited to the template's
+        species and the counties when given. Errors are `{"code": -10001, "message": …}`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, from, until]
+              properties:
+                name:
+                  $ref: "#/components/schemas/Translation"
+                description:
+                  $ref: "#/components/schemas/Translation"
+                from:
+                  type: string
+                  format: date-time
+                  description: At most a year ago, before `until`.
+                until:
+                  type: string
+                  format: date-time
+                  description: Exclusive end; in the future, at most five years after `from`.
+                list_template_uuid:
+                  type: string
+                  description: '`""` means all species count.'
+                end_on_reports:
+                  type: integer
+                  minimum: 0
+                  description: First to this many species wins; 0 for no limit.
+                max_competitors:
+                  type: integer
+                  description: 0 for unlimited; 1 and negative values are rejected.
+                visibility:
+                  type: integer
+                  enum: [0, 2]
+                color:
+                  type: string
+                  maxLength: 16
+                competition_zones_uuids:
+                  type: array
+                  description: County zones (`admin_level` 4).
+                  items:
+                    type: string
+                password:
+                  type: string
+                  maxLength: 64
+                creator_join:
+                  type: boolean
+      responses:
+        "200":
+          description: The competition (bare), with standings.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompetitionInfo"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /v1/competitions/list:
+    get:
+      tags: [Competitions]
+      summary: Open public competitions
+      description: Public, not archived, still open to join; by `from`, max 50. `standings` is `null`.
+      responses:
+        "200":
+          $ref: "#/components/responses/CompetitionsResult"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/competitions/list/me:
+    get:
+      tags: [Competitions]
+      summary: Your competitions
+      description: Created, joined or invited to; not archived; by `until` descending, max 100. `standings` is `null`.
+      responses:
+        "200":
+          $ref: "#/components/responses/CompetitionsResult"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/competitions/basis:
+    get:
+      tags: [Competitions]
+      summary: Everything the create-competition form needs
+      responses:
+        "200":
+          description: Bare object.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  zones:
+                    type: array
+                    description: All counties.
+                    items:
+                      $ref: "#/components/schemas/Zone"
+                  list_templates:
+                    type: array
+                    description: Your own and public templates with their species count.
+                    items:
+                      type: object
+                      properties:
+                        uuid:
+                          type: string
+                        name:
+                          $ref: "#/components/schemas/Translation"
+                        description:
+                          $ref: "#/components/schemas/Translation"
+                        size:
+                          type: integer
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/competitions/{uuid}:
+    get:
+      tags: [Competitions]
+      summary: One competition
+      description: |
+        `standings` is filled in when the competition is public or you are joined, invited or the creator.
+        Private competitions you have no part in are not found.
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      responses:
+        "200":
+          description: Bare object.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompetitionInfo"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/competitions/{uuid}/result:
+    get:
+      tags: [Competitions]
+      summary: Standings of a public competition
+      description: No token needed. Public competitions only, seen anonymously (`joined` etc. false, `me` false).
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      responses:
+        "200":
+          description: Bare object.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompetitionInfo"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /v1/competitions/{uuid}/join:
+    put:
+      tags: [Competitions]
+      summary: Join a competition
+      description: |
+        Also accepts a pending invite. The password is needed when `has_password` is true, unless you were invited.
+        Wrong passwords are throttled to 10 an hour (429 code 7003).
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/EmptyObject"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Wrong password (9001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Finished, not open for joining, or full.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/competitions/{uuid}/leave:
+    put:
+      tags: [Competitions]
+      summary: Leave a competition
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      responses:
+        "200":
+          $ref: "#/components/responses/EmptyObject"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/competitions/{uuid}/invite:
+    put:
+      tags: [Competitions]
+      summary: Invite users by username
+      description: |
+        Participants and the creator can invite while the competition is not finished. A leading `@` is trimmed.
+        Throttled to 20 calls an hour per user (429 code 7003).
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [usernames]
+              properties:
+                usernames:
+                  type: array
+                  minItems: 1
+                  maxItems: 50
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: Bare object.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  invited:
+                    type: array
+                    items:
+                      type: string
+                  not_found:
+                    type: array
+                    items:
+                      type: string
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Only participants can invite.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: The competition has finished.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/competitions/{uuid}/decline:
+    put:
+      tags: [Competitions]
+      summary: Decline an invite
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      responses:
+        "200":
+          $ref: "#/components/responses/EmptyObject"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/competitions/{uuid}/archive:
+    put:
+      tags: [Competitions]
+      summary: Remove a competition
+      description: Only the creator.
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      responses:
+        "200":
+          $ref: "#/components/responses/EmptyObject"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Only the creator can remove the competition.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  # ---------------------------------------------------------------- Announcements
+  /v1/announcements/feed:
+    get:
+      tags: [Announcements]
+      summary: News feed
+      description: |
+        Published posts, newest first. Page with `before` (the uuid of the last post you have). Posts published
+        before the account was created count as read. Note the envelope: `{data, more}` without `message`.
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 50
+        - name: before
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/NewsPost"
+                  more:
+                    type: boolean
+        "400":
+          description: Unknown `before` post (1001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/announcements/list:
+    get:
+      tags: [Announcements]
+      summary: Unread news
+      description: Unread published posts from after sign-up, newest first, max 50.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/NewsPost"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/announcements/{uuid}/read:
+    put:
+      tags: [Announcements]
+      summary: Mark a post read
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessNull"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/announcements/read_all:
+    put:
+      tags: [Announcements]
+      summary: Mark all posts read
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessNull"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/announcements/all:
+    get:
+      tags: [Announcements]
+      summary: All posts, drafts included
+      description: "**Admin only** (needs the `admin` scope). Newest first, with read counts."
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: "#/components/schemas/Announcement"
+                        - type: object
+                          properties:
+                            published_at:
+                              type: string
+                              format: date-time
+                            reads:
+                              type: integer
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/announcements:
+    post:
+      tags: [Announcements]
+      summary: Create a post
+      description: "**Admin only** (needs the `admin` scope)."
+      requestBody:
+        $ref: "#/components/requestBodies/AnnouncementBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/AnnouncementResult"
+        "400":
+          description: Parse error (2001) or invalid field (1005).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/announcements/{uuid}:
+    put:
+      tags: [Announcements]
+      summary: Update a post
+      description: "**Admin only** (needs the `admin` scope). Every field is replaced; `draft` is ignored (use pause/resume)."
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      requestBody:
+        $ref: "#/components/requestBodies/AnnouncementBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/AnnouncementResult"
+        "400":
+          description: Parse error (2001) or invalid field (1005).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+    delete:
+      tags: [Announcements]
+      summary: Delete a post
+      description: "**Admin only** (needs the `admin` scope). 200 also for unknown uuids."
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessNull"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/announcements/{uuid}/pause:
+    put:
+      tags: [Announcements]
+      summary: Take a post down
+      description: "**Admin only** (needs the `admin` scope)."
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessNull"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/announcements/{uuid}/resume:
+    put:
+      tags: [Announcements]
+      summary: Publish a paused post
+      description: "**Admin only** (needs the `admin` scope). 404 also when the post is not paused."
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessNull"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  # ---------------------------------------------------------------- Notifications, contact
+  /v1/notifications/{uuid}/comment:
+    post:
+      tags: [Notifications]
+      summary: Comment on a notification
+      description: Only notifications on your own sightings.
+      parameters:
+        - $ref: "#/components/parameters/Uuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+      responses:
+        "200":
+          description: The comment (bare).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+        "400":
+          description: Parse error (2001), or not found or not yours (-10001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/contact:
+    post:
+      tags: [Contact]
+      summary: Send a message to the site owners
+      description: Replies go to the account's email. Throttled to 5 an hour per user (429 code 7003).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subject:
+                  type: string
+                message:
+                  type: string
+      responses:
+        "201":
+          description: Sent. The body is the JSON literal `null`.
+          content:
+            application/json:
+              schema:
+                nullable: true
+                type: object
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "503":
+          $ref: "#/components/responses/Unavailable"
+
+  # ---------------------------------------------------------------- Analyze
+  /v1/analyze:
+    post:
+      tags: [Analyze]
+      summary: Identify birds in a recording
+      description: |
+        Multipart upload, max 10 MiB; WAV is the safe format. The identification service's answer is passed
+        through as is. Convert `results` to `{name, probability}` objects and send them to
+        `PUT /v1/analyze/resolve` to get species. Throttled to 60 an hour per user (429 code 7003).
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [audio]
+              properties:
+                audio:
+                  type: string
+                  format: binary
+                meta:
+                  type: string
+                  description: |
+                    JSON text, optional: `num_results` (1–20, default 5), `sensitivity` (0.5–1.5, default 1),
+                    `week` (1–48, -1 any), `lat`, `lon`.
+                  example: '{"num_results":5,"sensitivity":1,"week":20}'
+      responses:
+        "200":
+          description: The identification service's answer.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: success
+                  results:
+                    type: array
+                    description: "`[label, confidence]` pairs, best first. The label is `<Scientific name>_<English name>`."
+                    items:
+                      type: array
+                      minItems: 2
+                      maxItems: 2
+                      items: {}
+                    example: [["Turdus merula_Eurasian Blackbird", 0.8123]]
+        "400":
+          description: 'Missing audio (`{"msg": "missing audio"}`).'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "502":
+          description: The identification service is not answering (8001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "503":
+          description: Identification is not available (8001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /v1/analyze/resolve:
+    put:
+      tags: [Analyze]
+      summary: Map identification labels to species
+      description: Unmatched labels are dropped; `results` is `null` when nothing matched.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [birds]
+              properties:
+                birds:
+                  type: array
+                  maxItems: 50
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        example: "Turdus merula_Eurasian Blackbird"
+                      probability:
+                        type: number
+                        example: 0.8123
+      responses:
+        "200":
+          description: Bare object.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    nullable: true
+                    items:
+                      type: object
+                      properties:
+                        species:
+                          $ref: "#/components/schemas/Species"
+                        probability:
+                          type: number
+        "400":
+          description: Parse error (-10001) or too many birds (1005).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  # ---------------------------------------------------------------- Admin
+  /v1/invite:
+    post:
+      tags: [Admin]
+      summary: Invite someone by email
+      description: "**Admin only** (needs the `admin` scope)."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                language_code:
+                  type: string
+                  enum: [en, sv, de]
+      responses:
+        "200":
+          description: Sent. The body is empty.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /v1/emails/send_all:
+    get:
+      tags: [Admin]
+      summary: Send queued emails
+      description: "**Admin only** (needs the `admin` scope). Sends every queued email that is due."
+      responses:
+        "200":
+          description: Bare object.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  emails_sent:
+                    type: integer
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /v1/translations/list:
+    get:
+      tags: [Admin]
+      summary: All translations
+      description: "**Admin only** (needs the `admin` scope). Every name of every record, unpaginated."
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  translations:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Translation"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/translations/update:
+    post:
+      tags: [Admin]
+      summary: Change a translation
+      description: |
+        **Admin only** (needs the `admin` scope). Renames any record: `uuid` is the translation's uuid
+        (`record.name.uuid`). Only non-empty languages are written; `""` does not clear one.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Translation"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: The `access_token` from `POST /v1/auth`.
+
+  parameters:
+    Uuid:
+      name: uuid
+      in: path
+      required: true
+      schema:
+        type: string
+    XAppLanguage:
+      name: X-App-Language
+      in: header
+      required: false
+      description: Language for new accounts, emails and Wikipedia texts. Anything else falls back to `en`.
+      schema:
+        type: string
+        enum: [en, sv, de]
+
+  requestBodies:
+    NamedRecordCreate:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [name]
+            properties:
+              name:
+                $ref: "#/components/schemas/Translation"
+    AnnouncementBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [title, body, color]
+            properties:
+              title:
+                allOf:
+                  - $ref: "#/components/schemas/LocalizedText"
+                description: "`en` required; each at most 160 characters."
+              body:
+                allOf:
+                  - $ref: "#/components/schemas/LocalizedText"
+                description: "`en` required; each at most 10000 characters."
+              from:
+                type: string
+                format: date-time
+                nullable: true
+                description: Publish time; empty publishes at once.
+              until:
+                type: string
+                format: date-time
+                nullable: true
+                description: Take-down time, after `from`.
+              icon:
+                type: string
+                pattern: '^[a-z0-9_]{1,32}$'
+                default: campaign
+                description: A Material Symbols name.
+              color:
+                type: string
+                pattern: '^#[0-9a-fA-F]{6}$'
+              draft:
+                type: boolean
+                description: Create on hold. Ignored on update.
+
   responses:
-    GeneralErrorResponse:
+    NoContent:
+      description: Done. No body.
+    EmptyObject:
+      description: Done. The body is `{}`.
+      content:
+        application/json:
+          schema:
+            type: object
+    SuccessNull:
+      description: "Done: `{\"message\": \"success\", \"data\": null}`."
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: success
+              data:
+                type: object
+                nullable: true
+    BadRequest:
+      description: Invalid request, or not found. `code` may be missing.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Unauthorized:
+      description: |
+        No or invalid access token (7001), unknown or revoked API key (3003), or the token lacks the scope (3005).
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            message: missing scope
+            code: 3005
+    RateLimited:
+      description: The API key's daily call limit is used up (3004), or a route throttle was hit (7003).
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            message: too many calls on api key
+            code: 3004
+    Throttled:
+      description: Too many requests from this client (7003).
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            message: too many requests, try again later
+            code: 7003
+    NotFound:
+      description: Not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    ServerError:
+      description: Server or database error.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    BadGateway:
+      description: An outside service failed.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Unavailable:
+      description: The feature is turned off on this server.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NamedRecordList:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NamedRecord"
+    NamedRecordCreated:
+      description: The new record (bare).
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/NamedRecord"
+    CompetitionsResult:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CompetitionInfo"
+    AnnouncementResult:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: success
+              data:
+                $ref: "#/components/schemas/Announcement"
+
+  schemas:
+    Error:
       type: object
       properties:
+        message:
+          type: string
+          example: missing scope
         code:
           type: integer
-          example: 3002
-        message:
+          description: See the error code table. Missing on some errors.
+          example: 3005
+    ZeroTime:
+      type: string
+      format: date-time
+      description: RFC 3339. `"0001-01-01T00:00:00Z"` means unset.
+      example: "2026-05-03T07:12:00Z"
+    Visibility:
+      type: integer
+      enum: [0, 1, 2]
+      description: 0 private, 1 hidden (anyone with the link), 2 public.
+    Translation:
+      type: object
+      description: A name in several languages. `""` for a missing language; `la` is the scientific name. `uuid` is ignored on input.
+      properties:
+        uuid:
           type: string
-          example: "missing api key"
-    GeneralSuccessResponse:
+        sv:
+          type: string
+        en:
+          type: string
+        de:
+          type: string
+        la:
+          type: string
+      example:
+        uuid: abcd234efg
+        sv: Sånglärka
+        en: Eurasian Skylark
+        de: Feldlerche
+        la: Alauda arvensis
+    LocalizedText:
       type: object
       properties:
-        message:
+        sv:
           type: string
-          example: "success"
-        data:
-          type: object
-  securitySchemes:
-    BasicAuth:
-      type: http
-      scheme: basic
-  parameters:
-    X-Access-Token:
-      name: "X-Access-Token"
-      in: header
-      required: true
-      schema:
-        type: string
-    X-Api-Key:
-      name: "X-Api-Key"
-      in: header
-      required: true
-      schema:
-        type: string
-  schemas:
+        en:
+          type: string
+        de:
+          type: string
     Language:
       type: object
       properties:
         iso_name:
           type: string
-          example: "Swedish"
+          example: Swedish
         native_name:
           type: string
-          example: "Svenska"
+          example: Svenska
         code:
           type: string
-          example: "sv"
+          example: sv
+    NamedRecord:
+      type: object
+      description: An age, gender, method or activity.
+      properties:
+        uuid:
+          type: string
+        name:
+          $ref: "#/components/schemas/Translation"
     Order:
       type: object
       properties:
         uuid:
           type: string
-          example: "a1b2c3"
         name:
           $ref: "#/components/schemas/Translation"
     Species:
@@ -77,166 +3624,746 @@ components:
         name:
           $ref: "#/components/schemas/Translation"
         order:
-          $ref: "#/components/schemas/Order"
+          allOf:
+            - $ref: "#/components/schemas/Order"
+          description: Empty strings where the route does not fill it in.
     Tag:
       type: object
       properties:
         uuid:
           type: string
-          example: "a1b2c3"
         name:
           type: string
-          example: "Garden"
         color:
           type: string
-          example: "#ff00ff"
-        archived:
-          type: string
-          example: "2023-07-19T07:04:20Z"
-    Translation:
+          description: '`"#rrggbb"` or `""`.'
+    Comment:
       type: object
       properties:
         uuid:
           type: string
-          example: "a1b2c3"
-        sv:
+        text:
           type: string
-          example: "Hej"
-        en:
+        edited:
+          $ref: "#/components/schemas/ZeroTime"
+    Zone:
+      type: object
+      properties:
+        uuid:
           type: string
-          example: "Hello"
-        de:
+        name:
+          $ref: "#/components/schemas/Translation"
+        polygon:
           type: string
-          example: "Hallo"
-        la:
+          format: byte
+          nullable: true
+          description: Base64 of the GeoJSON text; `null` where left out.
+        admin_level:
+          type: integer
+          description: 2 country, 4 county, 7 municipality, 10 habitat.
+        parent_zone:
+          allOf:
+            - $ref: "#/components/schemas/Zone"
+          nullable: true
+    RegionZone:
+      type: object
+      properties:
+        uuid:
           type: string
-          example: "Salve"
+          description: Left out when no zone exists yet.
+        osm_id:
+          type: string
+          example: R54220
+        name:
+          $ref: "#/components/schemas/Translation"
+        country:
+          type: string
+        outline:
+          type: object
+          description: Simplified GeoJSON geometry, `[lon, lat]`.
+          properties:
+            type:
+              type: string
+              example: MultiPolygon
+            coordinates:
+              type: array
+              items:
+                type: array
+                items:
+                  type: array
+                  items:
+                    type: array
+                    items:
+                      type: number
+    RegionZonesResult:
+      type: object
+      properties:
+        result:
+          type: array
+          items:
+            $ref: "#/components/schemas/RegionZone"
+    List:
+      type: object
+      description: A checklist.
+      properties:
+        uuid:
+          type: string
+        name:
+          $ref: "#/components/schemas/Translation"
+        from:
+          $ref: "#/components/schemas/ZeroTime"
+        until:
+          $ref: "#/components/schemas/ZeroTime"
+        visibility:
+          $ref: "#/components/schemas/Visibility"
+        species:
+          type: array
+          nullable: true
+          description: The target species.
+          items:
+            $ref: "#/components/schemas/Species"
+        color:
+          type: string
+        template:
+          type: string
+          description: Uuid of the template it was made from. Only in `GET /v1/lists/list`.
+    ListsResult:
+      type: object
+      properties:
+        result:
+          type: array
+          items:
+            $ref: "#/components/schemas/List"
+    ListResult:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/List"
+    ListTemplate:
+      type: object
+      properties:
+        uuid:
+          type: string
+        name:
+          $ref: "#/components/schemas/Translation"
+        description:
+          $ref: "#/components/schemas/Translation"
+        visibility:
+          $ref: "#/components/schemas/Visibility"
+        species:
+          type: array
+          nullable: true
+          items:
+            $ref: "#/components/schemas/Species"
+    ListTemplatesResult:
+      type: object
+      properties:
+        result:
+          type: array
+          items:
+            $ref: "#/components/schemas/ListTemplate"
+    Report:
+      type: object
+      description: A sighting. Which relations are filled in depends on the route; the rest are `null` or empty.
+      properties:
+        uuid:
+          type: string
+        species:
+          $ref: "#/components/schemas/Species"
+        from:
+          $ref: "#/components/schemas/ZeroTime"
+        until:
+          $ref: "#/components/schemas/ZeroTime"
+        latitude:
+          type: number
+          description: 0 when unset.
+        longitude:
+          type: number
+          description: 0 when unset.
+        zone:
+          allOf:
+            - $ref: "#/components/schemas/Zone"
+          nullable: true
+          description: Worked out from the position by the server, maybe later.
+        quantity:
+          type: integer
+          description: 0 when unset.
+        age:
+          allOf:
+            - $ref: "#/components/schemas/NamedRecord"
+          nullable: true
+        activity:
+          allOf:
+            - $ref: "#/components/schemas/NamedRecord"
+          nullable: true
+        gender:
+          allOf:
+            - $ref: "#/components/schemas/NamedRecord"
+          nullable: true
+        method:
+          allOf:
+            - $ref: "#/components/schemas/NamedRecord"
+          nullable: true
+        comment:
+          allOf:
+            - $ref: "#/components/schemas/Comment"
+          nullable: true
+        site:
+          type: string
+        lists:
+          type: array
+          nullable: true
+          items:
+            $ref: "#/components/schemas/List"
+        tags:
+          type: array
+          nullable: true
+          items:
+            $ref: "#/components/schemas/Tag"
+        notification:
+          allOf:
+            - $ref: "#/components/schemas/Notification"
+          nullable: true
+    ReportsResult:
+      type: object
+      properties:
+        result:
+          type: array
+          items:
+            $ref: "#/components/schemas/Report"
+    ReportFields:
+      type: object
+      required: [species_uuid]
+      properties:
+        species_uuid:
+          type: string
+        from:
+          type: string
+          format: date-time
+          description: RFC 3339; a bare date is rejected.
+        until:
+          type: string
+          format: date-time
+        latitude:
+          type: number
+        longitude:
+          type: number
+        quantity:
+          type: integer
+        age_uuid:
+          type: string
+        activity_uuid:
+          type: string
+        gender_uuid:
+          type: string
+        method_uuid:
+          type: string
+        comment:
+          type: string
+          description: A private note.
+        site:
+          type: string
+          description: Free-text place name.
+        list_uuids:
+          type: array
+          description: Your lists; unknown or other users' lists are ignored.
+          items:
+            type: string
+        tag_uuids:
+          type: array
+          description: Your non-archived tags; others are ignored.
+          items:
+            type: string
+    ReportCreate:
+      allOf:
+        - type: object
+          properties:
+            uuid:
+              type: string
+              pattern: '^[abcdefghjkmnpqrstuvwxyz123456789]{16,32}$'
+              description: Optional client-made id; makes the call safe to repeat.
+            silent:
+              type: boolean
+              default: false
+              description: When false, a notification with `notification_comment` is created.
+            notification_comment:
+              type: string
+        - $ref: "#/components/schemas/ReportFields"
+    Notification:
+      type: object
+      properties:
+        uuid:
+          type: string
+        comment:
+          $ref: "#/components/schemas/Comment"
+        processed:
+          $ref: "#/components/schemas/ZeroTime"
+        comments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Comment"
+    SpeciesUuidBody:
+      type: object
+      required: [species_uuid]
+      properties:
+        species_uuid:
+          type: string
+    TagUuidBody:
+      type: object
+      required: [tag_uuid]
+      properties:
+        tag_uuid:
+          type: string
     User:
       type: object
+      description: The email address is never included.
       properties:
         uuid:
           type: string
-          example: "abcdef"
         display_name:
           type: string
-          example: "John Doe"
-        scopes:
+        username:
           type: string
-          example: 1
         notifications:
           type: integer
-          example: 0
-        last_seen:
-          type: string
-          example: "2023-07-19T07:04:20Z"
+          description: Bit mask.
+        last_seen_at:
+          $ref: "#/components/schemas/ZeroTime"
         confirmed_at:
-          type: string
-          example: "2023-07-19T07:04:20Z"
+          $ref: "#/components/schemas/ZeroTime"
         deactivated_at:
-          type: string
-          example: "2023-07-19T07:04:20Z"
+          $ref: "#/components/schemas/ZeroTime"
         deleted_at:
-          type: string
-          example: "2023-07-19T07:04:20Z"
+          $ref: "#/components/schemas/ZeroTime"
         accepted_terms_at:
-          type: string
-          example: "2023-07-19T07:04:20Z"
+          $ref: "#/components/schemas/ZeroTime"
         language:
           $ref: "#/components/schemas/Language"
         portrait:
           type: string
-          example: "1.png"
-    Message:
-      type: string
-      example: "success"
-paths:
-  /health:
-    get:
-      summary: "This API endpoint allows you to retrieve the current health status of the server. It provides information about the overall health and operational status of the server, indicating whether it is functioning correctly or experiencing issues."
-      tags:
-        - "Status"
-      responses:
-        "200":
-          description: "Just pong"
-          content:
-            application/json:
-              schema:
+          example: "3.webp"
+        scopes:
+          type: string
+          description: Space separated.
+          example: user
+    ApiKey:
+      type: object
+      properties:
+        name:
+          type: string
+        prefix:
+          type: string
+        client_id:
+          type: string
+        scopes:
+          type: string
+          description: Space separated.
+          example: user
+        soft_limit:
+          type: integer
+        hard_limit:
+          type: integer
+          description: Calls a day.
+        revoked_at:
+          $ref: "#/components/schemas/ZeroTime"
+        website:
+          type: boolean
+          description: The key the website signs in with; cannot be revoked.
+    AuthRequest:
+      type: object
+      required: [grant_type]
+      properties:
+        grant_type:
+          type: string
+          enum: [password, refresh_token]
+        client_id:
+          type: string
+          description: Needed for `password`.
+        client_secret:
+          type: string
+          description: "`<prefix>.<secret>`. Needed for `password`."
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+            enum: [user, admin]
+          default: ["user"]
+        stay_signed_in:
+          type: boolean
+          description: Kept across refreshes.
+        refresh_token:
+          type: string
+          description: Needed for `refresh_token`.
+    AuthTokens:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+          description: Single use.
+        token_type:
+          type: string
+          example: Bearer
+        expires_in:
+          type: integer
+          description: Seconds until the access token expires.
+        scope:
+          type: string
+          description: Granted scopes, space separated.
+          example: user
+        lang:
+          type: string
+          description: The account's language code.
+          example: sv
+    NewsPost:
+      type: object
+      properties:
+        uuid:
+          type: string
+        title:
+          $ref: "#/components/schemas/LocalizedText"
+        body:
+          $ref: "#/components/schemas/LocalizedText"
+        icon:
+          type: string
+          example: campaign
+        color:
+          type: string
+          example: "#1273a3"
+        published_at:
+          type: string
+          format: date-time
+        read:
+          type: boolean
+    Announcement:
+      type: object
+      properties:
+        uuid:
+          type: string
+        title:
+          $ref: "#/components/schemas/LocalizedText"
+        body:
+          $ref: "#/components/schemas/LocalizedText"
+        from:
+          $ref: "#/components/schemas/ZeroTime"
+        until:
+          $ref: "#/components/schemas/ZeroTime"
+        on_hold:
+          allOf:
+            - $ref: "#/components/schemas/ZeroTime"
+          description: Set when the post is a draft or paused.
+        icon:
+          type: string
+        color:
+          type: string
+    PublicUser:
+      type: object
+      properties:
+        display_name:
+          type: string
+        username:
+          type: string
+        portrait:
+          type: string
+    CompetitionInfo:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: 24 hex characters.
+        name:
+          $ref: "#/components/schemas/Translation"
+        description:
+          $ref: "#/components/schemas/Translation"
+        color:
+          type: string
+        from:
+          type: string
+          format: date-time
+        until:
+          type: string
+          format: date-time
+          description: Exclusive.
+        join_until:
+          type: string
+          format: date-time
+        end_on_reports:
+          type: integer
+          description: 0 for no limit.
+        max_competitors:
+          type: integer
+          description: 0 for no limit.
+        visibility:
+          type: integer
+          enum: [0, 2]
+        has_password:
+          type: boolean
+        list_name:
+          allOf:
+            - $ref: "#/components/schemas/Translation"
+          nullable: true
+          description: "`null` when all species count."
+        list_size:
+          type: integer
+        zones:
+          type: array
+          description: County names; empty means anywhere.
+          items:
+            $ref: "#/components/schemas/Translation"
+        creator:
+          $ref: "#/components/schemas/PublicUser"
+        participants:
+          type: integer
+        status:
+          type: string
+          enum: [upcoming, ongoing, finished]
+        ended_at:
+          type: string
+          format: date-time
+          nullable: true
+        joined:
+          type: boolean
+        is_creator:
+          type: boolean
+        invited:
+          type: boolean
+        can_join:
+          type: boolean
+        my_rank:
+          type: integer
+          description: 0 when not taking part.
+        my_count:
+          type: integer
+        standings:
+          type: array
+          nullable: true
+          description: "`null` in lists, or when you may not see them."
+          items:
+            $ref: "#/components/schemas/Standing"
+    Standing:
+      type: object
+      properties:
+        rank:
+          type: integer
+        user:
+          $ref: "#/components/schemas/PublicUser"
+        count:
+          type: integer
+        latest:
+          type: string
+          format: date-time
+          nullable: true
+          description: Day of the last counted species (00:00 UTC).
+        me:
+          type: boolean
+    Recording:
+      type: object
+      description: A xeno-canto recording.
+      properties:
+        url:
+          type: string
+        filename:
+          type: string
+        type:
+          type: string
+        sex:
+          type: string
+        stage:
+          type: string
+        method:
+          type: string
+        sono:
+          type: string
+        recorder:
+          type: string
+        country:
+          type: string
+        location:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+    Wikipedia:
+      type: object
+      properties:
+        url:
+          type: string
+        thumbnail:
+          type: string
+        summary:
+          type: string
+        images:
+          type: array
+          nullable: true
+          items:
+            type: string
+    AccountExportName:
+      type: object
+      properties:
+        sv:
+          type: string
+        en:
+          type: string
+        de:
+          type: string
+        la:
+          type: string
+    AccountExport:
+      type: object
+      properties:
+        format:
+          type: string
+          example: 300sf-export
+        version:
+          type: integer
+          example: 2
+        exported_at:
+          type: string
+          format: date-time
+        user:
+          type: object
+          properties:
+            uuid:
+              type: string
+            display_name:
+              type: string
+            username:
+              type: string
+            email:
+              type: string
+            language:
+              type: string
+            portrait:
+              type: string
+              nullable: true
+            last_seen_at:
+              type: string
+              nullable: true
+        checklists:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+              name:
+                $ref: "#/components/schemas/AccountExportName"
+              color:
+                type: string
+                nullable: true
+              from:
+                type: string
+                nullable: true
+              until:
+                type: string
+                nullable: true
+              archived:
+                type: string
+                nullable: true
+              species:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    uuid:
+                      type: string
+                    name:
+                      $ref: "#/components/schemas/AccountExportName"
+        labels:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+              name:
+                type: string
+              color:
+                type: string
+                nullable: true
+              archived:
+                type: string
+                nullable: true
+        sightings:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+              species:
                 type: object
                 properties:
-                  message:
+                  uuid:
                     type: string
-                    example: "healthy"
-                  data:
-                    type: object
-                    properties:
-                      version:
-                        type: string
-                        example: "0.1.0"
-  /v1/auth:
-    put:
-      security:
-        - BasicAuth: []
-      summary: "Login."
-      tags:
-        - "Authentication"
-      responses:
-        "200":
-          description: "OK"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  token_type:
-                    type: string
-                    example: "bearer"
-                  access_token:
-                    type: string
-                  expires_at:
-                    type: integer
-                    example: 427413600
-                  max_age:
-                    type: integer
-                    example: 3600
-        "400":
-          description: "Bad Request"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/responses/GeneralErrorResponse"
-  /v1/users/me:
-    get:
-      summary: "Get me."
-      tags:
-        - "Users"
-      parameters:
-      - $ref: "#/components/parameters/X-Access-Token"
-      responses:
-        "200":
-          description: "OK"
-  /v1/users/whoami:
-    get:
-      summary: "Who am I"
-      tags:
-        - "Users"
-      parameters:
-      - $ref: "#/components/parameters/X-Access-Token"
-      - $ref: "#/components/parameters/X-Api-Key"
-      responses:
-        "200":
-          description: "OK"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    $ref: "#/components/schemas/Message"
-                  data:
-                    $ref: "#/components/schemas/User"
-        "401":
-          description: "Unauthorized"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/responses/GeneralErrorResponse"
+                  name:
+                    $ref: "#/components/schemas/AccountExportName"
+              from:
+                type: string
+                nullable: true
+              until:
+                type: string
+                nullable: true
+              quantity:
+                type: integer
+                nullable: true
+              age:
+                allOf:
+                  - $ref: "#/components/schemas/AccountExportName"
+                nullable: true
+              sex:
+                allOf:
+                  - $ref: "#/components/schemas/AccountExportName"
+                nullable: true
+              activity:
+                allOf:
+                  - $ref: "#/components/schemas/AccountExportName"
+                nullable: true
+              method:
+                allOf:
+                  - $ref: "#/components/schemas/AccountExportName"
+                nullable: true
+              comment:
+                type: string
+                nullable: true
+              site:
+                type: string
+                nullable: true
+              municipality:
+                allOf:
+                  - $ref: "#/components/schemas/AccountExportName"
+                nullable: true
+              latitude:
+                type: number
+                nullable: true
+              longitude:
+                type: number
+                nullable: true
+              archived:
+                type: string
+                nullable: true
+              checklists:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    uuid:
+                      type: string
+                    name:
+                      type: string
+              labels:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    uuid:
+                      type: string
+                    name:
+                      type: string

@@ -71,6 +71,14 @@ func Users(c *gin.Context) {
 		return
 	}
 
+	if usernameTaken(r.Username, 0) {
+		c.JSON(http.StatusConflict, gin.H{
+			"code":    ErrorUsernameTaken,
+			"message": "username taken",
+		})
+		return
+	}
+
 	if !utils.VerifyEmail(r.Email) {
 		log.Error(c, ErrorSignUpInvalidEmail, "invalid email")
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -637,6 +645,179 @@ func UsersPortrait(c *gin.Context) {
 	}
 
 	models.DB.Table(table.Users).Where("uuid=?", c.GetString("uuid")).UpdateColumn("portrait", r.Portrait)
+
+	c.JSON(http.StatusNoContent, nil)
+}
+
+func UsersDisplayName(c *gin.Context) {
+	type request struct {
+		DisplayName string `json:"display_name"`
+	}
+
+	var r request
+	if err := c.ShouldBindJSON(&r); err != nil || !utils.VerifyDisplayName(strings.TrimSpace(r.DisplayName)) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorSignUpInvalidDisplayName,
+			"message": "invalid display name",
+		})
+		return
+	}
+
+	if err := models.DB.Table(table.Users).Where("uuid=?", c.GetString("uuid")).UpdateColumn("display_name", strings.TrimSpace(r.DisplayName)).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
+}
+
+// usernameTaken reports whether another user than the one with id has the username.
+func usernameTaken(username string, id int64) bool {
+	var count int64
+	models.DB.Table(table.Users).Where("username=?", username).Where("id<>?", id).Count(&count)
+	return count > 0
+}
+
+func UsersUsername(c *gin.Context) {
+	type request struct {
+		Username string `json:"username"`
+	}
+
+	var r request
+	if err := c.ShouldBindJSON(&r); err != nil || !utils.VerifyUsername(r.Username) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorSignUpInvalidUsername,
+			"message": "invalid username",
+		})
+		return
+	}
+
+	var user models.User
+	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	// The unique index decides a race between two users taking the same name.
+	if usernameTaken(r.Username, user.Id) || models.DB.Model(&user).UpdateColumn("username", r.Username).Error != nil {
+		c.JSON(http.StatusConflict, gin.H{
+			"code":    ErrorUsernameTaken,
+			"message": "username taken",
+		})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
+}
+
+// UsersEmail changes the account's email address. It takes the password, so
+// a session left open can't hand the account to someone else, and tells the
+// old address.
+func UsersEmail(c *gin.Context) {
+	type request struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	var r request
+	if err := c.ShouldBindJSON(&r); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "could not parse request",
+			"code":    ErrorParse,
+		})
+		return
+	}
+	r.Email = strings.TrimSpace(r.Email)
+
+	tx := models.DB.Begin()
+	defer tx.Rollback()
+
+	var user models.User
+	if err := tx.Where("uuid=?", c.GetString("uuid")).Preload("Language").First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if PasswordLocked(user.Email, c.ClientIP()) {
+		c.JSON(http.StatusTooManyRequests, gin.H{
+			"code":    ErrorTooManyLoginAttempts,
+			"message": "too many wrong passwords, try again later",
+		})
+		return
+	}
+	p := utils.Password{}
+	if !p.IsMatching(r.Password, user.Password, user.PasswordSalt) {
+		PasswordFailed(user.Email, c.ClientIP())
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -30002,
+			"message": "invalid password",
+		})
+		return
+	}
+
+	// VerifyEmail also checks that no account has the address.
+	if !utils.VerifyEmail(r.Email) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorSignUpInvalidEmail,
+			"message": "invalid email",
+		})
+		return
+	}
+
+	et, err := utils.GetEmailTemplate("email_changed", user.Language.Code, config.AppConfig.Domain, map[string]string{"NEW_EMAIL": r.Email})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	notice := models.Email{
+		Model: models.Model{
+			Timestamp: time.Now(),
+			Uuid:      utils.GenerateShortUuid(),
+		},
+		FromEmail:  et.Email,
+		ToEmail:    user.Email,
+		FromName:   et.Name,
+		ToName:     user.DisplayName,
+		Subject:    et.Subject,
+		TextPart:   et.Txt,
+		HtmlPart:   et.Html,
+		SendAt:     time.Now(),
+		ReplyEmail: et.ReplyTo,
+		ReplyName:  et.Name,
+	}
+	notice.Checksum = utils.ComputeHmac256(notice.Subject+notice.HtmlPart+notice.SendAt.String(), config.AppConfig.HashingSecret)
+	if err := tx.Create(&notice).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	// The unique index decides a race for the same address.
+	if err := tx.Model(&user).UpdateColumn("email", r.Email).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorSignUpInvalidEmail,
+			"message": "invalid email",
+		})
+		return
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
 
 	c.JSON(http.StatusNoContent, nil)
 }

@@ -1,0 +1,10 @@
+subject: Din e-postadress har ändrats
+email: noreply@300sf.se
+name: 300 Svenska Fåglar
+preheader: Ditt konto använder nu ${NEW_EMAIL}.
+heading: Din e-postadress har ändrats
+body:
+- E-postadressen för ditt konto på 300 Svenska Fåglar har ändrats till ${NEW_EMAIL}. Mejl från oss, som återställning av lösenord, skickas nu dit.
+after:
+- Om det inte var du kan någon känna till ditt lösenord. Svara på det här mejlet så hjälper vi dig att få tillbaka ditt konto.
+reason: Du får det här mejlet eftersom det var adressen till ditt konto på 300sf.se.

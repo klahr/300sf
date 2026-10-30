@@ -5,6 +5,7 @@
 /// <reference path="ui/MessageBox.ts"/>
 /// <reference path="App.ts"/>
 /// <reference path="Theme.ts"/>
+/// <reference path="ApiKeysPopUp.ts"/>
 
 class SettingsPage extends Page {
 
@@ -58,6 +59,23 @@ class SettingsPage extends Page {
 			appListener.showPage("tags", null);
 		});
 		this.container.appendChild(labelsButton);
+
+		// API keys let other apps and scripts use the account.
+		const apiKeysLbl = document.createElement("h2");
+		apiKeysLbl.innerHTML = App.translations.ApiKeys;
+		this.container.appendChild(apiKeysLbl);
+
+		const apiKeysDescription = document.createElement("p");
+		apiKeysDescription.textContent = App.translations.ApiKeysDescription;
+		this.container.appendChild(apiKeysDescription);
+
+		const apiKeysButton = document.createElement("button");
+		apiKeysButton.className = "secondary";
+		apiKeysButton.innerHTML = "<span class='material-symbols-outlined'>key</span>" + App.translations.ManageApiKeys;
+		apiKeysButton.addEventListener("click", function () {
+			openApiKeysPopUp();
+		});
+		this.container.appendChild(apiKeysButton);
 
 		const exportDataLbl = document.createElement("h2");
 		exportDataLbl.innerHTML = App.translations.ExportMyData;

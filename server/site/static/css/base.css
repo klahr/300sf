@@ -1730,6 +1730,26 @@ p.lead {
 	max-width: 62ch;
 }
 
+/* An input with its own button beside it, e.g. the name in the profile. */
+div.inline-field {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+div.inline-field>.uix-input,
+div.inline-field>input {
+	flex: 1;
+	min-width: 0;
+	margin: 0;
+}
+
+div.inline-field>button {
+	width: auto;
+	flex-shrink: 0;
+	margin: 0;
+}
+
 /* Segmented control, e.g. the theme picker. */
 div.segmented {
 	display: inline-flex;

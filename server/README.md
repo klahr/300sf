@@ -38,10 +38,14 @@ go test ./...
 ## Authentication
 
 API clients call `POST /v1/auth` with `grant_type: password` (plus their
-`client_id`/`client_secret` API key, `email`, `password`, `scopes`) or
+`client_id`/`client_secret` API key, `email`, `password` and optionally
+`scopes`, `["user"]` when left out) or
 `grant_type: refresh_token`, and send the access token as `Authorization:
 Bearer <token>`. `POST /v1/auth/logout` with the refresh token ends the
-session. Scopes are `user` and `admin`.
+session. Scopes are `user` and `admin`. Users make their own API keys in the
+app under Settings → API keys (or `POST /v1/api_keys`); a key gets the
+`user` scope, and `admin` too when an admin asks for it. The full API is
+documented at `/docs` (`site/static/swagger.yaml`).
 
 - Tokens are HS256 JWTs signed with `token-secret` and typed: only access
   tokens are accepted on API calls. `token-secret` is separate from

@@ -32,6 +32,25 @@ Versions are git tags `X.Y.Z`, cut with `make patch|minor|major`.
 - Admins write posts in English, Swedish and German with simple formatting
   and a preview, edit them, schedule them, publish and take them down, and
   see how many have read each one.
+- Everyone can make API keys for other apps and scripts, under Settings → API keys;
+  the client ID they sign in with is shown with each key. Admins can give a key admin access.
+- Complete API documentation at `/docs`.
+- Edit a sighting, including which bird it was, from the sighting's page.
+- Choose who can see a checklist on comparison links: only you, anyone with the link, or everyone.
+- Change your display name, username and email in your profile; the old address is told
+  about a new one.
+- API: the same, as `PUT /v1/reports/:uuid`, `POST /v1/lists/:uuid/visibility` and
+  `POST /v1/users/display_name`, `/username` and `/email`.
+
+### Changed
+
+- API: signing in without `scopes` gives the `user` scope instead of none.
+- API: `POST /v1/api_keys` also returns the key's `client_id`, `prefix` and `scopes`, and takes `scopes`.
+- API: `POST /v1/reports` returns the sighting with its species, place and other details,
+  and `GET /v1/reports/:uuid` includes the sex.
+- API: a checklist's `from` and `until` take a date or an RFC 3339 time, and anything
+  else is refused instead of ignored.
+- Signing up with a username that is taken says so (409, code 4006) instead of failing.
 
 ### Removed
 

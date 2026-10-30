@@ -1,0 +1,10 @@
+subject: Deine E-Mail-Adresse wurde geändert
+email: noreply@300sf.se
+name: 300 Schwedische Vögel
+preheader: Dein Konto verwendet jetzt ${NEW_EMAIL}.
+heading: Deine E-Mail-Adresse wurde geändert
+body:
+- Die E-Mail-Adresse deines Kontos bei 300 Schwedische Vögel wurde in ${NEW_EMAIL} geändert. E-Mails von uns, etwa zum Zurücksetzen des Passworts, gehen jetzt dorthin.
+after:
+- Wenn du das nicht warst, könnte jemand dein Passwort kennen. Antworte auf diese E-Mail, dann helfen wir dir, dein Konto zurückzubekommen.
+reason: Du erhältst diese E-Mail, weil es die Adresse deines Kontos auf 300sf.se war.

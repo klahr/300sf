@@ -25,13 +25,30 @@ class ReportPopUp {
 	private mLocation: { lat: number, lng: number } | null = null;
 	private mPopUp: Ui.Sheet;
 
-	constructor(species: Models.Species, list: Models.List | null, closeCallback: (speciesAdded: boolean) => void) {
+	// With existing, the form edits that sighting instead of reporting a new one.
+	constructor(species: Models.Species, list: Models.List | null, closeCallback: (speciesAdded: boolean) => void, existing: Models.Report | null = null) {
 		const self = this;
 
 		var speciesAdded = false;
 
-		const sheet = new Ui.Sheet({ eyebrow: App.translations.SubmitSighting, title: App.getTranslation(species.name), subtitle: species.name.la, latin: true });
+		const sheet = new Ui.Sheet({ eyebrow: existing ? App.translations.EditSighting : App.translations.SubmitSighting, title: App.getTranslation(species.name), subtitle: species.name.la, latin: true });
 		this.mPopUp = sheet;
+
+		// A wrong bird is the usual mistake; pick the right one and carry on editing.
+		if (existing) {
+			const changeSpecies = document.createElement("button");
+			changeSpecies.className = "text-button";
+			changeSpecies.innerHTML = "<span class='material-symbols-outlined'>swap_horiz</span>" + App.translations.ChangeSpecies;
+			changeSpecies.addEventListener("click", function () {
+				sheet.close();
+				Ui.PopUp.whenHistorySettled(function () {
+					openSpeciesPicker(function (other: Models.Species) {
+						openReportPopUp(other, null, closeCallback, existing);
+					}, App.translations.EditSighting);
+				});
+			});
+			sheet.names.appendChild(changeSpecies);
+		}
 
 		this.mChecklistContainer = new Ui.Div();
 		this.mChecklistContainer.style.position = "relative";
@@ -76,6 +93,10 @@ class ReportPopUp {
 			map = L.map(mapDiv.container).setView(last ? [last.lat, last.lng] : [62.0, 16.0], last ? 13 : 5);
 			Maps.tileLayer().addTo(map);
 			const markerGroup = L.layerGroup().addTo(map);
+			if (self.mLocation !== null) {
+				map.setView([self.mLocation.lat, self.mLocation.lng], 13);
+				L.marker([self.mLocation.lat, self.mLocation.lng]).addTo(markerGroup);
+			}
 
 			// The position keeps improving while the GPS settles; stop once it is good enough, or
 			// when the user puts the marker where they want it.
@@ -141,12 +162,19 @@ class ReportPopUp {
 				// Whatever it has by then will do.
 				watchTimer = setTimeout(stopWatching, 60000);
 			});
-			setTimeout(function() {
-				if (!closed) {
-					locateButton.click();
-				}
-			}, 1000);
+			// An edited sighting keeps its place unless the user asks for where they are now.
+			if (!existing) {
+				setTimeout(function() {
+					if (!closed) {
+						locateButton.click();
+					}
+				}, 1000);
+			}
 		}, 10);
+
+		if (existing && existing.latitude !== 0 && existing.longitude !== 0) {
+			this.mLocation = { lat: existing.latitude, lng: existing.longitude };
+		}
 
 		// The species is fixed; the input only carries it to the request and the toast.
 		this.mSpeciesList = new Ui.Input("text");
@@ -193,7 +221,11 @@ class ReportPopUp {
 				cLbl.textContent = App.getTranslation(e.list.name);
 				dd.container.appendChild(cLbl);
 
-				if (!e.available) {
+				const onIt = existing !== null && (existing.lists || []).some(l => l.uuid === e.list.uuid);
+				if (onIt) {
+					// Left free even when the bird isn't on the list, so it can be taken off.
+					(c.container as HTMLInputElement).checked = true;
+				} else if (!e.available) {
 					c.container.setAttribute("disabled", "");
 					dd.addClass("unavailable");
 				} else if (list && e.list.uuid === list.uuid) {
@@ -204,7 +236,7 @@ class ReportPopUp {
 
 			// With only one list that can hold the species, choose it for the user.
 			const open = Array.from(self.mChecklistContainer.container.querySelectorAll("input")).filter(c => !c.disabled);
-			if (open.length === 1 && !self.mChecklistContainer.container.querySelector("input:checked")) {
+			if (!existing && open.length === 1 && !self.mChecklistContainer.container.querySelector("input:checked")) {
 				open[0].checked = true;
 			}
 
@@ -254,10 +286,14 @@ class ReportPopUp {
 		from.container.id = "report-from";
 		sheet.field(whenGrid, App.translations.ObservedFrom, from.container);
 
+		// For the date inputs, in local time.
+		const toLocalInput = function (d: Date): string {
+			d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+			return d.toISOString().slice(0, -8);
+		};
 		const now = new Date();
-		now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
 		now.setSeconds(now.getMinutes());
-		from.value = now.toISOString().slice(0, -8);
+		from.value = toLocalInput(now);
 
 		const until = new Ui.Input("datetime-local");
 		until.container.id = "report-until";
@@ -303,6 +339,16 @@ class ReportPopUp {
 		privateComment.rows = 3;
 		sheet.field(details, App.translations.PrivateComment, privateComment);
 
+		if (existing) {
+			from.value = Utils.isValidDate(existing.from as any) ? toLocalInput(new Date(existing.from as any)) : "";
+			if (Utils.isValidDate(existing.until as any)) {
+				until.value = toLocalInput(new Date(existing.until as any));
+			}
+			quantity.value = existing.quantity ? existing.quantity.toString() : "";
+			site.value = existing.site || "";
+			privateComment.value = existing.comment ? existing.comment.text : "";
+		}
+
 		const tagsSection = sheet.section(App.translations.Tags);
 		tagsSection.classList.add("hidden");
 		moreToggle.addEventListener("click", function () {
@@ -316,6 +362,11 @@ class ReportPopUp {
 		tagsSection.appendChild(this.mTagsContainer.container);
 
 		const fillBasis = function (d: Responses.ReportsBasis) {
+
+			if (existing) {
+				// An edit can take a detail away again.
+				[ageList, genderList, methodList, activityList].forEach(l => l.addOption(App.translations.None, ""));
+			}
 
 			if (list) {
 				let found = false;
@@ -351,10 +402,27 @@ class ReportPopUp {
 			});
 
 			d.tags.forEach(e => {
-				self.addTag(e);
+				const tag = self.addTag(e);
+				if (existing && (existing.tags || []).some(t => t.uuid === e.uuid)) {
+					tag.classList.add("selected");
+				}
 			});
 
 			self.addNewTagTag();
+
+			if (existing) {
+				const chosen: Array<[Ui.Select, { uuid: string } | null]> = [[ageList, existing.age], [genderList, existing.gender], [methodList, existing.method], [activityList, existing.activity]];
+				chosen.forEach(([l, v]) => {
+					if (v) {
+						l.setSelected(v.uuid);
+					}
+				});
+				// Show the details the sighting has.
+				const hasDetails = chosen.some(([, v]) => !!v) || site.value !== "" || privateComment.value !== "" || (existing.tags || []).length > 0;
+				if (hasDetails && details.classList.contains("hidden")) {
+					moreToggle.click();
+				}
+			}
 		};
 		// The choices are the same for every bird, so the last ones fetched do offline.
 		const basis = new HttpRequest("PUT", "/v1/reports/basis", { species_uuid: species.uuid });
@@ -371,7 +439,7 @@ class ReportPopUp {
 			}
 		});
 
-		this.mReportButton = sheet.addAction(Ui.actionButton(App.translations.SubmitSighting, "check", "success"));
+		this.mReportButton = sheet.addAction(Ui.actionButton(existing ? App.translations.Save : App.translations.SubmitSighting, "check", "success"));
 		this.mReportButton.disabled = true;
 		this.mReportButton.addEventListener("click", function () {
 			const r = new Requests.Reports();
@@ -420,7 +488,10 @@ class ReportPopUp {
 				}
 			}
 
-			// TODO: Tags and notifications.
+			if (existing) {
+				self.save(existing, r);
+				return;
+			}
 
 			// No connection: keep it on this device and send it later.
 			const keep = function () {
@@ -465,6 +536,29 @@ class ReportPopUp {
 				map.remove();
 			}
 			closeCallback(speciesAdded);
+		});
+	}
+
+	// Sends an edit: every field is replaced, so the request carries all of them.
+	private save(existing: Models.Report, r: Requests.Reports): void {
+		const self = this;
+		const body: any = Object.assign({}, r);
+		delete body.uuid;
+		delete body.silent;
+		["age_uuid", "activity_uuid", "gender_uuid", "method_uuid"].forEach(k => {
+			if (!body[k]) {
+				delete body[k];
+			}
+		});
+		Ui.setBusy(self.mReportButton, true);
+		new HttpRequest("PUT", "/v1/reports/" + encodeURIComponent(existing.uuid), body).process(function () {
+			new Ui.Toast(App.translations.Saved, "", null, "var(--success-color)", function () { });
+			self.mPopUp.close();
+			window.dispatchEvent(new Event("sightingadded"));
+		}, function () {
+			new Ui.MessageBox(App.translations.Error, App.translations.SomethingWentWrong, "/img/messagebox-256.webp", "var(--error-color)", function () { });
+		}, function () {
+			Ui.setBusy(self.mReportButton, false);
 		});
 	}
 
@@ -516,18 +610,25 @@ class ReportPopUp {
 	}
 }
 
-function openReportPopUp(species: Models.Species, list: Models.List | null, closeCallback: (speciesAdded: boolean) => void = function () { }): void {
-	new ReportPopUp(species, list, closeCallback);
+function openReportPopUp(species: Models.Species, list: Models.List | null, closeCallback: (speciesAdded: boolean) => void = function () { }, existing: Models.Report | null = null): void {
+	new ReportPopUp(species, list, closeCallback, existing);
 }
 
 // The "Report sighting" button in the menu: pick the bird, then the report form.
 function openQuickReport(): void {
-	const sheet = new Ui.Sheet({ eyebrow: App.translations.SubmitSighting, title: App.translations.WhichBird, size: "tall" });
+	openSpeciesPicker(function (species: Models.Species) {
+		openReportPopUp(species, null);
+	});
+}
+
+// Asks which bird, by name or by its song.
+function openSpeciesPicker(chosen: (species: Models.Species) => void, eyebrow: string = App.translations.SubmitSighting): void {
+	const sheet = new Ui.Sheet({ eyebrow: eyebrow, title: App.translations.WhichBird, size: "tall" });
 	const section = sheet.section();
 	const search = new Ui.SpeciesSearch(App.translations.SearchSpecies, function (species: Models.Species) {
 		sheet.close();
 		Ui.PopUp.whenHistorySettled(function () {
-			openReportPopUp(species, null);
+			chosen(species);
 		});
 	}, true, App.translations.WhichBirdHint);
 	section.appendChild(search.container);
@@ -539,9 +640,7 @@ function openQuickReport(): void {
 	identify.addEventListener("click", function () {
 		sheet.close();
 		Ui.PopUp.whenHistorySettled(function () {
-			openIdentifyBySound(function (species: Models.Species) {
-				openReportPopUp(species, null);
-			});
+			openIdentifyBySound(chosen);
 		});
 	});
 	section.insertBefore(identify, search.container.nextSibling);

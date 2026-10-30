@@ -105,6 +105,9 @@ class SignUpPage extends Page {
 					case Responses.ErrorCode.ErrorSignUpTermsNotAccepted:
 						new Ui.MessageBox(App.translations.Error, App.translations.InvalidAcceptTerms, "/img/messagebox-256.webp", "var(--error-color)", function () { });
 						break;
+					case Responses.ErrorCode.ErrorUsernameTaken:
+						new Ui.MessageBox(App.translations.Error, App.translations.UsernameTaken, "/img/messagebox-256.webp", "var(--error-color)", function () { });
+						break;
 					default:
 						new Ui.MessageBox(App.translations.Error, App.translations.SomethingWentWrong, "/img/messagebox-256.webp", "var(--error-color)", function () { });
 						break;

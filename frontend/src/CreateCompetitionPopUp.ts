@@ -1,3 +1,4 @@
+/// <reference path="ui/Segmented.ts"/>
 /// <reference path="MapSelect.ts"/>
 /// <reference path="ui/Sheet.ts"/>
 /// <reference path="ui/Select.ts"/>
@@ -12,34 +13,6 @@
 function openCreateCompetition(created: (competition: Models.Competition) => void): void {
 	const sheet = new Ui.Sheet({ title: App.translations.NewCompetition, size: "tall" });
 
-	const segmented = function (options: Array<[string, string, string]>, selected: string, changed: (value: string) => void): HTMLDivElement {
-		const group = document.createElement("div");
-		group.className = "segmented";
-		group.setAttribute("role", "radiogroup");
-		const select = function (value: string, notify: boolean) {
-			Array.from(group.children).forEach(b => {
-				const on = (b as HTMLElement).dataset.value === value;
-				b.classList.toggle("selected", on);
-				b.setAttribute("aria-checked", String(on));
-			});
-			if (notify) {
-				changed(value);
-			}
-		};
-		options.forEach(o => {
-			const b = document.createElement("button");
-			b.type = "button";
-			b.setAttribute("role", "radio");
-			b.dataset.value = o[0];
-			b.innerHTML = "<span class='material-symbols-outlined'>" + o[1] + "</span>" + Utils.escapeHtml(o[2]);
-			b.addEventListener("click", function () {
-				select(o[0], true);
-			});
-			group.appendChild(b);
-		});
-		select(selected, false);
-		return group;
-	};
 
 	const dateInput = function (id: string, value: Date): HTMLInputElement {
 		const input = document.createElement("input");
@@ -206,7 +179,7 @@ function openCreateCompetition(created: (competition: Models.Competition) => voi
 	picker.appendChild(chips);
 
 	let anywhere = true;
-	zonesField.appendChild(segmented([["anywhere", "public", App.translations.AllowedAnywhereShort], ["counties", "location_on", App.translations.SelectedCounties]], "anywhere", function (v: string) {
+	zonesField.appendChild(Ui.segmented([["anywhere", "public", App.translations.AllowedAnywhereShort], ["counties", "location_on", App.translations.SelectedCounties]], "anywhere", function (v: string) {
 		anywhere = v === "anywhere";
 		picker.classList.toggle("hidden", anywhere);
 		if (!anywhere) {
@@ -228,7 +201,7 @@ function openCreateCompetition(created: (competition: Models.Competition) => voi
 	const targetField = document.createElement("div");
 	targetField.className = "hidden";
 	let firstTo = false;
-	ends.appendChild(segmented([["most", "leaderboard", App.translations.MostSpeciesWinsShort], ["first", "flag", App.translations.FirstToReach]], "most", function (v: string) {
+	ends.appendChild(Ui.segmented([["most", "leaderboard", App.translations.MostSpeciesWinsShort], ["first", "flag", App.translations.FirstToReach]], "most", function (v: string) {
 		firstTo = v === "first";
 		targetField.classList.toggle("hidden", !firstTo);
 		validate();
@@ -242,7 +215,7 @@ function openCreateCompetition(created: (competition: Models.Competition) => voi
 	const visibilityHint = document.createElement("p");
 	visibilityHint.className = "details";
 	visibilityHint.textContent = App.translations.CompetitionPrivateHint;
-	who.appendChild(segmented([[String(Models.Visibility.Private), "lock", App.translations.CompetitionPrivate], [String(Models.Visibility.Public), "public", App.translations.CompetitionPublic]], String(Models.Visibility.Private), function (v: string) {
+	who.appendChild(Ui.segmented([[String(Models.Visibility.Private), "lock", App.translations.CompetitionPrivate], [String(Models.Visibility.Public), "public", App.translations.CompetitionPublic]], String(Models.Visibility.Private), function (v: string) {
 		visibility = Number(v);
 		visibilityHint.textContent = visibility === Models.Visibility.Public ? App.translations.CompetitionPublicHint : App.translations.CompetitionPrivateHint;
 	}));

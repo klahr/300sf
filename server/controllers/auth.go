@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
+	"github.com/klahr/300sf/server/auth"
 	"github.com/klahr/300sf/server/config"
 	"github.com/klahr/300sf/server/models"
 	"github.com/klahr/300sf/server/utils"
@@ -277,7 +278,12 @@ func Authenticate(r AuthRequest) (*AuthTokens, *AuthError) {
 
 		clientId = r.ClientId
 		stay = r.StaySignedIn
-		scopes = intersectScopes(r.Scopes, user.Scopes, apiKey.Scopes)
+		// A client that asks for nothing would get a token no route accepts.
+		requested := r.Scopes
+		if len(requested) == 0 {
+			requested = []string{auth.AuthScopeUser}
+		}
+		scopes = intersectScopes(requested, user.Scopes, apiKey.Scopes)
 
 	default:
 		return nil, authError(http.StatusBadRequest, ErrorInvalidRequest, "invalid grant_type")

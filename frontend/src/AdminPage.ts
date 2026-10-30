@@ -3,7 +3,6 @@
 /// <reference path="AdminSpeciesPopUp.ts"/>
 /// <reference path="AdminAnnouncementsPopUp.ts"/>
 /// <reference path="AdminUsersPopUp.ts"/>
-/// <reference path="AdminApiKeysPopUp.ts"/>
 /// <reference path="AdminCatalogPopUp.ts"/>
 /// <reference path="AdminZonesPopUp.ts"/>
 /// <reference path="AdminTranslationsPopUp.ts"/>
@@ -28,7 +27,6 @@ class AdminPage extends Page {
 		this.addEntry(App.translations.Translations, "translate", openAdminTranslationsPopUp);
 		this.addEntry(App.translations.Announcements, "campaign", openAdminAnnouncementsPopUp);
 		this.addEntry(App.translations.Users, "group", openAdminUsersPopUp);
-		this.addEntry(App.translations.ApiKeys, "key", openAdminApiKeysPopUp);
 
 		const inviteLbl = document.createElement("h2");
 		inviteLbl.textContent = App.translations.Invite;

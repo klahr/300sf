@@ -3,6 +3,8 @@ package controllers
 
 import (
 	"net/http"
+	"slices"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -19,6 +21,8 @@ const maxApiKeysPerUser = 10
 func ApiKeys(c *gin.Context) {
 	type request struct {
 		Name string `json:"name"`
+		// Optional; only scopes the user has. Sign-in is still limited to the user's scopes.
+		Scopes []string `json:"scopes"`
 	}
 
 	var r request
@@ -38,6 +42,22 @@ func ApiKeys(c *gin.Context) {
 		})
 		return
 	}
+
+	requested := r.Scopes
+	if len(requested) == 0 {
+		requested = []string{auth.AuthScopeUser}
+	}
+	for _, s := range requested {
+		if intersectScopes([]string{s}, user.Scopes, user.Scopes) == "" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    ErrorMissingScope,
+				"message": "you can only give a key scopes you have",
+			})
+			return
+		}
+	}
+	slices.Sort(requested)
+	scopes := strings.Join(slices.Compact(requested), " ")
 
 	// Rate limits are per key, so unlimited keys would mean no limit at all.
 	var active int64
@@ -66,7 +86,7 @@ func ApiKeys(c *gin.Context) {
 		UserId:    user.Id,
 		SoftLimit: config.AppConfig.DefaultApiSoftLimit,
 		HardLimit: config.AppConfig.DefaultApiHardLimit,
-		Scopes:    auth.AuthScopeUser,
+		Scopes:    scopes,
 	}
 
 	if err := models.DB.Create(&apiKey).Error; err != nil {
@@ -76,11 +96,18 @@ func ApiKeys(c *gin.Context) {
 		return
 	}
 
+	// Signing in takes the client ID as well as the secret.
 	type response struct {
-		ApiKey string `json:"api_key"`
+		ApiKey   string `json:"api_key"`
+		ClientId string `json:"client_id"`
+		Prefix   string `json:"prefix"`
+		Scopes   string `json:"scopes"`
 	}
 	c.JSON(http.StatusOK, response{
-		ApiKey: prefix + "." + originalKey,
+		ApiKey:   prefix + "." + originalKey,
+		ClientId: apiKey.ClientId,
+		Prefix:   prefix,
+		Scopes:   scopes,
 	})
 }
 

@@ -9,9 +9,10 @@
 /// <reference path="HttpRequest.ts"/>
 /// <reference path="utils/Sort.ts"/>
 /// <reference path="SpeciesPopUp.ts"/>
+/// <reference path="ReportPopUp.ts"/>
 
-// One sighting, read only: the species photo, what was seen when and where, and the lists and labels
-// it counts for.
+// One sighting: the species photo, what was seen when and where, and the lists and labels it counts
+// for; edited in the report form.
 class EditReportPopUp {
 	private mSheet: Ui.Sheet;
 
@@ -127,6 +128,19 @@ class EditReportPopUp {
 				tagChips.appendChild(tag);
 			});
 		}
+
+		// The list pages leave out parts of a sighting, so the form starts from all of it.
+		sheet.addAction(Ui.actionButton(App.translations.EditSighting, "edit", "secondary")).addEventListener("click", function () {
+			new HttpRequest("GET", "/v1/reports/" + encodeURIComponent(report.uuid)).process(function (status: any, data: any) {
+				const full = data.result as Models.Report;
+				self.mSheet.close();
+				Ui.PopUp.whenHistorySettled(function () {
+					openReportPopUp(full.species, null, function () { }, full);
+				});
+			}, function () {
+				new Ui.MessageBox(App.translations.Error, App.translations.SomethingWentWrong, "/img/messagebox-256.webp", "var(--error-color)", function () { });
+			});
+		});
 
 		sheet.addAction(Ui.actionButton(App.translations.ArchiveSighting, "archive", "secondary")).addEventListener("click", function () {
 			new Ui.ConfirmBox(App.translations.ArchiveSighting, App.translations.ConfirmArchiveSighting, "/img/messagebox-256.webp", "var(--error-color)", function () {

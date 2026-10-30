@@ -6,8 +6,10 @@
 /// <reference path="ui/DivSelect.ts"/>
 /// <reference path="Colors.ts"/>
 /// <reference path="SpeciesListPopUp.ts"/>
+/// <reference path="ui/Segmented.ts"/>
 
-// A checklist in the management list: what it holds, renaming, recolouring and archiving it.
+// A checklist in the management list: what it holds, renaming, recolouring, who can see it and
+// archiving it.
 class EditListPopUp {
 	private mSheet: Ui.Sheet;
 
@@ -35,6 +37,22 @@ class EditListPopUp {
 		const color = list.color !== "" ? list.color : Colors.fallback;
 		colorSelect.select(color);
 		sheet.field(form, App.translations.Color, colorSelect.container);
+
+		// Others see a checklist on a comparison link only when it isn't private.
+		let visibility = String(list.visibility);
+		const visibilitySelect = Ui.segmented([
+			[String(Models.Visibility.Private), "lock", App.translations.Private],
+			[String(Models.Visibility.Hidden), "link", App.translations.WithLink],
+			[String(Models.Visibility.Public), "public", App.translations.Public],
+		], visibility, function (v: string) {
+			visibility = v;
+			saveButton.disabled = name.value.trim() === "" || !changed();
+		});
+		sheet.field(form, App.translations.Visibility, visibilitySelect);
+		const visibilityHint = document.createElement("p");
+		visibilityHint.className = "details";
+		visibilityHint.textContent = App.translations.ChecklistVisibilityHint;
+		form.appendChild(visibilityHint);
 
 		// Lists made from the user's own species list can have their species changed.
 		if (list.template) {
@@ -69,7 +87,7 @@ class EditListPopUp {
 
 		const saveButton = sheet.addAction(Ui.actionButton(App.translations.SaveChanges, "check", "success"));
 		const changed = function (): boolean {
-			return name.value.trim() !== App.getTranslation(list.name) || (colorSelect.value !== null && colorSelect.value !== color);
+			return name.value.trim() !== App.getTranslation(list.name) || (colorSelect.value !== null && colorSelect.value !== color) || visibility !== String(list.visibility);
 		};
 		saveButton.disabled = true;
 		name.container.addEventListener("input", function () {
@@ -87,6 +105,9 @@ class EditListPopUp {
 			}
 			if (colorSelect.value !== null && colorSelect.value !== color) {
 				requests.push(new HttpRequest("POST", "/v1/lists/" + list.uuid + "/color", { color: colorSelect.value }));
+			}
+			if (visibility !== String(list.visibility)) {
+				requests.push(new HttpRequest("POST", "/v1/lists/" + list.uuid + "/visibility", { visibility: parseInt(visibility) }));
 			}
 			Ui.setBusy(saveButton, true);
 			let pending = requests.length;

@@ -1,0 +1,10 @@
+subject: Your email address was changed
+email: noreply@300sf.se
+name: 300 Swedish Birds
+preheader: Your account now uses ${NEW_EMAIL}.
+heading: Your email address was changed
+body:
+- The email address of your 300 Swedish Birds account was changed to ${NEW_EMAIL}. Emails from us, such as password resets, now go there.
+after:
+- If you didn't do this, someone may know your password. Reply to this email and we'll help you get your account back.
+reason: You're receiving this email because it was the address of your account on 300sf.se.

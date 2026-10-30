@@ -2,6 +2,7 @@
 package controllers
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -14,26 +15,114 @@ import (
 	"github.com/klahr/300sf/server/types"
 	"github.com/klahr/300sf/server/utils"
 	"gopkg.in/guregu/null.v4/zero"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
+
+// reportFields are what a sighting is made of, for both reporting and editing one.
+type reportFields struct {
+	SpeciesUuid  string      `json:"species_uuid"`
+	From         zero.Time   `json:"from" time_format:"2006-01-02T15:04Z"`
+	Until        zero.Time   `json:"until" time_format:"2006-01-02T15:04Z"`
+	Latitude     zero.Float  `json:"latitude"`
+	Longitude    zero.Float  `json:"longitude"`
+	Quantity     zero.Int    `json:"quantity"`
+	AgeUuid      zero.String `json:"age_uuid"`
+	ActivityUuid zero.String `json:"activity_uuid"`
+	GenderUuid   zero.String `json:"gender_uuid"`
+	MethodUuid   zero.String `json:"method_uuid"`
+	Comment      zero.String `json:"comment"`
+	Site         zero.String `json:"site"`
+	ListUuids    []string    `json:"list_uuids"`
+	TagUuids     []string    `json:"tag_uuids"`
+}
+
+// lookupId returns the id of the record of type T with this uuid, or null for none.
+func lookupId[T any](tx *gorm.DB, uuid zero.String) (zero.Int, error) {
+	if !uuid.Valid {
+		return zero.Int{}, nil
+	}
+	var row struct{ Id int64 }
+	if err := tx.Model(new(T)).Select("id").Where("uuid=?", uuid.String).Take(&row).Error; err != nil {
+		return zero.Int{}, err
+	}
+	return zero.IntFrom(row.Id), nil
+}
+
+// setReportFields fills in report from r, all of it: what r leaves out is
+// cleared. It reports whether the place has to be looked up once saved.
+func setReportFields(tx *gorm.DB, user models.User, report *models.Report, r reportFields) (bool, error) {
+	var species models.Species
+	if err := tx.Where("uuid=?", r.SpeciesUuid).First(&species).Error; err != nil {
+		return false, errors.New("species not found")
+	}
+	report.SpeciesId = species.Id
+	report.From = r.From
+	report.Until = r.Until
+	report.Latitude = r.Latitude
+	report.Longitude = r.Longitude
+	report.Quantity = r.Quantity
+	report.Site = r.Site
+
+	// Known places get their zone now; a new place is looked up once the
+	// sighting is saved (places.Locate).
+	locateLater := false
+	report.ZoneId = zero.Int{}
+	report.Zone = nil
+	if r.Latitude.Valid && r.Longitude.Valid {
+		zones := utils.GetZonesFromPosition(types.LatLon{
+			Latitude:  r.Latitude.Float64,
+			Longitude: r.Longitude.Float64,
+		})
+		if len(zones) > 0 {
+			report.ZoneId = zero.IntFrom(zones[len(zones)-1].Id)
+		}
+		locateLater = !places.Complete(zones)
+	}
+
+	var err error
+	if report.AgeId, err = lookupId[models.Age](tx, r.AgeUuid); err != nil {
+		return false, err
+	}
+	if report.ActivityId, err = lookupId[models.Activity](tx, r.ActivityUuid); err != nil {
+		return false, err
+	}
+	if report.GenderId, err = lookupId[models.Gender](tx, r.GenderUuid); err != nil {
+		return false, err
+	}
+	if report.MethodId, err = lookupId[models.Method](tx, r.MethodUuid); err != nil {
+		return false, err
+	}
+
+	report.Lists = []models.List{}
+	if len(r.ListUuids) > 0 {
+		if err := tx.Where("uuid IN ?", r.ListUuids).Where("user_id=?", user.Id).Find(&report.Lists).Error; err != nil {
+			return false, err
+		}
+	}
+
+	report.Tags = []models.Tag{}
+	if len(r.TagUuids) > 0 {
+		if err := tx.Where("uuid IN ?", r.TagUuids).Where("user_id=?", user.Id).Where("archived IS NULL").Find(&report.Tags).Error; err != nil {
+			return false, err
+		}
+	}
+
+	return locateLater, nil
+}
+
+// loadReport reads a sighting with everything a client shows of it.
+func loadReport(db *gorm.DB, id int64) (models.Report, error) {
+	var report models.Report
+	err := db.Where("id=?", id).Preload("Zone.Name").Preload("Species.Name").Preload("Species.Order.Name").Preload("Age.Name").Preload("Gender.Name").Preload("Method.Name").Preload("Activity.Name").Preload("Lists.Name").Preload("Tags", "archived IS NULL").Preload("Comment").Preload("Notification.Comment").Preload("Notification.Comments").First(&report).Error
+	return report, err
+}
 
 func Reports(c *gin.Context) {
 	type request struct {
+		reportFields
 		// Optional, from apps that report offline: the same sighting sent again is stored once.
 		Uuid                string      `json:"uuid"`
-		SpeciesUuid         string      `json:"species_uuid"`
-		From                zero.Time   `json:"from" time_format:"2006-01-02T15:04Z"`
-		Until               zero.Time   `json:"until" time_format:"2006-01-02T15:04Z"`
-		Latitude            zero.Float  `json:"latitude"`
-		Longitude           zero.Float  `json:"longitude"`
-		Quantity            zero.Int    `json:"quantity"`
-		AgeUuid             zero.String `json:"age_uuid"`
-		ActivityUuid        zero.String `json:"activity_uuid"`
-		GenderUuid          zero.String `json:"gender_uuid"`
-		MethodUuid          zero.String `json:"method_uuid"`
-		Comment             zero.String `json:"comment"`
-		Site                zero.String `json:"site"`
-		ListUuids           []string    `json:"list_uuids"`
-		TagUuids            []string    `json:"tag_uuids"`
 		Silent              bool        `json:"silent"`
 		NotificationComment zero.String `json:"notification_comment"`
 	}
@@ -85,20 +174,17 @@ func Reports(c *gin.Context) {
 				})
 				return
 			}
-			c.JSON(http.StatusOK, existing)
+			stored, err := loadReport(tx, existing.Id)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"message": err.Error(),
+				})
+				return
+			}
+			c.JSON(http.StatusOK, stored)
 			return
 		}
 		uuid = r.Uuid
-	}
-
-	var species models.Species
-	if err := tx.Where("uuid=?", r.SpeciesUuid).First(&species).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    -10001,
-			"message": "species not found",
-		})
-		tx.Rollback()
-		return
 	}
 
 	report := models.Report{
@@ -106,14 +192,7 @@ func Reports(c *gin.Context) {
 			Timestamp: time.Now(),
 			Uuid:      uuid,
 		},
-		UserId:    user.Id,
-		SpeciesId: species.Id,
-		From:      r.From,
-		Until:     r.Until,
-		Latitude:  r.Latitude,
-		Longitude: r.Longitude,
-		Quantity:  r.Quantity,
-		Site:      r.Site,
+		UserId: user.Id,
 		Comment: &models.Comment{
 			Model: models.Model{
 				Timestamp: time.Now(),
@@ -124,99 +203,14 @@ func Reports(c *gin.Context) {
 		},
 	}
 
-	// Known places get their zone now; a new place is looked up once the
-	// sighting is saved (places.Locate).
-	locateLater := false
-	if r.Latitude.Valid && r.Longitude.Valid {
-		zones := utils.GetZonesFromPosition(types.LatLon{
-			Latitude:  r.Latitude.Float64,
-			Longitude: r.Longitude.Float64,
+	locateLater, err := setReportFields(tx, user, &report, r.reportFields)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
 		})
-		if len(zones) > 0 {
-			report.ZoneId = zero.IntFrom(zones[len(zones)-1].Id)
-		}
-		locateLater = !places.Complete(zones)
+		return
 	}
-
-	if r.AgeUuid.Valid {
-		var age models.Age
-		if err := tx.Where("uuid=?", r.AgeUuid.String).First(&age).Error; err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"code":    -10001,
-				"message": err.Error(),
-			})
-			tx.Rollback()
-			return
-		}
-		report.AgeId = zero.IntFrom(age.Id)
-	}
-
-	if r.ActivityUuid.Valid {
-		var activity models.Activity
-		if err := tx.Where("uuid=?", r.ActivityUuid.String).First(&activity).Error; err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"code":    -10001,
-				"message": err.Error(),
-			})
-			tx.Rollback()
-			return
-		}
-		report.ActivityId = zero.IntFrom(activity.Id)
-	}
-
-	if r.GenderUuid.Valid {
-		var gender models.Gender
-		if err := tx.Where("uuid=?", r.GenderUuid.String).First(&gender).Error; err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"code":    -10001,
-				"message": err.Error(),
-			})
-			tx.Rollback()
-			return
-		}
-		report.GenderId = zero.IntFrom(gender.Id)
-	}
-
-	if r.MethodUuid.Valid {
-		var method models.Method
-		if err := tx.Where("uuid=?", r.MethodUuid.String).First(&method).Error; err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"code":    -10001,
-				"message": err.Error(),
-			})
-			tx.Rollback()
-			return
-		}
-		report.MethodId = zero.IntFrom(method.Id)
-	}
-
-	var lists []models.List
-	if len(r.ListUuids) > 0 {
-		if err := tx.Where("uuid IN ?", r.ListUuids).Where("user_id=?", user.Id).Find(&lists).Error; err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"code":    -10001,
-				"message": err.Error(),
-			})
-			tx.Rollback()
-			return
-		}
-	}
-
-	report.Lists = lists
-
-	var tags []models.Tag
-	if len(r.TagUuids) > 0 {
-		if err := tx.Where("uuid IN ?", r.TagUuids).Where("user_id=?", user.Id).Where("archived IS NULL").Find(&tags).Error; err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"code":    -10001,
-				"message": err.Error(),
-			})
-			tx.Rollback()
-			return
-		}
-	}
-
-	report.Tags = tags
 
 	if err := tx.Create(&report).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -260,7 +254,118 @@ func Reports(c *gin.Context) {
 		places.Locate(report.Id)
 	}
 
-	c.JSON(http.StatusOK, report)
+	stored, err := loadReport(models.DB, report.Id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, stored)
+}
+
+// ReportsUpdate edits a sighting: every field is replaced, so what the
+// request leaves out is cleared.
+func ReportsUpdate(c *gin.Context) {
+	var r reportFields
+	if err := c.ShouldBindJSON(&r); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	tx := models.DB.Begin()
+	defer tx.Rollback()
+
+	var user models.User
+	if err := tx.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var report models.Report
+	if err := tx.Where("uuid=?", c.Param("uuid")).Where("user_id=?", user.Id).Where("archived IS NULL").First(&report).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorRecordNotFound,
+			"message": "report not found",
+		})
+		return
+	}
+
+	locateLater, err := setReportFields(tx, user, &report, r)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    -10001,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	// Select writes the cleared (null) fields too.
+	if err := tx.Model(&report).Select("species_id", "from", "until", "latitude", "longitude", "zone_id", "quantity", "age_id", "activity_id", "gender_id", "method_id", "site").Omit(clause.Associations).Updates(&report).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	if err := tx.Model(&report).Association("Lists").Replace(report.Lists); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	if err := tx.Model(&report).Association("Tags").Replace(report.Tags); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if report.CommentId.Valid {
+		err = tx.Model(&models.Comment{}).Where("id=?", report.CommentId.Int64).Update("text", r.Comment.String).Error
+	} else {
+		comment := models.Comment{
+			Model: models.Model{
+				Timestamp: time.Now(),
+				Uuid:      utils.GenerateShortUuid(),
+			},
+			UserId: user.Id,
+			Text:   r.Comment.String,
+		}
+		if err = tx.Create(&comment).Error; err == nil {
+			err = tx.Model(&report).UpdateColumn("comment_id", comment.Id).Error
+		}
+	}
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	if locateLater && !Throttled("geocode/"+c.GetString("uuid"), 100, time.Hour) {
+		places.Locate(report.Id)
+	}
+
+	stored, err := loadReport(models.DB, report.Id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, stored)
 }
 
 func ReportsList(c *gin.Context) {
@@ -412,8 +517,7 @@ func ReportsDetails(c *gin.Context) {
 		return
 	}
 
-	// TODO: Preload("Lists.Name") is not working and returns an empty list.
-	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("user_id=?", user.Id).Preload("Zone.Name").Preload("Species.Name").Preload("Age.Name").Preload("Method.Name").Preload("Activity.Name").Preload("Lists.Name").Preload("Tags", "archived IS NULL").Preload("Comment").Preload("Notification.Comment").Preload("Notification.Comments").First(&result).Error; err != nil {
+	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("user_id=?", user.Id).Preload("Zone.Name").Preload("Species.Name").Preload("Age.Name").Preload("Gender.Name").Preload("Method.Name").Preload("Activity.Name").Preload("Lists.Name").Preload("Tags", "archived IS NULL").Preload("Comment").Preload("Notification.Comment").Preload("Notification.Comments").First(&result).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "report not found",
 		})
