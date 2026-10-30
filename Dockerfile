@@ -18,7 +18,7 @@ COPY --from=frontend /src/server/site/static/js ./site/static/js
 ARG VERSION=dev
 RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w -X main.version=${VERSION}" -o /300sf
 
-FROM alpine:3.22
+FROM alpine:3.24
 RUN apk add --no-cache ca-certificates && adduser -D -H -u 10001 app
 WORKDIR /app
 COPY --from=server /300sf ./
