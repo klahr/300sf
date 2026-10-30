@@ -3,6 +3,7 @@ package main
 
 import (
 	"net/http"
+	"slices"
 	"strings"
 	"time"
 
@@ -31,17 +32,19 @@ func parseToken(header string) jwt.MapClaims {
 	return claims
 }
 
-func requireScope(c *gin.Context, requiredScope string) {
+// requireScope lets the request through when the token has any of the
+// scopes, or with none given, whether or not there is a token.
+func requireScope(c *gin.Context, requiredScopes ...string) {
 	xAccessToken := c.Request.Header.Get("Authorization")
 
 	xAppLanguage := c.Request.Header.Get("X-App-Language")
 	c.Set("app_language", xAppLanguage)
 	c.Set("request", uuid.New().String())
 
-	ok := requiredScope == auth.AuthScopeNone
+	ok := len(requiredScopes) == 0
 	claims := parseToken(xAccessToken)
 	if claims == nil {
-		if requiredScope != auth.AuthScopeNone {
+		if !ok {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "missing scope", "code": controllers.ErrorAuthInvalid})
 			c.Abort()
 			return
@@ -49,15 +52,11 @@ func requireScope(c *gin.Context, requiredScope string) {
 	} else {
 		c.Set("uuid", claims["sub"])
 
-		if requiredScope == "" {
-			ok = true
-		} else {
-			scopes := strings.Split(claims["scp"].(string), " ")
-			for _, s := range scopes {
-				if s == requiredScope {
-					ok = true
-					break
-				}
+		scopes := strings.Split(claims["scp"].(string), " ")
+		for _, s := range scopes {
+			if slices.Contains(requiredScopes, s) {
+				ok = true
+				break
 			}
 		}
 	}
@@ -71,11 +70,17 @@ func requireScope(c *gin.Context, requiredScope string) {
 }
 
 func noneMiddleware(c *gin.Context) {
-	requireScope(c, auth.AuthScopeNone)
+	requireScope(c)
 }
 
 func basicMiddleware(c *gin.Context) {
 	requireScope(c, auth.AuthScopeUser)
+}
+
+// readMiddleware is for normal routes that only read, which read-only keys
+// may call too.
+func readMiddleware(c *gin.Context) {
+	requireScope(c, auth.AuthScopeUser, auth.AuthScopeRead)
 }
 
 func adminMiddleware(c *gin.Context) {
@@ -184,10 +189,10 @@ func SetupRoutes(r gin.IRouter, signIn, signOut gin.HandlerFunc) {
 	// Users
 	r.POST("/v1/users", noneMiddleware, controllers.Users)
 	r.GET("/v1/users/list", apiKeyMiddleware, adminMiddleware, controllers.UsersGetUsers)
-	r.GET("/v1/users/me", apiKeyMiddleware, basicMiddleware, controllers.UsersMe)
+	r.GET("/v1/users/me", apiKeyMiddleware, readMiddleware, controllers.UsersMe)
 	r.GET("/v1/users/:uuid", apiKeyMiddleware, adminMiddleware, controllers.UsersGetUser)
-	r.GET("/v1/users/whoami", apiKeyMiddleware, basicMiddleware, controllers.UsersWhoAmI)
-	r.GET("/v1/users/export", apiKeyMiddleware, basicMiddleware, controllers.UsersExportData)
+	r.GET("/v1/users/whoami", apiKeyMiddleware, readMiddleware, controllers.UsersWhoAmI)
+	r.GET("/v1/users/export", apiKeyMiddleware, readMiddleware, controllers.UsersExportData)
 	r.POST("/v1/users/language", apiKeyMiddleware, basicMiddleware, controllers.UsersLanguage)
 	r.POST("/v1/users/portrait", apiKeyMiddleware, basicMiddleware, controllers.UsersPortrait)
 	r.POST("/v1/users/display_name", apiKeyMiddleware, basicMiddleware, controllers.UsersDisplayName)
@@ -203,23 +208,23 @@ func SetupRoutes(r gin.IRouter, signIn, signOut gin.HandlerFunc) {
 
 	// Competitions
 	r.POST("/v1/competitions", apiKeyMiddleware, basicMiddleware, controllers.Competitions)
-	r.GET("/v1/competitions/list", apiKeyMiddleware, basicMiddleware, controllers.CompetitionsList)
-	r.GET("/v1/competitions/list/me", apiKeyMiddleware, basicMiddleware, controllers.CompetitionsListMe)
-	r.GET("/v1/competitions/:uuid", apiKeyMiddleware, basicMiddleware, controllers.CompetitionsGet)
+	r.GET("/v1/competitions/list", apiKeyMiddleware, readMiddleware, controllers.CompetitionsList)
+	r.GET("/v1/competitions/list/me", apiKeyMiddleware, readMiddleware, controllers.CompetitionsListMe)
+	r.GET("/v1/competitions/:uuid", apiKeyMiddleware, readMiddleware, controllers.CompetitionsGet)
 	r.PUT("/v1/competitions/:uuid/join", apiKeyMiddleware, basicMiddleware, controllers.CompetitionsJoin)
 	r.PUT("/v1/competitions/:uuid/leave", apiKeyMiddleware, basicMiddleware, controllers.CompetitionsLeave)
 	r.PUT("/v1/competitions/:uuid/invite", apiKeyMiddleware, basicMiddleware, controllers.CompetitionsInvite)
 	r.PUT("/v1/competitions/:uuid/decline", apiKeyMiddleware, basicMiddleware, controllers.CompetitionsDecline)
 	r.PUT("/v1/competitions/:uuid/archive", apiKeyMiddleware, basicMiddleware, controllers.CompetitionsArchive)
 	r.GET("/v1/competitions/:uuid/result", noneMiddleware, controllers.CompetitionsResult)
-	r.GET("/v1/competitions/basis", apiKeyMiddleware, basicMiddleware, controllers.CompetitionsBasis)
-	r.GET("/v1/zones/regions", apiKeyMiddleware, basicMiddleware, controllers.ZonesRegions)
-	r.GET("/v1/zones/search", apiKeyMiddleware, basicMiddleware, controllers.ZonesSearch)
+	r.GET("/v1/competitions/basis", apiKeyMiddleware, readMiddleware, controllers.CompetitionsBasis)
+	r.GET("/v1/zones/regions", apiKeyMiddleware, readMiddleware, controllers.ZonesRegions)
+	r.GET("/v1/zones/search", apiKeyMiddleware, readMiddleware, controllers.ZonesSearch)
 	r.POST("/v1/zones/osm", apiKeyMiddleware, basicMiddleware, controllers.ZonesFromOsm)
 
 	// Lists
-	r.GET("/v1/lists/list", apiKeyMiddleware, basicMiddleware, controllers.ListsList)
-	r.GET("/v1/lists/archived", apiKeyMiddleware, basicMiddleware, controllers.ListsArchived)
+	r.GET("/v1/lists/list", apiKeyMiddleware, readMiddleware, controllers.ListsList)
+	r.GET("/v1/lists/archived", apiKeyMiddleware, readMiddleware, controllers.ListsArchived)
 	r.POST("/v1/lists", apiKeyMiddleware, basicMiddleware, controllers.Lists)
 	r.POST("/v1/lists/:uuid/archive", apiKeyMiddleware, basicMiddleware, controllers.ListsArchive)
 	r.POST("/v1/lists/:uuid/restore", apiKeyMiddleware, basicMiddleware, controllers.ListsRestore)
@@ -228,14 +233,14 @@ func SetupRoutes(r gin.IRouter, signIn, signOut gin.HandlerFunc) {
 	r.POST("/v1/lists/:uuid/color", apiKeyMiddleware, basicMiddleware, controllers.ListsColor)
 	r.POST("/v1/lists/:uuid/timespan", apiKeyMiddleware, basicMiddleware, controllers.ListsTimespan)
 	r.POST("/v1/lists/:uuid/visibility", apiKeyMiddleware, basicMiddleware, controllers.ListsVisibility)
-	r.GET("/v1/lists/:uuid", apiKeyMiddleware, basicMiddleware, controllers.ListsDetails)
-	r.GET("/v1/lists/:uuid/reports", apiKeyMiddleware, basicMiddleware, controllers.ListsReports)
-	r.GET("/v1/lists/species/:species_uuid", apiKeyMiddleware, basicMiddleware, controllers.ListsForSpecies)
+	r.GET("/v1/lists/:uuid", apiKeyMiddleware, readMiddleware, controllers.ListsDetails)
+	r.GET("/v1/lists/:uuid/reports", apiKeyMiddleware, readMiddleware, controllers.ListsReports)
+	r.GET("/v1/lists/species/:species_uuid", apiKeyMiddleware, readMiddleware, controllers.ListsForSpecies)
 	r.POST("/v1/lists/compare", noneMiddleware, controllers.ListsCompare)
 
 	// List templates
-	r.GET("/v1/list_templates/list", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesList)
-	r.GET("/v1/list_templates/list/me", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesListMe)
+	r.GET("/v1/list_templates/list", apiKeyMiddleware, readMiddleware, controllers.ListTemplatesList)
+	r.GET("/v1/list_templates/list/me", apiKeyMiddleware, readMiddleware, controllers.ListTemplatesListMe)
 	r.POST("/v1/list_templates", apiKeyMiddleware, basicMiddleware, controllers.ListTemplates)
 	r.POST("/v1/list_templates/:uuid/archive", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesArchive)
 	r.POST("/v1/list_templates/:uuid/add_species", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesAddSpecies)
@@ -244,28 +249,28 @@ func SetupRoutes(r gin.IRouter, signIn, signOut gin.HandlerFunc) {
 	r.POST("/v1/list_templates/:uuid/description", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesDescription)
 	r.POST("/v1/list_templates/:uuid/species", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesSpecies)
 	r.POST("/v1/list_templates/:uuid/visibility", apiKeyMiddleware, adminMiddleware, controllers.ListTemplatesVisibility)
-	r.GET("/v1/list_templates/:uuid", apiKeyMiddleware, basicMiddleware, controllers.ListTemplatesDetails)
+	r.GET("/v1/list_templates/:uuid", apiKeyMiddleware, readMiddleware, controllers.ListTemplatesDetails)
 
 	// Tags
-	r.GET("/v1/tags/list", apiKeyMiddleware, basicMiddleware, controllers.TagsList)
+	r.GET("/v1/tags/list", apiKeyMiddleware, readMiddleware, controllers.TagsList)
 	r.POST("/v1/tags", apiKeyMiddleware, basicMiddleware, controllers.Tags)
 	r.POST("/v1/tags/:uuid/archive", apiKeyMiddleware, basicMiddleware, controllers.TagsArchive)
 	r.POST("/v1/tags/:uuid/rename", apiKeyMiddleware, basicMiddleware, controllers.TagsRename)
-	r.GET("/v1/tags/:uuid", apiKeyMiddleware, basicMiddleware, controllers.TagsDetails)
+	r.GET("/v1/tags/:uuid", apiKeyMiddleware, readMiddleware, controllers.TagsDetails)
 
 	// Api keys
-	r.GET("/v1/api_keys/list", apiKeyMiddleware, basicMiddleware, controllers.ApiKeysList)
+	r.GET("/v1/api_keys/list", apiKeyMiddleware, readMiddleware, controllers.ApiKeysList)
 	r.POST("/v1/api_keys", apiKeyMiddleware, basicMiddleware, controllers.ApiKeys)
 	r.POST("/v1/api_keys/password", noneMiddleware, controllers.ApiKeysPassword)
 	r.POST("/v1/api_keys/:prefix/revoke", apiKeyMiddleware, basicMiddleware, controllers.ApiKeysRevoke)
 
 	// Species
-	r.GET("/v1/species/list", apiKeyMiddleware, basicMiddleware, controllers.SpeciesList)
+	r.GET("/v1/species/list", apiKeyMiddleware, readMiddleware, controllers.SpeciesList)
 	r.GET("/v1/species/:uuid", apiKeyMiddleware, noneMiddleware, controllers.SpeciesDetails)
 	r.POST("/v1/species/:uuid/set_rarity", apiKeyMiddleware, adminMiddleware, controllers.SpeciesSetRarity)
 
 	// Reports
-	r.GET("/v1/reports/list", apiKeyMiddleware, basicMiddleware, controllers.ReportsList)
+	r.GET("/v1/reports/list", apiKeyMiddleware, readMiddleware, controllers.ReportsList)
 	r.POST("/v1/reports/list", apiKeyMiddleware, basicMiddleware, controllers.ReportsListByList)
 	r.POST("/v1/reports", apiKeyMiddleware, basicMiddleware, controllers.Reports)
 	r.POST("/v1/reports/:uuid/archive", apiKeyMiddleware, basicMiddleware, controllers.ReportsArchive)
@@ -273,28 +278,28 @@ func SetupRoutes(r gin.IRouter, signIn, signOut gin.HandlerFunc) {
 	r.POST("/v1/reports/:uuid/remove_list", apiKeyMiddleware, basicMiddleware, controllers.ReportsRemoveList)
 	r.DELETE("/v1/reports/:uuid", apiKeyMiddleware, basicMiddleware, controllers.ReportsDelete)
 	r.PUT("/v1/reports/:uuid", apiKeyMiddleware, basicMiddleware, controllers.ReportsUpdate)
-	r.GET("/v1/reports/:uuid", apiKeyMiddleware, basicMiddleware, controllers.ReportsDetails)
+	r.GET("/v1/reports/:uuid", apiKeyMiddleware, readMiddleware, controllers.ReportsDetails)
 	r.POST("/v1/reports/:uuid/remove_tag", apiKeyMiddleware, basicMiddleware, controllers.ReportsRemoveTag)
 	r.POST("/v1/reports/:uuid/add_tag", apiKeyMiddleware, basicMiddleware, controllers.ReportsAddTag)
 	r.PUT("/v1/reports/basis", apiKeyMiddleware, basicMiddleware, controllers.ReportsBasis)
 	r.PUT("/v1/reports/export", apiKeyMiddleware, basicMiddleware, controllers.ReportsExport)
 
 	// Activities
-	r.GET("/v1/activities/list", apiKeyMiddleware, basicMiddleware, controllers.NamedRecordList[models.Activity])
+	r.GET("/v1/activities/list", apiKeyMiddleware, readMiddleware, controllers.NamedRecordList[models.Activity])
 
 	// Methods
-	r.GET("/v1/methods/list", apiKeyMiddleware, basicMiddleware, controllers.NamedRecordList[models.Method])
+	r.GET("/v1/methods/list", apiKeyMiddleware, readMiddleware, controllers.NamedRecordList[models.Method])
 
 	// Genders
-	r.GET("/v1/genders/:uuid", apiKeyMiddleware, basicMiddleware, controllers.NamedRecordDetails[models.Gender])
-	r.GET("/v1/genders/list", apiKeyMiddleware, basicMiddleware, controllers.NamedRecordList[models.Gender])
+	r.GET("/v1/genders/:uuid", apiKeyMiddleware, readMiddleware, controllers.NamedRecordDetails[models.Gender])
+	r.GET("/v1/genders/list", apiKeyMiddleware, readMiddleware, controllers.NamedRecordList[models.Gender])
 
 	// Orders
-	r.GET("/v1/orders/list", apiKeyMiddleware, basicMiddleware, controllers.NamedRecordList[models.Order])
-	r.GET("/v1/orders/:uuid", apiKeyMiddleware, basicMiddleware, controllers.OrderDetails)
+	r.GET("/v1/orders/list", apiKeyMiddleware, readMiddleware, controllers.NamedRecordList[models.Order])
+	r.GET("/v1/orders/:uuid", apiKeyMiddleware, readMiddleware, controllers.OrderDetails)
 
 	// Ages
-	r.GET("/v1/ages/list", apiKeyMiddleware, basicMiddleware, controllers.NamedRecordList[models.Age])
+	r.GET("/v1/ages/list", apiKeyMiddleware, readMiddleware, controllers.NamedRecordList[models.Age])
 
 	// Zones
 	r.GET("/v1/zones/list", apiKeyMiddleware, adminMiddleware, controllers.ZonesList)
@@ -308,8 +313,8 @@ func SetupRoutes(r gin.IRouter, signIn, signOut gin.HandlerFunc) {
 
 	// Announcements
 	r.PUT("/v1/announcements/:uuid/read", apiKeyMiddleware, basicMiddleware, controllers.AnnouncementsRead)
-	r.GET("/v1/announcements/list", apiKeyMiddleware, basicMiddleware, controllers.AnnouncementsList)
-	r.GET("/v1/announcements/feed", apiKeyMiddleware, basicMiddleware, controllers.AnnouncementsFeed)
+	r.GET("/v1/announcements/list", apiKeyMiddleware, readMiddleware, controllers.AnnouncementsList)
+	r.GET("/v1/announcements/feed", apiKeyMiddleware, readMiddleware, controllers.AnnouncementsFeed)
 	r.PUT("/v1/announcements/read_all", apiKeyMiddleware, basicMiddleware, controllers.AnnouncementsReadAll)
 
 	r.POST("/v1/analyze", apiKeyMiddleware, basicMiddleware, controllers.Analyze)

@@ -12,21 +12,35 @@ function openApiKeysPopUp(closeCallback: () => void = function () { }): void {
 
 	const add = sheet.section(App.translations.CreateApiKey);
 	const name = Admin.input(sheet, add, "api-key-name", App.translations.Name);
+	const checkRow = function (input: Ui.Input, id: string, text: string) {
+		const row = document.createElement("div");
+		row.className = "check-row";
+		input.container.id = id;
+		row.appendChild(input.container);
+		const lbl = document.createElement("label");
+		lbl.setAttribute("for", id);
+		lbl.textContent = text;
+		row.appendChild(lbl);
+		add.appendChild(row);
+	};
+	// A read-only key can only call routes that read, so it can't be an admin key too.
+	const readOnly = new Ui.Input("checkbox");
+	checkRow(readOnly, "api-key-read-only", App.translations.ApiKeyReadOnly);
 	// Admins may give a key their admin scope too.
 	const scope = new LocalStorage().get("scope");
 	const isAdmin = !!scope && scope.includes("admin");
 	const admin = new Ui.Input("checkbox");
 	if (isAdmin) {
-		const row = document.createElement("div");
-		row.className = "check-row";
-		admin.container.id = "api-key-admin";
-		row.appendChild(admin.container);
-		const lbl = document.createElement("label");
-		lbl.setAttribute("for", admin.container.id);
-		lbl.textContent = App.translations.ApiKeyAdminScope;
-		row.appendChild(lbl);
-		add.appendChild(row);
+		checkRow(admin, "api-key-admin", App.translations.ApiKeyAdminScope);
 	}
+	const syncScopes = function () {
+		const ro = (readOnly.container as HTMLInputElement).checked;
+		if (ro) {
+			(admin.container as HTMLInputElement).checked = false;
+		}
+		(admin.container as HTMLInputElement).disabled = ro;
+	};
+	readOnly.container.addEventListener("change", syncScopes);
 	const create = sheet.addAction(Ui.actionButton(App.translations.CreateApiKey, "key", "success"));
 	create.disabled = true;
 	name.container.addEventListener("input", function () {
@@ -68,10 +82,12 @@ function openApiKeysPopUp(closeCallback: () => void = function () { }): void {
 
 	create.addEventListener("click", function () {
 		create.disabled = true;
-		const scopes = (admin.container as HTMLInputElement).checked ? ["user", "admin"] : ["user"];
+		const scopes = (readOnly.container as HTMLInputElement).checked ? ["read"] : (admin.container as HTMLInputElement).checked ? ["user", "admin"] : ["user"];
 		new HttpRequest("POST", "/v1/api_keys", { name: name.value.trim(), scopes: scopes }).process(function (status: any, data: any) {
 			name.value = "";
 			(admin.container as HTMLInputElement).checked = false;
+			(readOnly.container as HTMLInputElement).checked = false;
+			syncScopes();
 			// The secret is only ever returned here; a client signs in with it and the client ID.
 			created.innerHTML = "";
 			created.style.display = "";

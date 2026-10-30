@@ -46,6 +46,7 @@ Versions are git tags `X.Y.Z`, cut with `make patch|minor|major`.
   see how many have read each one.
 - Everyone can make API keys for other apps and scripts, under Settings → API keys;
   the client ID they sign in with is shown with each key. Admins can give a key admin access.
+- Read-only API keys, which can look but not change anything (the `read` scope).
 - Complete API documentation at `/docs`.
 - Edit a sighting, including which bird it was, from the sighting's page.
 - Choose who can see a checklist on comparison links: only you, anyone with the link, or everyone.

@@ -296,6 +296,9 @@ func Authenticate(r AuthRequest) (*AuthTokens, *AuthError) {
 		requested := r.Scopes
 		if len(requested) == 0 {
 			requested = []string{auth.AuthScopeUser}
+			if !hasScope(apiKey.Scopes, auth.AuthScopeUser) {
+				requested = []string{auth.AuthScopeRead}
+			}
 		}
 		scopes = intersectScopes(requested, user.Scopes, apiKey.Scopes)
 		if scopes == "" {
@@ -384,21 +387,24 @@ func AuthLogout(c *gin.Context) {
 
 // intersectScopes keeps the requested scopes that both the user and the API key have.
 func intersectScopes(requested []string, userScopes, apiKeyScopes string) string {
-	has := func(list string, scope string) bool {
-		for _, s := range strings.Split(list, " ") {
-			if s == scope {
-				return true
-			}
-		}
-		return false
-	}
 	var result []string
 	for _, s := range requested {
-		if s != "" && has(userScopes, s) && has(apiKeyScopes, s) {
+		if s != "" && hasScope(userScopes, s) && hasScope(apiKeyScopes, s) {
 			result = append(result, s)
 		}
 	}
 	return strings.Join(result, " ")
+}
+
+// hasScope tells whether the space-separated scopes give scope. The user
+// scope gives the read scope too.
+func hasScope(scopes string, scope string) bool {
+	for _, s := range strings.Split(scopes, " ") {
+		if s == scope || (s == auth.AuthScopeUser && scope == auth.AuthScopeRead) {
+			return true
+		}
+	}
+	return false
 }
 
 func generateToken(typ, userUuid, clientId, scopes, jti string, stay bool, lifetimeSeconds int64) (string, error) {

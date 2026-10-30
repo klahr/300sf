@@ -48,9 +48,11 @@ info:
     | Scope | Gives access to |
     |---|---|
     | `user` | Every normal route. |
+    | `read` | The normal `GET` routes only. Every account with `user` has it. |
     | `admin` | Routes marked **Admin only**. Only granted to admin accounts. |
 
-    `scopes` is optional and defaults to `["user"]`. The token gets the requested scopes that both the user and the
+    A **read-only key** (made with `scopes: ["read"]`) gives only `read`, so its sessions can look but not change
+    anything. `scopes` is optional and defaults to `["user"]`, or to `["read"]` with a read-only key. The token gets the requested scopes that both the user and the
     API key have (the granted ones are in the response's `scope`, space separated). Scopes are matched exactly: an
     admin who wants to call both normal and admin routes asks for `["user", "admin"]`. A missing scope is answered
     with **401** and code `3005` (not 403).
@@ -239,8 +241,8 @@ paths:
         - `grant_type: "refresh_token"` needs `refresh_token`. `client_id` is optional but must match the key the
           token was issued for. The refresh token is used up; keep the new one from the response.
 
-        `scopes` is optional and defaults to `["user"]`. The token gets the requested scopes that both the user and
-        the API key have; if that leaves none, sign-in fails with 400 code 3005 (and a refresh whose scopes the user
+        `scopes` is optional and defaults to `["user"]` (`["read"]` with a read-only key). The token gets the
+        requested scopes that both the user and the API key have; if that leaves none, sign-in fails with 400 code 3005 (and a refresh whose scopes the user
         or key has lost fails with 401 code 7001).
       security: []
       requestBody:
@@ -851,8 +853,8 @@ paths:
       tags: [API keys]
       summary: Create an API key
       description: |
-        At most 10 active keys per user. `scopes` defaults to `["user"]`; each must be a scope the user has. The
-        secret in `api_key` is shown only once.
+        At most 10 active keys per user. `scopes` defaults to `["user"]`; each must be a scope the user has.
+        `["read"]` makes a read-only key, which can have no other scopes. The secret in `api_key` is shown only once.
       requestBody:
         required: true
         content:
@@ -867,7 +869,7 @@ paths:
                   type: array
                   items:
                     type: string
-                    enum: [user, admin]
+                    enum: [user, read, admin]
                   default: ["user"]
       responses:
         "200":
@@ -891,7 +893,7 @@ paths:
                     description: Space separated.
                     example: "user admin"
         "400":
-          description: Parse error (-10001), a scope the user does not have (3005) or too many keys (3006).
+          description: Parse error (-10001), a scope the user does not have or `read` with other scopes (3005), or too many keys (3006).
           content:
             application/json:
               schema:

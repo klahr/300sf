@@ -46,6 +46,42 @@ func TestDBOwnApiKey(t *testing.T) {
 	}
 }
 
+// A read-only key's sessions can read but not change anything.
+func TestDBReadOnlyApiKey(t *testing.T) {
+	s := testDB(t)
+	u := s.signUp(t)
+
+	if r := s.call(t, u, "POST", "/v1/api_keys", map[string]any{"name": "x", "scopes": []string{"read", "user"}}); r.Status != http.StatusBadRequest || get(r.Body, "code") != float64(3005) {
+		t.Errorf("read-only key with the user scope: %d %s", r.Status, r.Raw)
+	}
+	r := s.must(t, u, http.StatusOK, "POST", "/v1/api_keys", map[string]any{"name": "Reader", "scopes": []string{"read"}})
+	if r.Body["scopes"] != "read" {
+		t.Fatalf("read-only key = %s", r.Raw)
+	}
+	clientId, secret := r.Body["client_id"].(string), r.Body["api_key"].(string)
+
+	// Without asking for scopes it gets read; it can't get user.
+	signIn := func(scopes ...string) response {
+		body := map[string]any{"grant_type": "password", "client_id": clientId, "client_secret": secret, "email": u.Email, "password": u.Password}
+		if scopes != nil {
+			body["scopes"] = scopes
+		}
+		return s.do(t, u.address, "", "POST", "/v1/auth", body)
+	}
+	if r := signIn("user"); r.Status != http.StatusBadRequest {
+		t.Errorf("read-only key signed in with user: %d %s", r.Status, r.Raw)
+	}
+	r = signIn()
+	if r.Status != http.StatusOK || r.Body["scope"] != "read" {
+		t.Fatalf("sign in with read-only key = %d: %s", r.Status, r.Raw)
+	}
+	reader := &testUser{address: u.address, Token: r.Body["access_token"].(string)}
+	s.must(t, reader, http.StatusOK, "GET", "/v1/users/whoami", nil)
+	s.must(t, reader, http.StatusOK, "GET", "/v1/lists/list", nil)
+	s.must(t, reader, http.StatusUnauthorized, "POST", "/v1/users/display_name", map[string]any{"display_name": "Changed"})
+	s.must(t, reader, http.StatusUnauthorized, "POST", "/v1/api_keys", map[string]any{"name": "more"})
+}
+
 // A new account gets its first key with its password, without the website.
 func TestDBApiKeyWithPassword(t *testing.T) {
 	s := testDB(t)

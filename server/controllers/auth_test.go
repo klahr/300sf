@@ -115,6 +115,11 @@ func TestIntersectScopes(t *testing.T) {
 		{[]string{"user", ""}, "user", "user", "user"},
 		{nil, "user", "user", ""},
 		{[]string{"adm"}, "admin", "admin", ""},
+		// The user scope gives read too.
+		{[]string{"read"}, "user", "read", "read"},
+		{[]string{"read"}, "user", "user", "read"},
+		{[]string{"user"}, "user", "read", ""},
+		{[]string{"read"}, "admin", "admin", ""},
 	}
 	for _, c := range cases {
 		if got := intersectScopes(c.requested, c.user, c.key); got != c.want {

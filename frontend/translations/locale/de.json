@@ -347,6 +347,7 @@
 	"ClientId": "Client-ID",
 	"ApiKeySecret": "Geheimnis",
 	"ApiKeyAdminScope": "Administratorzugriff",
+	"ApiKeyReadOnly": "Nur lesen (kann nichts ändern)",
 	"UsernameTaken": "Dieser Benutzername ist vergeben. Wähle einen anderen.",
 	"EditSighting": "Beobachtung bearbeiten",
 	"ChangeSpecies": "Art ändern",

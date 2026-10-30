@@ -21,7 +21,8 @@ const maxApiKeysPerUser = 10
 func ApiKeys(c *gin.Context) {
 	type request struct {
 		Name string `json:"name"`
-		// Optional; only scopes the user has. Sign-in is still limited to the user's scopes.
+		// Optional; only scopes the user has, or just read for a read-only key.
+		// Sign-in is still limited to the user's scopes.
 		Scopes []string `json:"scopes"`
 	}
 
@@ -87,6 +88,14 @@ func createApiKey(c *gin.Context, user models.User, name string, requested []str
 			})
 			return
 		}
+	}
+	// A read-only key with other scopes would not be read-only.
+	if slices.Contains(requested, auth.AuthScopeRead) && slices.ContainsFunc(requested, func(s string) bool { return s != auth.AuthScopeRead }) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorMissingScope,
+			"message": "a read-only key can have no other scopes",
+		})
+		return
 	}
 	slices.Sort(requested)
 	scopes := strings.Join(slices.Compact(requested), " ")

@@ -35,6 +35,7 @@ func newScopeRouter() *gin.Engine {
 	ok := func(c *gin.Context) { c.JSON(http.StatusOK, gin.H{"uuid": c.GetString("uuid")}) }
 	r.GET("/none", noneMiddleware, ok)
 	r.GET("/user", basicMiddleware, ok)
+	r.GET("/read", readMiddleware, ok)
 	r.GET("/admin", adminMiddleware, ok)
 	r.GET("/health", Health)
 	return r
@@ -68,6 +69,12 @@ func TestScopeMiddleware(t *testing.T) {
 		{"/admin", token(t, "user"), http.StatusUnauthorized},
 		{"/admin", token(t, "user admin"), http.StatusOK},
 		{"/admin", token(t, "administrator"), http.StatusUnauthorized},
+		{"/read", "", http.StatusUnauthorized},
+		{"/read", token(t, "read"), http.StatusOK},
+		{"/read", token(t, "user"), http.StatusOK},
+		{"/read", token(t, "admin"), http.StatusUnauthorized},
+		{"/user", token(t, "read"), http.StatusUnauthorized},
+		{"/admin", token(t, "read"), http.StatusUnauthorized},
 	}
 	for _, c := range cases {
 		if w := do(r, c.path, c.auth); w.Code != c.status {

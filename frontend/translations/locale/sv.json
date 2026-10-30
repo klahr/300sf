@@ -347,6 +347,7 @@
 	"ClientId": "Klient-id",
 	"ApiKeySecret": "Hemlighet",
 	"ApiKeyAdminScope": "Administratörsåtkomst",
+	"ApiKeyReadOnly": "Endast läsning (kan inte ändra något)",
 	"UsernameTaken": "Användarnamnet är upptaget. Välj ett annat.",
 	"EditSighting": "Ändra observation",
 	"ChangeSpecies": "Byt art",
