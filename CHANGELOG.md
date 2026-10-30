@@ -25,6 +25,17 @@ Versions are git tags `X.Y.Z`, cut with `make patch|minor|major`.
 - The contact form's address is set in the config (`contact-email`).
 - Licenses of the bundled libraries, fonts and data (`THIRD_PARTY_NOTICES.md`).
 - A contributing guide, issue templates and Dependabot.
+- A news feed: announcements are posts with a title, kept under the bell in
+  the top bar (News in the sidebar), with unread ones counted and shown on
+  the home page. New accounts don't start with old posts unread.
+- Admins write posts in English, Swedish and German with simple formatting
+  and a preview, edit them, schedule them, publish and take them down, and
+  see how many have read each one.
+
+### Removed
+
+- Importing sightings from the old 300 Svenska Fåglar app (`/v1/users/migrate`),
+  and `imported_at` on users.
 
 ### Security
 
@@ -48,6 +59,8 @@ Versions are git tags `X.Y.Z`, cut with `make patch|minor|major`.
 - Redis can be given a password (`redis-password`).
 
 ### Fixed
+
+- Resuming a paused announcement did nothing.
 
 - Browsers could keep running old code after a release.
 - The health check reported the wrong version.

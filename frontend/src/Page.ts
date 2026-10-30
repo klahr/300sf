@@ -1,4 +1,5 @@
 /// <reference path="ui/PopUp.ts"/>
+/// <reference path="News.ts"/>
 
 class Page extends Ui.Widget {
 	private mAppListener: IAppListener;
@@ -31,6 +32,10 @@ class Page extends Ui.Widget {
 		const spacer = document.createElement("div");
 		spacer.className = "spacer";
 		this.mAppBar.appendChild(spacer);
+
+		if (App.isLoggedIn()) {
+			this.mAppBar.appendChild(News.bell(appListener));
+		}
 
 		this.mContainer.addEventListener("scroll", function () {
 			self.mAppBar.classList.toggle("scrolled", self.mContainer.scrollTop > 4);

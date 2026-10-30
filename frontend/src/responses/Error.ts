@@ -19,9 +19,6 @@ namespace Responses {
 		public static ErrorSignUpInvalidPassword = 4003;
 		public static ErrorSignUpTermsNotAccepted = 4004;
 
-		public static ErrorMigrateCompleted = 5001
-		public static ErrorMigrateInvalidCredentials = 5002
-
 		public static ErrorAccountDeactivated = 6001;
 	}
 }

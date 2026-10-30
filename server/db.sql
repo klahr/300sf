@@ -1310,3 +1310,29 @@ CREATE TABLE IF NOT EXISTS `300sf`.`competition_invites` (
 ALTER TABLE `300sf`.`zones`
 ADD COLUMN `osm_id` VARCHAR(32) NULL AFTER `parent_zone_id`,
 ADD UNIQUE INDEX `osm_id_UNIQUE` (`osm_id` ASC) VISIBLE;
+
+-- Announcements become a news feed: each post has a title and a body of its
+-- own, in the row, since translations hold at most 512 characters. Bodies of
+-- existing announcements are copied from their content translation, which
+-- is no longer used (content_id is kept, but may be empty).
+ALTER TABLE `300sf`.`announcements`
+ADD COLUMN `title_sv` VARCHAR(160) NULL AFTER `name`,
+ADD COLUMN `title_en` VARCHAR(160) NULL AFTER `title_sv`,
+ADD COLUMN `title_de` VARCHAR(160) NULL AFTER `title_en`,
+ADD COLUMN `body_sv` TEXT NULL AFTER `title_de`,
+ADD COLUMN `body_en` TEXT NULL AFTER `body_sv`,
+ADD COLUMN `body_de` TEXT NULL AFTER `body_en`,
+MODIFY COLUMN `content_id` INT NULL,
+ADD INDEX `published_idx` (`on_hold`, `from`);
+
+UPDATE `300sf`.`announcements` a JOIN `300sf`.`translations` t ON t.id = a.content_id
+SET a.body_sv = t.sv, a.body_en = t.en, a.body_de = t.de;
+
+-- Old announcements had only an internal name; it is the closest to a title.
+UPDATE `300sf`.`announcements` SET `title_en` = `name` WHERE `title_en` IS NULL;
+
+-- Reading a post twice must not count it twice.
+DELETE u1 FROM `300sf`.`announcement_users` u1 JOIN `300sf`.`announcement_users` u2
+ON u1.announcement_id = u2.announcement_id AND u1.user_id = u2.user_id AND u1.id > u2.id;
+ALTER TABLE `300sf`.`announcement_users`
+ADD UNIQUE INDEX `announcement_user_UNIQUE` (`announcement_id` ASC, `user_id` ASC) VISIBLE;

@@ -40,7 +40,7 @@ var Version = "dev"
 var appPages = []string{
 	"home", "sign-up", "forgot", "settings", "checklists", "contribute", "donation",
 	"contact", "tags", "reports", "set-password", "delete-account", "competitions",
-	"admin", "experimental",
+	"admin", "experimental", "news",
 }
 
 var appNames = map[string]string{

@@ -7,9 +7,6 @@
 /// <reference path="Theme.ts"/>
 
 class SettingsPage extends Page {
-	private mEmail: Ui.Input;
-	private mPassword: Ui.Input;
-	private mImportButton: HTMLButtonElement;
 
 	constructor(appListener: IAppListener) {
 		super(appListener);
@@ -61,65 +58,6 @@ class SettingsPage extends Page {
 			appListener.showPage("tags", null);
 		});
 		this.container.appendChild(labelsButton);
-
-		const importSubmissionsLbl = document.createElement("h2");
-		importSubmissionsLbl.innerHTML = App.translations.ImportData;
-		this.container.appendChild(importSubmissionsLbl);
-
-		const importSubmissionsDescription = document.createElement("p");
-		importSubmissionsDescription.innerHTML = App.translations.ImportDataDescription;
-		this.container.appendChild(importSubmissionsDescription);
-
-		this.mEmail = new Ui.Input("email");
-		this.mPassword = new Ui.Input("password");
-		this.mImportButton = document.createElement("button");
-
-		this.mEmail.style.position = "relative";
-		this.mEmail.setPlaceHolder(App.translations.Email);
-		this.mEmail.container.addEventListener("keydown", function (e) {
-			if (e.key == "Enter") {
-				e.preventDefault();
-				self.mPassword.select();
-			}
-		});
-		this.attach(this.mEmail);
-
-		this.mPassword.style.position = "relative";
-		this.mPassword.setPlaceHolder(App.translations.Password);
-		this.mPassword.container.addEventListener("keydown", function (e) {
-			if (e.key == "Enter") {
-				e.preventDefault();
-				self.mImportButton.click();
-			}
-		});
-		this.attach(this.mPassword);
-
-		this.mImportButton.innerHTML = App.translations.Import;
-		this.mImportButton.addEventListener("click", function () {
-			const d = {
-				old_password: self.mPassword.value,
-				old_username: self.mEmail.value
-			};
-
-			self.mImportButton.disabled = true;
-			self.mImportButton.innerHTML = App.translations.PleaseWait;
-			self.mEmail.container.setAttribute("disabled", "");
-			self.mPassword.container.setAttribute("disabled", "");
-			const r = new HttpRequest("POST", "/v1/users/migrate", d);
-			r.process(function (status: any, data: any) {
-				self.refresh();
-				new Ui.MessageBox(App.translations.Success, App.translations.SightingsImportSuccess, "/img/messagebox-256.webp", "var(--success-color)", function () { });
-				self.mPassword.value = "";
-			}, function () {
-				self.mImportButton.disabled = false;
-				self.mImportButton.innerHTML = App.translations.Import;
-				self.mEmail.container.removeAttribute("disabled");
-				self.mPassword.container.removeAttribute("disabled");
-				new Ui.MessageBox(App.translations.Error, App.translations.WrongImportCredentials, "/img/messagebox-256.webp", "var(--error-color)", function () { });
-			});
-		});
-
-		this.container.appendChild(this.mImportButton);
 
 		const exportDataLbl = document.createElement("h2");
 		exportDataLbl.innerHTML = App.translations.ExportMyData;
@@ -232,17 +170,6 @@ class SettingsPage extends Page {
 	}
 
 	private refresh(): void {
-		const self = this;
 		this.mProfile.setImage("/img/portraits/" + App.user.portrait);
-		const me = new HttpRequest("GET", "/v1/users/me");
-		me.process(function (status: any, data: any) {
-			const d = data as Responses.UsersMe;
-			if (Utils.isValidDate(d.user.imported_at)) {
-				self.mImportButton.disabled = true;
-				self.mImportButton.innerHTML = "(" + App.translations.AlreadyImported + ")";
-				self.mEmail.container.setAttribute("disabled", "");
-				self.mPassword.container.setAttribute("disabled", "");
-			}
-		});
 	}
 }

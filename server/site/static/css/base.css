@@ -1085,6 +1085,303 @@ div.announcement>span.close:hover {
 	color: var(--ink);
 }
 
+/* Unread posts on the home page: a short card each, leading to the feed. */
+div.announcement>div.announcement-text {
+	flex: 1;
+	min-width: 0;
+}
+
+div.announcement>div.announcement-text>h3 {
+	margin: 2px 0 4px;
+	font-size: 1rem;
+}
+
+div.announcement>div.announcement-text>p {
+	margin: 0 0 6px;
+	color: var(--ink-soft);
+}
+
+div.announcement>div.announcement-text>a,
+a.announcements-all {
+	font-weight: 600;
+	color: var(--tone, var(--primary));
+}
+
+a.announcements-all {
+	display: inline-block;
+	margin: -4px 0 12px;
+}
+
+/* The bell in the top bar and the count on it, and on News in the sidebar. */
+button.news-bell {
+	position: relative;
+	flex-shrink: 0;
+}
+
+span.news-badge {
+	min-width: 18px;
+	height: 18px;
+	padding: 0 5px;
+	box-sizing: border-box;
+	border-radius: var(--radius-pill);
+	background-color: var(--danger);
+	/* Dark on the light red of the dark theme, light on the dark red of the light one. */
+	color: var(--paper);
+	font-size: 0.7rem;
+	font-weight: 700;
+	line-height: 18px;
+	text-align: center;
+	font-variant-numeric: tabular-nums;
+}
+
+span.news-badge:empty {
+	display: none;
+}
+
+button.news-bell>span.news-badge {
+	position: absolute;
+	top: 4px;
+	right: 2px;
+	box-shadow: 0 0 0 2px var(--paper);
+}
+
+button.news-bell.has-unread>span.material-symbols-outlined {
+	font-variation-settings: 'FILL' 1;
+}
+
+a.nav-item>span.news-badge {
+	margin-left: auto;
+}
+
+/* The news feed. */
+div.news-feed {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin-top: var(--medium-distance);
+}
+
+article.news-post {
+	--tone: var(--blue);
+	display: flex;
+	gap: 14px;
+	padding: var(--medium-distance);
+	background-color: var(--surface);
+	border: 1px solid var(--line);
+	border-radius: var(--radius-l);
+	scroll-margin-top: calc(var(--app-bar-height) + 16px);
+	transition: box-shadow var(--dur);
+}
+
+article.news-post.unread {
+	border-color: color-mix(in srgb, var(--tone) 45%, var(--line));
+	box-shadow: inset 3px 0 0 var(--tone);
+}
+
+article.news-post.focus {
+	box-shadow: 0 0 0 2px var(--tone);
+}
+
+span.news-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	background-color: color-mix(in srgb, var(--tone) 14%, var(--surface));
+	color: var(--tone);
+}
+
+span.news-icon>span.material-symbols-outlined {
+	font-size: 22px;
+}
+
+div.news-main {
+	flex: 1;
+	min-width: 0;
+}
+
+p.news-meta {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0;
+	font-size: 0.85rem;
+	color: var(--ink-soft);
+}
+
+span.news-new {
+	padding: 1px 8px;
+	border-radius: var(--radius-pill);
+	background-color: var(--tone);
+	color: #fff;
+	font-size: 0.75rem;
+	font-weight: 700;
+}
+
+article.news-post h2 {
+	margin: 4px 0 6px;
+	font-size: 1.15rem;
+}
+
+div.news-body {
+	overflow-wrap: anywhere;
+}
+
+div.news-body>*:first-child {
+	margin-top: 0;
+}
+
+div.news-body>*:last-child {
+	margin-bottom: 0;
+}
+
+div.news-body h3 {
+	margin: 14px 0 6px;
+	font-size: 1rem;
+}
+
+div.news-body ul,
+div.news-body ol {
+	padding-left: 20px;
+}
+
+div.news-body a {
+	color: var(--tone);
+	font-weight: 600;
+}
+
+button.news-more {
+	display: block;
+	margin: var(--medium-distance) auto 0;
+}
+
+button.news-more[hidden] {
+	display: none;
+}
+
+/* The admin's list of posts. */
+div.admin-news-list {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+div.admin-news-row {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 10px 8px 10px 12px;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-m);
+	background-color: var(--surface);
+}
+
+div.admin-news-text {
+	flex: 1;
+	min-width: 0;
+}
+
+p.admin-news-title {
+	margin: 0;
+	font-weight: 600;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+p.admin-news-meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin: 2px 0 0;
+	font-size: 0.8rem;
+	color: var(--ink-soft);
+}
+
+span.admin-news-reads {
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+}
+
+span.admin-news-reads>span.material-symbols-outlined {
+	font-size: 16px;
+}
+
+span.news-status {
+	padding: 1px 8px;
+	border-radius: var(--radius-pill);
+	font-weight: 600;
+	background-color: var(--surface-sunk);
+	color: var(--ink-soft);
+}
+
+span.news-status.is-published {
+	background-color: var(--seen-soft);
+	color: var(--seen);
+}
+
+span.news-status.is-scheduled {
+	background-color: var(--primary-soft);
+	color: var(--primary-ink);
+}
+
+div.admin-news-actions {
+	display: flex;
+	flex-shrink: 0;
+}
+
+div.admin-news-actions>button.icon-button {
+	width: 38px;
+	min-width: 38px;
+	height: 38px;
+}
+
+div.admin-news-actions>button.icon-button .material-symbols-outlined {
+	font-size: 22px;
+}
+
+/* The editor: languages with text are marked on their tab. */
+div.segmented>button.filled::after {
+	content: "";
+	display: inline-block;
+	width: 6px;
+	height: 6px;
+	margin-left: 6px;
+	vertical-align: middle;
+	border-radius: 50%;
+	background-color: var(--seen);
+}
+
+div.admin-news-pane {
+	margin-top: 12px;
+}
+
+div.admin-news-pane textarea {
+	width: 100%;
+	box-sizing: border-box;
+	resize: vertical;
+}
+
+div.admin-news-preview {
+	margin-top: 0;
+}
+
+@media screen and (max-width: 480px) {
+	div.admin-news-row {
+		flex-wrap: wrap;
+	}
+
+	div.admin-news-actions {
+		width: 100%;
+		justify-content: flex-end;
+	}
+}
+
 div.fade-out {
 	opacity: 0;
 	transform: scale(0.98);

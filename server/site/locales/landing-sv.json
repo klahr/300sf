@@ -88,7 +88,7 @@
 	],
 	"More": [
 		{ "icon": "photo", "title": "Lär känna fågeln", "text": "Bilder och en kort beskrivning från Wikipedia för varje art." },
-		{ "icon": "import", "title": "Ta med dina gamla fynd", "text": "Importera allt från appen 300 Svenska Fåglar på en gång." },
+		{ "icon": "offline", "title": "Fungerar utan täckning", "text": "Rapportera fynd utan uppkoppling; de skickas när du är online igen." },
 		{ "icon": "devices", "title": "Mobil och dator", "text": "Samma listor överallt, i webbläsaren du redan har." }
 	],
 	"HowEyebrow": "Så fungerar det",
@@ -103,7 +103,6 @@
 	"Faq": [
 		{ "q": "Kostar det något?", "a": "Nej. 300 Svenska Fåglar är gratis att använda. Vill du kan du stödja projektet med en gåva." },
 		{ "q": "Vilka fåglar finns med?", "a": "Den färdiga listan har Sveriges 300 vanligaste fåglar. Dina egna listor kan innehålla vilken som helst av över 2 000 arter i katalogen." },
-		{ "q": "Jag använde appen 300 Svenska Fåglar. Kan jag behålla mina fynd?", "a": "Ja. Logga in, öppna Konto och importera dina fynd med appens e-postadress och lösenord." },
 		{ "q": "Måste jag installera en app?", "a": "Nej. 300 Svenska Fåglar fungerar i webbläsaren i mobilen, surfplattan och datorn." },
 		{ "q": "Kan jag få ut mina data?", "a": "Ja. Ladda ner en lista som kalkylblad (CSV) eller alla dina data på en gång, när du vill." },
 		{ "q": "Hur säker är igenkänningen av läten?", "a": "Den är ett förslag, inte en säker artbestämning. Den fungerar bäst med en tydlig inspelning av en sjungande fågel på nära håll." }

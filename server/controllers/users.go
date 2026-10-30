@@ -569,53 +569,6 @@ func UsersExportData(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
-func UsersMigrate(c *gin.Context) {
-	log.Info(c, 0, "UsersMigrate")
-
-	type request struct {
-		OldUsername string `json:"old_username"`
-		OldPassword string `json:"old_password"`
-	}
-
-	var r request
-	if err := c.ShouldBindJSON(&r); err != nil {
-		log.Error(c, -10001, err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    -10001,
-			"message": err.Error(),
-		})
-		return
-	}
-
-	// Each attempt tries a password on the old site; don't let this be used
-	// to guess them.
-	if throttle(c, "migrate/"+c.GetString("uuid"), 10, time.Hour) {
-		return
-	}
-
-	var user models.User
-	if err := models.DB.Where("uuid=?", c.GetString("uuid")).First(&user).Error; err != nil {
-		log.Error(c, -10001, err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    -10001,
-			"message": err.Error(),
-		})
-		return
-	}
-
-	res, code, err := migrate(user, r.OldUsername, r.OldPassword)
-	if err != nil {
-		log.Error(c, int64(code), err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    code,
-			"message": err.Error(),
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, res)
-}
-
 func UsersLanguage(c *gin.Context) {
 	log.Info(c, 0, "UsersLanguage")
 

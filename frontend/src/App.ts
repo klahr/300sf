@@ -23,6 +23,8 @@
 /// <reference path="Session.ts"/>
 /// <reference path="Outbox.ts"/>
 /// <reference path="Updates.ts"/>
+/// <reference path="NewsPage.ts"/>
+/// <reference path="News.ts"/>
 
 interface IAppListener {
 	showPage(id: string, data: any): void;
@@ -80,6 +82,7 @@ class App implements IAppListener {
 		this.addPage(new ContactPage(this));
 		this.addPage(new ManageCompetitionsPage(this));
 		this.addPage(new ExperimentalPage(this));
+		this.addPage(new NewsPage(this));
 
 		document.body.classList.toggle("signed-out", !App.isLoggedIn());
 		this.mLayerManager.addToLayer("base", this.mMainMenu);
@@ -96,6 +99,7 @@ class App implements IAppListener {
 		// Sightings saved while offline, from this visit or an earlier one.
 		Outbox.send();
 		Updates.watch();
+		News.refresh(true);
 
 		window.addEventListener("popstate", function () {
 			if (Ui.PopUp.handleBack()) {

@@ -10,6 +10,8 @@
 /// <reference path="Page.ts"/>
 /// <reference path="App.ts"/>
 /// <reference path="HttpRequest.ts"/>
+/// <reference path="News.ts"/>
+/// <reference path="utils/NewsText.ts"/>
 /// <reference path="SpeciesPopUp.ts"/>
 /// <reference path="ReportPopUp.ts"/>
 /// <reference path="ProfilePopUp.ts"/>
@@ -59,6 +61,7 @@ class HomePage extends Page {
 		this.mAnnouncements = new Ui.Div();
 		this.mAnnouncements.addClass("announcements");
 		this.attach(this.mAnnouncements);
+		News.onChange(posts => self.showNews(posts));
 
 		this.mSpeciesList = new Ui.SpeciesSearch(App.translations.SearchSpecies, (species: Models.Species) => {
 			openSpeciesPopUp(species, null, () => { });
@@ -290,45 +293,82 @@ class HomePage extends Page {
 		}, (status: any, data: Responses.GeneralErrorResponse, error: any) => {
 		}, undefined);
 
-		const announcements = new HttpRequest("GET", "/v1/announcements/list", null);
-		announcements.process((status: any, data: any) => {
-			const an = data.data as Array<Models.Announcement>;
-			self.mAnnouncements.clear();
-			an.forEach(e => {
-				const a = document.createElement("div");
-				a.className = "announcement";
-				self.mAnnouncements.container.appendChild(a);
-				const img = document.createElement("p");
-				img.className = "announcement-icon";
-				img.innerHTML = "<span class='material-symbols-outlined'>" + Utils.escapeHtml(e.icon) + "</span>";
-				if (e.color) {
-					a.style.setProperty("--tone", e.color);
-				}
+		News.refresh(true);
+	}
 
-				a.appendChild(img);
+	// The newest unread posts, short, each leading to the feed. More than
+	// fit are counted on a link to the feed; the bell has them too.
+	private showNews(posts: Array<Models.NewsPost>): void {
+		const self = this;
+		const shown = 2;
+		this.mAnnouncements.clear();
+		posts.slice(0, shown).forEach(e => {
+			const a = document.createElement("div");
+			a.className = "announcement";
+			if (e.color) {
+				a.style.setProperty("--tone", e.color);
+			}
+			const img = document.createElement("p");
+			img.className = "announcement-icon";
+			img.innerHTML = "<span class='material-symbols-outlined'></span>";
+			(img.firstChild as HTMLElement).textContent = e.icon || "campaign";
+			a.appendChild(img);
 
-				const close = document.createElement("span");
-				close.className = "material-symbols-outlined close";
-				close.setAttribute("role", "button");
-				close.setAttribute("aria-label", App.translations.Close);
-				close.innerHTML = "close";
-				a.appendChild(close);
-				close.addEventListener("click", function () {
-					const r = new HttpRequest("PUT", "/v1/announcements/" + e.uuid + "/read");
-					r.process((status: any, data: any) => {
-						a.classList.add("fade-out");
-						setTimeout(function () {
-							a.remove();
-						}, 500);
-					});
+			const text = document.createElement("div");
+			text.className = "announcement-text";
+			const title = document.createElement("h3");
+			title.textContent = NewsText.localized(e.title);
+			text.appendChild(title);
+			const body = NewsText.localized(e.body);
+			const summary = document.createElement("p");
+			summary.textContent = NewsText.summary(body);
+			text.appendChild(summary);
+			// The rest of a long post is in the feed.
+			if (summary.textContent !== NewsText.summary(body, Infinity)) {
+				const more = document.createElement("a");
+				more.href = "/news";
+				more.textContent = App.translations.ShowMore;
+				more.addEventListener("click", function (ev) {
+					ev.preventDefault();
+					self.appListener.showPage("news", { post: e.uuid });
 				});
+				text.appendChild(more);
+			}
+			a.appendChild(text);
 
-				const c = document.createElement("p");
-				c.innerHTML = App.getTranslation(e.content);
-				a.appendChild(c);
+			const close = document.createElement("span");
+			close.className = "material-symbols-outlined close";
+			close.setAttribute("role", "button");
+			close.setAttribute("aria-label", App.translations.Close);
+			close.tabIndex = 0;
+			close.textContent = "close";
+			const dismiss = function () {
+				a.classList.add("fade-out");
+				setTimeout(function () {
+					News.markRead(e.uuid);
+				}, 300);
+			};
+			close.addEventListener("click", dismiss);
+			close.addEventListener("keydown", function (ev) {
+				if (ev.key === "Enter" || ev.key === " ") {
+					ev.preventDefault();
+					dismiss();
+				}
 			});
-		}, (status: any, data: Responses.GeneralErrorResponse, error: any) => {
-		}, undefined);
+			a.appendChild(close);
+			self.mAnnouncements.container.appendChild(a);
+		});
+		if (posts.length > shown) {
+			const all = document.createElement("a");
+			all.className = "announcements-all";
+			all.href = "/news";
+			all.textContent = App.translations.AllNews + " (" + posts.length + ")";
+			all.addEventListener("click", function (ev) {
+				ev.preventDefault();
+				self.appListener.showPage("news", null);
+			});
+			self.mAnnouncements.container.appendChild(all);
+		}
 	}
 
 	public setData(data: any): void {

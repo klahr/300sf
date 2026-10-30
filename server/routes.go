@@ -155,7 +155,6 @@ func SetupRoutes(r gin.IRouter, signIn, signOut gin.HandlerFunc) {
 	r.GET("/v1/users/me", apiKeyMiddleware, basicMiddleware, controllers.UsersMe)
 	r.GET("/v1/users/:uuid", apiKeyMiddleware, adminMiddleware, controllers.UsersGetUser)
 	r.GET("/v1/users/whoami", apiKeyMiddleware, basicMiddleware, controllers.UsersWhoAmI)
-	r.POST("/v1/users/migrate", apiKeyMiddleware, basicMiddleware, controllers.UsersMigrate)
 	r.GET("/v1/users/export", apiKeyMiddleware, basicMiddleware, controllers.UsersExportData)
 	r.POST("/v1/users/language", apiKeyMiddleware, basicMiddleware, controllers.UsersLanguage)
 	r.POST("/v1/users/portrait", apiKeyMiddleware, basicMiddleware, controllers.UsersPortrait)
@@ -269,6 +268,8 @@ func SetupRoutes(r gin.IRouter, signIn, signOut gin.HandlerFunc) {
 	// Announcements
 	r.PUT("/v1/announcements/:uuid/read", apiKeyMiddleware, basicMiddleware, controllers.AnnouncementsRead)
 	r.GET("/v1/announcements/list", apiKeyMiddleware, basicMiddleware, controllers.AnnouncementsList)
+	r.GET("/v1/announcements/feed", apiKeyMiddleware, basicMiddleware, controllers.AnnouncementsFeed)
+	r.PUT("/v1/announcements/read_all", apiKeyMiddleware, basicMiddleware, controllers.AnnouncementsReadAll)
 
 	r.POST("/v1/analyze", apiKeyMiddleware, basicMiddleware, controllers.Analyze)
 	r.PUT("/v1/analyze/resolve", apiKeyMiddleware, basicMiddleware, controllers.AnalyzeResolve)
@@ -296,6 +297,7 @@ func setupPrivateRoutes(r gin.IRouter) {
 	// Announcements
 	r.POST("/v1/announcements", apiKeyMiddleware, adminMiddleware, controllers.Announcements)
 	r.GET("/v1/announcements/all", apiKeyMiddleware, adminMiddleware, controllers.AnnouncementsAll)
+	r.PUT("/v1/announcements/:uuid", apiKeyMiddleware, adminMiddleware, controllers.AnnouncementsUpdate)
 	r.PUT("/v1/announcements/:uuid/pause", apiKeyMiddleware, adminMiddleware, controllers.AnnouncementsPause)
 	r.PUT("/v1/announcements/:uuid/resume", apiKeyMiddleware, adminMiddleware, controllers.AnnouncementsResume)
 	r.DELETE("/v1/announcements/:uuid", apiKeyMiddleware, adminMiddleware, controllers.AnnouncementsDelete)

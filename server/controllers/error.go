@@ -27,9 +27,6 @@ const (
 	ErrorSignUpTermsNotAccepted   = 4004
 	ErrorSignUpInvalidUsername    = 4005
 
-	ErrorMigrateCompleted          = 5001
-	ErrorMigrateInvalidCredentials = 5002
-
 	ErrorAccountDeactivated = 6001
 
 	ErrorAuthInvalid          = 7001

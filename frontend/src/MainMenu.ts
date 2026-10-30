@@ -1,6 +1,7 @@
 /// <reference path="ui/Div.ts"/>
 /// <reference path="App.ts"/>
 /// <reference path="AccountMenu.ts"/>
+/// <reference path="News.ts"/>
 /// <reference path="ReportPopUp.ts"/>
 /// <reference path="Overview.ts"/>
 
@@ -75,6 +76,9 @@ class MainMenu extends Ui.Widget {
 		this.mLists.className = "sidebar-lists";
 		main.appendChild(this.mLists);
 		main.appendChild(this.navItem("competitions", "/competitions", "emoji_events", App.translations.Competitions));
+		const news = this.navItem("news", "/news", "notifications", App.translations.News);
+		news.appendChild(News.badge());
+		main.appendChild(news);
 
 		const account = document.createElement("button");
 		account.className = "sidebar-account";

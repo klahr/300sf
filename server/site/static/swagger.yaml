@@ -141,9 +141,6 @@ components:
         accepted_terms_at:
           type: string
           example: "2023-07-19T07:04:20Z"
-        imported_at:
-          type: string
-          example: "2023-07-19T07:04:20Z"
         language:
           $ref: "#/components/schemas/Language"
         portrait:

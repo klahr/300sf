@@ -108,12 +108,15 @@ Notes for the installation at 300sf.se.
 
 **Next release** (offline reporting, zones from OpenStreetMap):
 
-1. Apply the migration that adds `zones.osm_id` (end of `server/db.sql`).
+1. Apply the migrations that add `zones.osm_id` and turn announcements into
+   news posts (end of `server/db.sql`).
 2. Add `token-secret` with a new `openssl rand -hex 32`. Sessions were signed
    with `hashing-secret` until now; the server refuses to start with the two
    the same. Everyone signs in once more.
 3. Set `requirepass` in Redis and the same as `redis-password`.
-4. Add `geocoder-endpoint: "https://nominatim.openstreetmap.org"` to turn on
+4. Importing from the old app is gone: remove the `/legacy/` route from
+   nginx, and the old site behind it.
+5. Add `geocoder-endpoint: "https://nominatim.openstreetmap.org"` to turn on
    zones from OpenStreetMap, and `contact-email: "hej@300sf.se"` to keep the
    contact form on. Check `domain` is `https://300sf.se`: it names the server
    to OpenStreetMap.
@@ -126,10 +129,7 @@ Notes for the installation at 300sf.se.
 3. `make -C .. deploy`, then reload nginx with `server_name 300sf.se
    www.300sf.se app.300sf.se api.300sf.se api-docs.300sf.se;`.
 4. Set `domain: "https://300sf.se"`, keep the existing `hashing-secret`.
-5. If importing from the old site should keep working, keep routing
-   `/legacy/` on 300sf.se to it in nginx; everything else goes to the
-   container.
-6. Check `https://300sf.se/`, signing in on `https://300sf.se/home`,
+5. Check `https://300sf.se/`, signing in on `https://300sf.se/home`,
    `https://300sf.se/docs`, `https://300sf.se/health`, and that
    `https://app.300sf.se/` redirects.
 

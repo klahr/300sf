@@ -5,7 +5,6 @@ namespace Models {
 		uuid: string;
 		display_name: string;
 		username: string;
-		imported_at: Date;
 		language: Language;
 		portrait: string;
 		scopes?: string;

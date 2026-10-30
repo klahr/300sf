@@ -88,7 +88,7 @@
 	],
 	"More": [
 		{ "icon": "photo", "title": "Know the bird", "text": "Photos and a short description from Wikipedia for every species." },
-		{ "icon": "import", "title": "Bring your old sightings", "text": "Import everything from the 300 Svenska Fåglar app in one go." },
+		{ "icon": "offline", "title": "Works offline", "text": "Report sightings without a connection; they are sent when you are back online." },
 		{ "icon": "devices", "title": "Phone and computer", "text": "The same lists everywhere, in the browser you already have." }
 	],
 	"HowEyebrow": "How it works",
@@ -103,7 +103,6 @@
 	"Faq": [
 		{ "q": "Does it cost anything?", "a": "No. 300 Swedish Birds is free to use. You can support the project with a donation if you like." },
 		{ "q": "Which birds are included?", "a": "The ready-made list has the 300 most common birds in Sweden. Your own lists can include any of over 2,000 species in the catalogue." },
-		{ "q": "I used the 300 Svenska Fåglar app. Can I keep my sightings?", "a": "Yes. Sign in, open Account and import your sightings with the app's email and password." },
 		{ "q": "Do I need to install an app?", "a": "No. 300 Swedish Birds runs in the browser on your phone, tablet and computer." },
 		{ "q": "Can I get my data out?", "a": "Yes. Download a list as a spreadsheet (CSV) or all your data at once, whenever you like." },
 		{ "q": "How reliable is the sound identification?", "a": "It is a suggestion, not a certain identification. It works best with a clear recording of a singing bird, close by." }
