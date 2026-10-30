@@ -16,7 +16,12 @@ func TestSampleConfigParses(t *testing.T) {
 	}
 	raw, _ := os.ReadFile(sample)
 	configured := filepath.Join(t.TempDir(), "300sf.yml")
-	os.WriteFile(configured, []byte(strings.Replace(string(raw), `"change-me"`, `"0123456789abcdef0123456789abcdef"`, 1)), 0o600)
+	withHashing := strings.Replace(string(raw), `"change-me"`, `"0123456789abcdef0123456789abcdef"`, 1)
+	os.WriteFile(configured, []byte(withHashing), 0o600)
+	if err := SetupAppConfig(configured); err == nil || !strings.Contains(err.Error(), "token-secret") {
+		t.Fatalf("sample config with placeholder token secret: err = %v", err)
+	}
+	os.WriteFile(configured, []byte(strings.Replace(withHashing, `"change-me"`, `"fedcba9876543210fedcba9876543210"`, 1)), 0o600)
 	if err := SetupAppConfig(configured); err != nil {
 		t.Fatal(err)
 	}
@@ -28,6 +33,22 @@ func TestSampleConfigParses(t *testing.T) {
 	}
 	if AppConfig.DefaultLists == nil {
 		t.Error("default-lists should parse to an empty list")
+	}
+}
+
+func TestValidateTokenSecret(t *testing.T) {
+	hashing := "0123456789abcdef0123456789abcdef"
+	for secret, ok := range map[string]bool{
+		"":                                 false,
+		"change-me":                        false,
+		"short":                            false,
+		hashing:                            false, // can't be rotated without breaking API keys
+		"fedcba9876543210fedcba9876543210": true,
+	} {
+		err := (&App{HashingSecret: hashing, TokenSecret: secret}).Validate()
+		if (err == nil) != ok {
+			t.Errorf("token-secret %q: err = %v", secret, err)
+		}
 	}
 }
 

@@ -16,7 +16,7 @@ import (
 
 func setup() {
 	gin.SetMode(gin.TestMode)
-	config.AppConfig = &config.App{HashingSecret: "test-secret", AccessTokenLifetime: 60, RefreshTokenLifetime: 120}
+	config.AppConfig = &config.App{HashingSecret: "test-secret", TokenSecret: "test-token-secret", AccessTokenLifetime: 60, RefreshTokenLifetime: 120}
 }
 
 func TestTokenRoundTrip(t *testing.T) {
@@ -43,7 +43,7 @@ func TestValidateTokenRejects(t *testing.T) {
 	}
 
 	good, _ := generateToken(TokenTypeAccess, "u", "c", "user", "", false, 60)
-	config.AppConfig.HashingSecret = "other-secret"
+	config.AppConfig.TokenSecret = "other-secret"
 	if tok, _ := ValidateToken(good); tok != nil {
 		t.Error("token signed with another secret accepted")
 	}
@@ -179,5 +179,31 @@ func TestValidateTokenRejectsOtherAlgorithms(t *testing.T) {
 	s, _ := jwt.NewWithClaims(jwt.SigningMethodHS512, jwt.MapClaims{"typ": TokenTypeAccess, "sub": "u", "scp": "admin", "exp": time.Now().Add(time.Minute).Unix()}).SignedString([]byte("test-secret"))
 	if tok, _ := ValidateToken(s); tok != nil {
 		t.Error("HS512 token accepted")
+	}
+}
+
+func TestClientNetwork(t *testing.T) {
+	for ip, want := range map[string]string{
+		"203.0.113.7":                  "203.0.113.7",
+		"2001:db8:1:2:aaaa::1":         "2001:db8:1:2::/64",
+		"2001:db8:1:2:bbbb:cccc::ffff": "2001:db8:1:2::/64",
+		"::ffff:203.0.113.7":           "203.0.113.7",
+		"":                             "",
+	} {
+		if got := ClientNetwork(ip); got != want {
+			t.Errorf("ClientNetwork(%q) = %q, want %q", ip, got, want)
+		}
+	}
+}
+
+func TestLoginFailKeys(t *testing.T) {
+	a1, n1, e1 := loginFailKeys(" Bird@Example.com", "2001:db8::1")
+	a2, n2, e2 := loginFailKeys("bird@example.com ", "2001:db8::2")
+	if a1 != a2 || n1 != n2 || e1 != e2 {
+		t.Error("same account from the same /64 should share counters")
+	}
+	a3, n3, e3 := loginFailKeys("bird@example.com", "203.0.113.7")
+	if a3 == a1 || n3 == n1 || e3 != e1 {
+		t.Error("another network should only share the account-wide counter")
 	}
 }

@@ -20,7 +20,7 @@
 	<link rel="stylesheet" href="{{asset "/css/fonts.css"}}">
 	<link rel="stylesheet" href="{{asset "/css/tokens.css"}}">
 	<link rel="stylesheet" href="{{asset "/css/landing.css"}}">
-	<script>
+	<script nonce="{{$.Nonce}}">
 		document.documentElement.classList.add("js");
 		{{- if $.SignedInGoesToApp}}
 		// Signed-in visitors land in the app instead of on this page.
@@ -306,7 +306,7 @@
 	</div>
 </footer>
 
-<script>
+<script nonce="{{$.Nonce}}">
 	// Sections fade in as they scroll into view.
 	(function () {
 		var items = document.querySelectorAll(".reveal");

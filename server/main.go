@@ -35,14 +35,14 @@ var version = "dev"
 // (/v1/analyze) have a larger limit of their own.
 const maxBodyBytes = 1 << 20
 
-// securityHeaders applies to every response. Pages may not be framed by other
-// sites (clickjacking) and browsers must use HTTPS once they have seen it.
+// securityHeaders applies to every response: the content security policy
+// (pages add their own nonce), and browsers must use HTTPS once they have seen it.
 func securityHeaders(c *gin.Context) {
 	h := c.Writer.Header()
 	h.Set("X-Content-Type-Options", "nosniff")
 	h.Set("Referrer-Policy", "strict-origin-when-cross-origin")
 	h.Set("X-Frame-Options", "DENY")
-	h.Set("Content-Security-Policy", "frame-ancestors 'none'; base-uri 'self'; object-src 'none'")
+	h.Set("Content-Security-Policy", site.ContentSecurityPolicy(""))
 	h.Set("Strict-Transport-Security", "max-age=31536000")
 	if c.Request.Body != nil && !strings.HasSuffix(c.Request.URL.Path, "/v1/analyze") {
 		c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, maxBodyBytes)
@@ -131,7 +131,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := models.SetupCache(config.AppConfig.RedisHost); err != nil {
+	if err := models.SetupCache(config.AppConfig.RedisHost, config.AppConfig.RedisPassword); err != nil {
 		log.Error(nil, 0, err.Error())
 		os.Exit(1)
 	}

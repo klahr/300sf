@@ -7,7 +7,9 @@
 package site
 
 import (
+	"crypto/rand"
 	"embed"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -207,6 +209,7 @@ func (s *Site) AppSignIn(c *gin.Context) {
 	}
 	r.ClientId = s.cfg.ClientId
 	r.ClientSecret = s.cfg.ClientSecret
+	r.ClientIP = c.ClientIP()
 	if r.GrantType == "refresh_token" {
 		r.RefreshToken, _ = c.Cookie(refreshCookie)
 	}
@@ -313,7 +316,32 @@ func queryMap(c *gin.Context) map[string]string {
 	return m
 }
 
-func (s *Site) render(c *gin.Context, status int, name string, data any) {
+// ContentSecurityPolicy is the policy for every response. Pages may not be
+// framed by other sites (clickjacking), and scripts only run from this site,
+// from Stripe (the donation page's buy button) or, inline, when they carry
+// the page's nonce; an injected script would carry none.
+func ContentSecurityPolicy(nonce string) string {
+	scripts := "'self' https://js.stripe.com"
+	if nonce != "" {
+		scripts += " 'nonce-" + nonce + "'"
+	}
+	return "frame-ancestors 'none'; base-uri 'self'; object-src 'none'; script-src " + scripts
+}
+
+func newNonce() string {
+	b := make([]byte, 16)
+	// crypto/rand.Read never fails, it fills b entirely or crashes the process.
+	_, _ = rand.Read(b)
+	return base64.RawURLEncoding.EncodeToString(b)
+}
+
+// render executes a template with data, plus Nonce for its inline scripts.
+func (s *Site) render(c *gin.Context, status int, name string, data gin.H) {
+	if data == nil {
+		data = gin.H{}
+	}
+	data["Nonce"] = newNonce()
+	c.Header("Content-Security-Policy", ContentSecurityPolicy(data["Nonce"].(string)))
 	c.Header("Content-Type", "text/html; charset=utf-8")
 	// Pages name the release's assets, so they must never outlive it.
 	c.Header("Cache-Control", "no-cache")
@@ -407,7 +435,7 @@ func (s *Site) comparePage(c *gin.Context) {
 		return
 	}
 	// Same limit as the API's compare, so list ids can't be guessed here instead.
-	if controllers.Throttled("compare/"+c.ClientIP(), 60, time.Minute) {
+	if controllers.Throttled("compare/"+controllers.ClientNetwork(c.ClientIP()), 60, time.Minute) {
 		c.String(http.StatusTooManyRequests, "Too many requests, try again in a minute.")
 		return
 	}

@@ -42,9 +42,12 @@ identification; the app then says it is unavailable. Only signed-in users can
 reach it (`/api/v1/analyze`). BirdNET's model is licensed CC BY-NC-SA 4.0, so
 it may only be used non-commercially.
 
-Keep `hashing-secret`: it signs sessions and API keys are stored hashed with
-it, so changing it signs everyone out and invalidates every API key. Redis
-holds the sessions, so flushing it signs everyone out too.
+Keep `hashing-secret`: API keys are stored hashed with it, so changing it
+invalidates every API key. `token-secret` signs sessions; change it (`openssl
+rand -hex 32`) whenever it may have leaked, which only signs everyone out.
+Redis holds the sessions, so flushing it signs everyone out too; give it a
+password (`requirepass`, and `redis-password` in the config) and bind it to
+`127.0.0.1`. MariaDB, too, should listen on `127.0.0.1` only.
 
 ## Upgrading
 
@@ -106,7 +109,11 @@ Notes for the installation at 300sf.se.
 **Next release** (offline reporting, zones from OpenStreetMap):
 
 1. Apply the migration that adds `zones.osm_id` (end of `server/db.sql`).
-2. Add `geocoder-endpoint: "https://nominatim.openstreetmap.org"` to turn on
+2. Add `token-secret` with a new `openssl rand -hex 32`. Sessions were signed
+   with `hashing-secret` until now; the server refuses to start with the two
+   the same. Everyone signs in once more.
+3. Set `requirepass` in Redis and the same as `redis-password`.
+4. Add `geocoder-endpoint: "https://nominatim.openstreetmap.org"` to turn on
    zones from OpenStreetMap, and `contact-email: "hej@300sf.se"` to keep the
    contact form on. Check `domain` is `https://300sf.se`: it names the server
    to OpenStreetMap.

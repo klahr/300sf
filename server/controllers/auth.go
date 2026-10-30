@@ -19,9 +19,15 @@ const (
 	TokenTypeAccess  = "access"
 	TokenTypeRefresh = "refresh"
 
-	// Failed sign-ins allowed per email address within loginFailWindow.
-	maxLoginFailures = 10
-	loginFailWindow  = 15 * time.Minute
+	// Wrong passwords allowed within loginFailWindow: for one account from
+	// one network, from one network for any accounts (password spraying),
+	// and for one account from anywhere (guessing spread over many networks).
+	// The last is high so that nobody can lock someone out with a few tries.
+	maxLoginFailures       = 10
+	maxLoginFailuresPerNet = 30
+	loginFailWindow        = 15 * time.Minute
+	maxLoginFailuresAnyNet = 100
+	loginFailWindowAnyNet  = time.Hour
 )
 
 // ValidateToken checks the signature (HS256 only) and expiry of token.
@@ -30,7 +36,7 @@ func ValidateToken(token string) (*jwt.Token, error) {
 		if token.Method != jwt.SigningMethodHS256 {
 			return nil, fmt.Errorf("unexpected signing method %v", token.Header["alg"])
 		}
-		return []byte(config.AppConfig.HashingSecret), nil
+		return []byte(config.AppConfig.TokenSecret), nil
 	})
 	if err != nil {
 		return nil, err
@@ -80,6 +86,8 @@ type AuthRequest struct {
 	RefreshToken string   `json:"refresh_token"`
 	Scopes       []string `json:"scopes"`
 	StaySignedIn bool     `json:"stay_signed_in"`
+	// The client's address, for limiting password guessing; set by the server.
+	ClientIP string `json:"-"`
 }
 
 type AuthTokens struct {
@@ -108,8 +116,15 @@ func refreshKey(jti string) string {
 	return "/refresh-token/" + jti
 }
 
-func loginFailKey(email string) string {
-	return "/login-fail/" + strings.ToLower(strings.TrimSpace(email))
+func normalizeEmail(email string) string {
+	return strings.ToLower(strings.TrimSpace(email))
+}
+
+// loginFailKeys are the counters of wrong passwords for this account from
+// this network, from this network, and for this account.
+func loginFailKeys(email, ip string) (accountNet, net, account string) {
+	n := ClientNetwork(ip)
+	return "/login-fail/" + n + "/" + normalizeEmail(email), "/login-fail-net/" + n, "/login-fail-account/" + normalizeEmail(email)
 }
 
 // userSessionsKey holds the jti of every refresh token a user has out.
@@ -124,18 +139,37 @@ func revokedBeforeKey(userUuid string) string {
 }
 
 // PasswordLocked reports whether too many wrong passwords have been tried
-// for the account with this email.
-func PasswordLocked(email string) bool {
-	failures, _ := models.Cache.Get(loginFailKey(email)).Int64()
-	return failures >= maxLoginFailures
+// for the account with this email, or from the client's network.
+func PasswordLocked(email, ip string) bool {
+	accountNet, net, account := loginFailKeys(email, ip)
+	count := func(key string) int64 {
+		n, _ := models.Cache.Get(key).Int64()
+		return n
+	}
+	return count(accountNet) >= maxLoginFailures || count(net) >= maxLoginFailuresPerNet || count(account) >= maxLoginFailuresAnyNet
 }
 
-// PasswordFailed counts a wrong password for the account with this email.
-func PasswordFailed(email string) {
-	key := loginFailKey(email)
-	if n, err := models.Cache.Incr(key).Result(); err == nil && n == 1 {
-		models.Cache.Expire(key, loginFailWindow)
+// PasswordFailed counts a wrong password for the account with this email,
+// tried from the client at ip.
+func PasswordFailed(email, ip string) {
+	accountNet, net, account := loginFailKeys(email, ip)
+	incr := func(key string, window time.Duration) {
+		// Also repair a counter left without expiry, or the key would be locked forever.
+		if n, err := models.Cache.Incr(key).Result(); err == nil && (n == 1 || models.Cache.TTL(key).Val() < 0) {
+			models.Cache.Expire(key, window)
+		}
 	}
+	incr(accountNet, loginFailWindow)
+	incr(net, loginFailWindow)
+	incr(account, loginFailWindowAnyNet)
+}
+
+// passwordSucceeded forgets the wrong passwords tried for this account from
+// this network. The other counters are kept: signing in to an account of
+// one's own must not reset them.
+func passwordSucceeded(email, ip string) {
+	accountNet, _, _ := loginFailKeys(email, ip)
+	models.Cache.Del(accountNet)
 }
 
 // RevokeUserSessions signs the user out everywhere: every refresh token is
@@ -221,11 +255,11 @@ func Authenticate(r AuthRequest) (*AuthTokens, *AuthError) {
 		}
 
 		// Slow down password guessing per account.
-		if PasswordLocked(r.Email) {
+		if PasswordLocked(r.Email, r.ClientIP) {
 			return nil, authError(http.StatusTooManyRequests, ErrorTooManyLoginAttempts, "too many failed sign-ins, try again later")
 		}
 		fail := func() *AuthError {
-			PasswordFailed(r.Email)
+			PasswordFailed(r.Email, r.ClientIP)
 			return authError(http.StatusBadRequest, ErrorAuthInvalid, "invalid email or password")
 		}
 
@@ -239,7 +273,7 @@ func Authenticate(r AuthRequest) (*AuthTokens, *AuthError) {
 		if !p.IsMatching(r.Password, user.Password, user.PasswordSalt) {
 			return nil, fail()
 		}
-		models.Cache.Del(loginFailKey(r.Email))
+		passwordSucceeded(r.Email, r.ClientIP)
 
 		clientId = r.ClientId
 		stay = r.StaySignedIn
@@ -303,6 +337,7 @@ func Auth(c *gin.Context) {
 		return
 	}
 
+	r.ClientIP = c.ClientIP()
 	tokens, authErr := Authenticate(r)
 	if authErr != nil {
 		c.JSON(authErr.Status, authErr.Body)
@@ -359,5 +394,5 @@ func generateToken(typ, userUuid, clientId, scopes, jti string, stay bool, lifet
 	if stay {
 		claims["stay"] = true
 	}
-	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(config.AppConfig.HashingSecret))
+	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(config.AppConfig.TokenSecret))
 }

@@ -25,11 +25,11 @@ Needs Go, Node (only to compile the app), MariaDB and Redis.
 (cd frontend && npm install && npm run dev)     # compiles the app in watch mode; leave running
 cd server
 cp config.yml.sample config.yml                # see server/README.md for the database
-sed -i "s/change-me/$(openssl rand -hex 32)/; s/\"release\"/\"debug\"/" config.yml
+sed -i "s/hashing-secret: \"change-me\"/hashing-secret: \"$(openssl rand -hex 32)\"/; s/token-secret: \"change-me\"/token-secret: \"$(openssl rand -hex 32)\"/; s/\"release\"/\"debug\"/" config.yml
 go run . -config config.yml
 ```
 
-The server won't start until `hashing-secret` is set. To sign in, sign up
+The server won't start until `hashing-secret` and `token-secret` are set. To sign in, sign up
 at <http://localhost:8090/sign-up>, run
 `go run . -config config.yml -seed -bootstrap you@example.com` (`-seed` adds
 the starter birds), put the printed key

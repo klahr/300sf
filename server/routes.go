@@ -151,9 +151,9 @@ func SetupRoutes(r gin.IRouter, signIn, signOut gin.HandlerFunc) {
 
 	// Users
 	r.POST("/v1/users", noneMiddleware, controllers.Users)
-	r.GET("/v1/users/list", adminMiddleware, controllers.UsersGetUsers)
+	r.GET("/v1/users/list", apiKeyMiddleware, adminMiddleware, controllers.UsersGetUsers)
 	r.GET("/v1/users/me", apiKeyMiddleware, basicMiddleware, controllers.UsersMe)
-	r.GET("/v1/users/:uuid", adminMiddleware, controllers.UsersGetUser)
+	r.GET("/v1/users/:uuid", apiKeyMiddleware, adminMiddleware, controllers.UsersGetUser)
 	r.GET("/v1/users/whoami", apiKeyMiddleware, basicMiddleware, controllers.UsersWhoAmI)
 	r.POST("/v1/users/migrate", apiKeyMiddleware, basicMiddleware, controllers.UsersMigrate)
 	r.GET("/v1/users/export", apiKeyMiddleware, basicMiddleware, controllers.UsersExportData)
@@ -218,14 +218,14 @@ func SetupRoutes(r gin.IRouter, signIn, signOut gin.HandlerFunc) {
 	r.GET("/v1/tags/:uuid", apiKeyMiddleware, basicMiddleware, controllers.TagsDetails)
 
 	// Api keys
-	r.GET("/v1/api_keys/list", basicMiddleware, controllers.ApiKeysList)
-	r.POST("/v1/api_keys", basicMiddleware, controllers.ApiKeys)
-	r.POST("/v1/api_keys/:prefix/revoke", basicMiddleware, controllers.ApiKeysRevoke)
+	r.GET("/v1/api_keys/list", apiKeyMiddleware, basicMiddleware, controllers.ApiKeysList)
+	r.POST("/v1/api_keys", apiKeyMiddleware, basicMiddleware, controllers.ApiKeys)
+	r.POST("/v1/api_keys/:prefix/revoke", apiKeyMiddleware, basicMiddleware, controllers.ApiKeysRevoke)
 
 	// Species
 	r.GET("/v1/species/list", apiKeyMiddleware, basicMiddleware, controllers.SpeciesList)
 	r.GET("/v1/species/:uuid", apiKeyMiddleware, noneMiddleware, controllers.SpeciesDetails)
-	r.POST("/v1/species/:uuid/set_rarity", adminMiddleware, controllers.SpeciesSetRarity)
+	r.POST("/v1/species/:uuid/set_rarity", apiKeyMiddleware, adminMiddleware, controllers.SpeciesSetRarity)
 
 	// Reports
 	r.GET("/v1/reports/list", apiKeyMiddleware, basicMiddleware, controllers.ReportsList)
@@ -257,8 +257,8 @@ func SetupRoutes(r gin.IRouter, signIn, signOut gin.HandlerFunc) {
 	r.GET("/v1/ages/list", apiKeyMiddleware, basicMiddleware, controllers.NamedRecordList[models.Age])
 
 	// Zones
-	r.GET("/v1/zones/list", adminMiddleware, controllers.ZonesList)
-	r.GET("/v1/zones/:uuid", adminMiddleware, controllers.NamedRecordDetails[models.Zone])
+	r.GET("/v1/zones/list", apiKeyMiddleware, adminMiddleware, controllers.ZonesList)
+	r.GET("/v1/zones/:uuid", apiKeyMiddleware, adminMiddleware, controllers.NamedRecordDetails[models.Zone])
 
 	// Notifications
 	r.POST("/v1/notifications/:uuid/comment", apiKeyMiddleware, basicMiddleware, controllers.NotificationsComment)
@@ -278,27 +278,27 @@ func SetupRoutes(r gin.IRouter, signIn, signOut gin.HandlerFunc) {
 
 func setupPrivateRoutes(r gin.IRouter) {
 	// Species
-	r.POST("/v1/activities", adminMiddleware, controllers.CreateNamedRecord[models.Activity])
-	r.POST("/v1/methods", adminMiddleware, controllers.CreateNamedRecord[models.Method])
-	r.POST("/v1/species", adminMiddleware, controllers.Species)
-	r.POST("/v1/genders", adminMiddleware, controllers.CreateNamedRecord[models.Gender])
-	r.POST("/v1/orders", adminMiddleware, controllers.CreateNamedRecord[models.Order])
-	r.GET("/v1/translations/list", adminMiddleware, controllers.TranslationList)
-	r.POST("/v1/translations/update", adminMiddleware, controllers.TranslationUpdate)
-	r.POST("/v1/ages", adminMiddleware, controllers.CreateNamedRecord[models.Age])
+	r.POST("/v1/activities", apiKeyMiddleware, adminMiddleware, controllers.CreateNamedRecord[models.Activity])
+	r.POST("/v1/methods", apiKeyMiddleware, adminMiddleware, controllers.CreateNamedRecord[models.Method])
+	r.POST("/v1/species", apiKeyMiddleware, adminMiddleware, controllers.Species)
+	r.POST("/v1/genders", apiKeyMiddleware, adminMiddleware, controllers.CreateNamedRecord[models.Gender])
+	r.POST("/v1/orders", apiKeyMiddleware, adminMiddleware, controllers.CreateNamedRecord[models.Order])
+	r.GET("/v1/translations/list", apiKeyMiddleware, adminMiddleware, controllers.TranslationList)
+	r.POST("/v1/translations/update", apiKeyMiddleware, adminMiddleware, controllers.TranslationUpdate)
+	r.POST("/v1/ages", apiKeyMiddleware, adminMiddleware, controllers.CreateNamedRecord[models.Age])
 
 	// Zones
-	r.POST("/v1/zones", adminMiddleware, controllers.Zones)
+	r.POST("/v1/zones", apiKeyMiddleware, adminMiddleware, controllers.Zones)
 
 	// Emails
-	r.GET("/v1/emails/send_all", adminMiddleware, controllers.EmailsSendAll)
+	r.GET("/v1/emails/send_all", apiKeyMiddleware, adminMiddleware, controllers.EmailsSendAll)
 
 	// Announcements
-	r.POST("/v1/announcements", adminMiddleware, controllers.Announcements)
-	r.GET("/v1/announcements/all", adminMiddleware, controllers.AnnouncementsAll)
-	r.PUT("/v1/announcements/:uuid/pause", adminMiddleware, controllers.AnnouncementsPause)
-	r.PUT("/v1/announcements/:uuid/resume", adminMiddleware, controllers.AnnouncementsResume)
-	r.DELETE("/v1/announcements/:uuid", adminMiddleware, controllers.AnnouncementsDelete)
+	r.POST("/v1/announcements", apiKeyMiddleware, adminMiddleware, controllers.Announcements)
+	r.GET("/v1/announcements/all", apiKeyMiddleware, adminMiddleware, controllers.AnnouncementsAll)
+	r.PUT("/v1/announcements/:uuid/pause", apiKeyMiddleware, adminMiddleware, controllers.AnnouncementsPause)
+	r.PUT("/v1/announcements/:uuid/resume", apiKeyMiddleware, adminMiddleware, controllers.AnnouncementsResume)
+	r.DELETE("/v1/announcements/:uuid", apiKeyMiddleware, adminMiddleware, controllers.AnnouncementsDelete)
 
-	r.POST("/v1/invite", adminMiddleware, controllers.Invite)
+	r.POST("/v1/invite", apiKeyMiddleware, adminMiddleware, controllers.Invite)
 }

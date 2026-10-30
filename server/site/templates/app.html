@@ -3,7 +3,7 @@
 
 <head>
 	{{template "app-head" .}}
-	<link rel="preload" as="style" href="{{asset "/vendor/leaflet/leaflet.css"}}" onload="this.rel='stylesheet'">
+	<link rel="stylesheet" href="{{asset "/vendor/leaflet/leaflet.css"}}">
 	<script async src="{{asset "/vendor/leaflet/leaflet.js"}}"></script>
 	<script defer src="{{asset "/vendor/jquery/jquery-3.7.1.min.js"}}"></script>
 </head>
@@ -12,7 +12,7 @@
 	<div id="loading" class="loading"></div>
 	<div id="root" class="background">
 		<script defer type="text/javascript" id="app-js" src="{{asset "/js/app.js"}}"></script>
-		<script type="text/javascript">
+		<script nonce="{{$.Nonce}}" type="text/javascript">
 			let promptEvent = null;
 
 			window.addEventListener("beforeinstallprompt", (event) => {

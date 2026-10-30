@@ -43,8 +43,10 @@ API clients call `POST /v1/auth` with `grant_type: password` (plus their
 Bearer <token>`. `POST /v1/auth/logout` with the refresh token ends the
 session. Scopes are `user` and `admin`.
 
-- Tokens are HS256 JWTs signed with `hashing-secret` and typed: only access
-  tokens are accepted on API calls.
+- Tokens are HS256 JWTs signed with `token-secret` and typed: only access
+  tokens are accepted on API calls. `token-secret` is separate from
+  `hashing-secret` (which API keys are hashed with), so it can be rotated
+  without breaking API keys.
 - Refresh tokens are single use. Each refresh replaces the token (its id is
   kept in Redis), so a stolen and replayed token stops working, and logging
   out revokes it. Refreshing re-checks the API key and the user's scopes.

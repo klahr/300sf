@@ -31,7 +31,9 @@ Set at least:
 | Key | Value |
 |---|---|
 | `data-source` | your MariaDB user, password and host |
-| `hashing-secret` | `openssl rand -hex 32`; changing it later signs everyone out and breaks API keys |
+| `hashing-secret` | `openssl rand -hex 32`; changing it later breaks every API key |
+| `token-secret` | another `openssl rand -hex 32`; it signs sessions, and changing it signs everyone out |
+| `redis-password` | Redis's `requirepass`, if you set one (do, unless Redis is only reachable by this server) |
 | `domain` | `https://your.domain`, used in email links |
 | `site.host` | `your.domain` |
 | `site.redirect-hosts` | `{}`, unless you have old domains to redirect |

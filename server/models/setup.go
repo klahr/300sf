@@ -35,10 +35,11 @@ func SetupDB(dataSource string, logLevel int) error {
 	return nil
 }
 
-func SetupCache(address string) error {
+func SetupCache(address, password string) error {
 	client := redis.NewClient(&redis.Options{
-		Addr: address,
-		DB:   0,
+		Addr:     address,
+		Password: password,
+		DB:       0,
 	})
 
 	Cache = client

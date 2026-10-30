@@ -38,9 +38,14 @@
 				{{end}}
 			</table>
 			<input id="list-id" placeholder="{{if eq .Lang "sv"}}Listans ID{{else if eq .Lang "de"}}Listen-ID{{else}}List ID{{end}}">
-			<button onclick="window.open(window.location + ',' + encodeURIComponent(document.getElementById('list-id').value), '_self');">{{if eq .Lang "sv"}}Lägg till{{else if eq .Lang "de"}}Hinzufügen{{else}}Add{{end}}</button>
+			<button id="add-list">{{if eq .Lang "sv"}}Lägg till{{else if eq .Lang "de"}}Hinzufügen{{else}}Add{{end}}</button>
 		</div>
 	</div>
+	<script nonce="{{$.Nonce}}">
+		document.getElementById("add-list").addEventListener("click", function () {
+			window.open(window.location + "," + encodeURIComponent(document.getElementById("list-id").value), "_self");
+		});
+	</script>
 </body>
 
 </html>

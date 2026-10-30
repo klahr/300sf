@@ -16,6 +16,12 @@ import (
 // A 10 second recording is about 1 MB as 48 kHz WAV.
 const maxRecordingBytes = 10 << 20
 
+// Each identification ties up the service, which runs one at a time.
+const maxAnalysesPerHour = 60
+
+// The service names a handful of candidates; more is not a real answer.
+const maxResolveBirds = 50
+
 var analyzeTransport = &http.Transport{
 	Proxy:                 http.ProxyFromEnvironment,
 	ResponseHeaderTimeout: 60 * time.Second,
@@ -32,6 +38,10 @@ func Analyze(c *gin.Context) {
 			"code":    ErrorAnalyzeUnavailable,
 			"message": "identification is not available",
 		})
+		return
+	}
+
+	if throttle(c, "analyze/"+c.GetString("uuid"), maxAnalysesPerHour, time.Hour) {
 		return
 	}
 
@@ -77,6 +87,14 @@ func AnalyzeResolve(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -10001,
 			"message": err.Error(),
+		})
+		return
+	}
+
+	if len(r.Birds) > maxResolveBirds {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    ErrorInvalidRequest,
+			"message": "too many birds",
 		})
 		return
 	}

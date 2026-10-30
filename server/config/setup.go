@@ -3,19 +3,28 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
 	"gopkg.in/yaml.v2"
 )
 
 type App struct {
-	DataSource             string   `yaml:"data-source"`
-	Address                string   `yaml:"address"`
-	AccessTokenLifetime    int64    `yaml:"access-token-lifetime"`
-	RefreshTokenLifetime   int64    `yaml:"refresh-token-lifetime"`
-	HashingSecret          string   `yaml:"hashing-secret"`
-	Domain                 string   `yaml:"domain"`
-	RedisHost              string   `yaml:"redis-host"`
+	DataSource           string `yaml:"data-source"`
+	Address              string `yaml:"address"`
+	AccessTokenLifetime  int64  `yaml:"access-token-lifetime"`
+	RefreshTokenLifetime int64  `yaml:"refresh-token-lifetime"`
+	// Stores API keys and email checksums hashed; changing it breaks every
+	// API key.
+	HashingSecret string `yaml:"hashing-secret"`
+	// Signs sessions (JWTs); changing it only signs everyone out, so it can
+	// be rotated whenever it may have leaked.
+	TokenSecret string `yaml:"token-secret"`
+	Domain      string `yaml:"domain"`
+	RedisHost   string `yaml:"redis-host"`
+	// Redis holds the sessions; set its requirepass so nothing else on the
+	// host can read or change them.
+	RedisPassword          string   `yaml:"redis-password"`
 	LogLevel               string   `yaml:"log-level"`
 	DefaultApiSoftLimit    int64    `yaml:"default-api-soft-limit"`
 	DefaultApiHardLimit    int64    `yaml:"default-api-hard-limit"`
@@ -83,6 +92,8 @@ func (c *App) Parse(data []byte) error {
 
 var AppConfig *App
 
+const minTokenSecretLength = 32
+
 func SetupAppConfig(filename string) error {
 	raw, err := os.ReadFile(filename)
 	if err != nil {
@@ -102,6 +113,20 @@ func (c *App) Validate() error {
 	// anyone, admins included.
 	if c.HashingSecret == "" || c.HashingSecret == "change-me" {
 		return errors.New("hashing-secret is not set; generate one with: openssl rand -hex 32")
+	}
+	// The token secret signs every session: with a known or guessable one
+	// anyone can sign in as anyone, admins included. Any signed-in user holds
+	// a token to brute-force it against, so it must be long and random.
+	if c.TokenSecret == "" || c.TokenSecret == "change-me" {
+		return errors.New("token-secret is not set; generate one with: openssl rand -hex 32")
+	}
+	if len(c.TokenSecret) < minTokenSecretLength {
+		return fmt.Errorf("token-secret is too short; use at least %d characters: openssl rand -hex 32", minTokenSecretLength)
+	}
+	// Older installations signed sessions with hashing-secret, which can't be
+	// rotated without breaking API keys.
+	if c.TokenSecret == c.HashingSecret {
+		return errors.New("token-secret must differ from hashing-secret; generate one with: openssl rand -hex 32")
 	}
 	return nil
 }

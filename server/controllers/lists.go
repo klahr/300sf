@@ -396,7 +396,7 @@ func ListsDetails(c *gin.Context) {
 		return
 	}
 
-	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("user_id=? OR visibility<>?", user.Id, models.VisibilityPrivate).Where("archived IS NULL").Preload("Name").Preload("Species.Name").Preload("Species.Order.Name").First(&result).Error; err != nil {
+	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("user_id=? OR (visibility<>? AND CHAR_LENGTH(uuid)>=?)", user.Id, models.VisibilityPrivate, utils.ShortUuidLength).Where("archived IS NULL").Preload("Name").Preload("Species.Name").Preload("Species.Order.Name").First(&result).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -553,14 +553,15 @@ type CompareResult struct {
 
 // CompareLists shows which species each list has, for lists that are not
 // private. Only display names and species are returned, never positions,
-// times or comments. The first uuid is the reference list.
+// times or comments. The first uuid is the reference list. Lists with old
+// 6-character ids are left out: those ids are short enough to guess.
 func CompareLists(uuids []string) (*CompareResult, error) {
 	if len(uuids) == 0 || len(uuids) > 20 {
 		return nil, fmt.Errorf("between 1 and 20 uuids required")
 	}
 
 	var lists []models.List
-	if err := models.DB.Where("uuid IN ?", uuids).Where("visibility<>?", models.VisibilityPrivate).Where("archived IS NULL").Preload("Name").Find(&lists).Error; err != nil {
+	if err := models.DB.Where("uuid IN ?", uuids).Where("visibility<>?", models.VisibilityPrivate).Where("CHAR_LENGTH(uuid)>=?", utils.ShortUuidLength).Where("archived IS NULL").Preload("Name").Find(&lists).Error; err != nil {
 		return nil, err
 	}
 
@@ -624,7 +625,7 @@ func ListsCompare(c *gin.Context) {
 	}
 
 	// Anyone can call this, so limit how fast list ids can be guessed.
-	if throttle(c, "compare/"+c.ClientIP(), 60, time.Minute) {
+	if throttle(c, "compare/"+ClientNetwork(c.ClientIP()), 60, time.Minute) {
 		return
 	}
 

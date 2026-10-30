@@ -41,7 +41,7 @@ func Users(c *gin.Context) {
 	}
 
 	// Each sign-up sends an email, so limit how many one address can make.
-	if throttle(c, "signup/"+c.ClientIP(), 10, time.Hour) {
+	if throttle(c, "signup/"+ClientNetwork(c.ClientIP()), 10, time.Hour) {
 		return
 	}
 
@@ -716,7 +716,7 @@ func UsersResetPassword(c *gin.Context) {
 		return
 	}
 
-	if throttle(c, "reset-password/"+c.ClientIP(), 10, time.Hour) {
+	if throttle(c, "reset-password/"+ClientNetwork(c.ClientIP()), 10, time.Hour) {
 		return
 	}
 
@@ -953,7 +953,7 @@ func UsersRequestDelete(c *gin.Context) {
 		return
 	}
 
-	if PasswordLocked(user.Email) {
+	if PasswordLocked(user.Email, c.ClientIP()) {
 		c.JSON(http.StatusTooManyRequests, gin.H{
 			"code":    ErrorTooManyLoginAttempts,
 			"message": "too many wrong passwords, try again later",
@@ -962,7 +962,7 @@ func UsersRequestDelete(c *gin.Context) {
 	}
 	p := utils.Password{}
 	if !p.IsMatching(r.Password, user.Password, user.PasswordSalt) {
-		PasswordFailed(user.Email)
+		PasswordFailed(user.Email, c.ClientIP())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -30002,
 			"message": "invalid password",
@@ -1072,7 +1072,7 @@ func UsersConfirmDelete(c *gin.Context) {
 		return
 	}
 
-	if PasswordLocked(user.Email) {
+	if PasswordLocked(user.Email, c.ClientIP()) {
 		c.JSON(http.StatusTooManyRequests, gin.H{
 			"code":    ErrorTooManyLoginAttempts,
 			"message": "too many wrong passwords, try again later",
@@ -1081,7 +1081,7 @@ func UsersConfirmDelete(c *gin.Context) {
 	}
 	p := utils.Password{}
 	if !p.IsMatching(r.Password, user.Password, user.PasswordSalt) {
-		PasswordFailed(user.Email)
+		PasswordFailed(user.Email, c.ClientIP())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    -30002,
 			"message": "invalid password",

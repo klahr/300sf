@@ -15,7 +15,7 @@ import (
 func fullRouter(t *testing.T) *gin.Engine {
 	t.Helper()
 	gin.SetMode(gin.TestMode)
-	config.AppConfig = &config.App{HashingSecret: "test-secret"}
+	config.AppConfig = &config.App{HashingSecret: "test-secret", TokenSecret: "test-token-secret"}
 	web, err := site.New(config.Site{Host: "300sf.se", RedirectHosts: map[string]string{"app.300sf.se": "/home"}}, nil)
 	if err != nil {
 		t.Fatal(err)

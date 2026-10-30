@@ -26,6 +26,27 @@ Versions are git tags `X.Y.Z`, cut with `make patch|minor|major`.
 - Licenses of the bundled libraries, fonts and data (`THIRD_PARTY_NOTICES.md`).
 - A contributing guide, issue templates and Dependabot.
 
+### Security
+
+- Sessions are signed with a new `token-secret`, separate from
+  `hashing-secret`, so it can be rotated without breaking API keys. The
+  server refuses to start without one, with one shorter than 32 characters,
+  or with one equal to `hashing-secret`. Everyone signs in once more.
+- Wrong passwords are counted per account and network, per network, and per
+  account from anywhere, so a few tries no longer lock someone out and
+  passwords can't be sprayed across accounts from one address. IPv6
+  addresses are limited per /64.
+- Tokens from a revoked API key no longer work on admin and API key routes.
+- Lists and private competitions with old 6-character ids no longer open
+  for anyone but their owners and members: those ids could be guessed.
+- Competition passwords, invites and sound identification are rate limited;
+  joining can no longer go past the competition's maximum.
+- Competitions can start at most a year back, and standings show the day of
+  a sighting, not its time.
+- Pages only run scripts from this site, Stripe, or inline with the page's
+  nonce (Content-Security-Policy `script-src`).
+- Redis can be given a password (`redis-password`).
+
 ### Fixed
 
 - Browsers could keep running old code after a release.

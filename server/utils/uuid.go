@@ -6,13 +6,14 @@ import (
 	"strings"
 )
 
-// shortUuidLength gives about 50 random bits. Some of these ids are the only
+// ShortUuidLength gives about 50 random bits. Some of these ids are the only
 // thing that keeps a link-shared list private, so they must not be guessable.
-// Ids made before were 6 characters and keep working.
-const shortUuidLength = 10
+// Ids made before were 6 characters (30 bits): they keep working for their
+// owner, but must not open anything to anyone else.
+const ShortUuidLength = 10
 
 func GenerateShortUuid() string {
-	return GenerateUuidWithFixedLength(shortUuidLength)
+	return GenerateUuidWithFixedLength(ShortUuidLength)
 }
 
 // 32 characters, so each random byte maps onto one without bias. Easily

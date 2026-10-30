@@ -369,3 +369,40 @@ func TestOldHostsRedirect(t *testing.T) {
 		t.Errorf("300sf.se/ = %d", w.Code)
 	}
 }
+
+// Inline scripts only run with the nonce the page's policy names, so every
+// one must carry it, and inline event handlers would not run at all.
+func TestPagesCarryScriptNonce(t *testing.T) {
+	s, r := newTestSite(t, cfg)
+	s.compare = func(uuids []string) (*controllers.CompareResult, error) {
+		return &controllers.CompareResult{}, nil
+	}
+	policyNonce := regexp.MustCompile(`script-src [^;]*'nonce-([^']+)'`)
+	inline := regexp.MustCompile(`<script(?:\s+nonce="([^"]*)")?(?:\s+type="text/javascript")?>`)
+	handler := regexp.MustCompile(`\son[a-z]+=`)
+	seen := map[string]bool{}
+	for _, path := range []string{"/", "/landing", "/home", "/docs", "/compare?uuids=a"} {
+		w := get(r, "300sf.se", path)
+		m := policyNonce.FindStringSubmatch(w.Header().Get("Content-Security-Policy"))
+		if w.Code != http.StatusOK || m == nil {
+			t.Errorf("%s: status %d, policy %q", path, w.Code, w.Header().Get("Content-Security-Policy"))
+			continue
+		}
+		if seen[m[1]] {
+			t.Errorf("%s: nonce %q reused", path, m[1])
+		}
+		seen[m[1]] = true
+		scripts := inline.FindAllStringSubmatch(w.Body.String(), -1)
+		if len(scripts) == 0 {
+			t.Errorf("%s: no inline scripts found", path)
+		}
+		for _, script := range scripts {
+			if script[1] != m[1] {
+				t.Errorf("%s: inline script with nonce %q, policy has %q", path, script[1], m[1])
+			}
+		}
+		if h := handler.FindString(w.Body.String()); h != "" {
+			t.Errorf("%s: inline event handler%s", path, h)
+		}
+	}
+}

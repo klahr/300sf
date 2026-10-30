@@ -14,6 +14,7 @@ import (
 	"gopkg.in/guregu/null.v4"
 	"gopkg.in/guregu/null.v4/zero"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // Competitions: who sees the most species in a period. A participant's score is the number of
@@ -161,7 +162,20 @@ func competitionStandings(competition *models.Competition, participants []models
 		return nil, null.Time{}, err
 	}
 	standings, wonAt := rankCompetition(participants, sightings, competition.EndOnReports.Int64)
-	return standings, wonAt, nil
+	// Other participants see these, so they tell no more than the day of a
+	// sighting.
+	for i := range standings {
+		standings[i].Latest = toDay(standings[i].Latest)
+	}
+	return standings, toDay(wonAt), nil
+}
+
+// toDay rounds t down to its day (UTC).
+func toDay(t null.Time) null.Time {
+	if !t.Valid {
+		return t
+	}
+	return null.TimeFrom(t.Time.UTC().Truncate(24 * time.Hour))
 }
 
 // rankCompetition turns each participant's first sightings of the species into standings. With
@@ -296,6 +310,20 @@ func competitionInfo(competition *models.Competition, viewer *models.User, withS
 	return &info, nil
 }
 
+// competitionUuidLength is the length of competition ids since the rewrite (96
+// bits). Older ones are 6 characters, short enough to guess.
+const competitionUuidLength = 24
+
+var errCompetitionFull = errors.New("the competition is full")
+
+// competitionHidden reports whether the viewer must not learn that the
+// competition exists: a private one with an old, guessable id that the viewer
+// doesn't take part in, didn't make and wasn't invited to.
+func competitionHidden(competition *models.Competition, info *CompetitionInfo) bool {
+	return len(competition.Uuid) < competitionUuidLength && competition.Visibility != models.VisibilityPublic &&
+		!info.Joined && !info.IsCreator && !info.Invited
+}
+
 func competitionJoinable(competition *models.Competition, info *CompetitionInfo, now time.Time) error {
 	if info.Status == competitionStatusFinished {
 		return errors.New("the competition has finished")
@@ -304,7 +332,7 @@ func competitionJoinable(competition *models.Competition, info *CompetitionInfo,
 		return errors.New("the competition is not open for joining")
 	}
 	if competition.MaxCompetitors.Valid && competition.MaxCompetitors.Int64 > 0 && int64(info.Participants) >= competition.MaxCompetitors.Int64 {
-		return errors.New("the competition is full")
+		return errCompetitionFull
 	}
 	return nil
 }
@@ -343,6 +371,11 @@ func Competitions(c *gin.Context) {
 		return
 	case !r.Until.After(time.Now()):
 		competitionError(c, http.StatusBadRequest, "the competition must end in the future")
+		return
+	case r.From.Before(time.Now().AddDate(-1, 0, 0)):
+		// Otherwise a competition made for one species in one county would
+		// tell its creator whether those who join have ever seen it there.
+		competitionError(c, http.StatusBadRequest, "the competition can start at most a year ago")
 		return
 	case r.Until.Sub(r.From) > 5*366*24*time.Hour:
 		competitionError(c, http.StatusBadRequest, "the competition can last at most five years")
@@ -525,6 +558,10 @@ func CompetitionsGet(c *gin.Context) {
 		competitionError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+	if competitionHidden(competition, info) {
+		competitionError(c, http.StatusNotFound, "not found")
+		return
+	}
 	c.JSON(http.StatusOK, info)
 }
 
@@ -565,6 +602,10 @@ func CompetitionsJoin(c *gin.Context) {
 		competitionError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+	if competitionHidden(competition, info) {
+		competitionError(c, http.StatusNotFound, "not found")
+		return
+	}
 	if info.Joined {
 		c.JSON(http.StatusOK, gin.H{})
 		return
@@ -574,6 +615,10 @@ func CompetitionsJoin(c *gin.Context) {
 		return
 	}
 	if info.HasPassword && !info.Invited {
+		// Each try costs a bcrypt check; don't let the password be guessed.
+		if throttle(c, "competition-password/"+competition.Uuid+"/"+user.Uuid, 10, time.Hour) {
+			return
+		}
 		p := utils.Password{}
 		if !p.IsMatching(r.Password, competition.Password.String, competition.PasswordSalt.String) {
 			c.JSON(http.StatusForbidden, gin.H{"code": ErrorCompetitionPassword, "message": "wrong password"})
@@ -581,6 +626,21 @@ func CompetitionsJoin(c *gin.Context) {
 		}
 	}
 	err = models.DB.Transaction(func(tx *gorm.DB) error {
+		// Lock the competition, so that joins at the same time can't go past
+		// max_competitors between counting and joining.
+		var locked models.Competition
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Select("id", "max_competitors").Where("id=?", competition.Id).First(&locked).Error; err != nil {
+			return err
+		}
+		if locked.MaxCompetitors.Valid && locked.MaxCompetitors.Int64 > 0 {
+			var n int64
+			if err := tx.Table("competition_users").Where("competition_id=?", competition.Id).Count(&n).Error; err != nil {
+				return err
+			}
+			if n >= locked.MaxCompetitors.Int64 {
+				return errCompetitionFull
+			}
+		}
 		if err := tx.Table("competition_users").Create(&models.CompetitionUsers{CompetitionId: competition.Id, UserId: user.Id}).Error; err != nil {
 			return err
 		}
@@ -588,6 +648,10 @@ func CompetitionsJoin(c *gin.Context) {
 			Where("competition_id=? AND user_id=? AND accepted_at IS NULL AND rejected_at IS NULL", competition.Id, user.Id).
 			Update("accepted_at", time.Now()).Error
 	})
+	if errors.Is(err, errCompetitionFull) {
+		competitionError(c, http.StatusConflict, err.Error())
+		return
+	}
 	if err != nil {
 		competitionError(c, http.StatusInternalServerError, err.Error())
 		return
@@ -626,6 +690,11 @@ func CompetitionsInvite(c *gin.Context) {
 	user, err := currentUser(c)
 	if err != nil {
 		competitionError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	// The answer tells which usernames exist, and each invite shows the
+	// competition's name and description to someone who didn't ask for it.
+	if throttle(c, "competition-invite/"+user.Uuid, 20, time.Hour) {
 		return
 	}
 	competition, err := loadCompetition(c.Param("uuid"))

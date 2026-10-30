@@ -253,7 +253,10 @@ func Reports(c *gin.Context) {
 	}
 
 	tx.Commit()
-	if locateLater {
+	// The geocoder takes one place a second for the whole site, so one user
+	// can't fill its queue; places not looked up now are
+	// left to the backfill.
+	if locateLater && !Throttled("geocode/"+c.GetString("uuid"), 100, time.Hour) {
 		places.Locate(report.Id)
 	}
 

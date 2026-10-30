@@ -21,7 +21,7 @@ func token(t *testing.T, scopes string) string {
 	claims["scp"] = scopes
 	claims["typ"] = controllers.TokenTypeAccess
 	claims["exp"] = time.Now().Add(time.Minute).Unix()
-	s, err := tok.SignedString([]byte(config.AppConfig.HashingSecret))
+	s, err := tok.SignedString([]byte(config.AppConfig.TokenSecret))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -30,7 +30,7 @@ func token(t *testing.T, scopes string) string {
 
 func newScopeRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
-	config.AppConfig = &config.App{HashingSecret: "test-secret"}
+	config.AppConfig = &config.App{HashingSecret: "test-secret", TokenSecret: "test-token-secret"}
 	r := gin.New()
 	ok := func(c *gin.Context) { c.JSON(http.StatusOK, gin.H{"uuid": c.GetString("uuid")}) }
 	r.GET("/none", noneMiddleware, ok)

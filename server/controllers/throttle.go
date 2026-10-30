@@ -2,6 +2,7 @@
 package controllers
 
 import (
+	"net"
 	"net/http"
 	"time"
 
@@ -35,4 +36,18 @@ func throttle(c *gin.Context, key string, limit int64, window time.Duration) boo
 	}
 	c.JSON(http.StatusTooManyRequests, GeneralErrorResponse{Code: ErrorTooManyRequests, Message: "too many requests, try again later"})
 	return true
+}
+
+// ClientNetwork is what limits per client count against: the address for
+// IPv4, and its /64 for IPv6, since one connection is usually given a whole
+// /64 to pick addresses from.
+func ClientNetwork(ip string) string {
+	parsed := net.ParseIP(ip)
+	if parsed == nil {
+		return ip
+	}
+	if parsed.To4() != nil {
+		return parsed.String()
+	}
+	return parsed.Mask(net.CIDRMask(64, 128)).String() + "/64"
 }

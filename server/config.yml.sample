@@ -4,7 +4,9 @@ address: "127.0.0.1:8090"  # only nginx on this host should reach it
 mode: "release"          # gin mode: debug | release
 log-level: "warn"        # silent | error | warn | info
 redis-host: "127.0.0.1:6379"
-hashing-secret: "change-me"  # signs all tokens; openssl rand -hex 32
+redis-password: ""           # Redis's requirepass; it holds the sessions
+hashing-secret: "change-me"  # hashes API keys; openssl rand -hex 32. Changing it breaks every API key.
+token-secret: "change-me"    # signs sessions; openssl rand -hex 32, not the same as hashing-secret. Changing it signs everyone out.
 domain: "http://localhost:8090"  # public base URL, used in email links
 access-token-lifetime: 3600
 refresh-token-lifetime: 2592000

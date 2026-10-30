@@ -11,7 +11,7 @@
 <body>
 	<div id="swagger-ui"></div>
 	<script src="/vendor/swagger-ui/swagger-ui-bundle.js" integrity="sha384-wmyclcVGX/WhUkdkATwhaK1X1JtiNrr2EoYJ+diV3vj4v6OC5yCeSu+yW13SYJep" crossorigin="anonymous"></script>
-	<script>
+	<script nonce="{{$.Nonce}}">
 		window.onload = function () {
 			SwaggerUIBundle({ url: "/swagger.yaml", dom_id: "#swagger-ui" });
 		};
