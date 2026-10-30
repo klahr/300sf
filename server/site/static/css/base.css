@@ -3787,6 +3787,92 @@ button.zone-chip[aria-pressed="true"] {
 	box-shadow: inset 0 0 0 1.5px var(--primary);
 }
 
+button.zone-chip>span.material-symbols-outlined {
+	margin-left: 4px;
+	font-size: 18px;
+	vertical-align: -4px;
+}
+
+div.zone-picker {
+	margin-top: 12px;
+}
+
+div.zone-picker>p.details {
+	margin: 0 0 8px;
+}
+
+form.zone-search {
+	display: flex;
+	gap: 8px;
+}
+
+form.zone-search>input {
+	flex: 1;
+	min-width: 0;
+}
+
+form.zone-search>button {
+	width: auto;
+	margin: 0;
+	flex: none;
+}
+
+div.zone-results {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	margin: 8px 0;
+}
+
+div.zone-results:empty {
+	margin: 0;
+}
+
+button.zone-result {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+	margin: 0;
+	padding: 8px 12px;
+	background-color: var(--surface-sunk);
+	color: var(--ink);
+	text-align: left;
+	font-weight: 500;
+}
+
+button.zone-result:hover {
+	background-color: var(--surface-hover);
+}
+
+div.zone-map {
+	position: relative;
+	height: 320px;
+	margin-top: 8px;
+	border-radius: var(--radius-m);
+	overflow: hidden;
+}
+
+/* CSS wins over the attributes Leaflet sets, so the colours follow the theme. */
+div.zone-map path.zone-area {
+	stroke: var(--ink-soft);
+	fill: var(--ink-soft);
+	fill-opacity: 0.08;
+	cursor: pointer;
+	transition: fill-opacity var(--dur-fast);
+}
+
+div.zone-map path.zone-area:hover {
+	fill-opacity: 0.18;
+}
+
+div.zone-map path.zone-area.selected {
+	stroke: var(--primary);
+	stroke-width: 2.5px;
+	fill: var(--primary);
+	fill-opacity: 0.35;
+}
+
 div.color-swatches {
 	display: flex;
 	flex-wrap: wrap;

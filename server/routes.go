@@ -132,7 +132,7 @@ func Health(c *gin.Context) {
 	}
 
 	res := response{
-		Version: "0.1.0",
+		Version: version,
 	}
 
 	c.JSON(http.StatusOK, controllers.GeneralSuccessResponse{
@@ -178,6 +178,9 @@ func SetupRoutes(r gin.IRouter, signIn, signOut gin.HandlerFunc) {
 	r.PUT("/v1/competitions/:uuid/archive", apiKeyMiddleware, basicMiddleware, controllers.CompetitionsArchive)
 	r.GET("/v1/competitions/:uuid/result", noneMiddleware, controllers.CompetitionsResult)
 	r.GET("/v1/competitions/basis", apiKeyMiddleware, basicMiddleware, controllers.CompetitionsBasis)
+	r.GET("/v1/zones/regions", apiKeyMiddleware, basicMiddleware, controllers.ZonesRegions)
+	r.GET("/v1/zones/search", apiKeyMiddleware, basicMiddleware, controllers.ZonesSearch)
+	r.POST("/v1/zones/osm", apiKeyMiddleware, basicMiddleware, controllers.ZonesFromOsm)
 
 	// Lists
 	r.GET("/v1/lists/list", apiKeyMiddleware, basicMiddleware, controllers.ListsList)

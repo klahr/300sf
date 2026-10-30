@@ -22,6 +22,7 @@
 /// <reference path="LocalStorage.ts"/>
 /// <reference path="Session.ts"/>
 /// <reference path="Outbox.ts"/>
+/// <reference path="Updates.ts"/>
 
 interface IAppListener {
 	showPage(id: string, data: any): void;
@@ -37,8 +38,10 @@ class App implements IAppListener {
 	public static translations = Translations.en;
 	private mPages = new Array<Page>();
 	private static sUser: Models.User;
+	private static sVersion = "dev";
 
-	constructor(language: string, redirect: string, queryParameters: object) {
+	constructor(language: string, redirect: string, queryParameters: object, version: string) {
+		App.sVersion = version || "dev";
 		App.hideIconNames();
 
 		Session.forgetLegacyTokens();
@@ -90,6 +93,7 @@ class App implements IAppListener {
 		});
 		// Sightings saved while offline, from this visit or an earlier one.
 		Outbox.send();
+		Updates.watch();
 
 		window.addEventListener("popstate", function () {
 			if (Ui.PopUp.handleBack()) {
@@ -208,6 +212,11 @@ class App implements IAppListener {
 				App.sLanguage = "en";
 				break;
 		}
+	}
+
+	// The release the server sent this page with.
+	public static get version(): string {
+		return App.sVersion;
 	}
 
 	public static get language(): string {

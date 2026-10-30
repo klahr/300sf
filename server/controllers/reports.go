@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/klahr/300sf/server/models"
+	"github.com/klahr/300sf/server/places"
 	"github.com/klahr/300sf/server/table"
 	"github.com/klahr/300sf/server/types"
 	"github.com/klahr/300sf/server/utils"
@@ -123,11 +124,18 @@ func Reports(c *gin.Context) {
 		},
 	}
 
-	if zones := utils.GetZonesFromPosition(types.LatLon{
-		Latitude:  r.Latitude.Float64,
-		Longitude: r.Longitude.Float64,
-	}); len(zones) > 0 {
-		report.ZoneId = zero.IntFrom(zones[len(zones)-1].Id)
+	// Known places get their zone now; a new place is looked up once the
+	// sighting is saved (places.Locate).
+	locateLater := false
+	if r.Latitude.Valid && r.Longitude.Valid {
+		zones := utils.GetZonesFromPosition(types.LatLon{
+			Latitude:  r.Latitude.Float64,
+			Longitude: r.Longitude.Float64,
+		})
+		if len(zones) > 0 {
+			report.ZoneId = zero.IntFrom(zones[len(zones)-1].Id)
+		}
+		locateLater = !places.Complete(zones)
 	}
 
 	if r.AgeUuid.Valid {
@@ -245,6 +253,9 @@ func Reports(c *gin.Context) {
 	}
 
 	tx.Commit()
+	if locateLater {
+		places.Locate(report.Id)
+	}
 
 	c.JSON(http.StatusOK, report)
 }

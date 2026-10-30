@@ -13,6 +13,7 @@ const (
 	ListTemplates          = "list_templates"
 	ListReports            = "list_reports"
 	ListTemplateSpecies    = "list_template_species"
+	Orders                 = "orders"
 	Rarities               = "rarities"
 	Reports                = "reports"
 	ReportTags             = "report_tags"

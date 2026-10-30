@@ -1,0 +1,543 @@
+order,la,sv,en,de
+Anseriformes,Oxyura jamaicensis,Amerikansk kopparand,Ruddy Duck,Schwarzkopf-Ruderente
+Anseriformes,Cygnus olor,Knölsvan,Mute Swan,Höckerschwan
+Anseriformes,Cygnus columbianus,Mindre sångsvan,Tundra Swan,Zwergschwan
+Anseriformes,Cygnus cygnus,Sångsvan,Whooper Swan,Singschwan
+Anseriformes,Branta bernicla,Prutgås,Brant Goose,Ringelgans
+Anseriformes,Branta ruficollis,Rödhalsad gås,Red-breasted Goose,Rothalsgans
+Anseriformes,Branta canadensis,Kanadagås,Canada Goose,Kanadagans
+Anseriformes,Branta leucopsis,Vitkindad gås,Barnacle Goose,Weißwangengans
+Anseriformes,Branta hutchinsii,Polargås,Cackling Goose,Zwergkanadagans
+Anseriformes,Anser indicus,Stripgås,Bar-headed Goose,Streifengans
+Anseriformes,Anser rossii,Dvärgsnögås,Ross's Goose,Zwergschneegans
+Anseriformes,Anser anser,Grågås,Greylag Goose,Graugans
+Anseriformes,Anser erythropus,Fjällgås,Lesser White-fronted Goose,Zwerggans
+Anseriformes,Anser albifrons,Bläsgås,Greater White-fronted Goose,Blässgans
+Anseriformes,Anser serrirostris,Tundragås,Tundra Bean Goose,Tundrasaatgans
+Anseriformes,Anser brachyrhynchus,Spetsbergsgås,Pink-footed Goose,Kurzschnabelgans
+Anseriformes,Anser fabalis,Skogsgås,Taiga Bean Goose,Waldsaatgans
+Anseriformes,Aix galericulata,Mandarinand,Mandarin Duck,Mandarinente
+Anseriformes,Alopochen aegyptiaca,Nilgås,Egyptian Goose,Nilgans
+Anseriformes,Tadorna tadorna,Gravand,Common Shelduck,Brandgans
+Anseriformes,Tadorna ferruginea,Rostand,Ruddy Shelduck,Rostgans
+Anseriformes,Clangula hyemalis,Alfågel,Long-tailed Duck,Eisente
+Anseriformes,Polysticta stelleri,Alförrädare,Steller's Eider,Scheckente
+Anseriformes,Somateria spectabilis,Praktejder,King Eider,Prachteiderente
+Anseriformes,Somateria mollissima,Ejder,Common Eider,Eiderente
+Anseriformes,Histrionicus histrionicus,Strömand,Harlequin Duck,Kragenente
+Anseriformes,Melanitta nigra,Sjöorre,Common Scoter,Trauerente
+Anseriformes,Melanitta americana,Amerikansk sjöorre,Black Scoter,Pazifiktrauerente
+Anseriformes,Melanitta perspicillata,Vitnackad svärta,Surf Scoter,Brillenente
+Anseriformes,Melanitta fusca,Svärta,Velvet Scoter,Samtente
+Anseriformes,Melanitta deglandi,Amerikansk knölsvärta,White-winged Scoter,Höckersamtente
+Anseriformes,Melanitta stejnegeri,Sibirisk knölsvärta,Stejneger's Scoter,Kamtschatkasamtente
+Anseriformes,Bucephala clangula,Knipa,Common Goldeneye,Schellente
+Anseriformes,Mergellus albellus,Salskrake,Smew,Zwergsäger
+Anseriformes,Mergus serrator,Småskrake,Red-breasted Merganser,Mittelsäger
+Anseriformes,Mergus merganser,Storskrake,Common Merganser,Gänsesäger
+Anseriformes,Netta rufina,Rödhuvad dykand,Red-crested Pochard,Kolbenente
+Anseriformes,Aythya nyroca,Vitögd dykand,Ferruginous Duck,Moorente
+Anseriformes,Aythya ferina,Brunand,Common Pochard,Tafelente
+Anseriformes,Aythya collaris,Ringand,Ring-necked Duck,Ringschnabelente
+Anseriformes,Aythya fuligula,Vigg,Tufted Duck,Reiherente
+Anseriformes,Aythya affinis,Mindre bergand,Lesser Scaup,Kanadabergente
+Anseriformes,Aythya marila,Bergand,Greater Scaup,Bergente
+Anseriformes,Sibirionetta formosa,Gulkindad kricka,Baikal Teal,Gluckente
+Anseriformes,Spatula querquedula,Årta,Garganey,Knäkente
+Anseriformes,Spatula discors,Blåvingad årta,Blue-winged Teal,Blauflügelente
+Anseriformes,Spatula clypeata,Skedand,Northern Shoveler,Löffelente
+Anseriformes,Mareca strepera,Snatterand,Gadwall,Schnatterente
+Anseriformes,Mareca penelope,Bläsand,Eurasian Wigeon,Pfeifente
+Anseriformes,Mareca americana,Amerikansk bläsand,American Wigeon,Kanadapfeifente
+Anseriformes,Anas platyrhynchos,Gräsand,Mallard,Stockente
+Anseriformes,Anas rubripes,Svartand,American Black Duck,Dunkelente
+Anseriformes,Anas acuta,Stjärtand,Northern Pintail,Spießente
+Anseriformes,Anas crecca,Kricka,Eurasian Teal,Krickente
+Galliformes,Tetrastes bonasia,Järpe,Hazel Grouse,Haselhuhn
+Galliformes,Lagopus muta,Fjällripa,Rock Ptarmigan,Alpenschneehuhn
+Galliformes,Lagopus lagopus,Dalripa,Willow Ptarmigan,Moorschneehuhn
+Galliformes,Tetrao urogallus,Tjäder,Western Capercaillie,Auerhuhn
+Galliformes,Lyrurus tetrix,Orre,Black Grouse,Birkhuhn
+Galliformes,Perdix perdix,Rapphöna,Grey Partridge,Rebhuhn
+Galliformes,Phasianus colchicus,Fasan,Common Pheasant,Jagdfasan
+Galliformes,Coturnix coturnix,Vaktel,Common Quail,Wachtel
+Podicipediformes,Tachybaptus ruficollis,Smådopping,Little Grebe,Zwergtaucher
+Podicipediformes,Podiceps auritus,Svarthakedopping,Horned Grebe,Ohrentaucher
+Podicipediformes,Podiceps grisegena,Gråhakedopping,Red-necked Grebe,Rothalstaucher
+Podicipediformes,Podiceps cristatus,Skäggdopping,Great Crested Grebe,Haubentaucher
+Podicipediformes,Podiceps nigricollis,Svarthalsad dopping,Black-necked Grebe,Schwarzhalstaucher
+Otidiformes,Otis tarda,Stortrapp,Great Bustard,Großtrappe
+Otidiformes,Chlamydotis macqueenii,Kragtrapp,Asian Houbara,Steppenkragentrappe
+Otidiformes,Tetrax tetrax,Småtrapp,Little Bustard,Zwergtrappe
+Cuculiformes,Clamator glandarius,Skatgök,Great Spotted Cuckoo,Häherkuckuck
+Cuculiformes,Cuculus canorus,Gök,Common Cuckoo,Kuckuck
+Pterocliformes,Syrrhaptes paradoxus,Stäppflyghöna,Pallas's Sandgrouse,Steppenflughuhn
+Columbiformes,Zenaida macroura,Spetsstjärtad duva,Mourning Dove,Carolinataube
+Columbiformes,Streptopelia orientalis,Större turturduva,Oriental Turtle Dove,Orientturteltaube
+Columbiformes,Streptopelia turtur,Turturduva,European Turtle Dove,Turteltaube
+Columbiformes,Streptopelia decaocto,Turkduva,Eurasian Collared Dove,Türkentaube
+Columbiformes,Columba palumbus,Ringduva,Common Wood Pigeon,Ringeltaube
+Columbiformes,Columba livia,Tamduva,Rock Dove,Felsentaube
+Columbiformes,Columba oenas,Skogsduva,Stock Dove,Hohltaube
+Gruiformes,Antigone canadensis,Prärietrana,Sandhill Crane,Kanadakranich
+Gruiformes,Grus virgo,Jungfrutrana,Demoiselle Crane,Jungfernkranich
+Gruiformes,Grus grus,Trana,Common Crane,Kranich
+Gruiformes,Rallus aquaticus,Vattenrall,Water Rail,Wasserralle
+Gruiformes,Crex crex,Kornknarr,Corn Crake,Wachtelkönig
+Gruiformes,Porzana carolina,Karolinasumphöna,Sora,Carolinasumpfhuhn
+Gruiformes,Porzana porzana,Småfläckig sumphöna,Spotted Crake,Tüpfelsumpfhuhn
+Gruiformes,Gallinula chloropus,Rörhöna,Common Moorhen,Teichhuhn
+Gruiformes,Fulica atra,Sothöna,Eurasian Coot,Blässhuhn
+Gruiformes,Zapornia parva,Mindre sumphöna,Little Crake,Kleinsumpfhuhn
+Gruiformes,Zapornia pusilla,Dvärgsumphöna,Baillon's Crake,Zwergsumpfhuhn
+Charadriiformes,Burhinus oedicnemus,Tjockfot,Eurasian Stone-curlew,Triel
+Charadriiformes,Recurvirostra avosetta,Skärfläcka,Pied Avocet,Säbelschnäbler
+Charadriiformes,Himantopus himantopus,Styltlöpare,Black-winged Stilt,Stelzenläufer
+Charadriiformes,Haematopus ostralegus,Strandskata,Eurasian Oystercatcher,Austernfischer
+Charadriiformes,Pluvialis squatarola,Kustpipare,Grey Plover,Kiebitzregenpfeifer
+Charadriiformes,Pluvialis apricaria,Ljungpipare,European Golden Plover,Goldregenpfeifer
+Charadriiformes,Pluvialis dominica,Amerikansk tundrapipare,American Golden Plover,Prärie-Goldregenpfeifer
+Charadriiformes,Pluvialis fulva,Sibirisk tundrapipare,Pacific Golden Plover,Tundra-Goldregenpfeifer
+Charadriiformes,Eudromias morinellus,Fjällpipare,Eurasian Dotterel,Mornellregenpfeifer
+Charadriiformes,Charadrius hiaticula,Större strandpipare,Common Ringed Plover,Sandregenpfeifer
+Charadriiformes,Thinornis dubius,Mindre strandpipare,Little Ringed Plover,Flussregenpfeifer
+Charadriiformes,Vanellus vanellus,Tofsvipa,Northern Lapwing,Kiebitz
+Charadriiformes,Vanellus cinereus,Gråhuvad vipa,Grey-headed Lapwing,Graukopfkiebitz
+Charadriiformes,Vanellus gregarius,Stäppvipa,Sociable Lapwing,Steppenkiebitz
+Charadriiformes,Vanellus leucurus,Sumpvipa,White-tailed Lapwing,Weißschwanzkiebitz
+Charadriiformes,Anarhynchus asiaticus,Kaspisk pipare,Caspian Plover,Wermutregenpfeifer
+Charadriiformes,Anarhynchus veredus,Orientpipare,Oriental Plover,Steppenregenpfeifer
+Charadriiformes,Anarhynchus atrifrons,Tibetpipare,Tibetan Sand Plover,
+Charadriiformes,Anarhynchus mongolus,Kamtjatkapipare,Siberian Sand Plover,Mongolenregenpfeifer
+Charadriiformes,Anarhynchus leschenaultii,Ökenpipare,Greater Sand Plover,Wüstenregenpfeifer
+Charadriiformes,Anarhynchus alexandrinus,Svartbent strandpipare,Kentish Plover,Seeregenpfeifer
+Charadriiformes,Bartramia longicauda,Piparsnäppa,Upland Sandpiper,Prärieläufer
+Charadriiformes,Numenius minutus,Dvärgspov,Little Curlew,Zwergbrachvogel
+Charadriiformes,Numenius phaeopus,Småspov,Eurasian Whimbrel,Regenbrachvogel
+Charadriiformes,Numenius arquata,Storspov,Eurasian Curlew,Brachvogel
+Charadriiformes,Limosa lapponica,Myrspov,Bar-tailed Godwit,Pfuhlschnepfe
+Charadriiformes,Limosa limosa,Rödspov,Black-tailed Godwit,Uferschnepfe
+Charadriiformes,Limosa haemastica,Hudsonspov,Hudsonian Godwit,Hudsonschnepfe
+Charadriiformes,Limnodromus scolopaceus,Större beckasinsnäppa,Long-billed Dowitcher,Tundraschlammläufer
+Charadriiformes,Limnodromus griseus,Mindre beckasinsnäppa,Short-billed Dowitcher,Moorschlammläufer
+Charadriiformes,Lymnocryptes minimus,Dvärgbeckasin,Jack Snipe,Zwergschnepfe
+Charadriiformes,Scolopax rusticola,Morkulla,Eurasian Woodcock,Waldschnepfe
+Charadriiformes,Gallinago media,Dubbelbeckasin,Great Snipe,Doppelschnepfe
+Charadriiformes,Gallinago delicata,Amerikansk beckasin,Wilson's Snipe,Wilsonbekassine
+Charadriiformes,Gallinago gallinago,Enkelbeckasin,Common Snipe,Bekassine
+Charadriiformes,Xenus cinereus,Tereksnäppa,Terek Sandpiper,Terekwasserläufer
+Charadriiformes,Actitis hypoleucos,Drillsnäppa,Common Sandpiper,Flussuferläufer
+Charadriiformes,Actitis macularia,Fläckdrillsnäppa,Spotted Sandpiper,Drosseluferläufer
+Charadriiformes,Phalaropus tricolor,Präriesimsnäppa,Wilson's Phalarope,Wilsonwassertreter
+Charadriiformes,Phalaropus fulicarius,Brednäbbad simsnäppa,Red Phalarope,Thorshühnchen
+Charadriiformes,Phalaropus lobatus,Smalnäbbad simsnäppa,Red-necked Phalarope,Odinshühnchen
+Charadriiformes,Tringa ochropus,Skogssnäppa,Green Sandpiper,Waldwasserläufer
+Charadriiformes,Tringa solitaria,Amerikansk skogssnäppa,Solitary Sandpiper,Einsiedelwasserläufer
+Charadriiformes,Tringa brevipes,Sibirisk gråsnäppa,Grey-tailed Tattler,Grauschwanz-Wasserläufer
+Charadriiformes,Tringa stagnatilis,Dammsnäppa,Marsh Sandpiper,Teichwasserläufer
+Charadriiformes,Tringa glareola,Grönbena,Wood Sandpiper,Bruchwasserläufer
+Charadriiformes,Tringa totanus,Rödbena,Common Redshank,Rotschenkel
+Charadriiformes,Tringa flavipes,Mindre gulbena,Lesser Yellowlegs,Gelbschenkel
+Charadriiformes,Tringa erythropus,Svartsnäppa,Spotted Redshank,Dunkelwasserläufer
+Charadriiformes,Tringa nebularia,Gluttsnäppa,Common Greenshank,Grünschenkel
+Charadriiformes,Tringa melanoleuca,Större gulbena,Greater Yellowlegs,Tüpfelgelbschenkel
+Charadriiformes,Arenaria interpres,Roskarl,Ruddy Turnstone,Steinwälzer
+Charadriiformes,Calidris canutus,Kustsnäppa,Red Knot,Knutt
+Charadriiformes,Calidris tenuirostris,Kolymasnäppa,Great Knot,Anadyrknutt
+Charadriiformes,Calidris pugnax,Brushane,Ruff,Kampfläufer
+Charadriiformes,Calidris acuminata,Spetsstjärtad snäppa,Sharp-tailed Sandpiper,Spitzschwanz-Strandläufer
+Charadriiformes,Calidris falcinellus,Myrsnäppa,Broad-billed Sandpiper,Sumpfläufer
+Charadriiformes,Calidris ferruginea,Spovsnäppa,Curlew Sandpiper,Sichelstrandläufer
+Charadriiformes,Calidris himantopus,Styltsnäppa,Stilt Sandpiper,Bindenstrandläufer
+Charadriiformes,Calidris ruficollis,Rödhalsad snäppa,Red-necked Stint,Rotkehl-Strandläufer
+Charadriiformes,Calidris temminckii,Mosnäppa,Temminck's Stint,Temminckstrandläufer
+Charadriiformes,Calidris subminuta,Långtåsnäppa,Long-toed Stint,Langzehen-Strandläufer
+Charadriiformes,Calidris subruficollis,Prärielöpare,Buff-breasted Sandpiper,Grasläufer
+Charadriiformes,Calidris alba,Sandlöpare,Sanderling,Sanderling
+Charadriiformes,Calidris alpina,Kärrsnäppa,Dunlin,Alpenstrandläufer
+Charadriiformes,Calidris maritima,Skärsnäppa,Purple Sandpiper,Meerstrandläufer
+Charadriiformes,Calidris bairdii,Gulbröstad snäppa,Baird's Sandpiper,Bairdstrandläufer
+Charadriiformes,Calidris melanotos,Tuvsnäppa,Pectoral Sandpiper,Graubrust-Strandläufer
+Charadriiformes,Calidris pusilla,Sandsnäppa,Semipalmated Sandpiper,Sandstrandläufer
+Charadriiformes,Calidris mauri,Tundrasnäppa,Western Sandpiper,Bergstrandläufer
+Charadriiformes,Calidris minuta,Småsnäppa,Little Stint,Zwergstrandläufer
+Charadriiformes,Calidris minutilla,Dvärgsnäppa,Least Sandpiper,Wiesenstrandläufer
+Charadriiformes,Calidris fuscicollis,Vitgumpsnäppa,White-rumped Sandpiper,Weißbürzel-Strandläufer
+Charadriiformes,Cursorius cursor,Ökenlöpare,Cream-colored Courser,Rennvogel
+Charadriiformes,Glareola maldivarum,Orientvadarsvala,Oriental Pratincole,Orientbrachschwalbe
+Charadriiformes,Glareola nordmanni,Svartvingad vadarsvala,Black-winged Pratincole,Schwarzflügel-Brachschwalbe
+Charadriiformes,Glareola pratincola,Rödvingad vadarsvala,Collared Pratincole,Rotflügel-Brachschwalbe
+Charadriiformes,Stercorarius parasiticus,Kustlabb,Parasitic Jaeger,Schmarotzerraubmöwe
+Charadriiformes,Stercorarius longicaudus,Fjällabb,Long-tailed Jaeger,Falkenraubmöwe
+Charadriiformes,Stercorarius pomarinus,Bredstjärtad labb,Pomarine Jaeger,Spatelraubmöwe
+Charadriiformes,Stercorarius skua,Storlabb,Great Skua,Skua
+Charadriiformes,Fratercula cirrhata,Tofslunne,Tufted Puffin,Gelbschopflund
+Charadriiformes,Fratercula arctica,Lunnefågel,Atlantic Puffin,Papageitaucher
+Charadriiformes,Aethia psittacula,Papegojalka,Parakeet Auklet,Rotschnabelalk
+Charadriiformes,Cepphus grylle,Tobisgrissla,Black Guillemot,Gryllteiste
+Charadriiformes,Alca torda,Tordmule,Razorbill,Tordalk
+Charadriiformes,Pinguinus impennis,Garfågel,Great Auk,Riesenalk
+Charadriiformes,Alle alle,Alkekung,Little Auk,Krabbentaucher
+Charadriiformes,Uria lomvia,Spetsbergsgrissla,Thick-billed Murre,Dickschnabellumme
+Charadriiformes,Uria aalge,Sillgrissla,Common Murre,Trottellumme
+Charadriiformes,Onychoprion fuscatus,Sottärna,Sooty Tern,Rußseeschwalbe
+Charadriiformes,Onychoprion anaethetus,Tygeltärna,Bridled Tern,Zügelseeschwalbe
+Charadriiformes,Sternula albifrons,Småtärna,Little Tern,Zwergseeschwalbe
+Charadriiformes,Hydroprogne caspia,Skräntärna,Caspian Tern,Raubseeschwalbe
+Charadriiformes,Gelochelidon nilotica,Sandtärna,Gull-billed Tern,Lachseeschwalbe
+Charadriiformes,Chlidonias hybrida,Skäggtärna,Whiskered Tern,Weißbart-Seeschwalbe
+Charadriiformes,Chlidonias leucopterus,Vitvingad tärna,White-winged Tern,Weißflügel-Seeschwalbe
+Charadriiformes,Chlidonias niger,Svarttärna,Black Tern,Trauerseeschwalbe
+Charadriiformes,Thalasseus sandvicensis,Kentsk tärna,Sandwich Tern,Brandseeschwalbe
+Charadriiformes,Sterna forsteri,Kärrtärna,Forster's Tern,Forsterseeschwalbe
+Charadriiformes,Sterna paradisaea,Silvertärna,Arctic Tern,Küstenseeschwalbe
+Charadriiformes,Sterna hirundo,Fisktärna,Common Tern,Flussseeschwalbe
+Charadriiformes,Sterna dougallii,Rosentärna,Roseate Tern,Rosenseeschwalbe
+Charadriiformes,Hydrocoloeus minutus,Dvärgmås,Little Gull,Zwergmöwe
+Charadriiformes,Rhodostethia rosea,Rosenmås,Ross's Gull,Rosenmöwe
+Charadriiformes,Rissa tridactyla,Tretåig mås,Black-legged Kittiwake,Dreizehenmöwe
+Charadriiformes,Xema sabini,Tärnmås,Sabine's Gull,Schwalbenmöwe
+Charadriiformes,Pagophila eburnea,Ismås,Ivory Gull,Elfenbeinmöwe
+Charadriiformes,Chroicocephalus genei,Långnäbbad mås,Slender-billed Gull,Dünnschnabelmöwe
+Charadriiformes,Chroicocephalus philadelphia,Trädmås,Bonaparte's Gull,Bonapartemöwe
+Charadriiformes,Chroicocephalus ridibundus,Skrattmås,Black-headed Gull,Lachmöwe
+Charadriiformes,Leucophaeus atricilla,Sotvingad mås,Laughing Gull,Aztekenmöwe
+Charadriiformes,Leucophaeus pipixcan,Präriemås,Franklin's Gull,Präriemöwe
+Charadriiformes,Ichthyaetus ichthyaetus,Svarthuvad trut,Pallas's Gull,Fischmöwe
+Charadriiformes,Ichthyaetus melanocephalus,Svarthuvad mås,Mediterranean Gull,Schwarzkopfmöwe
+Charadriiformes,Larus delawarensis,Ringnäbbad mås,Ring-billed Gull,Ringschnabelmöwe
+Charadriiformes,Larus canus,Fiskmås,Common Gull,Sturmmöwe
+Charadriiformes,Larus cachinnans,Kaspisk trut,Caspian Gull,Steppenmöwe
+Charadriiformes,Larus argentatus,Gråtrut,European Herring Gull,Silbermöwe
+Charadriiformes,Larus michahellis,Medelhavstrut,Yellow-legged Gull,Mittelmeermöwe
+Charadriiformes,Larus marinus,Havstrut,Great Black-backed Gull,Mantelmöwe
+Charadriiformes,Larus hyperboreus,Vittrut,Glaucous Gull,Eismöwe
+Charadriiformes,Larus fuscus,Silltrut,Lesser Black-backed Gull,Heringsmöwe
+Charadriiformes,Larus glaucoides,Vitvingad trut,Iceland Gull,Polarmöwe
+Gaviiformes,Gavia stellata,Smålom,Red-throated Loon,Sterntaucher
+Gaviiformes,Gavia immer,Svartnäbbad islom,Common Loon,Eistaucher
+Gaviiformes,Gavia adamsii,Vitnäbbad islom,Yellow-billed Loon,Gelbschnabeltaucher
+Gaviiformes,Gavia pacifica,Stillahavslom,Pacific Loon,Pazifiktaucher
+Gaviiformes,Gavia arctica,Storlom,Black-throated Loon,Prachttaucher
+Procellariiformes,Thalassarche chlororhynchos,Mindre albatross,Atlantic Yellow-nosed Albatross,Gelbnasenalbatros
+Procellariiformes,Thalassarche melanophris,Svartbrynad albatross,Black-browed Albatross,Schwarzbrauenalbatros
+Procellariiformes,Hydrobates pelagicus,Stormsvala,European Storm Petrel,Sturmwellenläufer
+Procellariiformes,Hydrobates leucorhous,Klykstjärtad stormsvala,Leach's Storm Petrel,Wellenläufer
+Procellariiformes,Fulmarus glacialis,Stormfågel,Northern Fulmar,Eissturmvogel
+Procellariiformes,Calonectris diomedea,Diomedeslira,Scopoli's Shearwater,Sepiasturmtaucher
+Procellariiformes,Calonectris borealis,Gulnäbbad lira,Cory's Shearwater,Corysturmtaucher
+Procellariiformes,Ardenna grisea,Grålira,Sooty Shearwater,Dunkelsturmtaucher
+Procellariiformes,Ardenna gravis,Större lira,Great Shearwater,Kappensturmtaucher
+Procellariiformes,Puffinus puffinus,Mindre lira,Manx Shearwater,Atlantiksturmtaucher
+Procellariiformes,Puffinus yelkouan,Medelhavslira,Yelkouan Shearwater,Mittelmeer-Sturmtaucher
+Ciconiiformes,Ciconia nigra,Svart stork,Black Stork,Schwarzstorch
+Ciconiiformes,Ciconia ciconia,Vit stork,White Stork,Weißstorch
+Suliformes,Morus bassanus,Havssula,Northern Gannet,Basstölpel
+Suliformes,Sula leucogaster,Brunsula,Brown Booby,Weißbauchtölpel
+Suliformes,Microcarbo pygmaeus,Dvärgskarv,Pygmy Cormorant,Zwergscharbe
+Suliformes,Gulosus aristotelis,Toppskarv,European Shag,Krähenscharbe
+Suliformes,Phalacrocorax carbo,Storskarv,Great Cormorant,Kormoran
+Pelecaniformes,Plegadis falcinellus,Bronsibis,Glossy Ibis,Sichler
+Pelecaniformes,Platalea leucorodia,Skedstork,Eurasian Spoonbill,Löffler
+Pelecaniformes,Pelecanus crispus,Krushuvad pelikan,Dalmatian Pelican,Krauskopfpelikan
+Pelecaniformes,Botaurus stellaris,Rördrom,Eurasian Bittern,Rohrdommel
+Pelecaniformes,Botaurus lentiginosus,Amerikansk rördrom,American Bittern,Schwarzbart-Rohrdommel
+Pelecaniformes,Botaurus minutus,Dvärgrördrom,Little Bittern,Zwergdommel
+Pelecaniformes,Egretta garzetta,Silkeshäger,Little Egret,Seidenreiher
+Pelecaniformes,Nycticorax nycticorax,Natthäger,Black-crowned Night Heron,Nachtreiher
+Pelecaniformes,Ardeola ralloides,Rallhäger,Squacco Heron,Rallenreiher
+Pelecaniformes,Ardea alba,Ägretthäger,Great Egret,Silberreiher
+Pelecaniformes,Ardea ibis,Kohäger,Western Cattle Egret,Kuhreiher
+Pelecaniformes,Ardea purpurea,Purpurhäger,Purple Heron,Purpurreiher
+Pelecaniformes,Ardea cinerea,Gråhäger,Grey Heron,Graureiher
+Caprimulgiformes,Caprimulgus europaeus,Nattskärra,European Nightjar,Nachtschwalbe
+Caprimulgiformes,Caprimulgus aegyptius,Ökennattskärra,Egyptian Nightjar,Pharaonennachtschwalbe
+Apodiformes,Hirundapus caudacutus,Taggstjärtseglare,White-throated Needletail,Stachelschwanzsegler
+Apodiformes,Chaetura pelagica,Skorstenseglare,Chimney Swift,Schornsteinsegler
+Apodiformes,Tachymarptis melba,Alpseglare,Alpine Swift,Alpensegler
+Apodiformes,Apus pacificus,Orientseglare,Pacific Swift,Pazifiksegler
+Apodiformes,Apus caffer,Vitgumpseglare,White-rumped Swift,Weißbürzelsegler
+Apodiformes,Apus affinis,Stubbstjärtseglare,Little Swift,Haussegler
+Apodiformes,Apus apus,Tornseglare,Common Swift,Mauersegler
+Apodiformes,Apus pallidus,Blek tornseglare,Pallid Swift,Fahlsegler
+Strigiformes,Tyto alba,Tornuggla,Western Barn Owl,Schleiereule
+Strigiformes,Aegolius funereus,Pärluggla,Boreal Owl,Raufußkauz
+Strigiformes,Athene noctua,Minervauggla,Little Owl,Steinkauz
+Strigiformes,Surnia ulula,Hökuggla,Northern Hawk-Owl,Sperbereule
+Strigiformes,Glaucidium passerinum,Sparvuggla,Eurasian Pygmy Owl,Sperlingskauz
+Strigiformes,Otus scops,Dvärguv,Eurasian Scops Owl,Zwergohreule
+Strigiformes,Asio flammeus,Jorduggla,Short-eared Owl,Sumpfohreule
+Strigiformes,Asio otus,Hornuggla,Long-eared Owl,Waldohreule
+Strigiformes,Bubo scandiacus,Fjälluggla,Snowy Owl,Schneeeule
+Strigiformes,Bubo bubo,Berguv,Eurasian Eagle-Owl,Uhu
+Strigiformes,Strix aluco,Kattuggla,Tawny Owl,Waldkauz
+Strigiformes,Strix uralensis,Slaguggla,Ural Owl,Habichtskauz
+Strigiformes,Strix nebulosa,Lappuggla,Great Grey Owl,Bartkauz
+Accipitriformes,Pandion haliaetus,Fiskgjuse,Osprey,Fischadler
+Accipitriformes,Elanus caeruleus,Svartvingad glada,Black-winged Kite,Gleitaar
+Accipitriformes,Neophron percnopterus,Smutsgam,Egyptian Vulture,Schmutzgeier
+Accipitriformes,Pernis apivorus,Bivråk,European Honey Buzzard,Wespenbussard
+Accipitriformes,Aegypius monachus,Grågam,Cinereous Vulture,Mönchsgeier
+Accipitriformes,Gyps fulvus,Gåsgam,Griffon Vulture,Gänsegeier
+Accipitriformes,Circaetus gallicus,Ormörn,Short-toed Snake Eagle,Schlangenadler
+Accipitriformes,Clanga clanga,Större skrikörn,Greater Spotted Eagle,Schelladler
+Accipitriformes,Clanga pomarina,Mindre skrikörn,Lesser Spotted Eagle,Schreiadler
+Accipitriformes,Hieraaetus pennatus,Dvärgörn,Booted Eagle,Zwergadler
+Accipitriformes,Aquila nipalensis,Stäppörn,Steppe Eagle,Steppenadler
+Accipitriformes,Aquila heliaca,Kejsarörn,Eastern Imperial Eagle,Kaiseradler
+Accipitriformes,Aquila chrysaetos,Kungsörn,Golden Eagle,Steinadler
+Accipitriformes,Aquila fasciata,Hökörn,Bonelli's Eagle,Habichtsadler
+Accipitriformes,Accipiter nisus,Sparvhök,Eurasian Sparrowhawk,Sperber
+Accipitriformes,Astur gentilis,Duvhök,Eurasian Goshawk,Habicht
+Accipitriformes,Circus macrourus,Stäpphök,Pallid Harrier,Steppenweihe
+Accipitriformes,Circus cyaneus,Blå kärrhök,Hen Harrier,Kornweihe
+Accipitriformes,Circus pygargus,Ängshök,Montagu's Harrier,Wiesenweihe
+Accipitriformes,Circus aeruginosus,Brun kärrhök,Western Marsh Harrier,Rohrweihe
+Accipitriformes,Milvus milvus,Röd glada,Red Kite,Rotmilan
+Accipitriformes,Milvus migrans,Brun glada,Black Kite,Schwarzmilan
+Accipitriformes,Haliaeetus albicilla,Havsörn,White-tailed Eagle,Seeadler
+Accipitriformes,Buteo lagopus,Fjällvråk,Rough-legged Buzzard,Raufußbussard
+Accipitriformes,Buteo buteo,Ormvråk,Common Buzzard,Mäusebussard
+Accipitriformes,Buteo rufinus,Örnvråk,Long-legged Buzzard,Adlerbussard
+Bucerotiformes,Upupa epops,Härfågel,Common Hoopoe,Wiedehopf
+Coraciiformes,Coracias garrulus,Blåkråka,European Roller,Blauracke
+Coraciiformes,Merops apiaster,Biätare,European Bee-eater,Bienenfresser
+Coraciiformes,Merops persicus,Grön biätare,Blue-cheeked Bee-eater,Blauwangenspint
+Coraciiformes,Alcedo atthis,Kungsfiskare,Common Kingfisher,Eisvogel
+Piciformes,Jynx torquilla,Göktyta,Eurasian Wryneck,Wendehals
+Piciformes,Picus canus,Gråspett,Grey-headed Woodpecker,Grauspecht
+Piciformes,Picus viridis,Gröngöling,European Green Woodpecker,Grünspecht
+Piciformes,Dryocopus martius,Spillkråka,Black Woodpecker,Schwarzspecht
+Piciformes,Picoides tridactylus,Tretåig hackspett,Eurasian Three-toed Woodpecker,Dreizehenspecht
+Piciformes,Dendrocoptes medius,Mellanspett,Middle Spotted Woodpecker,Mittelspecht
+Piciformes,Dendrocopos leucotos,Vitryggig hackspett,White-backed Woodpecker,Weißrückenspecht
+Piciformes,Dendrocopos major,Större hackspett,Great Spotted Woodpecker,Buntspecht
+Piciformes,Dryobates minor,Mindre hackspett,Lesser Spotted Woodpecker,Kleinspecht
+Falconiformes,Falco naumanni,Rödfalk,Lesser Kestrel,Rötelfalke
+Falconiformes,Falco tinnunculus,Tornfalk,Common Kestrel,Turmfalke
+Falconiformes,Falco vespertinus,Aftonfalk,Red-footed Falcon,Rotfußfalke
+Falconiformes,Falco amurensis,Amurfalk,Amur Falcon,Amurfalke
+Falconiformes,Falco columbarius,Stenfalk,Merlin,Merlin
+Falconiformes,Falco eleonorae,Eleonorafalk,Eleonora's Falcon,Eleonorenfalke
+Falconiformes,Falco subbuteo,Lärkfalk,Eurasian Hobby,Baumfalke
+Falconiformes,Falco peregrinus,Pilgrimsfalk,Peregrine Falcon,Wanderfalke
+Falconiformes,Falco rusticolus,Jaktfalk,Gyrfalcon,Gerfalke
+Passeriformes,Vireo olivaceus,Rödögd vireo,Red-eyed Vireo,Rotaugenvireo
+Passeriformes,Oriolus oriolus,Sommargylling,Eurasian Golden Oriole,Pirol
+Passeriformes,Lanius excubitor,Varfågel,Great Grey Shrike,Raubwürger
+Passeriformes,Lanius borealis,Beringvarfågel,Northern Shrike,Taigaraubwürger
+Passeriformes,Lanius nubicus,Masktörnskata,Masked Shrike,Maskenwürger
+Passeriformes,Lanius minor,Svartpannad törnskata,Lesser Grey Shrike,Schwarzstirnwürger
+Passeriformes,Lanius senator,Rödhuvad törnskata,Woodchat Shrike,Rotkopfwürger
+Passeriformes,Lanius isabellinus,Isabellatörnskata,Isabelline Shrike,Isabellwürger
+Passeriformes,Lanius collurio,Törnskata,Red-backed Shrike,Neuntöter
+Passeriformes,Lanius phoenicuroides,Turkestantörnskata,Red-tailed Shrike,Rotschwanzwürger
+Passeriformes,Lanius schach,Rostgumpad törnskata,Long-tailed Shrike,Schachwürger
+Passeriformes,Lanius cristatus,Brun törnskata,Brown Shrike,Braunwürger
+Passeriformes,Perisoreus infaustus,Lavskrika,Siberian Jay,Unglückshäher
+Passeriformes,Garrulus glandarius,Nötskrika,Eurasian Jay,Eichelhäher
+Passeriformes,Pica pica,Skata,Eurasian Magpie,Elster
+Passeriformes,Nucifraga caryocatactes,Nötkråka,Northern Nutcracker,Tannenhäher
+Passeriformes,Coloeus dauuricus,Klippkaja,Daurian Jackdaw,Elsterdohle
+Passeriformes,Coloeus monedula,Kaja,Western Jackdaw,Dohle
+Passeriformes,Corvus frugilegus,Råka,Rook,Saatkrähe
+Passeriformes,Corvus corax,Korp,Northern Raven,Kolkrabe
+Passeriformes,Corvus corone,Kråka,Carrion and Hooded Crow,Aaskrähe
+Passeriformes,Remiz pendulinus,Pungmes,Eurasian Penduline Tit,Beutelmeise
+Passeriformes,Cyanistes cyanus,Azurmes,Azure Tit,Lasurmeise
+Passeriformes,Cyanistes caeruleus,Blåmes,Eurasian Blue Tit,Blaumeise
+Passeriformes,Parus major,Talgoxe,Great Tit,Kohlmeise
+Passeriformes,Periparus ater,Svartmes,Coal Tit,Tannenmeise
+Passeriformes,Lophophanes cristatus,Tofsmes,Crested Tit,Haubenmeise
+Passeriformes,Poecile palustris,Entita,Marsh Tit,Sumpfmeise
+Passeriformes,Poecile montanus,Talltita,Willow Tit,Weidenmeise
+Passeriformes,Poecile cinctus,Lappmes,Grey-headed Chickadee,Lapplandmeise
+Passeriformes,Panurus biarmicus,Skäggmes,Bearded Reedling,Bartmeise
+Passeriformes,Lullula arborea,Trädlärka,Woodlark,Heidelerche
+Passeriformes,Alauda leucoptera,Vitvingad lärka,White-winged Lark,Weißflügellerche
+Passeriformes,Alauda arvensis,Sånglärka,Eurasian Skylark,Feldlerche
+Passeriformes,Galerida cristata,Tofslärka,Crested Lark,Haubenlerche
+Passeriformes,Eremophila alpestris,Berglärka,Horned Lark,Ohrenlerche
+Passeriformes,Calandrella brachydactyla,Korttålärka,Greater Short-toed Lark,Kurzzehenlerche
+Passeriformes,Melanocorypha bimaculata,Asiatisk kalanderlärka,Bimaculated Lark,Bergkalanderlerche
+Passeriformes,Melanocorypha yeltoniensis,Svartlärka,Black Lark,Schwarzsteppenlerche
+Passeriformes,Melanocorypha calandra,Kalanderlärka,Calandra Lark,Kalanderlerche
+Passeriformes,Alaudala heinei,Turkestanlärka,Turkestan Short-toed Lark,Turkestanlerche
+Passeriformes,Cisticola juncidis,Grässångare,Zitting Cisticola,Zistensänger
+Passeriformes,Hippolais icterina,Härmsångare,Icterine Warbler,Gelbspötter
+Passeriformes,Hippolais polyglotta,Polyglottsångare,Melodious Warbler,Orpheusspötter
+Passeriformes,Iduna caligata,Stäppsångare,Booted Warbler,Buschspötter
+Passeriformes,Iduna rama,Saxaulsångare,Sykes's Warbler,Steppenspötter
+Passeriformes,Iduna pallida,Eksångare,Eastern Olivaceous Warbler,Blassspötter
+Passeriformes,Iduna opaca,Macchiasångare,Western Olivaceous Warbler,Isabellspötter
+Passeriformes,Acrocephalus schoenobaenus,Sävsångare,Sedge Warbler,Schilfrohrsänger
+Passeriformes,Acrocephalus paludicola,Vattensångare,Aquatic Warbler,Seggenrohrsänger
+Passeriformes,Acrocephalus melanopogon,Kaveldunsångare,Moustached Warbler,Mariskenrohrsänger
+Passeriformes,Acrocephalus agricola,Fältsångare,Paddyfield Warbler,Feldrohrsänger
+Passeriformes,Acrocephalus dumetorum,Busksångare,Blyth's Reed Warbler,Buschrohrsänger
+Passeriformes,Acrocephalus palustris,Kärrsångare,Marsh Warbler,Sumpfrohrsänger
+Passeriformes,Acrocephalus scirpaceus,Rörsångare,Common Reed Warbler,Teichrohrsänger
+Passeriformes,Acrocephalus arundinaceus,Trastsångare,Great Reed Warbler,Drosselrohrsänger
+Passeriformes,Helopsaltes certhiola,Starrsångare,Pallas's Grasshopper Warbler,Streifenschwirl
+Passeriformes,Locustella lanceolata,Träsksångare,Lanceolated Warbler,Strichelschwirl
+Passeriformes,Locustella fluviatilis,Flodsångare,River Warbler,Schlagschwirl
+Passeriformes,Locustella luscinioides,Vassångare,Savi's Warbler,Rohrschwirl
+Passeriformes,Locustella naevia,Gräshoppsångare,Common Grasshopper Warbler,Feldschwirl
+Passeriformes,Riparia riparia,Backsvala,Sand Martin,Uferschwalbe
+Passeriformes,Ptyonoprogne rupestris,Klippsvala,Eurasian Crag Martin,Felsenschwalbe
+Passeriformes,Hirundo rustica,Ladusvala,Barn Swallow,Rauchschwalbe
+Passeriformes,Delichon urbicum,Hussvala,Western House Martin,Mehlschwalbe
+Passeriformes,Cecropis rufula,Rostgumpsvala,European Red-rumped Swallow,
+Passeriformes,Cecropis daurica,Tempelsvala,Eastern Red-rumped Swallow,Rötelschwalbe
+Passeriformes,Petrochelidon pyrrhonota,Stensvala,American Cliff Swallow,Fahlstirnschwalbe
+Passeriformes,Aegithalos caudatus,Stjärtmes,Long-tailed Tit,Schwanzmeise
+Passeriformes,Cettia cetti,Sumpcettia,Cetti's Warbler,Seidensänger
+Passeriformes,Phylloscopus sibilatrix,Grönsångare,Wood Warbler,Waldlaubsänger
+Passeriformes,Phylloscopus bonelli,Bergsångare,Western Bonelli's Warbler,Berglaubsänger
+Passeriformes,Phylloscopus orientalis,Balkansångare,Eastern Bonelli's Warbler,Balkanlaubsänger
+Passeriformes,Phylloscopus inornatus,Tajgasångare,Yellow-browed Warbler,Gelbbrauen-Laubsänger
+Passeriformes,Phylloscopus humei,Bergtajgasångare,Hume's Leaf Warbler,Tienschan-Laubsänger
+Passeriformes,Phylloscopus proregulus,Kungsfågelsångare,Pallas's Leaf Warbler,Goldhähnchen-Laubsänger
+Passeriformes,Phylloscopus schwarzi,Videsångare,Radde's Warbler,Bartlaubsänger
+Passeriformes,Phylloscopus fuscatus,Brunsångare,Dusky Warbler,Dunkellaubsänger
+Passeriformes,Phylloscopus neglectus,Dvärgsångare,Plain Leaf Warbler,Eichenlaubsänger
+Passeriformes,Phylloscopus trochilus,Lövsångare,Willow Warbler,Fitis
+Passeriformes,Phylloscopus ibericus,Iberisk gransångare,Iberian Chiffchaff,Iberienzilpzalp
+Passeriformes,Phylloscopus collybita,Gransångare,Common Chiffchaff,Zilpzalp
+Passeriformes,Phylloscopus coronatus,Östlig kronsångare,Eastern Crowned Warbler,Kronenlaubsänger
+Passeriformes,Phylloscopus nitidus,Kaukasisk lundsångare,Green Warbler,Wacholderlaubsänger
+Passeriformes,Phylloscopus plumbeitarsus,Sibirisk lundsångare,Two-barred Warbler,Middendorff-Laubsänger
+Passeriformes,Phylloscopus trochiloides,Lundsångare,Greenish Warbler,Grünlaubsänger
+Passeriformes,Phylloscopus borealis,Nordsångare,Arctic Warbler,Wanderlaubsänger
+Passeriformes,Sylvia borin,Trädgårdssångare,Garden Warbler,Gartengrasmücke
+Passeriformes,Sylvia atricapilla,Svarthätta,Eurasian Blackcap,Mönchsgrasmücke
+Passeriformes,Curruca nisoria,Höksångare,Barred Warbler,Sperbergrasmücke
+Passeriformes,Curruca curruca,Ärtsångare,Lesser Whitethroat,Klappergrasmücke
+Passeriformes,Curruca nana,Ökensångare,Asian Desert Warbler,Wüstengrasmücke
+Passeriformes,Curruca communis,Törnsångare,Common Whitethroat,Dorngrasmücke
+Passeriformes,Curruca undata,Provencesångare,Dartford Warbler,Provencegrasmücke
+Passeriformes,Curruca melanocephala,Sammetshätta,Sardinian Warbler,Samtkopf-Grasmücke
+Passeriformes,Curruca subalpina,Rosensångare,Moltoni's Warbler,Ligurien-Bartgrasmücke
+Passeriformes,Curruca iberiae,Rostsångare,Western Subalpine Warbler,Iberien-Bartgrasmücke
+Passeriformes,Curruca cantillans,Rödstrupig sångare,Eastern Subalpine Warbler,Balkan-Bartgrasmücke
+Passeriformes,Bombycilla garrulus,Sidensvans,Bohemian Waxwing,Seidenschwanz
+Passeriformes,Regulus ignicapilla,Brandkronad kungsfågel,Common Firecrest,Sommergoldhähnchen
+Passeriformes,Regulus regulus,Kungsfågel,Goldcrest,Wintergoldhähnchen
+Passeriformes,Sitta europaea,Nötväcka,Eurasian Nuthatch,Kleiber
+Passeriformes,Certhia familiaris,Trädkrypare,Eurasian Treecreeper,Waldbaumläufer
+Passeriformes,Certhia brachydactyla,Trädgårdsträdkrypare,Short-toed Treecreeper,Gartenbaumläufer
+Passeriformes,Troglodytes troglodytes,Gärdsmyg,Eurasian Wren,Zaunkönig
+Passeriformes,Sturnus vulgaris,Stare,Common Starling,Star
+Passeriformes,Pastor roseus,Rosenstare,Rosy Starling,Rosenstar
+Passeriformes,Cinclus cinclus,Strömstare,White-throated Dipper,Wasseramsel
+Passeriformes,Zoothera aurea,Guldtrast,White's Thrush,Erddrossel
+Passeriformes,Catharus ustulatus,Beigekindad skogstrast,Swainson's Thrush,Zwergmusendrossel
+Passeriformes,Catharus fuscescens,Rostskogstrast,Veery,Weidenmusendrossel
+Passeriformes,Catharus guttatus,Eremitskogstrast,Hermit Thrush,Einsiedler-Musendrossel
+Passeriformes,Geokichla sibirica,Sibirisk trast,Siberian Thrush,Schieferdrossel
+Passeriformes,Turdus viscivorus,Dubbeltrast,Mistle Thrush,Misteldrossel
+Passeriformes,Turdus philomelos,Taltrast,Song Thrush,Singdrossel
+Passeriformes,Turdus iliacus,Rödvingetrast,Redwing,Rotdrossel
+Passeriformes,Turdus merula,Koltrast,Common Blackbird,Amsel
+Passeriformes,Turdus pilaris,Björktrast,Fieldfare,Wacholderdrossel
+Passeriformes,Turdus torquatus,Ringtrast,Ring Ouzel,Ringdrossel
+Passeriformes,Turdus atrogularis,Svarthalsad trast,Black-throated Thrush,Schwarzkehldrossel
+Passeriformes,Turdus naumanni,Rödtrast,Naumann's Thrush,Rostschwanzdrossel
+Passeriformes,Turdus eunomus,Bruntrast,Dusky Thrush,Rostflügeldrossel
+Passeriformes,Turdus obscurus,Gråhalsad trast,Eyebrowed Thrush,Weißbrauendrossel
+Passeriformes,Turdus migratorius,Vandringstrast,American Robin,Wanderdrossel
+Passeriformes,Muscicapa dauurica,Glasögonflugsnappare,Asian Brown Flycatcher,Braunschnäpper
+Passeriformes,Muscicapa striata,Grå flugsnappare,Spotted Flycatcher,Grauschnäpper
+Passeriformes,Erithacus rubecula,Rödhake,European Robin,Rotkehlchen
+Passeriformes,Irania gutturalis,Vitstrupig näktergal,White-throated Robin,Weißkehlsänger
+Passeriformes,Luscinia luscinia,Näktergal,Thrush Nightingale,Sprosser
+Passeriformes,Luscinia megarhynchos,Sydnäktergal,Common Nightingale,Nachtigall
+Passeriformes,Luscinia svecica,Blåhake,Bluethroat,Blaukehlchen
+Passeriformes,Calliope calliope,Rubinnäktergal,Siberian Rubythroat,Rubinkehlchen
+Passeriformes,Ficedula parva,Mindre flugsnappare,Red-breasted Flycatcher,Zwergschnäpper
+Passeriformes,Ficedula albicilla,Tajgaflugsnappare,Taiga Flycatcher,Taigaschnäpper
+Passeriformes,Ficedula albicollis,Halsbandsflugsnappare,Collared Flycatcher,Halsbandschnäpper
+Passeriformes,Ficedula hypoleuca,Svartvit flugsnappare,European Pied Flycatcher,Trauerschnäpper
+Passeriformes,Tarsiger cyanurus,Tajgablåstjärt,Red-flanked Bluetail,Blauschwanz
+Passeriformes,Phoenicurus ochruros,Svart rödstjärt,Black Redstart,Hausrotschwanz
+Passeriformes,Phoenicurus phoenicurus,Rödstjärt,Common Redstart,Gartenrotschwanz
+Passeriformes,Monticola saxatilis,Stentrast,Common Rock Thrush,Steinrötel
+Passeriformes,Monticola solitarius,Blåtrast,Blue Rock Thrush,Blaumerle
+Passeriformes,Saxicola rubetra,Buskskvätta,Whinchat,Braunkehlchen
+Passeriformes,Saxicola caprata,Svart buskskvätta,Pied Bush Chat,Elsterschmätzer
+Passeriformes,Saxicola maurus,Vitgumpad buskskvätta,Siberian Stonechat,Pallasschwarzkehlchen
+Passeriformes,Saxicola rubicola,Svarthakad buskskvätta,European Stonechat,Schwarzkehlchen
+Passeriformes,Oenanthe deserti,Ökenstenskvätta,Desert Wheatear,Wüstensteinschmätzer
+Passeriformes,Oenanthe hispanica,Västlig medelhavsstenskvätta,Western Black-eared Wheatear,Maurensteinschmätzer
+Passeriformes,Oenanthe pleschanka,Nunnestenskvätta,Pied Wheatear,Nonnensteinschmätzer
+Passeriformes,Oenanthe melanoleuca,Östlig medelhavsstenskvätta,Eastern Black-eared Wheatear,Balkansteinschmätzer
+Passeriformes,Oenanthe oenanthe,Stenskvätta,Northern Wheatear,Steinschmätzer
+Passeriformes,Oenanthe isabellina,Isabellastenskvätta,Isabelline Wheatear,Isabellsteinschmätzer
+Passeriformes,Prunella collaris,Alpjärnsparv,Alpine Accentor,Alpenbraunelle
+Passeriformes,Prunella atrogularis,Svartstrupig järnsparv,Black-throated Accentor,Schwarzkehlbraunelle
+Passeriformes,Prunella modularis,Järnsparv,Dunnock,Heckenbraunelle
+Passeriformes,Prunella montanella,Sibirisk järnsparv,Siberian Accentor,Bergbraunelle
+Passeriformes,Passer montanus,Pilfink,Eurasian Tree Sparrow,Feldsperling
+Passeriformes,Passer hispaniolensis,Spansk sparv,Spanish Sparrow,Weidensperling
+Passeriformes,Passer domesticus,Gråsparv,House Sparrow,Haussperling
+Passeriformes,Motacilla cinerea,Forsärla,Grey Wagtail,Gebirgsstelze
+Passeriformes,Motacilla flava,Gulärla,Western Yellow Wagtail,Schafstelze
+Passeriformes,Motacilla citreola,Citronärla,Citrine Wagtail,Zitronenstelze
+Passeriformes,Motacilla tschutschensis,Beringärla,Eastern Yellow Wagtail,Tschuktschenstelze
+Passeriformes,Motacilla alba,Sädesärla,White Wagtail,Bachstelze
+Passeriformes,Anthus godlewskii,Mongolpiplärka,Blyth's Pipit,Steppenpieper
+Passeriformes,Anthus campestris,Fältpiplärka,Tawny Pipit,Brachpieper
+Passeriformes,Anthus richardi,Större piplärka,Richard's Pipit,Spornpieper
+Passeriformes,Anthus gustavi,Tundrapiplärka,Pechora Pipit,Petschorapieper
+Passeriformes,Anthus trivialis,Trädpiplärka,Tree Pipit,Baumpieper
+Passeriformes,Anthus hodgsoni,Sibirisk piplärka,Olive-backed Pipit,Waldpieper
+Passeriformes,Anthus cervinus,Rödstrupig piplärka,Red-throated Pipit,Rotkehlpieper
+Passeriformes,Anthus japonicus,Stenpiplärka,Siberian Pipit,
+Passeriformes,Anthus rubescens,Amerikansk piplärka,American Pipit,Pazifikpieper
+Passeriformes,Anthus pratensis,Ängspiplärka,Meadow Pipit,Wiesenpieper
+Passeriformes,Anthus petrosus,Skärpiplärka,European Rock Pipit,Strandpieper
+Passeriformes,Anthus spinoletta,Vattenpiplärka,Water Pipit,Bergpieper
+Passeriformes,Fringilla montifringilla,Bergfink,Brambling,Bergfink
+Passeriformes,Fringilla coelebs,Bofink,Eurasian Chaffinch,Buchfink
+Passeriformes,Coccothraustes coccothraustes,Stenknäck,Hawfinch,Kernbeißer
+Passeriformes,Carpodacus erythrinus,Rosenfink,Common Rosefinch,Karmingimpel
+Passeriformes,Pinicola enucleator,Tallbit,Pine Grosbeak,Hakengimpel
+Passeriformes,Pyrrhula pyrrhula,Domherre,Eurasian Bullfinch,Gimpel
+Passeriformes,Bucanetes mongolicus,Mongolfink,Mongolian Finch,Mongolengimpel
+Passeriformes,Bucanetes githagineus,Ökentrumpetare,Trumpeter Finch,Wüstengimpel
+Passeriformes,Chloris chloris,Grönfink,European Greenfinch,Grünfink
+Passeriformes,Linaria flavirostris,Vinterhämpling,Twite,Berghänfling
+Passeriformes,Linaria cannabina,Hämpling,Common Linnet,Bluthänfling
+Passeriformes,Acanthis flammea,Gråsiska,Redpoll,Taigabirkenzeisig
+Passeriformes,Loxia leucoptera,Bändelkorsnäbb,Two-barred Crossbill,Bindenkreuzschnabel
+Passeriformes,Loxia pytyopsittacus,Större korsnäbb,Parrot Crossbill,Kiefernkreuzschnabel
+Passeriformes,Loxia curvirostra,Mindre korsnäbb,Red Crossbill,Fichtenkreuzschnabel
+Passeriformes,Carduelis carduelis,Steglits,European Goldfinch,Stieglitz
+Passeriformes,Serinus serinus,Gulhämpling,European Serin,Girlitz
+Passeriformes,Spinus spinus,Grönsiska,Eurasian Siskin,Erlenzeisig
+Passeriformes,Plectrophenax nivalis,Snösparv,Snow Bunting,Schneeammer
+Passeriformes,Calcarius lapponicus,Lappsparv,Lapland Longspur,Spornammer
+Passeriformes,Emberiza pallasi,Dvärgsävsparv,Pallas's Reed Bunting,Pallasammer
+Passeriformes,Emberiza schoeniclus,Sävsparv,Common Reed Bunting,Rohrammer
+Passeriformes,Emberiza chrysophrys,Gulbrynad sparv,Yellow-browed Bunting,Gelbbrauenammer
+Passeriformes,Emberiza aureola,Gyllensparv,Yellow-breasted Bunting,Weidenammer
+Passeriformes,Emberiza pusilla,Dvärgsparv,Little Bunting,Zwergammer
+Passeriformes,Emberiza rustica,Videsparv,Rustic Bunting,Waldammer
+Passeriformes,Emberiza spodocephala,Gråhuvad sparv,Black-faced Bunting,Maskenammer
+Passeriformes,Emberiza melanocephala,Svarthuvad sparv,Black-headed Bunting,Kappenammer
+Passeriformes,Emberiza calandra,Kornsparv,Corn Bunting,Grauammer
+Passeriformes,Emberiza fucata,Rödkindad sparv,Chestnut-eared Bunting,Bandammer
+Passeriformes,Emberiza cia,Klippsparv,Rock Bunting,Zippammer
+Passeriformes,Emberiza buchanani,Bergortolan,Grey-necked Bunting,Steinortolan
+Passeriformes,Emberiza cineracea,Gulgrå sparv,Cinereous Bunting,Türkenammer
+Passeriformes,Emberiza hortulana,Ortolansparv,Ortolan Bunting,Ortolan
+Passeriformes,Emberiza caesia,Rostsparv,Cretzschmar's Bunting,Grauortolan
+Passeriformes,Emberiza cirlus,Häcksparv,Cirl Bunting,Zaunammer
+Passeriformes,Emberiza leucocephalos,Tallsparv,Pine Bunting,Fichtenammer
+Passeriformes,Emberiza citrinella,Gulsparv,Yellowhammer,Goldammer
+Passeriformes,Spizelloides arborea,Tundrasparv,American Tree Sparrow,Baumammer
+Passeriformes,Junco hyemalis,Mörkögd junco,Dark-eyed Junco,Winterammer
+Passeriformes,Zonotrichia albicollis,Vitstrupig sparv,White-throated Sparrow,Weißkehlammer
+Passeriformes,Melospiza melodia,Sångsparv,Song Sparrow,Singammer
+Passeriformes,Icterus galbula,Baltimoretrupial,Baltimore Oriole,Baltimoretrupial
+Passeriformes,Pheucticus ludovicianus,Brokig kardinal,Rose-breasted Grosbeak,Rosenbrust-Kernknacker

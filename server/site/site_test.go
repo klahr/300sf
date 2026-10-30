@@ -112,11 +112,11 @@ func TestAppShell(t *testing.T) {
 	_, r := newTestSite(t, cfg)
 
 	w := get(r, "300sf.se", "/home")
-	if w.Code != http.StatusOK || !strings.Contains(w.Body.String(), `src="/js/app.js"`) {
+	if w.Code != http.StatusOK || !strings.Contains(w.Body.String(), `src="/js/app.js?v=dev"`) {
 		t.Fatalf("app shell not served: %d", w.Code)
 	}
 	boot := bootData(t, w.Body.String())
-	if boot["language"] != "sv" || boot["redirect"] != "home" {
+	if boot["language"] != "sv" || boot["redirect"] != "home" || boot["version"] != "dev" {
 		t.Errorf("boot = %v", boot)
 	}
 
@@ -164,6 +164,35 @@ func TestStaticFilesAndPages(t *testing.T) {
 	}
 	if w := get(r, "300sf.se", "/nope"); w.Code != http.StatusNotFound {
 		t.Errorf("unknown path = %d", w.Code)
+	}
+}
+
+func TestReleaseCaching(t *testing.T) {
+	Version = "1.2.3"
+	t.Cleanup(func() { Version = "dev" })
+	_, r := newTestSite(t, cfg)
+
+	page := get(r, "300sf.se", "/home")
+	if !strings.Contains(page.Body.String(), `src="/js/app.js?v=1.2.3"`) || page.Header().Get("Cache-Control") != "no-cache" {
+		t.Errorf("page should name this release's app.js and not be kept: %q", page.Header().Get("Cache-Control"))
+	}
+	if boot := bootData(t, page.Body.String()); boot["version"] != "1.2.3" {
+		t.Errorf("boot version = %v", boot["version"])
+	}
+
+	if cc := get(r, "300sf.se", "/css/base.css?v=1.2.3").Header().Get("Cache-Control"); !strings.Contains(cc, "immutable") {
+		t.Errorf("this release's file: Cache-Control = %q", cc)
+	}
+	if cc := get(r, "300sf.se", "/css/base.css?v=1.2.2").Header().Get("Cache-Control"); cc != "no-cache" {
+		t.Errorf("an older release's file: Cache-Control = %q", cc)
+	}
+	if w := get(r, "300sf.se", "/img/300sf.svg", "If-None-Match", `"1.2.3"`); w.Code != http.StatusNotModified {
+		t.Errorf("unchanged file within a release = %d, want 304", w.Code)
+	}
+
+	sw := get(r, "300sf.se", "/sw.js")
+	if !strings.Contains(sw.Body.String(), `const VERSION = "1.2.3";`) || sw.Header().Get("Cache-Control") != "no-cache" {
+		t.Errorf("sw.js should carry the release and not be kept")
 	}
 }
 

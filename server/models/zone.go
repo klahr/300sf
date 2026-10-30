@@ -11,4 +11,6 @@ type Zone struct {
 	AdminLevel   int64       `json:"admin_level"`
 	ParentZoneId zero.Int    `json:"-"`
 	ParentZone   *Zone       `json:"parent_zone"`
+	// The OpenStreetMap relation ("R54220") of a zone made by the geocoder.
+	OsmId zero.String `json:"-"`
 }

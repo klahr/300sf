@@ -190,6 +190,17 @@ class SettingsPage extends Page {
 
 		const cards = this.groupSections();
 		cards[cards.length - 1].classList.add("danger");
+
+		const version = document.createElement("p");
+		version.className = "details app-version";
+		version.textContent = App.translations.AppVersion.replace("{0}", App.version);
+		this.container.appendChild(version);
+
+		// Zones are named from OpenStreetMap, whose licence asks for this.
+		const credits = document.createElement("p");
+		credits.className = "details app-version";
+		credits.innerHTML = App.translations.PlaceCredits;
+		this.container.appendChild(credits);
 	}
 
 	private updateTheme(themes: HTMLElement): void {

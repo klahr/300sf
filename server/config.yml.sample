@@ -17,6 +17,11 @@ mailjet-public-key: ""
 mailjet-secret-key: ""
 send-email-interval: 0       # 0 disables the email sender
 delete-accounts-interval: 0  # 0 disables account deletion job
+# Names the country, region and municipality of sightings in new places, from
+# OpenStreetMap. The public service allows at most 1 request a second for the
+# whole site: https://operations.osmfoundation.org/policies/nominatim/
+# Run your own Nominatim for more; empty disables it.
+geocoder-endpoint: "https://nominatim.openstreetmap.org"
 site:
   host: "300sf.se"
   redirect-hosts:
@@ -26,3 +31,7 @@ site:
   client-id: ""
   client-secret: ""         # <prefix>.<secret> of the app's API key
   analyze-endpoint: ""      # empty disables bird sound identification
+  # Map tiles and their attribution; OpenStreetMap's when empty. Their policy:
+  # https://operations.osmfoundation.org/policies/tiles/
+  map-tiles: ""
+  map-attribution: ""

@@ -1,3 +1,4 @@
+/// <reference path="Maps.ts"/>
 /// <reference path="ui/Div.ts"/>
 /// <reference path="ui/Sheet.ts"/>
 /// <reference path="models/Recording.ts"/>
@@ -43,10 +44,7 @@ function openRecordingPopUp(species: Models.Species, recording: Models.Recording
 	setTimeout(function () {
 		const latLng = [recording.latitude, recording.longitude];
 		const map = L.map(mapDiv.container).setView(latLng, 4);
-		L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-			maxZoom: 19,
-			attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-		}).addTo(map);
+		Maps.tileLayer().addTo(map);
 		const markerGroup = L.layerGroup().addTo(map);
 		L.marker(latLng).addTo(markerGroup);
 	}, 10);

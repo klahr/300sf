@@ -1,83 +1,119 @@
+/// <reference path="Maps.ts"/>
 /// <reference path="ui/Widget.ts"/>
-/// <reference path="models/Zone.ts"/>
+/// <reference path="models/RegionZone.ts"/>
+/// <reference path="HttpRequest.ts"/>
 
+// A map of the counties and regions in view, loaded as the map moves. Tapping one toggles it; the
+// owner keeps what is selected and says so with setSelected.
 class MapSelect extends Ui.Widget {
-	private mMap: any;
-	private mGeoJsonLayers = Array<any>();
-	private mCallback: (zoneUuids: Array<string>) => void;
+	private mMap: any = null;
+	private mLayers = new Map<string, any>();
+	private mSelected = new Set<string>();
+	private mToggle: (zone: Models.RegionZone) => void;
+	private mLoadTimer = 0;
 
-	constructor(callback: (zoneUuids: Array<string>) => void) {
+	constructor(toggle: (zone: Models.RegionZone) => void) {
 		super();
-		this.mCallback = callback;
-
+		this.mToggle = toggle;
 		this.mContainer = document.createElement("div");
-		this.mContainer.classList.add("map");
-		this.mContainer.style.height = "500px";
-		this.mContainer.style.width = "100%";
-		this.mContainer.style.position = "relative";
-		this.mContainer.style.borderRadius = "var(--small-distance)";
-
-		const self = this;
-		setTimeout(function () {
-			self.mMap = L.map(self.mContainer, {
-				doubleClickZoom: false
-			}).setView([62.0, 15.0], 4);
-			L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-				maxZoom: 19,
-				attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-			}).addTo(self.mMap);
-			const markerGroup = L.layerGroup().addTo(self.mMap);
-		}, 10);
+		this.mContainer.className = "map zone-map";
 	}
 
-	public addZone(zone: Models.Zone): void {
+	// Leaflet measures its container, so the map is made once it is on screen.
+	public show(): void {
+		if (this.mMap) {
+			this.mMap.invalidateSize();
+			return;
+		}
 		const self = this;
-		const l = L.geoJSON(JSON.parse(Utils.decodeBase64(zone.polygon)), {
-			onEachFeature: function (feature, layer) {
-				feature.properties.uuid = zone.uuid;
-				layer.on('click', function () {
-					if (!feature.properties.hasOwnProperty('selected') || !feature.properties.selected) {
-						feature.properties.selected = true;
-						layer.setStyle({ color: "var(--success-color)", fillColor: 'var(--success-color)', fillOpacity: 0.5 }); // Change styling for selected state
-					} else {
-						feature.properties.selected = false;
-						layer.setStyle({ color: "#777", fillColor: '#777', fillOpacity: 0.2 }); // Change styling for unselected state
-					}
-					self.mCallback(self.getSelectedZoneUuids());
-				});
-			},
+		let last: any = null;
+		try {
+			last = JSON.parse(localStorage.getItem("last-position") || "null")?.value;
+		} catch (e) { }
+		this.mMap = L.map(this.mContainer, { doubleClickZoom: false }).setView(last ? [last.lat, last.lng] : [62.0, 16.0], last ? 6 : 4);
+		Maps.tileLayer().addTo(this.mMap);
+		this.mMap.on("moveend", function () {
+			clearTimeout(self.mLoadTimer);
+			self.mLoadTimer = setTimeout(function () {
+				self.loadInView();
+			}, 250);
+		});
+		this.loadInView();
+	}
+
+	public remove(): void {
+		clearTimeout(this.mLoadTimer);
+		if (this.mMap) {
+			this.mMap.remove();
+			this.mMap = null;
+		}
+	}
+
+	private loadInView(): void {
+		if (!this.mMap) {
+			return;
+		}
+		const self = this;
+		const b = this.mMap.getBounds();
+		const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v)).toFixed(4);
+		const bbox = [clamp(b.getWest(), -180, 180), clamp(b.getSouth(), -90, 90), clamp(b.getEast(), -180, 180), clamp(b.getNorth(), -90, 90)].join(",");
+		const r = new HttpRequest("GET", "/v1/zones/regions?bbox=" + bbox);
+		r.setQuiet();
+		r.process(function (status: any, data: any) {
+			(data.result || []).forEach((z: Models.RegionZone) => self.add(z));
+		});
+	}
+
+	// Draws the region, unless it is drawn already.
+	public add(zone: Models.RegionZone): void {
+		if (!this.mMap || !zone.uuid || !zone.outline || this.mLayers.has(zone.uuid)) {
+			return;
+		}
+		const self = this;
+		const uuid = zone.uuid;
+		const layer = L.geoJSON(zone.outline, {
 			style: function () {
-				return {
-					color: '#777',
-					fillColor: '#777',
-					fillOpacity: 0.2
-				};
+				return { className: "zone-area", weight: 1.5 };
 			}
-		}).addTo(this.mMap);
-		this.mGeoJsonLayers.push(l);
+		});
+		layer.bindTooltip(Utils.escapeHtml(App.getTranslation(zone.name)), { sticky: true });
+		layer.on("click", function () {
+			self.mToggle(zone);
+		});
+		layer.addTo(this.mMap);
+		this.mLayers.set(uuid, layer);
+		this.paint(uuid);
 	}
 
-	public setZoneSelected(uuid: string): void {
-		this.mGeoJsonLayers.forEach(l => {
-			l.eachLayer(function (layer) {
-				const f = layer.feature;
-				if (f.properties.uuid === uuid && !f.properties.selected) {
-					layer.fireEvent("click");
-				}
-			});
-		});
+	// Draws the region and moves the map to it.
+	public showZone(zone: Models.RegionZone): void {
+		this.add(zone);
+		const layer = zone.uuid ? this.mLayers.get(zone.uuid) : null;
+		if (layer) {
+			this.mMap.fitBounds(layer.getBounds(), { padding: [16, 16] });
+		}
 	}
 
-	public getSelectedZoneUuids(): Array<string> {
-		const uuids = Array<string>();
-		this.mGeoJsonLayers.forEach(l => {
-			l.eachLayer(function (layer) {
-				const f = layer.feature;
-				if (f.properties.selected) {
-					uuids.push(f.properties.uuid);
-				}
-			});
+	public setSelected(uuid: string, selected: boolean): void {
+		if (selected) {
+			this.mSelected.add(uuid);
+		} else {
+			this.mSelected.delete(uuid);
+		}
+		this.paint(uuid);
+	}
+
+	private paint(uuid: string): void {
+		const layer = this.mLayers.get(uuid);
+		if (!layer) {
+			return;
+		}
+		const selected = this.mSelected.has(uuid);
+		layer.eachLayer(function (l: any) {
+			l.getElement()?.classList.toggle("selected", selected);
 		});
-		return uuids;
+		if (selected) {
+			layer.bringToFront();
+		}
 	}
 }

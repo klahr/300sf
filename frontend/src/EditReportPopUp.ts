@@ -1,3 +1,4 @@
+/// <reference path="Maps.ts"/>
 /// <reference path="responses/Reports.ts"/>
 /// <reference path="responses/Lists.ts"/>
 /// <reference path="requests/Reports.ts"/>
@@ -92,10 +93,7 @@ class EditReportPopUp {
 			setTimeout(function () {
 				const latLng = [report.latitude, report.longitude];
 				const map = L.map(mapDiv.container).setView(latLng, 13);
-				L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-					maxZoom: 19,
-					attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-				}).addTo(map);
+				Maps.tileLayer().addTo(map);
 				const markerGroup = L.layerGroup().addTo(map);
 				L.marker(latLng).addTo(markerGroup);
 			}, 10);

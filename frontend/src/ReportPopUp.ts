@@ -1,3 +1,4 @@
+/// <reference path="Maps.ts"/>
 /// <reference path="responses/Reports.ts"/>
 /// <reference path="responses/Lists.ts"/>
 /// <reference path="requests/Reports.ts"/>
@@ -14,8 +15,6 @@
 /// <reference path="AnalyzePopUp.ts"/>
 /// <reference path="ui/SpeciesSearch.ts"/>
 /// <reference path="Outbox.ts"/>
-
-declare const L;
 
 class ReportPopUp {
 	private mReportButton: HTMLButtonElement;
@@ -75,10 +74,7 @@ class ReportPopUp {
 			const ks = new LocalStorage();
 			const last = ks.get("last-position") as any;
 			map = L.map(mapDiv.container).setView(last ? [last.lat, last.lng] : [62.0, 16.0], last ? 13 : 5);
-			L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-				maxZoom: 19,
-				attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-			}).addTo(map);
+			Maps.tileLayer().addTo(map);
 			const markerGroup = L.layerGroup().addTo(map);
 
 			// The position keeps improving while the GPS settles; stop once it is good enough, or

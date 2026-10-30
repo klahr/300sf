@@ -16,11 +16,20 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/klahr/300sf/server/config"
 	"github.com/klahr/300sf/server/controllers"
+	"github.com/klahr/300sf/server/geocoder"
 	"github.com/klahr/300sf/server/log"
 	"github.com/klahr/300sf/server/models"
+	"github.com/klahr/300sf/server/places"
+	"github.com/klahr/300sf/server/seed"
 	"github.com/klahr/300sf/server/services"
 	"github.com/klahr/300sf/server/site"
 )
+
+// version is the release, stamped at build time from git (see Makefile and
+// Dockerfile):
+//
+//	go build -ldflags="-X main.version=$(git describe --tags --always --dirty)"
+var version = "dev"
 
 // maxBodyBytes caps request bodies. Recordings sent for identification
 // (/v1/analyze) have a larger limit of their own.
@@ -109,6 +118,8 @@ func main() {
 	}()
 
 	configFilename := flag.String("config", "", "config filename")
+	bootstrapEmail := flag.String("bootstrap", "", "make this account an admin and, unless site.client-id is set, print a new API key for the website; then exit")
+	seedData := flag.Bool("seed", false, "add the starter bird orders and species the database doesn't have yet; then exit")
 	flag.Parse()
 	if err := config.SetupAppConfig(*configFilename); err != nil {
 		log.Error(nil, 0, err.Error())
@@ -125,6 +136,24 @@ func main() {
 		os.Exit(1)
 	}
 
+	if *seedData {
+		orders, species, err := seed.Load(models.DB)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		fmt.Printf("Added %d orders and %d species.\n", orders, species)
+	}
+	if *bootstrapEmail != "" {
+		if err := bootstrap(*bootstrapEmail); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+	}
+	if *seedData || *bootstrapEmail != "" {
+		os.Exit(0)
+	}
+
 	gin.SetMode(config.AppConfig.Mode)
 	// In debug mode, serve site/ from disk so CSS and app.js changes show up
 	// without rebuilding the server.
@@ -134,12 +163,19 @@ func main() {
 			siteFiles = os.DirFS("site")
 		}
 	}
+	site.Version = version
 	web, err := site.New(config.AppConfig.Site, siteFiles)
 	if err != nil {
 		log.Error(nil, 0, err.Error())
 		os.Exit(1)
 	}
 	r := newRouter(web)
+
+	if config.AppConfig.GeocoderEndpoint != "" {
+		// Names this server to the geocoder's operators, as their policy asks.
+		userAgent := fmt.Sprintf("300sf/%s (+%s)", version, config.AppConfig.Domain)
+		places.Start(geocoder.New(strings.TrimSuffix(config.AppConfig.GeocoderEndpoint, "/"), userAgent))
+	}
 
 	if config.AppConfig.SendEmailInterval > 0 {
 		go services.SendAllEmails(config.AppConfig.SendEmailInterval)

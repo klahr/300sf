@@ -1304,3 +1304,9 @@ CREATE TABLE IF NOT EXISTS `300sf`.`competition_invites` (
     REFERENCES `300sf`.`competitions` (`id`)
     ON DELETE CASCADE
     ON UPDATE NO ACTION);
+
+-- Zones made from OpenStreetMap (geocoder/) carry their relation, so the same
+-- area is never made twice.
+ALTER TABLE `300sf`.`zones`
+ADD COLUMN `osm_id` VARCHAR(32) NULL AFTER `parent_zone_id`,
+ADD UNIQUE INDEX `osm_id_UNIQUE` (`osm_id` ASC) VISIBLE;

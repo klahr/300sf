@@ -27,7 +27,11 @@ type App struct {
 	Mode                   string   `yaml:"mode"`
 	SendEmailInterval      int64    `yaml:"send-email-interval"`
 	DeleteAccountsInterval int64    `yaml:"delete-accounts-interval"`
-	Site                   Site     `yaml:"site"`
+	// Nominatim-compatible service that names the country, region and
+	// municipality of sightings in places no zone covers yet. Empty disables
+	// it. See geocoder/ for the public service's usage policy.
+	GeocoderEndpoint string `yaml:"geocoder-endpoint"`
+	Site             Site   `yaml:"site"`
 }
 
 // Site configures the websites served next to the API.
@@ -45,10 +49,26 @@ type Site struct {
 	ClientSecret string `yaml:"client-secret"`
 	// Bird sound identification service; empty disables /analyze.
 	AnalyzeEndpoint string `yaml:"analyze-endpoint"`
+	// The maps' raster tiles ({z}/{x}/{y} URL) and their attribution (HTML).
+	// OpenStreetMap's when empty; set them to move to another tile service.
+	MapTiles       string `yaml:"map-tiles"`
+	MapAttribution string `yaml:"map-attribution"`
 }
 
+const (
+	defaultMapTiles       = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+	defaultMapAttribution = `&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors`
+)
+
 func (c *App) Parse(data []byte) error {
-	return yaml.Unmarshal(data, c)
+	if err := yaml.Unmarshal(data, c); err != nil {
+		return err
+	}
+	if c.Site.MapTiles == "" {
+		c.Site.MapTiles = defaultMapTiles
+		c.Site.MapAttribution = defaultMapAttribution
+	}
+	return nil
 }
 
 var AppConfig *App

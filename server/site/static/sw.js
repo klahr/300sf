@@ -4,14 +4,17 @@
 // Everything goes to the network first and the kept copy is only used when that fails or is too
 // slow, so online the app is always current. Sightings made offline are kept by the app (Outbox.ts),
 // not here.
-const VERSION = "v2";
+
+// The server writes the release in here (site.serviceWorker), so every release is a new service
+// worker: it installs, takes over at once and drops the previous release's files.
+const VERSION = "dev";
 const APP_CACHE = "300sf-app-" + VERSION;
 // The signed-in user's data; the app deletes it on sign-out (Session.forgetOfflineCopies).
 const API_CACHE = "300sf-api";
 
-// Without these the app can't start offline.
-const APP_SHELL = [
-	"/home",
+// Without these the app can't start offline. The pages name the first ones with the release, as
+// the server's asset links do.
+const VERSIONED = [
 	"/js/app.js",
 	"/css/tokens.css",
 	"/css/theme.css",
@@ -19,19 +22,22 @@ const APP_SHELL = [
 	"/css/base.css",
 	"/css/fonts.css",
 	"/css/icons.css",
-	"/fonts/inter-latin.woff2",
-	"/fonts/inter-latin-ext.woff2",
-	"/fonts/material-symbols-rounded.woff2",
 	"/vendor/jquery/jquery-3.7.1.min.js",
 	"/vendor/leaflet/leaflet.js",
 	"/vendor/leaflet/leaflet.css",
+];
+const APP_SHELL = VERSIONED.map((path) => path + "?v=" + encodeURIComponent(VERSION)).concat([
+	"/home",
+	"/fonts/inter-latin.woff2",
+	"/fonts/inter-latin-ext.woff2",
+	"/fonts/material-symbols-rounded.woff2",
 	"/vendor/leaflet/images/marker-icon.png",
 	"/vendor/leaflet/images/marker-icon-2x.png",
 	"/vendor/leaflet/images/marker-shadow.png",
 	"/img/messagebox-256.webp",
 	"/favicon.png",
 	"/manifest.json",
-];
+]);
 
 const STATIC_PREFIXES = ["/js/", "/css/", "/fonts/", "/vendor/", "/img/"];
 
@@ -66,7 +72,7 @@ self.addEventListener("fetch", (event) => {
 		event.respondWith(networkFirst(event, APP_CACHE).then((r) => r || caches.match("/home", { cacheName: APP_CACHE })).then((r) => r || Response.error()));
 	} else if (API_KEPT.test(url.pathname)) {
 		event.respondWith(networkFirst(event, API_CACHE).then((r) => r || Response.error()));
-	} else if (STATIC_PREFIXES.some((p) => url.pathname.startsWith(p)) || APP_SHELL.includes(url.pathname)) {
+	} else if (STATIC_PREFIXES.some((p) => url.pathname.startsWith(p)) || APP_SHELL.includes(url.pathname + url.search)) {
 		event.respondWith(networkFirst(event, APP_CACHE).then((r) => r || Response.error()));
 	}
 });

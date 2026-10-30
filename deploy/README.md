@@ -26,9 +26,13 @@ flushing it signs everyone out.
 ```bash
 sudo mkdir -p /etc/300sf
 sudo cp ../server/config.yml.sample /etc/300sf/300sf.yml   # fill in secrets
-docker compose up -d --build
+make -C .. deploy    # docker compose up -d --build, with VERSION from git describe
 docker compose logs -f
 ```
+
+Build through `make` (or set `VERSION` yourself): a plain `docker compose up
+--build` stamps the release as `dev`, and browsers then aren't told that a
+new release is out.
 
 `CONFIG_FILE` overrides the config path, `PORT` the port used by the health
 check. The container uses host networking so it reaches MariaDB and Redis on
@@ -86,7 +90,7 @@ This replaces the previous upstreams (webapp on `:3000`, landing page on
 1. Merge the API config (`300sf-albatross.conf`) and the webapp's
    `routes/config.js` into `/etc/300sf/300sf.yml` (see `site:` in the sample).
 2. Stop the old containers: `docker rm -f albatross blackbird yellowhammer woodpecker swagger-ui`.
-3. `docker compose up -d --build`, then reload nginx with the config above.
+3. `make -C .. deploy`, then reload nginx with the config above.
 4. Set `domain: "https://300sf.se"` in the config so emails link to the new
    address. Keep the existing `hashing-secret`: it signs sessions and API
    keys are stored hashed with it, so changing it signs everyone out and

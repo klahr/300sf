@@ -22,6 +22,11 @@ go build -o bin/300sf
 curl localhost:8090/health
 ```
 
+A new database has no users and no API key for the website to sign in with.
+Sign up on the website, then `./bin/300sf -config ./config.yml -bootstrap
+you@example.com` makes you an admin and prints the key for `site.client-id` /
+`site.client-secret`.
+
 Logs go to `$LOG_FILE_LOCATION` (stderr if unset).
 
 ## Tests
@@ -60,7 +65,25 @@ Routes are declared in `routes.go`; the OpenAPI spec in
 
 ## Zones
 
-Zones are GeoJSON polygons nested country → county → municipality
-(`admin_level` 2, 4, 7). Reports are matched to zones by point-in-polygon
-(`utils/location.go`). Zones are added on the Admin page of the web app, from a
-GeoJSON file.
+Zones are GeoJSON polygons nested country → region → municipality
+(`admin_level` 2, 4, 7; a country without regions has its municipalities
+straight under it). A sighting is matched to the zones it lies in by
+point-in-polygon (`utils/location.go`).
+
+Zones are made as people report: a sighting in a place no zone covers is
+looked up with OpenStreetMap's Nominatim after it is saved (`places/`,
+`geocoder/`), and the country, region and municipality found become zones,
+keyed by their OpenStreetMap relation (`osm_id`). The next sighting there needs
+no lookup. Sightings left without a zone (geocoder down, or made before this)
+are filled in by a background pass every 15 minutes.
+
+The public Nominatim's [usage policy](https://operations.osmfoundation.org/policies/nominatim/)
+allows at most one request a second for the whole site, an identifying
+User-Agent (`300sf/<version> (+<domain>)`), cached answers and no use of
+`/details`; the geocoder package keeps to it, and the background pass to the
+4 a minute asked of scheduled work. Point `geocoder-endpoint` at your own
+Nominatim for more; leave it empty to turn lookups off.
+
+Zones can still be added by hand on the Admin page, from a GeoJSON file. A
+looked-up area with the same name and level as a hand-made zone takes that
+zone over instead of making a twin.

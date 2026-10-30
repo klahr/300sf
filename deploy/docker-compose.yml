@@ -7,6 +7,9 @@ services:
     build:
       context: ..
       dockerfile: Dockerfile
+      args:
+        # Set by make (git describe); the app shows it and names its files by it.
+        VERSION: ${VERSION:-dev}
     restart: unless-stopped
     # MariaDB and Redis run on the host.
     network_mode: host

@@ -13,6 +13,9 @@ One Go server runs everything on one domain, 300sf.se — the landing page on
 | [`frontend/`](frontend/) | TypeScript source of the app; compiled into `server/site/static/js/` at build time |
 | [`deploy/`](deploy/) | `docker-compose.yml` and the reverse proxy setup |
 
+To run your own, see [`SELFHOSTING.md`](SELFHOSTING.md). To report a
+security problem, see [`SECURITY.md`](SECURITY.md).
+
 ## Local development
 
 Needs Go, Node (only to compile the app), MariaDB and Redis.
@@ -25,7 +28,11 @@ sed -i "s/change-me/$(openssl rand -hex 32)/; s/\"release\"/\"debug\"/" config.y
 go run . -config config.yml
 ```
 
-The server won't start until `hashing-secret` is set. With `mode: debug` it
+The server won't start until `hashing-secret` is set. To sign in, sign up
+at <http://localhost:8090/sign-up>, run
+`go run . -config config.yml -seed -bootstrap you@example.com` (`-seed` adds
+the starter birds), put the printed key
+under `site:` in `config.yml` and restart. With `mode: debug` it
 reads `server/site/` from disk, so CSS and app changes show up on reload. Open <http://localhost:8090> for the landing page,
 <http://localhost:8090/home> for the app and <http://localhost:8090/docs> for
 the API docs.
@@ -39,12 +46,28 @@ the API docs.
 
 CI runs these and builds the image on every push and pull request.
 
+## Releases
+
+```bash
+make patch    # or minor / major: promotes CHANGELOG.md's [Unreleased], commits and tags
+git push origin main <version>
+```
+
+Write what ships under `[Unreleased]` in [`CHANGELOG.md`](CHANGELOG.md) first;
+an empty section stops the release. The build stamps the version from
+`git describe`; the app shows it in Settings, names its CSS and JavaScript by
+it, and puts it in the service worker, so browsers drop the old release's
+files and an open app offers to reload.
+
 ## Deploy
 
 ```bash
-docker build -t 300sf .
-cd deploy && docker compose up -d --build
+make image    # docker build, stamped with the version
+make deploy   # cd deploy && docker compose up -d --build, stamped likewise
 ```
+
+A plain `docker build` works too, but the version is then `dev`, and browsers
+won't be told about the new release.
 
 See [`deploy/README.md`](deploy/README.md) for the config file and the nginx
 setup.

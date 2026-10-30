@@ -40,4 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: docker build -t 300sf .
+        with:
+          # The tags, for the version git describe stamps into the build.
+          fetch-depth: 0
+      - run: docker build --build-arg VERSION="$(git describe --tags --always)" -t 300sf .

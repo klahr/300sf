@@ -2,6 +2,8 @@
 package utils
 
 import (
+	"sync"
+
 	"github.com/klahr/300sf/server/log"
 	"github.com/klahr/300sf/server/models"
 	"github.com/klahr/300sf/server/types"
@@ -9,8 +11,9 @@ import (
 	"github.com/tidwall/geojson/geometry"
 )
 
-// GetZonesFromPosition returns the country, county and municipality zones
-// containing position, from the outermost level inwards.
+// GetZonesFromPosition returns the zones containing position, from the
+// country inwards: usually country, county and municipality, but a country
+// without counties goes straight to its municipalities.
 func GetZonesFromPosition(position types.LatLon) []models.Zone {
 	var zones []models.Zone
 	p := geojson.NewPoint(geometry.Point{
@@ -23,8 +26,26 @@ func GetZonesFromPosition(position types.LatLon) []models.Zone {
 	return zones
 }
 
-func zoneContains(zone models.Zone, position *geojson.Point) bool {
+// Parsed outlines by zone id. A zone's outline never changes, and parsing a
+// country's for every sighting would be slow.
+var outlines sync.Map
+
+func outline(zone models.Zone) (geojson.Object, error) {
+	if obj, ok := outlines.Load(zone.Id); ok {
+		return obj.(geojson.Object), nil
+	}
 	obj, err := geojson.Parse(string(zone.Polygon), geojson.DefaultParseOptions)
+	if err != nil {
+		return nil, err
+	}
+	if zone.Id != 0 {
+		outlines.Store(zone.Id, obj)
+	}
+	return obj, nil
+}
+
+func zoneContains(zone models.Zone, position *geojson.Point) bool {
+	obj, err := outline(zone)
 	if err != nil {
 		log.Error(nil, 0, "zone "+zone.Uuid+": "+err.Error())
 		return false
@@ -56,11 +77,11 @@ func zoneContains(zone models.Zone, position *geojson.Point) bool {
 }
 
 func getZonesFromPosition(position *geojson.Point, zones *[]models.Zone, level int, parentZone *models.Zone) error {
-	q := models.DB.Where("admin_level=?", level)
+	var q = models.DB
 	if parentZone != nil {
 		q = q.Where("parent_zone_id=?", parentZone.Id)
 	} else {
-		q = q.Where("parent_zone_id IS NULL")
+		q = q.Where("admin_level=?", level).Where("parent_zone_id IS NULL")
 	}
 
 	var candidates []models.Zone
@@ -79,15 +100,18 @@ func getZonesFromPosition(position *geojson.Point, zones *[]models.Zone, level i
 		return nil
 	}
 	*zones = append(*zones, *found)
-
-	switch level {
-	case types.AdminLevelCountry:
-		level = types.AdminLevelCounty
-	case types.AdminLevelCounty:
-		level = types.AdminLevelMunicipality
-	default:
+	if found.AdminLevel >= types.AdminLevelMunicipality {
 		return nil
 	}
+	return getZonesFromPosition(position, zones, 0, found)
+}
 
-	return getZonesFromPosition(position, zones, level, found)
+// ZoneBounds is the box around a zone's outline, for finding the zones in
+// view on a map.
+func ZoneBounds(zone models.Zone) (geometry.Rect, bool) {
+	obj, err := outline(zone)
+	if err != nil {
+		return geometry.Rect{}, false
+	}
+	return obj.Rect(), true
 }

@@ -89,7 +89,7 @@ func TestHealth(t *testing.T) {
 	if w.Code != http.StatusOK {
 		t.Fatalf("status = %d", w.Code)
 	}
-	if body := w.Body.String(); body != `{"message":"healthy","data":{"version":"0.1.0"}}` {
+	if body := w.Body.String(); body != `{"message":"healthy","data":{"version":"dev"}}` {
 		t.Errorf("body = %s", body)
 	}
 }

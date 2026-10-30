@@ -1,3 +1,4 @@
+/// <reference path="MapSelect.ts"/>
 /// <reference path="ui/Sheet.ts"/>
 /// <reference path="ui/Select.ts"/>
 /// <reference path="HttpRequest.ts"/>
@@ -83,16 +84,137 @@ function openCreateCompetition(created: (competition: Models.Competition) => voi
 	list.setSelected("");
 	sheet.field(counts, App.translations.SpeciesList, list.container);
 
+	// Where: anywhere, or in counties chosen on the map or found by name.
 	const zonesField = document.createElement("div");
+	const picker = document.createElement("div");
+	picker.className = "zone-picker hidden";
+	const selected = new Map<string, string>();
 	const chips = document.createElement("div");
-	chips.className = "zone-chips hidden";
+	chips.className = "zone-chips";
+	const map = new MapSelect(function (zone: Models.RegionZone) {
+		toggleZone(zone, !selected.has(zone.uuid!));
+	});
+
+	const toggleZone = function (zone: Models.RegionZone, on: boolean) {
+		const uuid = zone.uuid!;
+		if (on) {
+			selected.set(uuid, App.getTranslation(zone.name));
+		} else {
+			selected.delete(uuid);
+		}
+		map.setSelected(uuid, on);
+		showChips();
+		validate();
+	};
+	const showChips = function () {
+		chips.innerHTML = "";
+		Array.from(selected.entries()).sort((a, b) => a[1].localeCompare(b[1], App.language)).forEach(([uuid, label]) => {
+			const b = document.createElement("button");
+			b.type = "button";
+			b.className = "zone-chip";
+			b.setAttribute("aria-pressed", "true");
+			b.setAttribute("aria-label", App.translations.RemoveZone.replace("{0}", label));
+			b.innerHTML = Utils.escapeHtml(label) + "<span class='material-symbols-outlined'>close</span>";
+			b.addEventListener("click", function () {
+				toggleZone({ uuid: uuid, name: { sv: label, en: label, de: label } as Models.Translation }, false);
+			});
+			chips.appendChild(b);
+		});
+	};
+
+	const hint = document.createElement("p");
+	hint.className = "details";
+	hint.textContent = App.translations.ZonePickerHint;
+	picker.appendChild(hint);
+
+	// Searches run when asked, never as the user types: the place service forbids that.
+	const searchForm = document.createElement("form");
+	searchForm.className = "zone-search";
+	const searchInput = document.createElement("input");
+	searchInput.type = "search";
+	searchInput.id = "competition-zone-search";
+	searchInput.placeholder = App.translations.ZoneSearchPlaceholder;
+	searchInput.setAttribute("aria-label", App.translations.ZoneSearchPlaceholder);
+	searchInput.autocomplete = "off";
+	const searchButton = document.createElement("button");
+	searchButton.type = "submit";
+	searchButton.className = "secondary";
+	searchButton.innerHTML = "<span class='material-symbols-outlined'>search</span>" + App.translations.Search;
+	searchForm.appendChild(searchInput);
+	searchForm.appendChild(searchButton);
+	picker.appendChild(searchForm);
+	const results = document.createElement("div");
+	results.className = "zone-results";
+	results.setAttribute("aria-live", "polite");
+	picker.appendChild(results);
+
+	const say = function (text: string) {
+		results.innerHTML = "";
+		const p = document.createElement("p");
+		p.className = "details";
+		p.textContent = text;
+		results.appendChild(p);
+	};
+	const failed = function (status: number) {
+		say(status === 503 ? App.translations.ZoneSearchOff : status === 429 ? App.translations.ZoneSearchTooMany : App.translations.SomethingWentWrong);
+	};
+	searchForm.addEventListener("submit", function (e) {
+		e.preventDefault();
+		const text = searchInput.value.trim();
+		if (text.length < 2) {
+			return;
+		}
+		Ui.setBusy(searchButton, true);
+		const r = new HttpRequest("GET", "/v1/zones/search?q=" + encodeURIComponent(text));
+		r.setQuiet();
+		r.process(function (status: any, data: any) {
+			const found = (data.result || []) as Array<Models.RegionZone>;
+			if (found.length === 0) {
+				say(App.translations.ZoneSearchNone);
+				return;
+			}
+			results.innerHTML = "";
+			found.forEach(f => {
+				const b = document.createElement("button");
+				b.type = "button";
+				b.className = "zone-result";
+				b.innerHTML = "<span class='material-symbols-outlined'>add_location_alt</span><span>" + Utils.escapeHtml(App.getTranslation(f.name)) +
+					(f.country ? "<span class='details'> · " + Utils.escapeHtml(f.country) + "</span>" : "") + "</span>";
+				b.addEventListener("click", function () {
+					Ui.setBusy(b, true);
+					// Makes the zone if no sighting has yet, and gives its outline for the map.
+					const z = new HttpRequest("POST", "/v1/zones/osm", { osm_id: f.osm_id });
+					z.setQuiet();
+					z.process(function (status: any, data: any) {
+						const zone = data as Models.RegionZone;
+						map.showZone(zone);
+						toggleZone(zone, true);
+						results.innerHTML = "";
+						searchInput.value = "";
+					}, failed, function () {
+						Ui.setBusy(b, false);
+					});
+				});
+				results.appendChild(b);
+			});
+		}, failed, function () {
+			Ui.setBusy(searchButton, false);
+		});
+	});
+
+	picker.appendChild(map.container);
+	picker.appendChild(chips);
+
 	let anywhere = true;
 	zonesField.appendChild(segmented([["anywhere", "public", App.translations.AllowedAnywhereShort], ["counties", "location_on", App.translations.SelectedCounties]], "anywhere", function (v: string) {
 		anywhere = v === "anywhere";
-		chips.classList.toggle("hidden", anywhere);
+		picker.classList.toggle("hidden", anywhere);
+		if (!anywhere) {
+			map.show();
+		}
 		validate();
 	}));
-	zonesField.appendChild(chips);
+	zonesField.appendChild(picker);
 	sheet.field(counts, App.translations.WhereSightingsCount, zonesField);
 
 	// How it ends.
@@ -182,7 +304,7 @@ function openCreateCompetition(created: (competition: Models.Competition) => voi
 	sheet.footer.insertBefore(error, create);
 
 	const selectedZones = function (): Array<string> {
-		return Array.from(chips.querySelectorAll("button[aria-pressed='true']")).map(b => (b as HTMLElement).dataset.uuid as string);
+		return Array.from(selected.keys());
 	};
 
 	const validate = function () {
@@ -201,21 +323,6 @@ function openCreateCompetition(created: (competition: Models.Competition) => voi
 		basis.list_templates.forEach(t => {
 			list.addOption(App.getTranslation(t.name) + " · " + App.translations.NumberOfSpecies.replace("{0}", String(t.size)), t.uuid);
 		});
-		basis.zones.map(z => ({ uuid: z.uuid, name: App.getTranslation(z.name) }))
-			.sort((a, b) => a.name.localeCompare(b.name, App.language))
-			.forEach(z => {
-				const b = document.createElement("button");
-				b.type = "button";
-				b.className = "zone-chip";
-				b.dataset.uuid = z.uuid;
-				b.setAttribute("aria-pressed", "false");
-				b.textContent = z.name;
-				b.addEventListener("click", function () {
-					b.setAttribute("aria-pressed", String(b.getAttribute("aria-pressed") !== "true"));
-					validate();
-				});
-				chips.appendChild(b);
-			});
 	});
 
 	create.addEventListener("click", function () {
@@ -254,6 +361,8 @@ function openCreateCompetition(created: (competition: Models.Competition) => voi
 	});
 
 	validate();
-	sheet.open();
+	sheet.open(function () {
+		map.remove();
+	});
 	name.focus();
 }

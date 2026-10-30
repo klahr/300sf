@@ -3,15 +3,15 @@
 
 <head>
 	{{template "app-head" .}}
-	<link rel="preload" as="style" href="/vendor/leaflet/leaflet.css" onload="this.rel='stylesheet'">
-	<script async src="/vendor/leaflet/leaflet.js"></script>
-	<script defer src="/vendor/jquery/jquery-3.7.1.min.js"></script>
+	<link rel="preload" as="style" href="{{asset "/vendor/leaflet/leaflet.css"}}" onload="this.rel='stylesheet'">
+	<script async src="{{asset "/vendor/leaflet/leaflet.js"}}"></script>
+	<script defer src="{{asset "/vendor/jquery/jquery-3.7.1.min.js"}}"></script>
 </head>
 
 <body>
 	<div id="loading" class="loading"></div>
 	<div id="root" class="background">
-		<script defer type="text/javascript" src="/js/app.js"></script>
+		<script defer type="text/javascript" id="app-js" src="{{asset "/js/app.js"}}"></script>
 		<script type="text/javascript">
 			let promptEvent = null;
 
@@ -27,20 +27,13 @@
 
 			function onAppStart() {
 				const boot = {{.Boot}};
-				new App(boot.language, boot.redirect, boot.queryParameters);
+				Maps.configure(boot.mapTiles, boot.mapAttribution);
+				new App(boot.language, boot.redirect, boot.queryParameters, boot.version);
 			}
 
-			document.querySelector('script[src="/js/app.js"]').onload = onAppStart;
+			document.getElementById("app-js").onload = onAppStart;
 		</script>
 	</div>
-
-	<script>
-		if ("serviceWorker" in navigator) {
-			navigator.serviceWorker.register("/sw.js").then(reg => {
-				reg.update();
-			});
-		}
-	</script>
 </body>
 
 </html>

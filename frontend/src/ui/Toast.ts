@@ -7,7 +7,8 @@ namespace Ui {
 		private mCloseCallback: () => void;
 		private mClosed = false;
 
-		constructor(title: string, message: string, image: string | null, color: string, closeCallback: () => void) {
+		// With a duration of 0 it stays until tapped.
+		constructor(title: string, message: string, image: string | null, color: string, closeCallback: () => void, durationMs: number = 3500) {
 			super();
 
 			const id = this.hashStr(title + message);
@@ -66,9 +67,11 @@ namespace Ui {
 				});
 			});
 
-			setTimeout(function () {
-				self.close();
-			}, 3500);
+			if (durationMs > 0) {
+				setTimeout(function () {
+					self.close();
+				}, durationMs);
+			}
 		}
 
 		public close(): void {

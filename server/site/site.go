@@ -9,9 +9,11 @@ package site
 import (
 	"embed"
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"io/fs"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"sync"
@@ -25,6 +27,12 @@ import (
 
 //go:embed static templates pages locales
 var embedded embed.FS
+
+// Version is the release being served, set by main from the build
+// (git describe); "dev" when run from source. Asset links carry it, so a
+// browser never mixes files from two releases, and so does the service
+// worker, so a release is a new one browsers pick up.
+var Version = "dev"
 
 // Client-side routes of the app; the page is chosen in the browser.
 var appPages = []string{
@@ -64,6 +72,7 @@ func New(cfg config.Site, files fs.FS) (*Site, error) {
 
 	funcs := template.FuncMap{
 		"year":   func() int { return time.Now().Year() },
+		"asset":  assetURL,
 		"number": formatNumber,
 		"translate": func(t models.Translation, lang string) string {
 			if lang == "sv" && t.Sv.String != "" {
@@ -100,15 +109,17 @@ func New(cfg config.Site, files fs.FS) (*Site, error) {
 func (s *Site) Register(r *gin.Engine) {
 	static, _ := fs.Sub(s.files, "static")
 	entries, _ := fs.ReadDir(static, ".")
+	files := r.Group("", cacheHeaders)
 	for _, e := range entries {
 		name := e.Name()
 		if e.IsDir() {
 			sub, _ := fs.Sub(static, name)
-			r.StaticFS("/"+name, http.FS(sub))
-		} else {
-			r.StaticFileFS("/"+name, name, http.FS(static))
+			files.StaticFS("/"+name, http.FS(sub))
+		} else if name != "sw.js" {
+			files.StaticFileFS("/"+name, name, http.FS(static))
 		}
 	}
+	r.GET("/sw.js", s.serviceWorker)
 
 	r.GET("/", s.root)
 	r.GET("/landing", s.landingPage)
@@ -302,6 +313,8 @@ func queryMap(c *gin.Context) map[string]string {
 
 func (s *Site) render(c *gin.Context, status int, name string, data any) {
 	c.Header("Content-Type", "text/html; charset=utf-8")
+	// Pages name the release's assets, so they must never outlive it.
+	c.Header("Cache-Control", "no-cache")
 	c.Status(status)
 	if err := s.templates.ExecuteTemplate(c.Writer, name, data); err != nil {
 		c.Error(err)
@@ -358,7 +371,10 @@ func (s *Site) app(c *gin.Context, redirect string, query map[string]string) {
 		"Lang":  lang,
 		"Title": appNames[lang],
 		// html/template encodes this as JSON that is safe inside <script>.
-		"Boot": gin.H{"language": lang, "redirect": redirect, "queryParameters": query},
+		"Boot": gin.H{
+			"language": lang, "redirect": redirect, "queryParameters": query, "version": Version,
+			"mapTiles": s.cfg.MapTiles, "mapAttribution": s.cfg.MapAttribution,
+		},
 	})
 }
 
@@ -400,4 +416,41 @@ func (s *Site) comparePage(c *gin.Context) {
 	}
 	lang := language(c, []string{"sv", "en", "de"}, "sv")
 	s.render(c, http.StatusOK, "compare.html", gin.H{"Lang": lang, "Title": appNames[lang], "Data": result})
+}
+
+// assetURL names a static file as the current release has it.
+func assetURL(path string) string {
+	return path + "?v=" + url.QueryEscape(Version)
+}
+
+// cacheHeaders lets browsers keep a file asked for by the current release
+// (its ?v=) for good: a later release asks for it under another name. Any
+// other file is checked with the server each time, which answers 304 while
+// the release is the same.
+func cacheHeaders(c *gin.Context) {
+	switch {
+	case Version == "dev":
+		c.Header("Cache-Control", "no-cache")
+	case c.Query("v") == Version:
+		c.Header("Cache-Control", "public, max-age=31536000, immutable")
+	default:
+		c.Header("Cache-Control", "no-cache")
+		// Embedded files have no modification time to compare against.
+		c.Header("ETag", `"`+Version+`"`)
+	}
+	c.Next()
+}
+
+// serviceWorker serves sw.js with the release in it. Browsers install a
+// service worker again only when its bytes change, so without this a
+// release would go unnoticed.
+func (s *Site) serviceWorker(c *gin.Context) {
+	raw, err := fs.ReadFile(s.files, "static/sw.js")
+	if err != nil {
+		c.Status(http.StatusNotFound)
+		return
+	}
+	body := strings.Replace(string(raw), `const VERSION = "dev";`, fmt.Sprintf("const VERSION = %q;", Version), 1)
+	c.Header("Cache-Control", "no-cache")
+	c.Data(http.StatusOK, "text/javascript; charset=utf-8", []byte(body))
 }
