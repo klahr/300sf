@@ -16,10 +16,18 @@ updates:
     groups:
       npm:
         patterns: ["*"]
+    ignore:
+      # TypeScript 7 drops module System and outFile, which the build uses.
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: docker
     directories: ["/", "/analyzer"]
     schedule:
       interval: monthly
+    ignore:
+      # Odd Node releases are short-lived; stay on the LTS ones.
+      - dependency-name: node
+        versions: ["25", "25-alpine", "27", "27-alpine"]
   - package-ecosystem: github-actions
     directory: /
     schedule:
