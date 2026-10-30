@@ -19,7 +19,9 @@ MariaDB and Redis. `make help` lists the common tasks.
 - Match the code around you: its naming, comments and idioms. Go is
   formatted with `gofmt`.
 - Add a test where the change can break, and run `make test` before you push.
-  CI runs the same, plus the image build.
+  Changes to the API or the database also get a test in `server/db_*_test.go`,
+  which runs the API against a real database: `make test-db` (needs Docker).
+  CI runs both, plus the image build.
 - Note user-facing changes under `[Unreleased]` in [`CHANGELOG.md`](CHANGELOG.md),
   one line each.
 - Database changes go at the end of `server/db.sql` as a migration that works

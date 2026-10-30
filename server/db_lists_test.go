@@ -1,0 +1,131 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+package main
+
+import (
+	"net/http"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/klahr/300sf/server/models"
+	"github.com/klahr/300sf/server/utils"
+)
+
+// someSpecies is a species from the starter data.
+func someSpecies(t *testing.T, n int) []string {
+	t.Helper()
+	var out []string
+	if err := models.DB.Table("species").Order("id").Limit(n).Pluck("uuid", &out).Error; err != nil || len(out) < n {
+		t.Fatalf("species: %v (%d)", err, len(out))
+	}
+	return out
+}
+
+func newList(t *testing.T, s *dbServer, u *testUser, name string, visibility int64) string {
+	t.Helper()
+	r := s.must(t, u, http.StatusOK, "POST", "/v1/lists", map[string]any{
+		"name": map[string]any{"en": name, "sv": name}, "visibility": visibility, "color": "#1273a3",
+	})
+	return r.Body["uuid"].(string)
+}
+
+func newReport(t *testing.T, s *dbServer, u *testUser, species string, lists ...string) response {
+	t.Helper()
+	return s.call(t, u, "POST", "/v1/reports", map[string]any{
+		"uuid": utils.GenerateUuidWithFixedLength(20), "species_uuid": species,
+		"from": time.Now().UTC().Format(time.RFC3339), "list_uuids": lists,
+	})
+}
+
+func TestDBListsAndSightingsStayPrivate(t *testing.T) {
+	s := testDB(t)
+	owner, stranger := s.signUp(t), s.signUp(t)
+	species := someSpecies(t, 2)
+
+	private := newList(t, s, owner, "Garden", models.VisibilityPrivate)
+	if r := newReport(t, s, owner, species[0], private); r.Status != http.StatusOK {
+		t.Fatalf("report = %d: %s", r.Status, r.Raw)
+	}
+
+	if got := uuids(s.must(t, owner, http.StatusOK, "GET", "/v1/lists/list", nil).Body["result"]); !contains(got, private) {
+		t.Errorf("owner's lists %v lack %s", got, private)
+	}
+	reports := s.must(t, owner, http.StatusOK, "GET", "/v1/lists/"+private+"/reports", nil)
+	if n := len(items(reports.Body["result"])); n != 1 {
+		t.Errorf("list has %d sightings, want 1", n)
+	}
+
+	// Nobody else sees the list, its sightings, or can add to it.
+	if r := s.call(t, stranger, "GET", "/v1/lists/"+private, nil); r.Status == http.StatusOK {
+		t.Errorf("stranger read private list: %s", r.Raw)
+	}
+	if r := s.call(t, stranger, "GET", "/v1/lists/"+private+"/reports", nil); r.Status == http.StatusOK && len(items(r.Body["result"])) > 0 {
+		t.Errorf("stranger read private sightings: %s", r.Raw)
+	}
+	newReport(t, s, stranger, species[1], private)
+	reports = s.must(t, owner, http.StatusOK, "GET", "/v1/lists/"+private+"/reports", nil)
+	if n := len(items(reports.Body["result"])); n != 1 {
+		t.Errorf("a stranger's sighting landed on the owner's list (%d sightings)", n)
+	}
+	if got := len(items(s.must(t, stranger, http.StatusOK, "GET", "/v1/reports/list", nil).Body["result"])); got != 1 {
+		t.Errorf("stranger has %d sightings, want only their own one", got)
+	}
+	if r := s.do(t, "10.250.1.1", "", "POST", "/v1/lists/compare", map[string]any{"uuids": []string{private}}); r.Status == http.StatusOK {
+		t.Errorf("compare showed a private list: %s", r.Raw)
+	}
+	s.must(t, stranger, http.StatusBadRequest, "POST", "/v1/lists/"+private+"/rename", map[string]any{"name": map[string]any{"en": "Mine"}})
+}
+
+func TestDBSharedLists(t *testing.T) {
+	s := testDB(t)
+	owner, friend := s.signUp(t), s.signUp(t)
+	species := someSpecies(t, 1)
+
+	shared := newList(t, s, owner, "Shared", models.VisibilityHidden)
+	if len(shared) < utils.ShortUuidLength {
+		t.Fatalf("new list id %q is short enough to guess", shared)
+	}
+	newReport(t, s, owner, species[0], shared)
+	s.must(t, friend, http.StatusOK, "GET", "/v1/lists/"+shared, nil)
+
+	r := s.do(t, "10.250.1.2", "", "POST", "/v1/lists/compare", map[string]any{"uuids": []string{shared}})
+	if r.Status != http.StatusOK {
+		t.Fatalf("compare = %d: %s", r.Status, r.Raw)
+	}
+	entry := get(r.Body, "result", 0)
+	if get(entry, "user", "display_name") == nil || len(items(get(entry, "reports"))) != 1 {
+		t.Errorf("compare entry = %v", entry)
+	}
+	// Only names and species: never where or when.
+	for _, field := range []string{"latitude", "longitude", "from", "comment"} {
+		if get(entry, "reports", 0, field) != nil {
+			t.Errorf("compare leaks %s: %v", field, entry)
+		}
+	}
+
+	// A list with an old 6-character id opens for its owner only.
+	old := "o" + utils.GenerateUuidWithFixedLength(5)
+	if err := models.DB.Model(&models.List{}).Where("uuid=?", shared).Update("uuid", old).Error; err != nil {
+		t.Fatal(err)
+	}
+	s.must(t, owner, http.StatusOK, "GET", "/v1/lists/"+old, nil)
+	if r := s.call(t, friend, "GET", "/v1/lists/"+old, nil); r.Status == http.StatusOK {
+		t.Errorf("old short id opened for someone else: %s", r.Raw)
+	}
+	if r := s.do(t, "10.250.1.3", "", "POST", "/v1/lists/compare", map[string]any{"uuids": []string{old}}); r.Status == http.StatusOK {
+		t.Errorf("compare opened an old short id: %s", r.Raw)
+	}
+}
+
+func TestDBExportHasEverything(t *testing.T) {
+	s := testDB(t)
+	u := s.signUp(t)
+	species := someSpecies(t, 1)
+	list := newList(t, s, u, "Exported", models.VisibilityPrivate)
+	newReport(t, s, u, species[0], list)
+
+	r := s.must(t, u, http.StatusOK, "GET", "/v1/users/export", nil)
+	if len(r.Raw) < 100 || !strings.Contains(r.Raw, "Exported") {
+		t.Errorf("export lacks the list: %.300s", r.Raw)
+	}
+}

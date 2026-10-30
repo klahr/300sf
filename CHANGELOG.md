@@ -25,6 +25,7 @@ Versions are git tags `X.Y.Z`, cut with `make patch|minor|major`.
 - The contact form's address is set in the config (`contact-email`).
 - Licenses of the bundled libraries, fonts and data (`THIRD_PARTY_NOTICES.md`).
 - A contributing guide, issue templates and Dependabot.
+- Tests of the API against a real database and Redis (`make test-db`), also in CI.
 - A news feed: announcements are posts with a title, kept under the bell in
   the top bar (News in the sidebar), with unread ones counted and shown on
   the home page. New accounts don't start with old posts unread.

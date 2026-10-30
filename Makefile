@@ -1,4 +1,4 @@
-.PHONY: help test image deploy major minor patch _bump latest
+.PHONY: help test test-db image deploy major minor patch _bump latest
 
 .DEFAULT_GOAL := help
 
@@ -12,6 +12,7 @@ help:
 	@echo "300sf — common targets"
 	@echo ""
 	@echo "    make test       Server tests and the app's typecheck"
+	@echo "    make test-db    The API against a real database and Redis (Docker)"
 	@echo "    make image      Build the Docker image, stamped with the version"
 	@echo "    make deploy     Build and (re)start the production stack in deploy/"
 	@echo ""
@@ -25,6 +26,22 @@ help:
 test:
 	cd server && go test ./...
 	cd frontend && npm run typecheck
+
+# The database tests (server/db_test.go) against throwaway MariaDB and Redis
+# containers, removed afterwards, with the schema from server/db.sql.
+TEST_DB_PORT ?= 33306
+TEST_REDIS_PORT ?= 36379
+test-db:
+	@set -e; \
+	docker rm -f sf-test-db sf-test-redis >/dev/null 2>&1 || true; \
+	trap 'docker rm -f sf-test-db sf-test-redis >/dev/null 2>&1' EXIT; \
+	docker run -d --name sf-test-db -e MARIADB_ROOT_PASSWORD=test -e MARIADB_DATABASE=300sf -p 127.0.0.1:$(TEST_DB_PORT):3306 mariadb:11 >/dev/null; \
+	docker run -d --name sf-test-redis -p 127.0.0.1:$(TEST_REDIS_PORT):6379 redis:7-alpine >/dev/null; \
+	echo "Waiting for MariaDB..."; \
+	for i in $$(seq 1 60); do docker exec sf-test-db mariadb -uroot -ptest -e "SELECT 1" >/dev/null 2>&1 && break; sleep 1; done; \
+	docker exec -i sf-test-db mariadb -uroot -ptest 300sf < server/db.sql; \
+	cd server && TEST_DATA_SOURCE="root:test@tcp(127.0.0.1:$(TEST_DB_PORT))/300sf?charset=utf8mb4&parseTime=True&loc=Local" \
+		TEST_REDIS="127.0.0.1:$(TEST_REDIS_PORT)" go test -run '^TestDB' -count=1 .
 
 image:
 	docker build --build-arg VERSION=$(VERSION) -t 300sf .

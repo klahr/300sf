@@ -21,6 +21,45 @@ jobs:
       - run: go vet ./...
       - run: go test ./...
 
+  # The API against a real database and Redis: the schema from db.sql, every
+  # query run for real. See server/db_test.go.
+  server-db:
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:11
+        env:
+          MARIADB_ROOT_PASSWORD: test
+          MARIADB_DATABASE: 300sf
+        ports:
+          - 127.0.0.1:33306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 127.0.0.1:36379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    env:
+      TEST_DATA_SOURCE: "root:test@tcp(127.0.0.1:33306)/300sf?charset=utf8mb4&parseTime=True&loc=Local"
+      TEST_REDIS: "127.0.0.1:36379"
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: server/go.mod
+          cache-dependency-path: server/go.sum
+      # MariaDB's own client, so the schema loads as it does in production.
+      - name: Load the schema
+        run: docker run --rm -i --network host mariadb:11 mariadb -h127.0.0.1 -P33306 -uroot -ptest 300sf < db.sql
+      - run: go test -run '^TestDB' -count=1 -v .
+
   frontend:
     runs-on: ubuntu-latest
     defaults:
