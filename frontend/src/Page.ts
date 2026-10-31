@@ -25,6 +25,11 @@ class Page extends Ui.Widget {
 		logo.src = "/img/300sf.svg";
 		logo.alt = App.translations.AppName;
 		logo.addEventListener("click", function () {
+			// Signed out, home is the sign-in form; the start page suits a visitor better.
+			if (!App.isLoggedIn()) {
+				window.location.href = "/?lang=" + App.language;
+				return;
+			}
 			self.mAppListener.showPage("home", null);
 		});
 		this.mAppBar.appendChild(logo);

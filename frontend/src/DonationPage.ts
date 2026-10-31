@@ -79,6 +79,8 @@ class DonationPage extends Page {
 	}
 
 	private refresh(): void {
+		// Anyone may donate; signed out there is no profile to show.
+		this.mProfile.container.style.display = App.user ? "" : "none";
 		if (App.user) {
 			this.mProfile.setImage("/img/portraits/" + App.user.portrait);
 		}

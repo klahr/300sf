@@ -122,7 +122,7 @@
 	"FaqEyebrow": "Questions",
 	"FaqTitle": "Good to know",
 	"Faq": [
-		{ "q": "Does it cost anything?", "a": "No. 300 Swedish Birds is free to use. You can support the project with a donation if you like." },
+		{ "q": "Does it cost anything?", "a": "No. 300 Swedish Birds is built by volunteers in their spare time, so the only cost is running it, and that is paid for by voluntary donations from its users. There are no ads, and your data is never sold. The code is open, so anyone can see how it all works.", "link": "/donation", "linkText": "Support the project with a donation." },
 		{ "q": "Which birds are included?", "a": "The ready-made list has the 300 most common birds in Sweden. Your own lists can include any of over 2,000 species in the catalogue." },
 		{ "q": "Do I need to install an app?", "a": "No. 300 Swedish Birds runs in the browser on your phone, tablet and computer." },
 		{ "q": "Can I get my data out?", "a": "Yes. Download a list as a spreadsheet (CSV) or all your data at once, whenever you like." },
@@ -133,6 +133,7 @@
 	"FooterTagline": "The checklist for birders in Sweden.",
 	"FooterProduct": "300sf",
 	"FooterLegal": "Legal",
+	"Donate": "Support the project",
 	"ApiDocs": "API",
 	"SourceCode": "Source code",
 	"Terms": "Terms of service",

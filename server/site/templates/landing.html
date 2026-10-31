@@ -276,7 +276,7 @@
 				{{range .Faq}}
 				<details>
 					<summary>{{.q}}</summary>
-					<p>{{.a}}</p>
+					<p>{{.a}}{{if .link}} <a href="{{.link}}?lang={{$.Lang}}">{{.linkText}}</a>{{end}}</p>
 				</details>
 				{{end}}
 			</div>
@@ -304,6 +304,7 @@
 			<h2>{{.FooterProduct}}</h2>
 			<a href="/home">{{.SignIn}}</a>
 			<a href="/sign-up">{{.CreateAccountShort}}</a>
+			<a href="/donation?lang={{$.Lang}}">{{.Donate}}</a>
 			<a href="/docs">{{.ApiDocs}}</a>
 			<a href="{{$.SourceUrl}}">{{.SourceCode}}</a>
 		</nav>

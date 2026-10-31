@@ -25,6 +25,12 @@ Versions are git tags `X.Y.Z`, cut with `make patch|minor|major`.
 
 ### Changed
 
+- The landing page links to the donation page, from the footer and the
+  answer on what it costs, and explains why the site can be free. Signed out,
+  the donation page shows no empty profile picture, and the logo leads back
+  to the start page in the same language.
+- The Swedish landing page is written in Swedish birders' own words
+  (kryss, årslista, skådare) instead of translated from English.
 - Joining a public competition asks you to agree to showing in which
   municipality you find species too, as its share page's map shows that.
 - API: a competition's `latest` and `ended_at` days start at midnight in the
