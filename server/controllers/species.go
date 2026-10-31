@@ -4,7 +4,9 @@ package controllers
 import (
 	"encoding/json"
 	"net/http"
+	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -207,7 +209,8 @@ func SpeciesDetails(c *gin.Context) {
 	}
 
 	lang := wikipedia.Language(c.GetString("app_language"))
-	cacheKey := c.Request.URL.Path + "?lang=" + lang
+	// Keyed by species, not path: the same details are asked for at / and /api.
+	cacheKey := "/v1/species/" + c.Param("uuid") + "?lang=" + lang
 	cached, err := models.Cache.Get(cacheKey).Result()
 	if err == redis.Nil {
 	} else if err != nil {
@@ -224,6 +227,13 @@ func SpeciesDetails(c *gin.Context) {
 			c.JSON(http.StatusOK, r)
 			return
 		}
+	}
+
+	// Not yet cached means asking Wikipedia and xeno-canto, which visitors
+	// without an account may only do now and then.
+	if c.GetHeader("Authorization") == "" && Throttled("species/"+ClientNetwork(c.ClientIP()), 20, time.Minute) {
+		c.JSON(http.StatusTooManyRequests, gin.H{"message": "too many requests", "code": ErrorTooManyApiCalls})
+		return
 	}
 
 	if err := models.DB.Where("uuid=?", c.Param("uuid")).Preload("Name").Preload("Order.Name").First(&result).Error; err != nil {
@@ -277,4 +287,120 @@ func SpeciesDetails(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, r)
+}
+
+// searchCatalog is every species with its names, and which are Swedish (on a
+// public species list), so that search needs no query per key press.
+type searchCatalog struct {
+	species []models.Species
+	swedish map[int64]bool
+	at      time.Time
+}
+
+var (
+	searchCatalogMu sync.Mutex
+	searchCatalogAt searchCatalog
+)
+
+func loadSearchCatalog() (searchCatalog, error) {
+	searchCatalogMu.Lock()
+	defer searchCatalogMu.Unlock()
+	if time.Since(searchCatalogAt.at) < 10*time.Minute {
+		return searchCatalogAt, nil
+	}
+	var species []models.Species
+	if err := models.DB.Preload("Name").Find(&species).Error; err != nil {
+		return searchCatalogAt, err
+	}
+	var swedish []int64
+	if err := models.DB.Table("list_template_species").
+		Joins("JOIN list_templates ON list_templates.id=list_template_species.list_template_id").
+		Where("list_templates.visibility=?", models.VisibilityPublic).
+		Where("list_templates.archived IS NULL").
+		Distinct().
+		Pluck("list_template_species.species_id", &swedish).Error; err != nil {
+		return searchCatalogAt, err
+	}
+	searchCatalogAt = searchCatalog{species: species, swedish: map[int64]bool{}, at: time.Now()}
+	for _, id := range swedish {
+		searchCatalogAt.swedish[id] = true
+	}
+	return searchCatalogAt, nil
+}
+
+// SpeciesSearch finds species by name for anyone, signed in or not, ranked
+// like the app's search: names that start with the query first, Swedish
+// species before others.
+func SpeciesSearch(c *gin.Context) {
+	if c.GetHeader("Authorization") == "" && Throttled("species-search/"+ClientNetwork(c.ClientIP()), 120, time.Minute) {
+		c.JSON(http.StatusTooManyRequests, gin.H{"message": "too many requests", "code": ErrorTooManyApiCalls})
+		return
+	}
+	query := strings.ToLower(strings.TrimSpace(c.Query("q")))
+	type response struct {
+		Result []models.Species `json:"result"`
+	}
+	if len([]rune(query)) < 2 || len(query) > 64 {
+		c.JSON(http.StatusOK, response{Result: []models.Species{}})
+		return
+	}
+	catalog, err := loadSearchCatalog()
+	if err != nil {
+		log.Error(c, 0, err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "internal server error", "code": ErrorInternalServerError})
+		return
+	}
+
+	lang := c.Query("lang")
+	type scored struct {
+		species models.Species
+		name    string
+		score   int
+	}
+	var found []scored
+	for _, s := range catalog.species {
+		name := strings.ToLower(utils.Translation2Value(s.Name, lang))
+		if name == "" {
+			name = strings.ToLower(s.Name.En.String)
+		}
+		latin := strings.ToLower(s.Name.La.String)
+		score := -1
+		switch {
+		case strings.HasPrefix(name, query):
+			score = 0
+		case wordStartsWith(name, query):
+			score = 1
+		case strings.Contains(name, query) || strings.HasPrefix(latin, query):
+			score = 2
+		case strings.Contains(latin, query):
+			score = 3
+		}
+		if score < 0 {
+			continue
+		}
+		if !catalog.swedish[s.Id] {
+			score += 10
+		}
+		found = append(found, scored{species: s, name: name, score: score})
+	}
+	sort.Slice(found, func(i, j int) bool {
+		if found[i].score != found[j].score {
+			return found[i].score < found[j].score
+		}
+		return found[i].name < found[j].name
+	})
+	result := []models.Species{}
+	for i := 0; i < len(found) && i < 8; i++ {
+		result = append(result, found[i].species)
+	}
+	c.JSON(http.StatusOK, response{Result: result})
+}
+
+func wordStartsWith(name, query string) bool {
+	for _, w := range strings.FieldsFunc(name, func(r rune) bool { return r == ' ' || r == '-' }) {
+		if strings.HasPrefix(w, query) {
+			return true
+		}
+	}
+	return false
 }

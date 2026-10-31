@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="{{.Lang}}">
+{{$lang := .Lang}}
+{{$t := .T}}
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="theme-color" content="#070707">
+	<meta name="robots" content="noindex">
+	{{- with .List}}
+	<meta property="og:title" content="{{translate .Name $lang}} · {{.Owner}}">
+	<meta property="og:description" content="{{.Seen}} {{$t.Of}} {{$.Total}} {{$t.Species}}">
+	{{- if $.Photo}}
+	<meta property="og:image" content="{{$.Photo}}">
+	{{- end}}
+	<title>{{translate .Name $lang}} · {{.Owner}}</title>
+	{{- else}}
+	<title>{{$.Title}}</title>
+	{{- end}}
+	<link rel="icon" href="/img/99249498-452f-4b0b-a1f5-45902f7ffe48.png" type="image/png">
+	<link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+	<link rel="stylesheet" href="{{asset "/css/fonts.css"}}">
+	<link rel="stylesheet" href="{{asset "/css/tokens.css"}}">
+	<link rel="stylesheet" href="{{asset "/css/species.css"}}">
+	<link rel="stylesheet" href="{{asset "/css/share.css"}}">
+</head>
+{{with .List}}
+<body style="--list: {{if .Color}}{{.Color}}{{else}}#75b946{{end}}">
+	<main class="board">
+		<section class="summary" data-live="summary">
+			<header>
+				<div class="top">
+					<p class="eyebrow"><span class="dot"></span>{{.Owner}} · {{$t.Checklist}}</p>
+					<nav class="lang" aria-label="{{$t.Language}}">
+						<a href="?lang=sv" hreflang="sv" lang="sv" aria-current="{{eq $lang "sv"}}">SV</a>
+						<a href="?lang=en" hreflang="en" lang="en" aria-current="{{eq $lang "en"}}">EN</a>
+						<a href="?lang=de" hreflang="de" lang="de" aria-current="{{eq $lang "de"}}">DE</a>
+					</nav>
+				</div>
+				<h1>{{translate .Name $lang}}</h1>
+			</header>
+
+			<div class="progress">
+				<div class="ring">
+					<svg viewBox="0 0 120 120" aria-hidden="true">
+						<circle class="track" cx="60" cy="60" r="52" pathLength="100"/>
+						<circle class="fill" cx="60" cy="60" r="52" pathLength="100" style="--p: {{$.Percent}}"/>
+					</svg>
+					<div class="ring-text">
+						<strong>{{.Seen}}</strong>
+						<span>{{$t.Of}} {{$.Total}}</span>
+					</div>
+				</div>
+				<dl class="figures">
+					<div><dt>{{$t.Species}}</dt><dd>{{$.Percent}}%</dd></div>
+					<div><dt>{{$t.ToGo}}</dt><dd>{{$.ToGo}}</dd></div>
+				</dl>
+			</div>
+
+			{{with $.Newest}}
+			<figure class="newest{{if $.Photo}} has-photo{{end}}" data-species="{{.Uuid}}" data-name="{{translate .Name $lang}}" tabindex="0" role="button">
+				{{if $.Photo}}<img src="{{$.Photo}}" alt="" referrerpolicy="no-referrer">{{end}}
+				<figcaption>
+					<small>{{$t.Newest}} · {{.Date}}</small>
+					<b>{{translate .Name $lang}}</b>
+					<i lang="la">{{.Name.La.String}}</i>
+				</figcaption>
+			</figure>
+			{{else}}
+			<p class="none-yet">{{$t.NoneYet}}</p>
+			{{end}}
+
+			{{with $.More}}
+			<ol class="latest">
+				{{range .}}
+				<li data-species="{{.Uuid}}" data-name="{{translate .Name $lang}}" tabindex="0" role="button"><span>{{translate .Name $lang}}</span><time>{{.Date}}</time></li>
+				{{end}}
+			</ol>
+			{{end}}
+
+			<a class="brand" href="/"><img src="/img/300sf.svg" alt="{{$.Title}}" width="64" height="30"></a>
+		</section>
+
+		<section class="species" id="species" aria-label="{{$t.Species}}">
+			<div class="columns" data-live="species">
+				{{range $.Groups}}
+				<div class="group">
+					<h2><span>{{translate .Order $lang}}</span><small>{{.Seen}}/{{len .Species}}</small></h2>
+					<ul>
+						{{range .Species}}
+						<li class="{{if .Recent}}recent{{else if .Seen}}seen{{end}}" data-species="{{.Uuid}}" data-name="{{translate .Name $lang}}" tabindex="0" role="button">
+							<span class="mark" aria-hidden="true"></span>
+							<span class="name">{{translate .Name $lang}}</span>
+							{{if .Seen}}<time>{{.Date}}</time>{{end}}
+						</li>
+						{{end}}
+					</ul>
+				</div>
+				{{end}}
+			</div>
+		</section>
+	</main>
+
+	{{template "species-dialog" $t}}
+	<script src="{{asset "/scripts/species.js"}}"></script>
+	<script src="{{asset "/scripts/share.js"}}"></script>
+	<script src="{{asset "/scripts/live.js"}}"></script>
+</body>
+{{else}}
+<body>
+	<main class="missing">
+		<a class="brand" href="/"><img src="/img/300sf.svg" alt="{{$.Title}}" width="84" height="40"></a>
+		<h1>{{$t.NotSharedTitle}}</h1>
+		<p>{{$t.NotSharedText}}</p>
+	</main>
+</body>
+{{end}}
+</html>

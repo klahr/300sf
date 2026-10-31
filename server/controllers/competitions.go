@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"encoding/json"
 	"errors"
+	"math"
 	"net/http"
 	"sort"
 	"strings"
@@ -138,15 +140,32 @@ func competitionStandings(competition *models.Competition, participants []models
 		return []CompetitionStanding{}, null.Time{}, nil
 	}
 
+	sightings, err := competitionFirstSightings(competition, participants)
+	if err != nil {
+		return nil, null.Time{}, err
+	}
+	standings, wonAt := rankCompetition(participants, sightings, competition.EndOnReports.Int64)
+	// Other participants see these, so they tell no more than the day of a
+	// sighting.
+	for i := range standings {
+		standings[i].Latest = toDay(standings[i].Latest)
+	}
+	return standings, toDay(wonAt), nil
+}
+
+// competitionAt is when a report counts as made.
+const competitionAt = "COALESCE(r.`from`, r.timestamp)"
+
+// competitionReports are the participants' reports (as r) that count: in the
+// period, of a species on the list and in the competition's zones.
+func competitionReports(competition *models.Competition, participants []models.User) *gorm.DB {
 	ids := make([]int64, len(participants))
 	for i, p := range participants {
 		ids[i] = p.Id
 	}
-	at := "COALESCE(r.`from`, r.timestamp)"
 	q := models.DB.Table("reports AS r").
-		Select("r.user_id, r.species_id, MIN("+at+") AS at").
 		Where("r.archived IS NULL AND r.user_id IN ?", ids).
-		Where(at+" >= ? AND "+at+" < ?", competition.From, competition.Until)
+		Where(competitionAt+" >= ? AND "+competitionAt+" < ?", competition.From, competition.Until)
 	if competition.ListTemplateId.Valid {
 		q = q.Where("r.species_id IN (SELECT species_id FROM "+table.ListTemplateSpecies+" WHERE list_template_id=?)", competition.ListTemplateId.Int64)
 	}
@@ -157,17 +176,17 @@ func competitionStandings(competition *models.Competition, participants []models
 		}
 		q = q.Joins("LEFT JOIN zones z ON z.id=r.zone_id").Where("r.zone_id IN ? OR z.parent_zone_id IN ?", zones, zones)
 	}
+	return q
+}
+
+// competitionFirstSightings are each participant's first sighting of each species that counts.
+func competitionFirstSightings(competition *models.Competition, participants []models.User) ([]competitionSighting, error) {
 	var sightings []competitionSighting
-	if err := q.Group("r.user_id, r.species_id").Scan(&sightings).Error; err != nil {
-		return nil, null.Time{}, err
-	}
-	standings, wonAt := rankCompetition(participants, sightings, competition.EndOnReports.Int64)
-	// Other participants see these, so they tell no more than the day of a
-	// sighting.
-	for i := range standings {
-		standings[i].Latest = toDay(standings[i].Latest)
-	}
-	return standings, toDay(wonAt), nil
+	err := competitionReports(competition, participants).
+		Select("r.user_id, r.species_id, MIN(" + competitionAt + ") AS at").
+		Group("r.user_id, r.species_id").
+		Scan(&sightings).Error
+	return sightings, err
 }
 
 // toDay rounds t down to its day (UTC).
@@ -836,4 +855,205 @@ func CompetitionsBasis(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, r)
+}
+
+// SharedCompetitionSpecies is a species in a shared competition: how many
+// took it and when it was first taken; First is zero when nobody has.
+type SharedCompetitionSpecies struct {
+	Uuid    string
+	Name    models.Translation
+	Order   models.Translation
+	Finders int
+	First   time.Time
+}
+
+// SharedFind is a participant's first sighting of a species, to the day.
+type SharedFind struct {
+	Who  CompetitionPerson
+	Uuid string
+	Name models.Translation
+	At   time.Time
+}
+
+// SharedCompetition is a public competition as its share page shows it:
+// standings, species and finds to the day, never where anyone was.
+type SharedCompetition struct {
+	Info *CompetitionInfo
+	// The list's species, or every species found when there is no list.
+	Species []SharedCompetitionSpecies
+	// The newest finds, newest first.
+	Latest []SharedFind
+}
+
+// SharedArea is how many species of a competition were found in a zone.
+type SharedArea struct {
+	Name    models.Translation `json:"name"`
+	Species int                `json:"species"`
+	Polygon json.RawMessage    `json:"polygon"`
+}
+
+// loadPublicCompetition is a competition anyone may see the standings of.
+func loadPublicCompetition(uuid string) (*models.Competition, []models.User, error) {
+	competition, err := loadCompetition(uuid)
+	if err != nil {
+		return nil, nil, err
+	}
+	if competition.Visibility != models.VisibilityPublic {
+		return nil, nil, gorm.ErrRecordNotFound
+	}
+	participants, err := competitionParticipants(competition.Id)
+	return competition, participants, err
+}
+
+// ShareCompetition is a public competition's progress for its share page.
+func ShareCompetition(uuid string) (*SharedCompetition, error) {
+	competition, participants, err := loadPublicCompetition(uuid)
+	if err != nil {
+		return nil, err
+	}
+	info, err := competitionInfo(competition, nil, true)
+	if err != nil {
+		return nil, err
+	}
+	sightings, err := competitionFirstSightings(competition, participants)
+	if err != nil {
+		return nil, err
+	}
+	// Once won, later sightings don't count.
+	if _, wonAt := rankCompetition(participants, sightings, competition.EndOnReports.Int64); wonAt.Valid {
+		var counted []competitionSighting
+		for _, s := range sightings {
+			if !s.At.After(wonAt.Time) {
+				counted = append(counted, s)
+			}
+		}
+		sightings = counted
+	}
+
+	var species []models.Species
+	q := models.DB.Table("species").Select("species.*").Order("species.id").Preload("Name").Preload("Order.Name")
+	if competition.ListTemplateId.Valid {
+		q = q.Joins("JOIN "+table.ListTemplateSpecies+" lts ON lts.species_id=species.id").Where("lts.list_template_id=?", competition.ListTemplateId.Int64)
+	} else {
+		ids := []int64{0}
+		for _, s := range sightings {
+			ids = append(ids, s.SpeciesId)
+		}
+		q = q.Where("species.id IN ?", ids)
+	}
+	if err := q.Find(&species).Error; err != nil {
+		return nil, err
+	}
+
+	people := map[int64]CompetitionPerson{}
+	for _, p := range participants {
+		people[p.Id] = person(p)
+	}
+	finders := map[int64]int{}
+	first := map[int64]time.Time{}
+	for _, s := range sightings {
+		finders[s.SpeciesId]++
+		if f, ok := first[s.SpeciesId]; !ok || s.At.Before(f) {
+			first[s.SpeciesId] = s.At
+		}
+	}
+
+	result := SharedCompetition{Info: info}
+	byId := map[int64]models.Species{}
+	for _, s := range species {
+		byId[s.Id] = s
+		result.Species = append(result.Species, SharedCompetitionSpecies{
+			Uuid: s.Uuid, Name: s.Name, Order: s.Order.Name, Finders: finders[s.Id], First: toDay(null.TimeFrom(first[s.Id])).Time,
+		})
+	}
+	sort.SliceStable(sightings, func(i, j int) bool { return sightings[i].At.After(sightings[j].At) })
+	for _, s := range sightings {
+		if len(result.Latest) == 8 {
+			break
+		}
+		sp, ok := byId[s.SpeciesId]
+		if !ok {
+			continue
+		}
+		result.Latest = append(result.Latest, SharedFind{Who: people[s.UserId], Uuid: sp.Uuid, Name: sp.Name, At: toDay(null.TimeFrom(s.At)).Time})
+	}
+	return &result, nil
+}
+
+// ShareCompetitionAreas are the zones where a public competition's species
+// were found, with how many, for its share page's map. Most species first.
+func ShareCompetitionAreas(uuid string) ([]SharedArea, error) {
+	competition, participants, err := loadPublicCompetition(uuid)
+	if err != nil {
+		return nil, err
+	}
+	areas := []SharedArea{}
+	if len(participants) == 0 {
+		return areas, nil
+	}
+	var counts []struct {
+		ZoneId  int64
+		Species int
+	}
+	if err := competitionReports(competition, participants).
+		Select("r.zone_id AS zone_id, COUNT(DISTINCT r.species_id) AS species").
+		Where("r.zone_id IS NOT NULL").
+		Group("r.zone_id").
+		Order("species DESC").
+		Limit(100).
+		Scan(&counts).Error; err != nil {
+		return nil, err
+	}
+	for _, c := range counts {
+		var zone models.Zone
+		if err := models.DB.Preload("Name").First(&zone, c.ZoneId).Error; err != nil || len(zone.Polygon) == 0 {
+			continue
+		}
+		areas = append(areas, SharedArea{Name: zone.Name, Species: c.Species, Polygon: roundGeoJSON(zone.Polygon)})
+	}
+	return areas, nil
+}
+
+// roundGeoJSON rounds a polygon's coordinates to three decimals (about 100 m),
+// plenty for the outline of a municipality and a fraction of the size.
+func roundGeoJSON(raw []byte) json.RawMessage {
+	var v any
+	if err := json.Unmarshal(raw, &v); err != nil {
+		return raw
+	}
+	var round func(any) any
+	round = func(v any) any {
+		switch t := v.(type) {
+		case float64:
+			return math.Round(t*1000) / 1000
+		case []any:
+			for i := range t {
+				t[i] = round(t[i])
+			}
+		case map[string]any:
+			for k := range t {
+				t[k] = round(t[k])
+			}
+		}
+		return v
+	}
+	out, err := json.Marshal(round(v))
+	if err != nil {
+		return raw
+	}
+	return out
+}
+
+// ShareCompetitionKeys are what a public competition's share page watches for
+// live updates (package live): the competition and each participant.
+func ShareCompetitionKeys(uuid string) ([]string, error) {
+	competition, participants, err := loadPublicCompetition(uuid)
+	if err != nil {
+		return nil, err
+	}
+	keys := []string{"competition:" + competition.Uuid}
+	for _, p := range participants {
+		keys = append(keys, "user:"+p.Uuid)
+	}
+	return keys, nil
 }

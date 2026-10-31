@@ -25,8 +25,9 @@ class ReportPopUp {
 	private mLocation: { lat: number, lng: number } | null = null;
 	private mPopUp: Ui.Sheet;
 
-	// With existing, the form edits that sighting instead of reporting a new one.
-	constructor(species: Models.Species, list: Models.List | null, closeCallback: (speciesAdded: boolean) => void, existing: Models.Report | null = null) {
+	// With existing, the form edits that sighting instead of reporting a new one. seenAt is when a new
+	// sighting was made, if not now.
+	constructor(species: Models.Species, list: Models.List | null, closeCallback: (speciesAdded: boolean) => void, existing: Models.Report | null = null, seenAt: Date | null = null) {
 		const self = this;
 
 		var speciesAdded = false;
@@ -291,7 +292,7 @@ class ReportPopUp {
 			d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
 			return d.toISOString().slice(0, -8);
 		};
-		const now = new Date();
+		const now = seenAt ? new Date(seenAt.getTime()) : new Date();
 		now.setSeconds(now.getMinutes());
 		from.value = toLocalInput(now);
 
@@ -610,8 +611,8 @@ class ReportPopUp {
 	}
 }
 
-function openReportPopUp(species: Models.Species, list: Models.List | null, closeCallback: (speciesAdded: boolean) => void = function () { }, existing: Models.Report | null = null): void {
-	new ReportPopUp(species, list, closeCallback, existing);
+function openReportPopUp(species: Models.Species, list: Models.List | null, closeCallback: (speciesAdded: boolean) => void = function () { }, existing: Models.Report | null = null, seenAt: Date | null = null): void {
+	new ReportPopUp(species, list, closeCallback, existing, seenAt);
 }
 
 // The "Report sighting" button in the menu: pick the bird, then the report form.

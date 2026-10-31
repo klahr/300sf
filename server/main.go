@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"slices"
 	"strings"
 	"syscall"
 	_ "time/tzdata" // the alpine image has no zoneinfo; reports export uses IANA zones
@@ -17,6 +18,7 @@ import (
 	"github.com/klahr/300sf/server/config"
 	"github.com/klahr/300sf/server/controllers"
 	"github.com/klahr/300sf/server/geocoder"
+	"github.com/klahr/300sf/server/live"
 	"github.com/klahr/300sf/server/log"
 	"github.com/klahr/300sf/server/models"
 	"github.com/klahr/300sf/server/places"
@@ -93,9 +95,11 @@ func newRouter(web *site.Site) *gin.Engine {
 	}))
 	r.Use(securityHeaders)
 	r.Use(web.Redirect)
-	r.Use(gzip.Gzip(gzip.DefaultCompression))
+	// A websocket can't be compressed this way; the share pages' live connections are left alone.
+	r.Use(gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedPathsRegexs([]string{"/live$"})))
 	r.Use(apiHeaders)
 	r.Use(dbErrors)
+	r.Use(liveChanges)
 
 	SetupRoutes(r, controllers.Auth, controllers.AuthLogout)
 	app := r.Group("/api", web.AppSession)
@@ -103,6 +107,32 @@ func newRouter(web *site.Site) *gin.Engine {
 	setupConnectRoutes(r, app)
 	web.Register(r)
 	return r
+}
+
+// liveReads are the API's POST and PUT routes that change nothing.
+var liveReads = []string{"/v1/reports/list", "/v1/reports/basis", "/v1/reports/export", "/v1/lists/compare"}
+
+// liveChanges tells the share pages' live connections (package live) when a
+// change through the API may have changed what they show: a user's sightings,
+// lists or name, or who takes part in a competition.
+func liveChanges(c *gin.Context) {
+	c.Next()
+	if c.Request.Method == http.MethodGet || c.Writer.Status() >= http.StatusBadRequest {
+		return
+	}
+	path := strings.TrimPrefix(c.FullPath(), "/api")
+	if slices.Contains(liveReads, path) {
+		return
+	}
+	switch {
+	case strings.HasPrefix(path, "/v1/competitions/:uuid"):
+		live.Notify("competition:" + c.Param("uuid"))
+	case strings.HasPrefix(path, "/v1/reports"), strings.HasPrefix(path, "/v1/lists"),
+		path == "/v1/users/display_name", path == "/v1/users/portrait":
+		if user := c.GetString("uuid"); user != "" {
+			live.Notify("user:" + user)
+		}
+	}
 }
 
 func main() {

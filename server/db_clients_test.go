@@ -197,9 +197,9 @@ func TestDBListDatesAndVisibility(t *testing.T) {
 
 	// A private list becomes visible to others with the link, and back.
 	s.must(t, friend, http.StatusBadRequest, "GET", "/v1/lists/"+list, nil)
-	s.must(t, owner, http.StatusNoContent, "POST", "/v1/lists/"+list+"/visibility", map[string]any{"visibility": models.VisibilityHidden})
+	s.must(t, owner, http.StatusOK, "POST", "/v1/lists/"+list+"/visibility", map[string]any{"visibility": models.VisibilityHidden})
 	s.must(t, friend, http.StatusOK, "GET", "/v1/lists/"+list, nil)
-	s.must(t, owner, http.StatusNoContent, "POST", "/v1/lists/"+list+"/visibility", map[string]any{"visibility": models.VisibilityPrivate})
+	s.must(t, owner, http.StatusOK, "POST", "/v1/lists/"+list+"/visibility", map[string]any{"visibility": models.VisibilityPrivate})
 	s.must(t, friend, http.StatusBadRequest, "GET", "/v1/lists/"+list, nil)
 	s.must(t, owner, http.StatusBadRequest, "POST", "/v1/lists/"+list+"/visibility", map[string]any{"visibility": 3})
 	s.must(t, friend, http.StatusBadRequest, "POST", "/v1/lists/"+list+"/visibility", map[string]any{"visibility": 2})

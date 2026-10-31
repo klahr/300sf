@@ -56,6 +56,12 @@ type Site struct {
 	landing   map[string]map[string]any
 	// Overridable in tests.
 	compare   func(uuids []string) (*controllers.CompareResult, error)
+	share     func(uuid string) (*controllers.SharedList, error)
+	shareRace func(uuid string) (*controllers.SharedCompetition, error)
+	areas     func(uuid string) ([]controllers.SharedArea, error)
+	listOwner func(uuid string) (string, error)
+	raceKeys  func(uuid string) ([]string, error)
+	photo     func(name models.Translation) string
 	stats     func() (*controllers.SiteStats, error)
 	authorize func(controllers.AuthorizeRequest) controllers.AuthorizeCheck
 
@@ -71,7 +77,7 @@ func New(cfg config.Site, files fs.FS) (*Site, error) {
 	if files == nil {
 		files = embedded
 	}
-	s := &Site{files: files, cfg: cfg, landing: map[string]map[string]any{}, compare: controllers.CompareLists, stats: controllers.GetSiteStats, authorize: controllers.CheckAuthorizeRequest}
+	s := &Site{files: files, cfg: cfg, landing: map[string]map[string]any{}, compare: controllers.CompareLists, share: controllers.ShareList, shareRace: controllers.ShareCompetition, areas: controllers.ShareCompetitionAreas, listOwner: controllers.ShareListOwner, raceKeys: controllers.ShareCompetitionKeys, photo: speciesPhoto, stats: controllers.GetSiteStats, authorize: controllers.CheckAuthorizeRequest}
 
 	funcs := template.FuncMap{
 		"year":   func() int { return time.Now().Year() },
@@ -141,6 +147,11 @@ func (s *Site) Register(r *gin.Engine) {
 	r.GET("/terms", s.page("terms"))
 	r.GET("/privacy-policy", s.page("privacy-policy"))
 	r.GET("/compare", s.comparePage)
+	r.GET("/share/:uuid", s.sharePage)
+	r.GET("/share/competition/:uuid", s.shareCompetitionPage)
+	r.GET("/share/competition/:uuid/areas", s.shareCompetitionAreas)
+	r.GET("/share/:uuid/live", s.liveList)
+	r.GET("/share/competition/:uuid/live", s.liveCompetition)
 	r.GET("/oauth/authorize", s.authorizePage)
 }
 

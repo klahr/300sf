@@ -2,6 +2,7 @@
 package site
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -10,11 +11,15 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
+	"github.com/coder/websocket"
 	"github.com/gin-gonic/gin"
 	"github.com/klahr/300sf/server/config"
 	"github.com/klahr/300sf/server/controllers"
+	"github.com/klahr/300sf/server/live"
 	"github.com/klahr/300sf/server/models"
+	"gopkg.in/guregu/null.v4"
 	"gopkg.in/guregu/null.v4/zero"
 )
 
@@ -247,6 +252,87 @@ func TestComparePage(t *testing.T) {
 	}
 }
 
+func TestSharePage(t *testing.T) {
+	s, r := newTestSite(t, cfg)
+
+	order := models.Translation{Model: models.Model{Id: 1}, Sv: zero.StringFrom("Tättingar")}
+	tit := models.Translation{Model: models.Model{Id: 2}, Sv: zero.StringFrom("Talgoxe"), La: zero.StringFrom("Parus major")}
+	robin := models.Translation{Model: models.Model{Id: 3}, Sv: zero.StringFrom("Rödhake")}
+	seen := time.Date(2026, 10, 29, 8, 0, 0, 0, time.UTC)
+	var gotUuid string
+	s.share = func(uuid string) (*controllers.SharedList, error) {
+		gotUuid = uuid
+		return &controllers.SharedList{
+			Name:    models.Translation{Sv: zero.StringFrom("Årslista")},
+			Owner:   "<script>alert(1)</script>",
+			Seen:    1,
+			Species: []controllers.SharedSpecies{{Name: tit, Order: order, Seen: seen}, {Name: robin, Order: order}},
+			Latest:  []controllers.SharedSpecies{{Name: tit, Order: order, Seen: seen}},
+		}, nil
+	}
+	s.photo = func(models.Translation) string { return "https://upload.wikimedia.org/tit.jpg" }
+	w := get(r, "300sf.se", "/share/abcdefghjk?lang=sv")
+	body := w.Body.String()
+	if w.Code != http.StatusOK || gotUuid != "abcdefghjk" {
+		t.Fatalf("status %d, uuid %q", w.Code, gotUuid)
+	}
+	for _, want := range []string{"Årslista", "Talgoxe", "Rödhake", "Tättingar", "29 okt", "50%", "tit.jpg"} {
+		if !strings.Contains(body, want) {
+			t.Errorf("page lacks %q", want)
+		}
+	}
+	if strings.Contains(body, "<script>alert") {
+		t.Error("owner name not escaped")
+	}
+
+	s.share = func(string) (*controllers.SharedList, error) { return nil, errors.New("not found") }
+	if w := get(r, "300sf.se", "/share/abcdefghjk?lang=en"); w.Code != http.StatusNotFound || !strings.Contains(w.Body.String(), "This list isn") {
+		t.Errorf("unshared list: %d", w.Code)
+	}
+}
+
+func TestShareCompetitionPage(t *testing.T) {
+	s, r := newTestSite(t, cfg)
+
+	order := models.Translation{Model: models.Model{Id: 1}, Sv: zero.StringFrom("Tättingar")}
+	tit := models.Translation{Model: models.Model{Id: 2}, Sv: zero.StringFrom("Talgoxe")}
+	from := time.Date(2025, 3, 1, 0, 0, 0, 0, time.UTC)
+	anna := controllers.CompetitionPerson{DisplayName: "<b>Anna</b>", Portrait: "3.webp"}
+	s.shareRace = func(uuid string) (*controllers.SharedCompetition, error) {
+		return &controllers.SharedCompetition{
+			Info: &controllers.CompetitionInfo{
+				Uuid: uuid, Name: models.Translation{Sv: zero.StringFrom("Vårracet")}, Status: "finished",
+				From: from, Until: from.AddDate(0, 3, 0), EndedAt: null.TimeFrom(from.AddDate(0, 3, 0)), Participants: 1, ListSize: 2,
+				Standings: []controllers.CompetitionStanding{{Rank: 1, User: anna, Count: 1}},
+			},
+			Species: []controllers.SharedCompetitionSpecies{{Uuid: "s1", Name: tit, Order: order, Finders: 1, First: from}},
+			Latest:  []controllers.SharedFind{{Who: anna, Uuid: "s1", Name: tit, At: from}},
+		}, nil
+	}
+	w := get(r, "300sf.se", "/share/competition/abc?lang=sv")
+	body := w.Body.String()
+	if w.Code != http.StatusOK {
+		t.Fatalf("status %d", w.Code)
+	}
+	for _, want := range []string{"Vårracet", "Talgoxe", "Tättingar", "1 mar – 31 maj 2025", "Avslutad 31 maj 2025", `data-species="s1"`, "/share/competition/abc/areas", "--p: 50", "--share: 100", "pie all", "Hittad av 1 av 1"} {
+		if !strings.Contains(body, want) {
+			t.Errorf("page lacks %q", want)
+		}
+	}
+	if strings.Contains(body, "<b>Anna") {
+		t.Error("display name not escaped")
+	}
+
+	s.areas = func(string) ([]controllers.SharedArea, error) { return nil, errors.New("not found") }
+	if w := get(r, "300sf.se", "/share/competition/abc/areas"); w.Code != http.StatusNotFound {
+		t.Errorf("areas of an unshared competition: %d", w.Code)
+	}
+	s.shareRace = func(string) (*controllers.SharedCompetition, error) { return nil, errors.New("not found") }
+	if w := get(r, "300sf.se", "/share/competition/abc"); w.Code != http.StatusNotFound {
+		t.Errorf("unshared competition: %d", w.Code)
+	}
+}
+
 func TestAppSessionUsesCookieAndBlocksCrossSiteWrites(t *testing.T) {
 	s, _ := newTestSite(t, cfg)
 	r := gin.New()
@@ -449,5 +535,42 @@ func TestAuthorizePage(t *testing.T) {
 	check = controllers.AuthorizeCheck{Problem: "unknown client_id"}
 	if w := get(r, "300sf.se", "/oauth/authorize?client_id=nope&lang=en"); w.Code != http.StatusBadRequest || !strings.Contains(w.Body.String(), "Can&#39;t connect the app") || strings.Contains(w.Body.String(), "oauth/approve") {
 		t.Errorf("an unknown app = %d:\n%s", w.Code, w.Body.String())
+	}
+}
+
+// A share page's live connection says "changed" when its list's owner changes something, and only then.
+func TestShareLiveConnection(t *testing.T) {
+	s, r := newTestSite(t, cfg)
+	s.listOwner = func(uuid string) (string, error) {
+		if uuid != "abcdefghjk" {
+			return "", errors.New("not found")
+		}
+		return "owner-uuid", nil
+	}
+	server := httptest.NewServer(r)
+	defer server.Close()
+	ws := "ws" + strings.TrimPrefix(server.URL, "http")
+
+	if _, resp, err := websocket.Dial(context.Background(), ws+"/share/private/live", nil); err == nil || resp == nil || resp.StatusCode != http.StatusNotFound {
+		t.Errorf("unshared list's live connection: %v %v", resp, err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	conn, _, err := websocket.Dial(ctx, ws+"/share/abcdefghjk/live", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.CloseNow()
+	live.Notify("user:someone-else")
+	live.Notify("user:owner-uuid")
+	_, msg, err := conn.Read(ctx)
+	if err != nil || string(msg) != "changed" {
+		t.Fatalf("read %q, %v", msg, err)
+	}
+	read, cancelRead := context.WithTimeout(context.Background(), 200*time.Millisecond)
+	defer cancelRead()
+	if _, msg, err := conn.Read(read); err == nil {
+		t.Errorf("another message %q for one change", msg)
 	}
 }

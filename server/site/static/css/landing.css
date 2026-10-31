@@ -228,32 +228,34 @@ svg {
 
 .hero {
 	position: relative;
-	padding: 88px 0 104px;
+	padding: 48px 0 104px;
 	isolation: isolate;
 }
 
 .hero::before {
 	content: "";
 	position: absolute;
-	inset: -68px 0 0;
+	inset: 0;
 	z-index: -1;
 	background:
 		radial-gradient(600px 420px at 12% 18%, var(--glow-primary), transparent 70%),
 		radial-gradient(560px 460px at 88% 42%, var(--glow-blue), transparent 70%),
 		radial-gradient(900px 500px at 50% 120%, rgba(117, 185, 70, 0.08), transparent 70%);
 	pointer-events: none;
+	mask-image: linear-gradient(to bottom, transparent, #000 220px);
+	-webkit-mask-image: linear-gradient(to bottom, transparent, #000 220px);
 }
 
 /* A faint dot grid, fading out downwards. */
 .hero::after {
 	content: "";
 	position: absolute;
-	inset: -68px 0 0;
+	inset: 0;
 	z-index: -1;
 	background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
 	background-size: 28px 28px;
-	mask-image: linear-gradient(to bottom, #000 20%, transparent 85%);
-	-webkit-mask-image: linear-gradient(to bottom, #000 20%, transparent 85%);
+	mask-image: linear-gradient(to bottom, transparent, #000 25%, transparent 85%);
+	-webkit-mask-image: linear-gradient(to bottom, transparent, #000 25%, transparent 85%);
 	pointer-events: none;
 }
 
@@ -264,7 +266,7 @@ svg {
 	gap: 64px;
 }
 
-.hero h1 {
+.hero h2 {
 	font-size: clamp(2.5rem, 5.4vw, 4.25rem);
 	font-weight: 800;
 	letter-spacing: -0.035em;
@@ -693,6 +695,155 @@ svg {
 	box-shadow: var(--shadow-float), inset 0 0 0 1px var(--hairline-strong);
 }
 
+/* Bird search */
+
+/* The page opens on the search, like a search engine: a question, a field and nothing else. */
+.lookup {
+	position: relative;
+	display: grid;
+	align-content: center;
+	min-height: min(70vh, 640px);
+	padding: 72px 0 40px;
+	text-align: center;
+	isolation: isolate;
+}
+
+.lookup::before {
+	content: "";
+	position: absolute;
+	inset: -68px 0 0;
+	z-index: -1;
+	background:
+		radial-gradient(640px 420px at 50% 30%, var(--glow-primary), transparent 70%),
+		radial-gradient(520px 380px at 85% 70%, var(--glow-blue), transparent 70%);
+	mask-image: linear-gradient(to bottom, #000 55%, transparent);
+	-webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
+	pointer-events: none;
+}
+
+/* The dotted field the page used to open on, now behind the search. */
+.lookup::after {
+	content: "";
+	position: absolute;
+	inset: -68px 0 0;
+	z-index: -1;
+	background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+	background-size: 28px 28px;
+	mask-image: linear-gradient(to bottom, #000 30%, transparent 100%);
+	-webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent 100%);
+	pointer-events: none;
+}
+
+.lookup-title {
+	margin-bottom: 36px;
+	font-size: clamp(2.5rem, 6vw, 4.5rem);
+	font-weight: 800;
+	letter-spacing: -0.035em;
+}
+
+.lookup-lede {
+	max-width: 36em;
+	margin: 22px auto 0;
+	color: var(--ink-soft);
+	font-size: 1.0625rem;
+	line-height: 1.6;
+}
+
+.lookup-box {
+	position: relative;
+	max-width: 720px;
+	margin: 0 auto;
+}
+
+.lookup-field {
+	position: relative;
+}
+
+.lookup-field svg {
+	position: absolute;
+	top: 50%;
+	left: 22px;
+	width: 26px;
+	height: 26px;
+	transform: translateY(-50%);
+	fill: var(--ink-soft);
+	pointer-events: none;
+}
+
+.lookup-field input {
+	width: 100%;
+	min-height: 64px;
+	padding: 0 22px 0 60px;
+	border: 0;
+	border-radius: var(--radius-pill);
+	background: var(--card-raised);
+	box-shadow: var(--shadow-float), inset 0 0 0 1px var(--hairline-strong);
+	color: var(--ink);
+	font: inherit;
+	font-size: 1.125rem;
+	transition: box-shadow 160ms var(--ease);
+	-webkit-appearance: none;
+	appearance: none;
+}
+
+.lookup-field input::placeholder {
+	color: var(--ink-faint);
+}
+
+.lookup-field input:focus {
+	outline: none;
+	box-shadow: var(--shadow-float), inset 0 0 0 2px var(--primary-strong), 0 0 0 6px var(--glow-primary);
+}
+
+.lookup-results {
+	position: absolute;
+	z-index: 5;
+	top: 72px;
+	right: 0;
+	left: 0;
+	margin: 0;
+	padding: 8px;
+	overflow: hidden;
+	border-radius: 20px;
+	background: var(--card-raised);
+	box-shadow: var(--shadow-float), inset 0 0 0 1px var(--hairline-strong);
+	list-style: none;
+}
+
+.lookup-results li {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 12px 16px;
+	border-radius: 12px;
+	cursor: pointer;
+}
+
+.lookup-results li[aria-selected="true"],
+.lookup-results li:hover {
+	background: rgba(255, 255, 255, 0.07);
+}
+
+.lookup-results b {
+	font-weight: 600;
+}
+
+.lookup-results i {
+	color: var(--ink-soft);
+	font-family: var(--font-latin);
+}
+
+#lookup-card .species-card {
+	margin-top: 24px;
+}
+
+.lookup-none {
+	margin-top: 18px;
+	color: var(--ink-soft);
+	text-align: center;
+}
+
 /* Checklists */
 
 .mock-lists {
@@ -945,111 +1096,46 @@ svg {
 	font-variant-numeric: tabular-nums;
 }
 
-/* Competitions */
-
-.mock-competition-head {
-	display: flex;
-	align-items: center;
-	gap: 14px;
-	padding-bottom: 16px;
-	border-bottom: 1px solid var(--hairline);
-}
-
-.trophy {
+.mock-chat {
 	display: grid;
-	place-items: center;
-	flex-shrink: 0;
-	width: 44px;
-	height: 44px;
-	border-radius: 14px;
-	background: rgba(224, 175, 104, 0.16);
-	color: var(--accent);
-}
-
-.trophy svg {
-	width: 24px;
-	height: 24px;
-}
-
-.mock-competition-head b {
-	display: block;
-	font-size: 1.0625rem;
-	font-weight: 800;
-}
-
-.mock-competition-head small {
-	color: var(--ink-soft);
-	font-size: 0.8125rem;
-}
-
-.mock-competition ol {
-	display: grid;
-	gap: 6px;
-	margin: 14px 0 0;
-	padding: 0;
-	list-style: none;
-}
-
-.mock-competition li {
-	--count: 0;
-	display: grid;
-	grid-template-columns: 28px 64px 1fr 36px;
-	align-items: center;
 	gap: 10px;
-	padding: 8px 10px;
-	border-radius: 12px;
-	font-size: 0.9375rem;
 }
 
-.mock-competition li.me {
+.mock-chat p {
+	max-width: 85%;
+	margin: 0;
+	padding: 10px 14px;
+	border-radius: 16px;
+	font-size: 0.9375rem;
+	line-height: 1.45;
+}
+
+.mock-chat .me {
+	justify-self: end;
+	border-bottom-right-radius: 4px;
 	background: rgba(180, 13, 129, 0.14);
 	box-shadow: inset 0 0 0 1px rgba(180, 13, 129, 0.4);
 }
 
-.mock-competition .place {
-	display: grid;
-	place-items: center;
-	width: 26px;
-	height: 26px;
-	border-radius: 50%;
-	background: rgba(255, 255, 255, 0.06);
-	color: var(--ink-soft);
-	font-size: 0.8125rem;
-	font-weight: 700;
-}
-
-.mock-competition li:first-child .place {
-	background: var(--accent);
-	color: #241a08;
-}
-
-.mock-competition .who {
-	font-weight: 600;
-}
-
-.mock-competition .bar {
-	height: 6px;
-	overflow: hidden;
-	border-radius: var(--radius-pill);
+.mock-chat .ai {
+	justify-self: start;
+	border-bottom-left-radius: 4px;
 	background: rgba(255, 255, 255, 0.06);
 }
 
-.mock-competition .bar span {
+/* Screenshots of the share pages, framed like a screen. */
+.mock-screen {
+	max-width: none;
+	padding: 8px;
+	border-radius: 18px;
+	background: #000;
+}
+
+.mock-screen img {
 	display: block;
-	width: calc(var(--count) / 150 * 100%);
-	height: 100%;
-	border-radius: inherit;
-	background: var(--blue);
-}
-
-.mock-competition li.me .bar span {
-	background: var(--primary-strong);
-}
-
-.mock-competition .count {
-	text-align: right;
-	font-weight: 700;
-	font-variant-numeric: tabular-nums;
+	width: 100%;
+	height: auto;
+	border-radius: 11px;
 }
 
 /* More features */

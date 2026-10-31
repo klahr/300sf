@@ -1,0 +1,28 @@
+{{/* A species' picture, names, Wikipedia text and song, with a button to report it. Filled by
+/scripts/species.js; the texts come from the page's own (Search...). */}}
+{{define "species-card"}}
+<article class="species-card" hidden aria-live="polite">
+	<div class="species-card-photo"><img alt="" referrerpolicy="no-referrer" hidden></div>
+	<div class="species-card-body">
+		<p class="species-card-order"></p>
+		<h3 class="species-card-name"></h3>
+		<p class="species-card-latin" lang="la"></p>
+		<p class="species-card-summary"></p>
+		<p class="species-card-failed" hidden>{{.SearchFailed}}</p>
+		<div class="species-card-actions">
+			<button type="button" class="species-card-button" data-report>{{.SearchReport}}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></button>
+			<button type="button" class="species-card-button ghost" data-listen data-play="{{.SearchListen}}" data-pause="{{.SearchPause}}" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><span>{{.SearchListen}}</span></button>
+		</div>
+		<p class="species-card-hint">{{.SearchReportHint}}</p>
+		<a class="species-card-wiki" target="_blank" rel="noopener" hidden>{{.SearchReadMore}}</a>
+	</div>
+</article>
+{{end}}
+
+{{/* The card in a dialog, opened by anything with data-species (see /scripts/species.js). */}}
+{{define "species-dialog"}}
+<dialog id="species-dialog" class="species-dialog">
+	<button type="button" class="species-dialog-close" data-close aria-label="{{.Close}}">×</button>
+	{{template "species-card" .}}
+</dialog>
+{{end}}

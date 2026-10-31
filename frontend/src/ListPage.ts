@@ -9,6 +9,7 @@
 /// <reference path="models/List.ts"/>
 /// <reference path="SpeciesPopUp.ts"/>
 /// <reference path="OrderPopUp.ts"/>
+/// <reference path="ShareChecklist.ts"/>
 
 class ListPage extends Page {
 	private mTitle: HTMLHeadingElement;
@@ -61,6 +62,19 @@ class ListPage extends Page {
 				Ui.setBusy(download, false);
 			});
 		});
+		const share = document.createElement("button");
+		share.className = "icon-button";
+		share.title = App.translations.ShareChecklist;
+		share.setAttribute("aria-label", App.translations.ShareChecklist);
+		share.innerHTML = "<span class='material-symbols-outlined'>share</span>";
+		share.addEventListener("click", function (event) {
+			event.stopPropagation();
+			ShareChecklist.open(self.data as Models.List, function () {
+				self.mShownUuid = (self.data as Models.List).uuid;
+				Page.setUrl(self.path);
+			});
+		});
+		header.appendChild(share);
 		header.appendChild(download);
 
 		const summary = document.createElement("div");

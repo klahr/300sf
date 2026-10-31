@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sort"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -58,7 +59,7 @@ func Lists(c *gin.Context) {
 		return
 	}
 
-	list, err := CreateList(r.Template, r.Name, r.Visibility, user, r.Color)
+	list, err := CreateList(r.Template, r.Name, models.ListVisibility(r.Visibility), user, r.Color)
 	if errors.Is(err, ErrTemplateNotFound) {
 		c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorRecordNotFound, Message: err.Error()})
 		return
@@ -455,14 +456,21 @@ func ListsVisibility(c *gin.Context) {
 		return
 	}
 
-	if err := models.DB.Model(&list).UpdateColumn("visibility", *r.Visibility).Error; err != nil {
+	// An old 6-character id is too easy to guess to be shared, so the list gets
+	// a new id when it stops being private; links to the old id stop working.
+	visibility := models.ListVisibility(*r.Visibility)
+	uuid := list.Uuid
+	if visibility != models.VisibilityPrivate && len(uuid) < utils.ShortUuidLength {
+		uuid = utils.GenerateShortUuid()
+	}
+	if err := models.DB.Model(&list).UpdateColumns(map[string]any{"visibility": visibility, "uuid": uuid}).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusNoContent, nil)
+	c.JSON(http.StatusOK, gin.H{"uuid": uuid})
 }
 
 func ListsDetails(c *gin.Context) {
@@ -739,4 +747,99 @@ func ListsCompare(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, resp)
+}
+
+// SharedSpecies is a species on a shared list and when it was first seen
+// there; Seen is zero when it hasn't been.
+type SharedSpecies struct {
+	Uuid  string
+	Name  models.Translation
+	Order models.Translation
+	Seen  time.Time
+}
+
+// SharedList is a list's progress as its share page shows it: names, species
+// and the day each was first seen, never where or anything else.
+type SharedList struct {
+	Name    models.Translation
+	Color   string
+	Owner   string
+	Seen    int
+	Species []SharedSpecies
+	// Latest are the most recently seen species, newest first.
+	Latest []SharedSpecies
+}
+
+// ShareList is the progress of a list that is not private, under the same
+// rules as CompareLists.
+func ShareList(uuid string) (*SharedList, error) {
+	var list models.List
+	if err := models.DB.Where("uuid=?", uuid).Where("visibility<>?", models.VisibilityPrivate).Where("CHAR_LENGTH(uuid)>=?", utils.ShortUuidLength).Where("archived IS NULL").Preload("Name").First(&list).Error; err != nil {
+		return nil, err
+	}
+	var owner models.User
+	if err := models.DB.Where("id=?", list.UserId).First(&owner).Error; err != nil {
+		return nil, err
+	}
+
+	var species []models.Species
+	if err := models.DB.Table("species").
+		Select("species.*").
+		Joins("JOIN list_species ON list_species.species_id=species.id").
+		Where("list_species.list_id=?", list.Id).
+		Order("species.id").
+		Preload("Name").
+		Preload("Order.Name").
+		Find(&species).Error; err != nil {
+		return nil, err
+	}
+
+	var firsts []struct {
+		SpeciesId int64
+		First     time.Time
+	}
+	if err := models.DB.Table("list_reports").
+		Select("reports.species_id AS species_id, MIN(reports.`from`) AS first").
+		Joins("JOIN reports ON reports.id=list_reports.report_id").
+		Where("list_reports.list_id=?", list.Id).
+		Where("reports.archived IS NULL").
+		Group("reports.species_id").
+		Scan(&firsts).Error; err != nil {
+		return nil, err
+	}
+	seen := map[int64]time.Time{}
+	for _, f := range firsts {
+		seen[f.SpeciesId] = f.First
+	}
+
+	result := SharedList{Name: list.Name, Color: list.Color.String, Owner: owner.DisplayName}
+	for _, s := range species {
+		entry := SharedSpecies{Uuid: s.Uuid, Name: s.Name, Order: s.Order.Name, Seen: seen[s.Id]}
+		result.Species = append(result.Species, entry)
+		if !entry.Seen.IsZero() {
+			result.Seen++
+			result.Latest = append(result.Latest, entry)
+		}
+	}
+	sort.SliceStable(result.Latest, func(i, j int) bool { return result.Latest[i].Seen.After(result.Latest[j].Seen) })
+	if len(result.Latest) > 5 {
+		result.Latest = result.Latest[:5]
+	}
+	return &result, nil
+}
+
+// ShareListOwner is the uuid of the owner of a list that can be shared, for
+// its share page's live updates.
+func ShareListOwner(uuid string) (string, error) {
+	var owners []string
+	if err := models.DB.Table("lists").Joins("JOIN users ON users.id=lists.user_id").
+		Where("lists.uuid=?", uuid).Where("lists.visibility<>?", models.VisibilityPrivate).
+		Where("CHAR_LENGTH(lists.uuid)>=?", utils.ShortUuidLength).Where("lists.archived IS NULL").
+		Limit(1).Pluck("users.uuid", &owners).Error; err != nil {
+		return "", err
+	}
+	if len(owners) == 0 {
+		return "", gorm.ErrRecordNotFound
+	}
+	return owners[0], nil
 }

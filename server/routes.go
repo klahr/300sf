@@ -266,7 +266,9 @@ func SetupRoutes(r gin.IRouter, signIn, signOut gin.HandlerFunc) {
 
 	// Species
 	r.GET("/v1/species/list", apiKeyMiddleware, readMiddleware, controllers.SpeciesList)
-	r.GET("/v1/species/:uuid", apiKeyMiddleware, noneMiddleware, controllers.SpeciesDetails)
+	// Species are public, for the search on the landing page.
+	r.GET("/v1/species/search", noneMiddleware, controllers.SpeciesSearch)
+	r.GET("/v1/species/:uuid", noneMiddleware, controllers.SpeciesDetails)
 	r.POST("/v1/species/:uuid/set_rarity", apiKeyMiddleware, adminMiddleware, controllers.SpeciesSetRarity)
 
 	// Reports

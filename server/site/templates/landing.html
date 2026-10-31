@@ -20,6 +20,7 @@
 	<link rel="stylesheet" href="{{asset "/css/fonts.css"}}">
 	<link rel="stylesheet" href="{{asset "/css/tokens.css"}}">
 	<link rel="stylesheet" href="{{asset "/css/landing.css"}}">
+	<link rel="stylesheet" href="{{asset "/css/species.css"}}">
 	<script nonce="{{$.Nonce}}">
 		document.documentElement.classList.add("js");
 		{{- if $.SignedInGoesToApp}}
@@ -37,10 +38,12 @@
 	<symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></symbol>
 	<symbol id="i-calendar" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 16H5V9h14Z"/></symbol>
 	<symbol id="i-count" viewBox="0 0 24 24"><path d="M16 11a3 3 0 1 0-3-3 3 3 0 0 0 3 3Zm-8 0a3 3 0 1 0-3-3 3 3 0 0 0 3 3Zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13Zm8 0c-.29 0-.62.02-.97.05A4.22 4.22 0 0 1 17 16.5V19h6v-2.5c0-2.33-4.67-3.5-7-3.5Z"/></symbol>
-	<symbol id="i-trophy" viewBox="0 0 24 24"><path d="M19 5h-2V3H7v2H5a2 2 0 0 0-2 2v1a5 5 0 0 0 4.4 4.96A5 5 0 0 0 11 15.9V19H7v2h10v-2h-4v-3.1a5 5 0 0 0 3.6-2.94A5 5 0 0 0 21 8V7a2 2 0 0 0-2-2ZM5 8V7h2v3.82A3 3 0 0 1 5 8Zm14 0a3 3 0 0 1-2 2.82V7h2Z"/></symbol>
 	<symbol id="i-photo" viewBox="0 0 24 24"><path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2ZM8.5 13.5l2.5 3 3.5-4.5 4.5 6H5Z"/></symbol>
 	<symbol id="i-offline" viewBox="0 0 24 24"><path d="M19.35 10.04A7.49 7.49 0 0 0 12 4c-1.48 0-2.85.43-4.01 1.17l1.46 1.46A5.47 5.47 0 0 1 12 6c3.04 0 5.5 2.46 5.5 5.5v.5H19a3 3 0 0 1 3 3c0 1.13-.64 2.11-1.56 2.62l1.45 1.45A4.96 4.96 0 0 0 24 15c0-2.64-2.05-4.78-4.65-4.96ZM3 5.27l2.75 2.74C2.56 8.15 0 10.77 0 14a6 6 0 0 0 6 6h11.73l2 2L21 20.73 4.27 4 3 5.27ZM7.73 10l8 8H6a4 4 0 0 1 0-8h1.73Z"/></symbol>
 	<symbol id="i-devices" viewBox="0 0 24 24"><path d="M4 6h18V4H4a2 2 0 0 0-2 2v11H0v3h14v-3H4Zm19 2h-6a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1Zm-1 9h-4v-7h4Z"/></symbol>
+	<symbol id="i-search" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5Zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14Z"/></symbol>
+	<symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol>
+	<symbol id="i-pause" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14Zm8-14v14h4V5h-4Z"/></symbol>
 	<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></symbol>
 </svg>
 
@@ -48,6 +51,7 @@
 	<div class="wrap topbar-inner">
 		<a href="?lang={{$lang}}" class="logo" aria-label="{{.Name}}"><img src="/img/300sf.svg" alt="" width="84" height="40"></a>
 		<nav class="topnav" aria-label="{{.Menu}}">
+			<a href="#search">{{.NavSearch}}</a>
 			<a href="#features">{{.NavFeatures}}</a>
 			<a href="#how">{{.NavHow}}</a>
 			<a href="#faq">{{.NavFaq}}</a>
@@ -64,11 +68,28 @@
 </header>
 
 <main>
+	<section id="search" class="lookup">
+		<div class="wrap">
+			<h1 class="lookup-title">{{.SearchTitle}}</h1>
+			<div class="lookup-box">
+				<div class="lookup-field">
+					<svg aria-hidden="true"><use href="#i-search"/></svg>
+					<input id="lookup-input" type="search" autocomplete="off" spellcheck="false" placeholder="{{.SearchPlaceholder}}" aria-label="{{.SearchTitle}}" role="combobox" aria-expanded="false" aria-controls="lookup-results" aria-autocomplete="list">
+				</div>
+				<ul id="lookup-results" class="lookup-results" role="listbox" hidden></ul>
+				<p id="lookup-none" class="lookup-none" hidden>{{.SearchNone}}</p>
+
+				<div id="lookup-card">{{template "species-card" .}}</div>
+			</div>
+			<p class="lookup-lede">{{.SearchLede}}</p>
+		</div>
+	</section>
+
 	<section class="hero">
 		<div class="wrap hero-grid">
 			<div class="hero-copy">
 				<p class="eyebrow">{{.Eyebrow}}</p>
-				<h1>{{.Headline}}</h1>
+				<h2>{{.Headline}}</h2>
 				<p class="lede">{{.Lede}}</p>
 				<div class="actions">
 					<a class="button" href="/sign-up">{{.CreateAccount}}<svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
@@ -134,7 +155,7 @@
 			</header>
 
 			{{range $i, $f := .Showcase}}
-			<article class="showcase{{if or (eq $i 1) (eq $i 3)}} flip{{end}} reveal">
+			<article class="showcase{{if or (eq $i 1) (eq $i 3) (eq $i 5)}} flip{{end}} reveal">
 				<div class="showcase-copy">
 					<p class="eyebrow">{{$f.eyebrow}}</p>
 					<h3>{{$f.title}}</h3>
@@ -197,22 +218,19 @@
 						</div>
 						{{end}}
 					</div>
+					{{else if eq $i 3}}
+					<div class="card mock-screen">
+						<img src="/img/competition-{{$lang}}.webp" alt="" width="1600" height="900" loading="lazy" decoding="async">
+					</div>
+					{{else if eq $i 4}}
+					<div class="card mock-chat">
+						{{range $t.MockChat}}
+						<p class="{{.from}}">{{.text}}</p>
+						{{end}}
+					</div>
 					{{else}}
-					<div class="card mock-competition">
-						<div class="mock-competition-head">
-							<span class="trophy"><svg><use href="#i-trophy"/></svg></span>
-							<div><b>{{$t.MockCompetition}}</b><small>{{$t.MockCompetitionMeta}}</small></div>
-						</div>
-						<ol>
-							{{range $n, $s := $t.MockStandings}}
-							<li class="{{if eq $n 2}}me{{end}}" style="--count: {{$s.count}}">
-								<span class="place">{{if eq $n 0}}1{{else if eq $n 1}}2{{else if eq $n 2}}3{{else}}4{{end}}</span>
-								<span class="who">{{$s.name}}</span>
-								<span class="bar"><span></span></span>
-								<span class="count">{{$s.count}}</span>
-							</li>
-							{{end}}
-						</ol>
+					<div class="card mock-screen">
+						<img src="/img/share-{{$lang}}.webp" alt="" width="1600" height="900" loading="lazy" decoding="async">
 					</div>
 					{{end}}
 				</div>
@@ -323,6 +341,124 @@
 			});
 		}, { rootMargin: "0px 0px -10% 0px" });
 		items.forEach(function (e) { observer.observe(e); });
+	})();
+</script>
+
+<script src="{{asset "/scripts/species.js"}}"></script>
+<script nonce="{{$.Nonce}}">
+	// The bird search: anyone can look a species up and open its card (/scripts/species.js).
+	(function () {
+		var input = document.getElementById("lookup-input");
+		if (!input || !window.fetch || !window.SpeciesCard) {
+			return;
+		}
+		var lang = document.documentElement.lang;
+		var list = document.getElementById("lookup-results");
+		var none = document.getElementById("lookup-none");
+		var card = window.SpeciesCard(document.querySelector("#lookup-card .species-card"), lang);
+		var results = [];
+		var active = -1;
+		var timer = 0;
+		var asked = 0;
+		var chosen = null;
+
+		function close() {
+			list.hidden = true;
+			input.setAttribute("aria-expanded", "false");
+			input.removeAttribute("aria-activedescendant");
+			active = -1;
+		}
+
+		function highlight(i) {
+			var items = list.children;
+			if (active >= 0 && items[active]) {
+				items[active].removeAttribute("aria-selected");
+			}
+			active = i;
+			if (active >= 0 && items[active]) {
+				items[active].setAttribute("aria-selected", "true");
+				input.setAttribute("aria-activedescendant", items[active].id);
+			}
+		}
+
+		function pick(s) {
+			close();
+			none.hidden = true;
+			chosen = s;
+			input.value = card.name(s.name);
+			card.show(s);
+		}
+
+		function render(found) {
+			results = found;
+			list.innerHTML = "";
+			none.hidden = found.length > 0;
+			found.forEach(function (s, i) {
+				var li = document.createElement("li");
+				li.id = "lookup-option-" + i;
+				li.setAttribute("role", "option");
+				var b = document.createElement("b");
+				b.textContent = card.name(s.name);
+				var latin = document.createElement("i");
+				latin.lang = "la";
+				latin.textContent = s.name.la || "";
+				li.appendChild(b);
+				li.appendChild(latin);
+				li.addEventListener("pointerdown", function (e) {
+					e.preventDefault();
+					pick(s);
+				});
+				list.appendChild(li);
+			});
+			list.hidden = found.length === 0;
+			input.setAttribute("aria-expanded", String(found.length > 0));
+			highlight(found.length > 0 ? 0 : -1);
+		}
+
+		input.addEventListener("input", function () {
+			clearTimeout(timer);
+			var q = input.value.trim();
+			if (q.length < 2) {
+				close();
+				none.hidden = true;
+				return;
+			}
+			timer = setTimeout(function () {
+				var mine = ++asked;
+				fetch("/api/v1/species/search?lang=" + lang + "&q=" + encodeURIComponent(q)).then(function (r) {
+					return r.ok ? r.json() : { result: [] };
+				}).then(function (d) {
+					if (mine === asked) {
+						render(d.result || []);
+					}
+				}).catch(close);
+			}, 150);
+		});
+		input.addEventListener("keydown", function (e) {
+			if (e.key === "ArrowDown" && results.length) {
+				e.preventDefault();
+				highlight((active + 1) % results.length);
+			} else if (e.key === "ArrowUp" && results.length) {
+				e.preventDefault();
+				highlight((active - 1 + results.length) % results.length);
+			} else if (e.key === "Enter" && !list.hidden && active >= 0) {
+				e.preventDefault();
+				pick(results[active]);
+			} else if (e.key === "Escape") {
+				close();
+			}
+		});
+		input.addEventListener("blur", close);
+		// Ready to type, like a search page; not on touch screens, where it would pop up the keyboard.
+		if (window.matchMedia("(pointer: fine)").matches && location.hash === "") {
+			input.focus({ preventScroll: true });
+		}
+		input.addEventListener("focus", function () {
+			if (results.length && input.value.trim().length >= 2 && (!chosen || input.value !== card.name(chosen.name))) {
+				list.hidden = false;
+				input.setAttribute("aria-expanded", "true");
+			}
+		});
 	})();
 </script>
 </body>

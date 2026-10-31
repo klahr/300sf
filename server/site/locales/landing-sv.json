@@ -3,6 +3,7 @@
 	"MetaDescription": "Checklistan för fågelskådare i Sverige. Bocka av arter, notera var och när du såg dem, känn igen fåglar på lätet och tävla med vänner. Gratis, direkt i webbläsaren.",
 	"Language": "Språk",
 	"Menu": "Huvudmeny",
+	"NavSearch": "Hitta en fågel",
 	"NavFeatures": "Funktioner",
 	"NavHow": "Så fungerar det",
 	"NavFaq": "Frågor",
@@ -34,6 +35,16 @@
 	"StatBirders": "fågelskådare",
 	"StatSightings": "rapporterade fynd",
 	"StatSpecies": "rapporterade arter",
+	"SearchTitle": "Vilken fågel såg du?",
+	"SearchLede": "Slå upp vilken som helst av de över 2 000 arterna i katalogen, läs om den och lyssna på lätet. Inget konto behövs.",
+	"SearchPlaceholder": "Sök på namn, till exempel koltrast eller Turdus",
+	"SearchNone": "Ingen art med det namnet.",
+	"SearchListen": "Lyssna",
+	"SearchPause": "Pausa",
+	"SearchReadMore": "Läs mer på Wikipedia",
+	"SearchReport": "Rapportera fynd",
+	"SearchReportHint": "Skapa ett gratis konto så väntar fyndet där, redo att sparas.",
+	"SearchFailed": "Kunde inte hämta arten. Försök igen om en stund.",
 	"FeaturesEyebrow": "Funktioner",
 	"FeaturesTitle": "Allt ditt fågelår behöver",
 	"FeaturesLede": "Gjort av fågelskådare för fågelskådare i Sverige: snabbt att använda i fält, och med alla detaljer när du kommer hem.",
@@ -61,6 +72,18 @@
 			"title": "Skåda tillsammans med vänner",
 			"text": "Välj en period och en artlista, bjud in dina vänner och följ vem som kommer längst.",
 			"points": ["Egna regler: period, lista och antal deltagare", "Den som först når ett antal arter kan vinna", "Bjud in vänner eller öppna för alla"]
+		},
+		{
+			"eyebrow": "AI-assistenter",
+			"title": "Rapportera fåglar i en chatt",
+			"text": "Anslut Claude eller en annan AI-assistent och prata med dina listor: berätta vad du har sett eller fråga hur året går.",
+			"points": ["Rapportera fynd och fråga om dina listor med vanliga ord", "Du godkänner assistenten och kan koppla från den när du vill", "Anslut den under Inställningar › Hantera API-nycklar"]
+		},
+		{
+			"eyebrow": "Dela",
+			"title": "Din lista på storbildsskärmen",
+			"text": "Varje checklista har en egen sida att dela. Visa den på tv:n i fågelklubben eller skicka den till en vän: den håller sig uppdaterad när du lägger till arter.",
+			"points": ["En länk per lista, inget konto behövs för att titta", "Gjord för tv, fungerar i mobilen också", "Visar arter och datum, aldrig var du såg dem"]
 		}
 	],
 	"MockSighting": "Fynd",
@@ -78,13 +101,11 @@
 		{ "name": "Koltrast", "latin": "Turdus merula", "percent": 99 },
 		{ "name": "Taltrast", "latin": "Turdus philomelos", "percent": 12 }
 	],
-	"MockCompetition": "Vårracet 2026",
-	"MockCompetitionMeta": "1 mars – 31 maj · 300 arter",
-	"MockStandings": [
-		{ "name": "Anna", "count": 142 },
-		{ "name": "Erik", "count": 137 },
-		{ "name": "Du", "count": 131 },
-		{ "name": "Maja", "count": 118 }
+	"MockChat": [
+		{ "from": "me", "text": "Såg två tranor vid Hornborgasjön i morse. Lägg in dem på min årslista." },
+		{ "from": "ai", "text": "Klart: trana, 2 individer, i dag vid Hornborgasjön. Det är nummer 88 på Årslista 2026." },
+		{ "from": "me", "text": "Hur långt efter Anna ligger jag i vårracet?" },
+		{ "from": "ai", "text": "11 arter. Anna har 142 och du har 131." }
 	],
 	"More": [
 		{ "icon": "photo", "title": "Lär känna fågeln", "text": "Bilder och en kort beskrivning från Wikipedia för varje art." },

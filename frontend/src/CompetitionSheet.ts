@@ -95,8 +95,9 @@ namespace Competitions {
 		return list;
 	}
 
+	// A public competition has a page of its own to share; a private one only the app's, for those let in.
 	function share(c: Models.Competition): void {
-		const url = link(c);
+		const url = c.visibility === Models.Visibility.Public ? window.location.origin + "/share/competition/" + encodeURIComponent(c.uuid) : link(c);
 		const nav = navigator as any;
 		if (nav.share) {
 			nav.share({ title: App.getTranslation(c.name), url: url }).catch(function () { });
@@ -259,8 +260,33 @@ namespace Competitions {
 				join.appendChild(passwordError);
 			}
 			if (c.can_join || c.invited) {
+				// Taking part shows the display name to others, so it is agreed to first; it can be changed.
+				const consentSection = sheet.section();
+				const consentRow = document.createElement("div");
+				consentRow.className = "check-row";
+				const consent = new Ui.Input("checkbox");
+				consent.container.id = "competition-show-name";
+				consentRow.appendChild(consent.container);
+				const consentLabel = document.createElement("label");
+				consentLabel.setAttribute("for", consent.container.id);
+				consentLabel.textContent = (c.visibility === Models.Visibility.Public ? App.translations.ShowNamePublic : App.translations.ShowNamePrivate).replace("{0}", App.user ? App.user.display_name : "");
+				consentRow.appendChild(consentLabel);
+				consentSection.appendChild(consentRow);
+				const rename = Ui.actionButton(App.translations.ChangeDisplayName, "badge", "inline");
+				rename.addEventListener("click", function () {
+					sheet.close();
+					Ui.PopUp.whenHistorySettled(function () {
+						openProfilePopUp();
+					});
+				});
+				consentSection.appendChild(rename);
+
 				const joinButton = sheet.addAction(Ui.actionButton(c.invited ? App.translations.AcceptInvitation : App.translations.JoinCompetition, "how_to_reg", "success"));
-				joinButton.disabled = !c.can_join;
+				const updateJoin = function (): void {
+					joinButton.disabled = !c.can_join || !(consent.container as HTMLInputElement).checked || (password !== null && password.value === "");
+				};
+				consent.container.addEventListener("change", updateJoin);
+				updateJoin();
 				joinButton.addEventListener("click", function () {
 					Ui.setBusy(joinButton, true);
 					new HttpRequest("PUT", "/v1/competitions/" + c.uuid + "/join", { password: password ? password.value : "" }).process(function () {
@@ -277,10 +303,7 @@ namespace Competitions {
 					});
 				});
 				if (password) {
-					joinButton.disabled = true;
-					password.addEventListener("input", function () {
-						joinButton.disabled = password!.value === "";
-					});
+					password.addEventListener("input", updateJoin);
 				}
 			}
 			if (c.invited) {

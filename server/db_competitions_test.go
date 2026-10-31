@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/klahr/300sf/server/controllers"
 	"github.com/klahr/300sf/server/models"
 )
 
@@ -145,5 +146,46 @@ func TestDBInviteSaysWhoIsAlreadyIn(t *testing.T) {
 		fmt.Sprint(r.Body["already_in"]) != fmt.Sprint([]any{creator.Username, friend.Username}) ||
 		fmt.Sprint(r.Body["not_found"]) != fmt.Sprint([]any{"nobody-at-all"}) {
 		t.Errorf("invite = %s", r.Raw)
+	}
+}
+
+// A public competition's share page counts the same sightings as its standings; a private one has none.
+func TestDBShareCompetition(t *testing.T) {
+	s := testDB(t)
+	creator, friend := s.signUp(t), s.signUp(t)
+	species := someSpecies(t, 2)
+	id := newCompetition(t, s, creator, map[string]any{"visibility": models.VisibilityPublic}).Body["uuid"].(string)
+	s.must(t, friend, http.StatusOK, "PUT", "/v1/competitions/"+id+"/join", nil)
+	newReport(t, s, friend, species[0])
+	newReport(t, s, creator, species[0])
+	newReport(t, s, creator, species[1])
+
+	shared, err := controllers.ShareCompetition(id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(shared.Info.Standings) != 2 || shared.Info.Standings[0].Count != 2 {
+		t.Fatalf("standings %+v", shared.Info.Standings)
+	}
+	finders := map[string]int{}
+	for _, sp := range shared.Species {
+		finders[sp.Uuid] = sp.Finders
+	}
+	if finders[species[0]] != 2 || finders[species[1]] != 1 {
+		t.Errorf("finders %v", finders)
+	}
+	if len(shared.Latest) != 3 {
+		t.Errorf("%d latest finds, want 3", len(shared.Latest))
+	}
+	if _, err := controllers.ShareCompetitionAreas(id); err != nil {
+		t.Errorf("areas: %v", err)
+	}
+
+	private := newCompetition(t, s, creator, nil).Body["uuid"].(string)
+	if _, err := controllers.ShareCompetition(private); err == nil {
+		t.Error("private competition shared")
+	}
+	if _, err := controllers.ShareCompetitionAreas(private); err == nil {
+		t.Error("private competition's areas shared")
 	}
 }

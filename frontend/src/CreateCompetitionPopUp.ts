@@ -211,13 +211,20 @@ function openCreateCompetition(created: (competition: Models.Competition) => voi
 
 	// Who takes part.
 	const who = sheet.section(App.translations.Participants);
+	const consentText = function (): string {
+		return (visibility === Models.Visibility.Public ? App.translations.ShowNamePublic : App.translations.ShowNamePrivate).replace("{0}", App.user ? App.user.display_name : "");
+	};
+	const joinConsent = document.createElement("p");
+	joinConsent.className = "details";
 	let visibility = Models.Visibility.Private;
+	joinConsent.textContent = consentText();
 	const visibilityHint = document.createElement("p");
 	visibilityHint.className = "details";
 	visibilityHint.textContent = App.translations.CompetitionPrivateHint;
 	who.appendChild(Ui.segmented([[String(Models.Visibility.Private), "lock", App.translations.CompetitionPrivate], [String(Models.Visibility.Public), "public", App.translations.CompetitionPublic]], String(Models.Visibility.Private), function (v: string) {
 		visibility = Number(v);
 		visibilityHint.textContent = visibility === Models.Visibility.Public ? App.translations.CompetitionPublicHint : App.translations.CompetitionPrivateHint;
+		joinConsent.textContent = consentText();
 	}));
 	who.appendChild(visibilityHint);
 	const whoGrid = document.createElement("div");
@@ -242,13 +249,14 @@ function openCreateCompetition(created: (competition: Models.Competition) => voi
 	const join = document.createElement("input");
 	join.type = "checkbox";
 	join.id = "competition-join";
-	join.checked = true;
 	const joinLabel = document.createElement("label");
 	joinLabel.htmlFor = join.id;
 	joinLabel.textContent = App.translations.IParticipate;
 	joinRow.appendChild(join);
 	joinRow.appendChild(joinLabel);
 	who.appendChild(joinRow);
+	// Taking part shows the creator's display name too, so it is agreed to, not ticked beforehand.
+	who.appendChild(joinConsent);
 
 	// Look.
 	const look = sheet.section(App.translations.Color);

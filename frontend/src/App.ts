@@ -10,6 +10,7 @@
 /// <reference path="ReportsPage.ts"/>
 /// <reference path="MainMenu.ts"/>
 /// <reference path="ManageChecklistsPage.ts"/>
+/// <reference path="PendingReport.ts"/>
 /// <reference path="ManageCompetitionsPage.ts"/>
 /// <reference path="ContributePage.ts"/>
 /// <reference path="SetPasswordPage.ts"/>
@@ -88,6 +89,9 @@ class App implements IAppListener {
 		this.mLayerManager.addToLayer("base", this.mMainMenu);
 
 		this.showPage(redirect === "" ? "home" : redirect, queryParameters);
+		if (App.isLoggedIn()) {
+			PendingReport.resume();
+		}
 
 		// Back and forward: close the newest dialog, or show the page for the URL without a reload.
 		const self = this;

@@ -1437,6 +1437,7 @@ paths:
     post:
       tags: [Lists]
       summary: Set a checklist's visibility
+      description: A checklist is private (0) or shared with anyone who has the link (1). Public (2) is taken as 1, since nothing lists public checklists.
       parameters:
         - $ref: "#/components/parameters/Uuid"
       requestBody:
@@ -1450,8 +1451,15 @@ paths:
                 visibility:
                   $ref: "#/components/schemas/Visibility"
       responses:
-        "204":
-          $ref: "#/components/responses/NoContent"
+        "200":
+          description: The checklist's id. A checklist with an old 6-character id gets a new one when it stops being private, since short ids are too easy to guess to share.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uuid:
+                    type: string
         "400":
           description: Missing or invalid visibility (1005), or list not found or not yours.
           content:
@@ -2450,13 +2458,51 @@ paths:
           $ref: "#/components/responses/RateLimited"
         "500":
           $ref: "#/components/responses/ServerError"
+  /v1/species/search:
+    get:
+      tags: [Species]
+      summary: Search species by name
+      description: |
+        Public: no token needed (without one, 120 searches a minute per network). Matches the name in `lang`
+        and the Latin name; names starting with `q` come first, then species on a public species list.
+        At most 8 results; fewer than 2 characters gives none.
+      security: []
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: lang
+          in: query
+          schema:
+            type: string
+            enum: [sv, en, de]
+      responses:
+        "200":
+          description: Bare object.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Species"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/ServerError"
   /v1/species/{uuid}:
     get:
       tags: [Species]
       summary: Species details with recordings and Wikipedia text
       description: |
-        Needs a valid token with any scope. `X-App-Language` picks the Wikipedia edition (falls back to `en`).
-        Up to 25 recordings from xeno-canto (`null` when none). Cached; can be slow on a cache miss.
+        Public: no token needed (without one, 20 a minute per network). `X-App-Language` picks the Wikipedia
+        edition (falls back to `en`). Up to 25 recordings from xeno-canto (`null` when none). Cached; can be
+        slow on a cache miss.
+      security: []
       parameters:
         - $ref: "#/components/parameters/Uuid"
         - $ref: "#/components/parameters/XAppLanguage"
@@ -2483,8 +2529,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
         "429":
           $ref: "#/components/responses/RateLimited"
         "500":

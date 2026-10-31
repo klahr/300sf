@@ -3,6 +3,7 @@
 	"MetaDescription": "The checklist for birders in Sweden. Tick off species, log where and when you saw them, identify birds by their song and compete with friends. Free, in your browser.",
 	"Language": "Language",
 	"Menu": "Main menu",
+	"NavSearch": "Find a bird",
 	"NavFeatures": "Features",
 	"NavHow": "How it works",
 	"NavFaq": "Questions",
@@ -34,6 +35,16 @@
 	"StatBirders": "birders",
 	"StatSightings": "sightings logged",
 	"StatSpecies": "species reported",
+	"SearchTitle": "Which bird did you see?",
+	"SearchLede": "Look up any of the over 2,000 species in the catalogue, read about it and hear its song. No account needed.",
+	"SearchPlaceholder": "Search by name, like blackbird or Turdus",
+	"SearchNone": "No species with that name.",
+	"SearchListen": "Listen",
+	"SearchPause": "Pause",
+	"SearchReadMore": "Read more on Wikipedia",
+	"SearchReport": "Report a sighting",
+	"SearchReportHint": "Create a free account and the sighting is waiting there, ready to save.",
+	"SearchFailed": "Couldn't load the species. Try again in a moment.",
 	"FeaturesEyebrow": "Features",
 	"FeaturesTitle": "Everything your birding year needs",
 	"FeaturesLede": "Built by birders for birders in Sweden: quick to use in the field, and with all the details when you get home.",
@@ -61,6 +72,18 @@
 			"title": "Bird together with friends",
 			"text": "Set a period and a species list, invite your friends and follow who gets furthest.",
 			"points": ["Your own rules: period, list and number of participants", "Optionally the first to reach a number of species wins", "Invite friends or open it to everyone"]
+		},
+		{
+			"eyebrow": "AI assistants",
+			"title": "Report birds in a chat",
+			"text": "Connect Claude or another AI assistant and talk to your lists: tell it what you saw, or ask how your year is going.",
+			"points": ["Report sightings and ask about your lists in plain words", "You approve the assistant and can disconnect it whenever you like", "Connect it under Settings › Manage API keys"]
+		},
+		{
+			"eyebrow": "Share",
+			"title": "Your list on the big screen",
+			"text": "Every checklist has a page of its own to share. Put it on the TV at the bird club or send it to a friend: it keeps itself up to date as you add species.",
+			"points": ["One link per list, no account needed to look", "Made for a TV, works on a phone too", "Shows species and dates, never where you saw them"]
 		}
 	],
 	"MockSighting": "Sighting",
@@ -78,13 +101,11 @@
 		{ "name": "Common blackbird", "latin": "Turdus merula", "percent": 99 },
 		{ "name": "Song thrush", "latin": "Turdus philomelos", "percent": 12 }
 	],
-	"MockCompetition": "Spring race 2026",
-	"MockCompetitionMeta": "1 March – 31 May · 300 species",
-	"MockStandings": [
-		{ "name": "Anna", "count": 142 },
-		{ "name": "Erik", "count": 137 },
-		{ "name": "You", "count": 131 },
-		{ "name": "Maja", "count": 118 }
+	"MockChat": [
+		{ "from": "me", "text": "Saw two cranes at Hornborgasjön this morning. Put them on my year list." },
+		{ "from": "ai", "text": "Done: common crane, 2 individuals, today at Hornborgasjön. That's number 88 on Year list 2026." },
+		{ "from": "me", "text": "How far behind Anna am I in the spring race?" },
+		{ "from": "ai", "text": "11 species. Anna has 142 and you have 131." }
 	],
 	"More": [
 		{ "icon": "photo", "title": "Know the bird", "text": "Photos and a short description from Wikipedia for every species." },

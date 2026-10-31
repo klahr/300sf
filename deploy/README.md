@@ -87,8 +87,23 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
+
+    # The share pages' live updates: websockets, kept open as long as the page is.
+    location ~ ^/share/.+/live$ {
+        proxy_pass http://sf;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 1h;
+    }
 }
 ```
+
+Without the `/live` block the share pages still work; they just pick up new
+sightings only every ten minutes instead of at once.
 
 `site.redirect-hosts` redirects old domains permanently to the same path on
 `site.host` (on 300sf.se, `app.300sf.se/` → `/home` and `api-docs.300sf.se/`

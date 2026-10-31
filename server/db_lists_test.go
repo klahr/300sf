@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/klahr/300sf/server/controllers"
+	"github.com/klahr/300sf/server/live"
 	"github.com/klahr/300sf/server/models"
 	"github.com/klahr/300sf/server/utils"
 	"gopkg.in/guregu/null.v4/zero"
@@ -115,6 +117,21 @@ func TestDBSharedLists(t *testing.T) {
 	}
 	if r := s.do(t, "10.250.1.3", "", "POST", "/v1/lists/compare", map[string]any{"uuids": []string{old}}); r.Status == http.StatusOK {
 		t.Errorf("compare opened an old short id: %s", r.Raw)
+	}
+
+	// Sharing it again gives it a long id that can be shared; the old one is gone.
+	r = s.must(t, owner, http.StatusOK, "POST", "/v1/lists/"+old+"/visibility", map[string]any{"visibility": models.VisibilityHidden})
+	renewed, _ := r.Body["uuid"].(string)
+	if len(renewed) != utils.ShortUuidLength {
+		t.Fatalf("shared old list got id %q", renewed)
+	}
+	s.must(t, friend, http.StatusOK, "GET", "/v1/lists/"+renewed, nil)
+	if r := s.call(t, owner, "GET", "/v1/lists/"+old, nil); r.Status == http.StatusOK {
+		t.Errorf("old id still opens: %s", r.Raw)
+	}
+	r = s.must(t, owner, http.StatusOK, "POST", "/v1/lists/"+renewed+"/visibility", map[string]any{"visibility": models.VisibilityPrivate})
+	if r.Body["uuid"] != renewed {
+		t.Errorf("making it private changed its id to %v", r.Body["uuid"])
 	}
 }
 
@@ -236,12 +253,21 @@ func TestDBSightingZoneHasNoPolygon(t *testing.T) {
 func TestDBVisibilityIsChecked(t *testing.T) {
 	s := testDB(t)
 	u := s.signUp(t)
+	// A public checklist is one shared with a link: nothing lists them.
 	list := newList(t, s, u, "Shared", models.VisibilityPublic)
+	if r := s.must(t, u, http.StatusOK, "GET", "/v1/lists/"+list, nil); get(r.Body, "result", "visibility") != float64(models.VisibilityHidden) {
+		t.Errorf("public list stored as %v", get(r.Body, "result", "visibility"))
+	}
 	if r := s.call(t, u, "POST", "/v1/lists/"+list+"/visibility", map[string]any{}); r.Status != http.StatusBadRequest {
 		t.Errorf("no visibility = %d", r.Status)
 	}
-	if r := s.must(t, u, http.StatusOK, "GET", "/v1/lists/"+list, nil); get(r.Body, "result", "visibility") != float64(models.VisibilityPublic) {
+	if r := s.must(t, u, http.StatusOK, "GET", "/v1/lists/"+list, nil); get(r.Body, "result", "visibility") != float64(models.VisibilityHidden) {
 		t.Errorf("visibility after a refused change = %v", get(r.Body, "result", "visibility"))
+	}
+	s.must(t, u, http.StatusOK, "POST", "/v1/lists/"+list+"/visibility", map[string]any{"visibility": models.VisibilityPrivate})
+	s.must(t, u, http.StatusOK, "POST", "/v1/lists/"+list+"/visibility", map[string]any{"visibility": models.VisibilityPublic})
+	if r := s.must(t, u, http.StatusOK, "GET", "/v1/lists/"+list, nil); get(r.Body, "result", "visibility") != float64(models.VisibilityHidden) {
+		t.Errorf("list made public stored as %v", get(r.Body, "result", "visibility"))
 	}
 	if r := s.call(t, u, "POST", "/v1/lists", map[string]any{"name": map[string]any{"en": "x"}, "visibility": 9}); r.Status != http.StatusBadRequest || get(r.Body, "code") != float64(1005) {
 		t.Errorf("list with visibility 9 = %d: %s", r.Status, r.Raw)
@@ -252,5 +278,95 @@ func TestDBVisibilityIsChecked(t *testing.T) {
 	r := s.must(t, u, http.StatusOK, "POST", "/v1/list_templates", map[string]any{"name": map[string]any{"en": "x"}, "visibility": 1})
 	if r.Body["visibility"] != float64(models.VisibilityPrivate) {
 		t.Errorf("hidden template stored as %v", r.Body["visibility"])
+	}
+}
+
+// The share page shows each species on a shared list and when it was first seen there, newest first.
+func TestDBShareList(t *testing.T) {
+	s := testDB(t)
+	u := s.signUp(t)
+	species := someSpecies(t, 3)
+	template := s.must(t, u, http.StatusOK, "POST", "/v1/list_templates", map[string]any{
+		"name": map[string]any{"en": "Three"}, "species_uuids": species,
+	}).Body["uuid"].(string)
+	list := s.must(t, u, http.StatusOK, "POST", "/v1/lists", map[string]any{
+		"name": map[string]any{"en": "Shared"}, "template": template, "visibility": models.VisibilityHidden,
+	}).Body["uuid"].(string)
+	s.must(t, u, http.StatusOK, "POST", "/v1/reports", map[string]any{"uuid": utils.GenerateUuidWithFixedLength(20), "species_uuid": species[0], "from": "2026-05-01T08:00:00Z", "list_uuids": []string{list}})
+	s.must(t, u, http.StatusOK, "POST", "/v1/reports", map[string]any{"uuid": utils.GenerateUuidWithFixedLength(20), "species_uuid": species[0], "from": "2026-04-01T08:00:00Z", "list_uuids": []string{list}})
+	s.must(t, u, http.StatusOK, "POST", "/v1/reports", map[string]any{"uuid": utils.GenerateUuidWithFixedLength(20), "species_uuid": species[2], "from": "2026-06-01T08:00:00Z", "list_uuids": []string{list}})
+
+	shared, err := controllers.ShareList(list)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(shared.Species) != 3 || shared.Seen != 2 || len(shared.Latest) != 2 {
+		t.Fatalf("species %d, seen %d, latest %d", len(shared.Species), shared.Seen, len(shared.Latest))
+	}
+	if first := shared.Species[0].Seen; first.Month() != time.April {
+		t.Errorf("first seen %v, want the earliest sighting", first)
+	}
+	if !shared.Species[1].Seen.IsZero() {
+		t.Errorf("unseen species seen %v", shared.Species[1].Seen)
+	}
+	if shared.Latest[0].Seen.Month() != time.June {
+		t.Errorf("latest starts with %v", shared.Latest[0].Seen)
+	}
+
+	s.must(t, u, http.StatusOK, "POST", "/v1/lists/"+list+"/visibility", map[string]any{"visibility": models.VisibilityPrivate})
+	if _, err := controllers.ShareList(list); err == nil {
+		t.Error("private list shared")
+	}
+}
+
+// Anyone can search species and read about one, without signing in.
+func TestDBSpeciesArePublic(t *testing.T) {
+	s := testDB(t)
+	var species models.Species
+	if err := models.DB.Preload("Name").Where("id=(SELECT MIN(id) FROM species)").First(&species).Error; err != nil {
+		t.Fatal(err)
+	}
+	q := strings.ToLower(species.Name.En.String[:3])
+	r := s.do(t, "10.250.2.1", "", "GET", "/v1/species/search?lang=en&q="+q, nil)
+	if r.Status != http.StatusOK || !strings.Contains(r.Raw, species.Uuid) {
+		t.Fatalf("search %q = %d: %.300s", q, r.Status, r.Raw)
+	}
+	if n := len(items(r.Body["result"])); n > 8 {
+		t.Errorf("search gave %d results", n)
+	}
+	if r := s.do(t, "10.250.2.1", "", "GET", "/v1/species/search?q=a", nil); r.Status != http.StatusOK || len(items(r.Body["result"])) != 0 {
+		t.Errorf("one letter = %d: %s", r.Status, r.Raw)
+	}
+}
+
+// Saving a sighting tells the share pages of that user's lists; reading changes nothing.
+func TestDBChangesReachLiveSharePages(t *testing.T) {
+	s := testDB(t)
+	u := s.signUp(t)
+	species := someSpecies(t, 1)
+	changes, stop := live.Watch([]string{"user:" + u.Uuid}, nil)
+	defer stop()
+	heard := func() bool {
+		select {
+		case <-changes:
+			return true
+		case <-time.After(time.Second):
+			return false
+		}
+	}
+
+	list := newList(t, s, u, "Read", models.VisibilityPrivate)
+	if !heard() {
+		t.Error("a new list wasn't passed on")
+	}
+	s.must(t, u, http.StatusOK, "POST", "/v1/reports/list", map[string]any{"list_uuid": list})
+	if heard() {
+		t.Error("reading sightings was taken for a change")
+	}
+	if r := newReport(t, s, u, species[0]); r.Status != http.StatusOK {
+		t.Fatalf("report = %d", r.Status)
+	}
+	if !heard() {
+		t.Error("a new sighting wasn't passed on")
 	}
 }

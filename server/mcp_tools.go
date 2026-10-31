@@ -750,7 +750,7 @@ func addChangeTools(s *mcp.Server, a *apiCaller) {
 		From       string `json:"from,omitempty" jsonschema:"first day it counts sightings, YYYY-MM-DD"`
 		Until      string `json:"until,omitempty" jsonschema:"last day, YYYY-MM-DD"`
 		Template   string `json:"template_uuid,omitempty" jsonschema:"start with the target species of this template, from list_checklist_templates"`
-		Visibility string `json:"visibility,omitempty" jsonschema:"private (default), hidden (anyone with the link) or public"`
+		Visibility string `json:"visibility,omitempty" jsonschema:"private (default) or hidden (anyone with the link); public is taken as hidden"`
 	}
 	addTool(s, changes, "create_checklist", "Create a checklist", "Makes a new checklist for the user.",
 		func(ctx context.Context, in createListInput) (any, error) {

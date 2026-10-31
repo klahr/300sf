@@ -3,6 +3,7 @@ module github.com/klahr/300sf/server
 go 1.26.0
 
 require (
+	github.com/coder/websocket v1.8.15
 	github.com/gin-contrib/gzip v1.2.8
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-redis/redis v6.15.9+incompatible

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="{{.Lang}}">
+{{$lang := .Lang}}
+{{$t := .T}}
+{{$info := .Race.Info}}
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="theme-color" content="#070707">
+	<meta name="robots" content="noindex">
+	<meta property="og:title" content="{{translate $info.Name $lang}}">
+	<meta property="og:description" content="{{.Status}} · {{$info.Participants}} {{$t.Participants}}">
+	<title>{{translate $info.Name $lang}} · {{.Title}}</title>
+	<link rel="icon" href="/img/99249498-452f-4b0b-a1f5-45902f7ffe48.png" type="image/png">
+	<link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+	<link rel="stylesheet" href="{{asset "/css/fonts.css"}}">
+	<link rel="stylesheet" href="{{asset "/css/tokens.css"}}">
+	<link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
+	<link rel="stylesheet" href="{{asset "/css/species.css"}}">
+	<link rel="stylesheet" href="{{asset "/css/share.css"}}">
+</head>
+<body class="race" style="--list: {{if .Color}}{{.Color}}{{else}}#e0af68{{end}}">
+	<main class="board race-board">
+		<section class="summary" data-live="summary">
+			<header>
+				<div class="top">
+					<p class="eyebrow"><span class="dot"></span>{{$t.Competition}} · {{.Period}}</p>
+					<nav class="lang" aria-label="{{$t.Language}}">
+						<a href="?lang=sv" hreflang="sv" lang="sv" aria-current="{{eq $lang "sv"}}">SV</a>
+						<a href="?lang=en" hreflang="en" lang="en" aria-current="{{eq $lang "en"}}">EN</a>
+						<a href="?lang=de" hreflang="de" lang="de" aria-current="{{eq $lang "de"}}">DE</a>
+					</nav>
+				</div>
+				<h1>{{translate $info.Name $lang}}</h1>
+				<p class="status{{if eq $info.Status "ongoing"}} live{{end}}"><span class="pulse"></span>{{.Status}}{{with .Goal}} · {{.}}{{end}}</p>
+			</header>
+
+			{{with .Winner}}
+			<div class="winner">
+				<img src="/img/portraits/{{if .Portrait}}{{.Portrait}}{{else}}3.webp{{end}}" alt="">
+				<div><small>{{$t.Winner}}</small><b>{{.DisplayName}}</b></div>
+				<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 5h-2V3H7v2H5a2 2 0 0 0-2 2v1a5 5 0 0 0 4.4 4.96A5 5 0 0 0 11 15.9V19H7v2h10v-2h-4v-3.1a5 5 0 0 0 3.6-2.94A5 5 0 0 0 21 8V7a2 2 0 0 0-2-2ZM5 8V7h2v3.82A3 3 0 0 1 5 8Zm14 0a3 3 0 0 1-2 2.82V7h2Z"/></svg>
+			</div>
+			{{end}}
+
+			<ol class="standings">
+				{{range .Standings}}
+				<li class="{{if eq .Rank 1}}first{{else if eq .Rank 2}}second{{else if eq .Rank 3}}third{{end}}" style="--p: {{.Percent}}">
+					<span class="rank">{{.Rank}}</span>
+					<img class="portrait" src="/img/portraits/{{if .User.Portrait}}{{.User.Portrait}}{{else}}3.webp{{end}}" alt="" loading="lazy">
+					<span class="who"><b>{{.User.DisplayName}}</b>{{if .Latest}}<small>{{.Latest}}</small>{{end}}</span>
+					<span class="count">{{.Count}}</span>
+					<span class="bar"><span></span></span>
+				</li>
+				{{else}}
+				<li class="empty">{{$t.NoParticipants}}</li>
+				{{end}}
+			</ol>
+
+			<footer class="race-foot">
+				<p>{{$info.Participants}} {{$t.Participants}} · {{.Found}}/{{.Total}} {{$t.Species}}</p>
+				{{if .CanJoin}}<a class="join" href="{{.Join}}">{{$t.Join}}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></a>{{end}}
+				<a class="brand" href="/"><img src="/img/300sf.svg" alt="{{.Title}}" width="64" height="30"></a>
+			</footer>
+		</section>
+
+		<section class="middle">
+			<div class="map-card">
+				<h2>{{$t.Where}}</h2>
+				<div id="map" class="map" data-areas="/share/competition/{{$info.Uuid}}/areas" data-label="{{$t.AreaSpecies}}" data-tiles="{{.Tiles}}" data-attribution="{{.TilesAttribution}}"></div>
+				<p class="map-empty" hidden>{{$t.NoFindsYet}}</p>
+			</div>
+			<div class="finds">
+				<h2>{{$t.LatestFinds}}</h2>
+				<ol data-live="finds">
+					{{range .Finds}}
+					<li data-species="{{.Uuid}}" data-name="{{translate .Name $lang}}" tabindex="0" role="button">
+						<img class="portrait" src="/img/portraits/{{if .Who.Portrait}}{{.Who.Portrait}}{{else}}3.webp{{end}}" alt="">
+						<span><b>{{translate .Name $lang}}</b><small>{{.Who.DisplayName}}</small></span>
+						<time>{{.Date}}</time>
+					</li>
+					{{else}}
+					<li class="empty">{{$t.NoFindsYet}}</li>
+					{{end}}
+				</ol>
+			</div>
+		</section>
+
+		<section class="species" id="species" aria-label="{{$t.Species}}">
+			<div class="columns" data-live="species">
+				{{range .Groups}}
+				<div class="group">
+					<h2><span>{{translate .Order $lang}}</span><small>{{.Found}}/{{len .Species}}</small></h2>
+					<ul>
+						{{range .Species}}
+						<li class="{{if .Recent}}recent{{else if .Finders}}seen{{end}}" data-species="{{.Uuid}}" data-name="{{translate .Name $lang}}" tabindex="0" role="button">
+							<span class="pie{{if eq .Share 100}} all{{end}}" style="--share: {{.Share}}" data-tip="{{.Tip}}" aria-label="{{.Tip}}" role="img"></span>
+							<span class="name">{{translate .Name $lang}}</span>
+							{{if .Date}}<time>{{.Date}}</time>{{end}}
+						</li>
+						{{end}}
+					</ul>
+				</div>
+				{{end}}
+			</div>
+		</section>
+	</main>
+
+	{{template "species-dialog" $t}}
+	<script src="/vendor/leaflet/leaflet.js"></script>
+	<script src="{{asset "/scripts/species.js"}}"></script>
+	<script src="{{asset "/scripts/share.js"}}"></script>
+	<script src="{{asset "/scripts/live.js"}}"></script>
+	<script nonce="{{$.Nonce}}">
+		// Where species were found, by municipality: the more species, the stronger the colour. Never
+		// anything finer, so nobody's spots show.
+		(function () {
+			var el = document.getElementById("map");
+			if (!el || !window.L || !window.fetch) {
+				return;
+			}
+			var lang = document.documentElement.lang;
+			var map = L.map(el, { zoomControl: false, scrollWheelZoom: false });
+			L.tileLayer(el.dataset.tiles, { maxZoom: 12, attribution: el.dataset.attribution }).addTo(map);
+			map.fitBounds([[55.3, 10.9], [69.1, 24.2]]);
+			function name(t) {
+				return (lang === "sv" ? t.sv : lang === "de" ? t.de : t.en) || t.sv || t.en || "";
+			}
+			// Drawn again on each live update; the view moves only the first time.
+			var layer = null;
+			function draw() {
+				fetch(el.dataset.areas, { cache: "no-store" }).then(function (r) {
+					return r.json();
+				}).then(function (d) {
+					var areas = d.areas || [];
+					document.querySelector(".map-empty").hidden = areas.length > 0;
+					if (!areas.length) {
+						if (layer) {
+							map.removeLayer(layer);
+							layer = null;
+						}
+						return;
+					}
+					var most = areas[0].species;
+					var color = getComputedStyle(document.body).getPropertyValue("--list").trim();
+					var next = L.featureGroup();
+					areas.forEach(function (a) {
+						var label = document.createElement("span");
+						label.textContent = name(a.name) + " · " + el.dataset.label.replace("{0}", a.species);
+						L.geoJSON(a.polygon, {
+							style: { color: color, weight: 1, opacity: 0.9, fillColor: color, fillOpacity: 0.15 + 0.55 * a.species / most }
+						}).bindTooltip(label, { sticky: true }).addTo(next);
+					});
+					next.addTo(map);
+					if (layer) {
+						map.removeLayer(layer);
+					} else {
+						map.fitBounds(next.getBounds(), { padding: [24, 24], maxZoom: 9 });
+					}
+					layer = next;
+				});
+			}
+			draw();
+			document.addEventListener("share:updated", draw);
+		})();
+	</script>
+</body>
+</html>

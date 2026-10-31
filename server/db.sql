@@ -1358,3 +1358,7 @@ ADD CONSTRAINT `fk_api_keys_oauth_client`
   REFERENCES `300sf`.`oauth_clients` (`id`)
   ON DELETE CASCADE
   ON UPDATE NO ACTION;
+
+-- Nothing lists public checklists, so public was the same as anyone with the
+-- link; checklists are now private or shared with a link.
+UPDATE `300sf`.`lists` SET `visibility` = 1 WHERE `visibility` = 2;

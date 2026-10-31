@@ -74,15 +74,27 @@ func GetData(lang string, pageName models.Translation) Data {
 		}
 	}
 
+	data.Thumbnail = thumbnail(lang, pageName, 200)
+
+	return data
+}
+
+// Photo is the page's main image about width pixels wide, or "" when it has none.
+func Photo(lang string, pageName models.Translation, width int) string {
+	return thumbnail(Language(lang), pageName, width)
+}
+
+func thumbnail(lang string, pageName models.Translation, width int) string {
 	q := fmt.Sprintf(
-		"https://%s.wikipedia.org/w/api.php?action=query&titles=%s&prop=pageimages&format=json&pithumbsize=200",
+		"https://%s.wikipedia.org/w/api.php?action=query&titles=%s&prop=pageimages&format=json&pithumbsize=%d",
 		lang,
 		url.QueryEscape(utils.Translation2Value(pageName, lang)),
+		width,
 	)
 
 	req, err := http.NewRequest("GET", q, nil)
 	if err != nil {
-		return data
+		return ""
 	}
 
 	req.Header.Set(
@@ -102,11 +114,11 @@ func GetData(lang string, pageName models.Translation) Data {
 			if end > 0 {
 				thumbnail := string(body[begin : begin+end])
 				if strings.HasPrefix(thumbnail, "http") {
-					data.Thumbnail = thumbnail
+					return thumbnail
 				}
 			}
 		}
 	}
 
-	return data
+	return ""
 }

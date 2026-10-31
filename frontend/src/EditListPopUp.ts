@@ -7,6 +7,7 @@
 /// <reference path="Colors.ts"/>
 /// <reference path="SpeciesListPopUp.ts"/>
 /// <reference path="ui/Segmented.ts"/>
+/// <reference path="ShareChecklist.ts"/>
 
 // A checklist in the management list: what it holds, renaming, recolouring, who can see it and
 // archiving it.
@@ -38,21 +39,56 @@ class EditListPopUp {
 		colorSelect.select(color);
 		sheet.field(form, App.translations.Color, colorSelect.container);
 
-		// Others see a checklist on a comparison link only when it isn't private.
-		let visibility = String(list.visibility);
-		const visibilitySelect = Ui.segmented([
-			[String(Models.Visibility.Private), "lock", App.translations.Private],
-			[String(Models.Visibility.Hidden), "link", App.translations.WithLink],
-			[String(Models.Visibility.Public), "public", App.translations.Public],
-		], visibility, function (v: string) {
+		// Others see a checklist's share page only when it isn't private. Public checklists are shown as shared
+		// with a link, which is what they are.
+		const savedVisibility = String(ShareChecklist.visibility(list));
+		let visibility = savedVisibility;
+		const visibilitySelect = ShareChecklist.visibilitySelect(visibility, function (v: string) {
 			visibility = v;
 			saveButton.disabled = name.value.trim() === "" || !changed();
+			showShare();
 		});
 		sheet.field(form, App.translations.Visibility, visibilitySelect);
 		const visibilityHint = document.createElement("p");
 		visibilityHint.className = "details";
 		visibilityHint.textContent = App.translations.ChecklistVisibilityHint;
 		form.appendChild(visibilityHint);
+
+		// The share page link, for a checklist that isn't private. Copying it saves the visibility
+		// first, since the link doesn't open until then (and an old list gets its id then).
+		const shareControl = document.createElement("div");
+		const shareUrl = new Ui.Input("text");
+		(shareUrl.container as HTMLInputElement).readOnly = true;
+		shareControl.appendChild(shareUrl.container);
+		const copyLink = Ui.actionButton(App.translations.Copy, "content_copy", "inline");
+		shareControl.appendChild(copyLink);
+		const shareField = sheet.field(form, App.translations.Share, shareControl);
+		const showShare = function (): void {
+			shareField.style.display = visibility === String(Models.Visibility.Private) ? "none" : "";
+			shareUrl.value = ShareChecklist.link(list);
+		};
+		showShare();
+		copyLink.addEventListener("click", function () {
+			const copy = function (): void {
+				navigator.clipboard.writeText(shareUrl.value).then(function () {
+					new Ui.Toast(App.translations.LinkCopied, Utils.escapeHtml(shareUrl.value), null, "var(--success-color)", function () { });
+				});
+			};
+			// Lists shared before ids grew longer get a new one on the server first.
+			if (visibility === String(ShareChecklist.visibility(list)) && list.uuid.length >= 10) {
+				copy();
+				return;
+			}
+			Ui.setBusy(copyLink, true);
+			saveVisibility(function () {
+				Ui.setBusy(copyLink, false);
+				saveButton.disabled = name.value.trim() === "" || !changed();
+				copy();
+			}, function () {
+				Ui.setBusy(copyLink, false);
+				failed();
+			});
+		});
 
 		// Lists made from the user's own species list can have their species changed.
 		if (list.template) {
@@ -87,7 +123,7 @@ class EditListPopUp {
 
 		const saveButton = sheet.addAction(Ui.actionButton(App.translations.SaveChanges, "check", "success"));
 		const changed = function (): boolean {
-			return name.value.trim() !== App.getTranslation(list.name) || (colorSelect.value !== null && colorSelect.value !== color) || visibility !== String(list.visibility);
+			return name.value.trim() !== App.getTranslation(list.name) || (colorSelect.value !== null && colorSelect.value !== color) || visibility !== String(ShareChecklist.visibility(list));
 		};
 		saveButton.disabled = true;
 		name.container.addEventListener("input", function () {
@@ -96,32 +132,56 @@ class EditListPopUp {
 		colorSelect.container.addEventListener("click", function () {
 			saveButton.disabled = name.value.trim() === "" || !changed();
 		});
+		const failed = function (): void {
+			new Ui.MessageBox(App.translations.Error, App.translations.SomethingWentWrong, "/img/messagebox-256.webp", "var(--error-color)", function () { });
+		};
+		// Sharing an old list gives it a new id, which the other changes must then use.
+		const saveVisibility = function (done: () => void, fail: () => void): void {
+			new HttpRequest("POST", "/v1/lists/" + list.uuid + "/visibility", { visibility: parseInt(visibility) }).process(function (status: any, data: any) {
+				list.visibility = parseInt(visibility);
+				list.uuid = data.uuid;
+				showShare();
+				done();
+			}, fail);
+		};
 		saveButton.addEventListener("click", function () {
-			const requests: Array<HttpRequest> = [];
-			if (name.value.trim() !== App.getTranslation(list.name)) {
-				const n = new Models.Translation();
-				n.en = n.sv = n.de = name.value.trim();
-				requests.push(new HttpRequest("POST", "/v1/lists/" + list.uuid + "/rename", { name: n }));
-			}
-			if (colorSelect.value !== null && colorSelect.value !== color) {
-				requests.push(new HttpRequest("POST", "/v1/lists/" + list.uuid + "/color", { color: colorSelect.value }));
-			}
-			if (visibility !== String(list.visibility)) {
-				requests.push(new HttpRequest("POST", "/v1/lists/" + list.uuid + "/visibility", { visibility: parseInt(visibility) }));
-			}
-			Ui.setBusy(saveButton, true);
-			let pending = requests.length;
-			requests.forEach(r => r.process(function () {
-				if (--pending === 0) {
-					self.mSheet.close();
-					setTimeout(() => {
-						location.reload();
-					}, 150);
-				}
-			}, function () {
+			const finish = function (): void {
+				self.mSheet.close();
+				setTimeout(() => {
+					location.reload();
+				}, 150);
+			};
+			const fail = function (): void {
 				Ui.setBusy(saveButton, false);
-				new Ui.MessageBox(App.translations.Error, App.translations.SomethingWentWrong, "/img/messagebox-256.webp", "var(--error-color)", function () { });
-			}));
+				failed();
+			};
+			const saveRest = function (): void {
+				const requests: Array<HttpRequest> = [];
+				if (name.value.trim() !== App.getTranslation(list.name)) {
+					const n = new Models.Translation();
+					n.en = n.sv = n.de = name.value.trim();
+					requests.push(new HttpRequest("POST", "/v1/lists/" + list.uuid + "/rename", { name: n }));
+				}
+				if (colorSelect.value !== null && colorSelect.value !== color) {
+					requests.push(new HttpRequest("POST", "/v1/lists/" + list.uuid + "/color", { color: colorSelect.value }));
+				}
+				if (requests.length === 0) {
+					finish();
+					return;
+				}
+				let pending = requests.length;
+				requests.forEach(r => r.process(function () {
+					if (--pending === 0) {
+						finish();
+					}
+				}, fail));
+			};
+			Ui.setBusy(saveButton, true);
+			if (visibility !== String(ShareChecklist.visibility(list))) {
+				saveVisibility(saveRest, fail);
+			} else {
+				saveRest();
+			}
 		});
 
 		sheet.open(closeCallback);
