@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/klahr/300sf/server/geocoder"
+	"github.com/klahr/300sf/server/live"
 	"github.com/klahr/300sf/server/log"
 	"github.com/klahr/300sf/server/models"
 	"github.com/klahr/300sf/server/table"
@@ -131,7 +132,15 @@ func placeKey(lat, lon float64) string {
 }
 
 func setZone(reportId, zoneId int64) {
-	models.DB.Table(table.Reports).Where("id=?", reportId).Update("zone_id", zoneId)
+	if err := models.DB.Table(table.Reports).Where("id=?", reportId).Update("zone_id", zoneId).Error; err != nil {
+		return
+	}
+	// The sighting may only now count in a competition limited to some zones.
+	var owners []string
+	models.DB.Table(table.Reports).Joins("JOIN users ON users.id=reports.user_id").Where("reports.id=?", reportId).Pluck("users.uuid", &owners)
+	for _, owner := range owners {
+		live.Notify("user:" + owner)
+	}
 }
 
 // resolve makes zones of the areas, from the country in, and returns the most

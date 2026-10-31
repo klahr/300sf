@@ -1362,3 +1362,9 @@ ADD CONSTRAINT `fk_api_keys_oauth_client`
 -- Nothing lists public checklists, so public was the same as anyone with the
 -- link; checklists are now private or shared with a link.
 UPDATE `300sf`.`lists` SET `visibility` = 1 WHERE `visibility` = 2;
+
+-- A list's id from before it got a longer one when shared, so sightings saved
+-- offline with the old id still land on the list.
+ALTER TABLE `300sf`.`lists`
+  ADD COLUMN `previous_uuid` VARCHAR(32) NULL AFTER `uuid`,
+  ADD INDEX `previous_uuid_idx` (`previous_uuid` ASC);

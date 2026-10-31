@@ -92,8 +92,16 @@ namespace ShareChecklist {
 			});
 		};
 
-		// Saved at once, so the link works as soon as it shows.
+		// Saved at once, so the link works as soon as it shows. A save may give the list a new id, so a
+		// choice made while one is under way waits for it and is saved with the new id.
+		let saving = false;
+		let wanted: number | null = null;
 		const save = function (value: number): void {
+			if (saving) {
+				wanted = value;
+				return;
+			}
+			saving = true;
 			Ui.setBusy(shareButton, true);
 			new HttpRequest("POST", "/v1/lists/" + list.uuid + "/visibility", { visibility: value }).process(function (status: any, data: any) {
 				list.visibility = value;
@@ -103,7 +111,14 @@ namespace ShareChecklist {
 			}, function () {
 				new Ui.MessageBox(App.translations.Error, App.translations.SomethingWentWrong, "/img/messagebox-256.webp", "var(--error-color)", function () { });
 			}, function () {
+				saving = false;
 				Ui.setBusy(shareButton, false);
+				const next = wanted;
+				wanted = null;
+				if (next !== null && next !== list.visibility) {
+					save(next);
+					return;
+				}
 				show();
 			});
 		};

@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/klahr/300sf/server/config"
 	"github.com/klahr/300sf/server/controllers"
 	"github.com/klahr/300sf/server/models"
 )
@@ -70,9 +71,10 @@ func TestDBCompetitionJoiningAndStandings(t *testing.T) {
 	if get(standings[0], "count") != float64(2) || get(standings[0], "me") != true {
 		t.Errorf("leader = %v, want the friend with 2", standings[0])
 	}
-	// Others see the day of a sighting, not its time.
+	// Others see the day of a sighting in the site's time zone, not its time.
 	latest, err := time.Parse(time.RFC3339, get(standings[0], "latest").(string))
-	if err != nil || !latest.Equal(latest.UTC().Truncate(24*time.Hour)) {
+	day := latest.In(config.Location())
+	if err != nil || !latest.Equal(time.Date(day.Year(), day.Month(), day.Day(), 0, 0, 0, 0, config.Location())) {
 		t.Errorf("latest = %v (%v), want a whole day", get(standings[0], "latest"), err)
 	}
 }

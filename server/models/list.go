@@ -18,6 +18,9 @@ type List struct {
 	ListTemplateId zero.Int     `json:"-"`
 	ListTemplate   ListTemplate `json:"-"`
 	Color          zero.String  `json:"color"`
+	// PreviousUuid is the old id of a list that got a new one when shared, for
+	// its owner's sightings saved offline with the old id.
+	PreviousUuid zero.String `json:"-"`
 	// Template is the uuid of the species list the list was made from, when the list is shown to its owner.
 	Template string `json:"template,omitempty" gorm:"-"`
 }

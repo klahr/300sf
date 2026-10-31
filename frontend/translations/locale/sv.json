@@ -116,7 +116,7 @@
 	"InvitationsSent": "Inbjudningar skickade",
 	"InviteFriends": "Bjud in vänner",
 	"InviteHint": "Skriv användarnamnen på de du vill bjuda in. De hittar inbjudan under Tävlingar.",
-	"ShowNamePublic": "Jag godkänner att mitt visningsnamn ”{0}” och vilka arter jag hittar, och vilken dag, visas för alla som kan se tävlingen, även på dess delningssida.",
+	"ShowNamePublic": "Jag godkänner att mitt visningsnamn ”{0}” och vilka arter jag hittar, vilken dag och i vilken kommun, visas för alla som kan se tävlingen, även på dess delningssida.",
 	"ShowNamePrivate": "Jag godkänner att mitt visningsnamn ”{0}” och hur många arter jag hittar visas för de andra i tävlingen.",
 	"ChangeDisplayName": "Ändra visningsnamn",
 	"JoinCompetition": "Gå med",

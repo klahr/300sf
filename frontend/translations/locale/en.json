@@ -116,7 +116,7 @@
 	"InvitationsSent": "Invitations sent",
 	"InviteFriends": "Invite friends",
 	"InviteHint": "Write the usernames of the people you want to invite. They find the invitation under Competitions.",
-	"ShowNamePublic": "I agree to show my display name “{0}”, which species I find and on which day to anyone who can see the competition, also on its share page.",
+	"ShowNamePublic": "I agree to show my display name “{0}”, which species I find, on which day and in which municipality to anyone who can see the competition, also on its share page.",
 	"ShowNamePrivate": "I agree to show my display name “{0}” and how many species I find to the others in the competition.",
 	"ChangeDisplayName": "Change display name",
 	"JoinCompetition": "Join",

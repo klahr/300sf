@@ -17,12 +17,12 @@ import (
 // the page shows may have, so that it fetches itself again (/scripts/live.js).
 
 func (s *Site) liveList(c *gin.Context) {
-	owner, err := s.listOwner(c.Param("uuid"))
+	keys, err := s.listKeys(c.Param("uuid"))
 	if err != nil {
 		c.Status(http.StatusNotFound)
 		return
 	}
-	s.serveLive(c, []string{"user:" + owner}, nil)
+	s.serveLive(c, keys, nil)
 }
 
 func (s *Site) liveCompetition(c *gin.Context) {

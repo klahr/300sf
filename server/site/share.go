@@ -202,7 +202,7 @@ func speciesPhoto(name models.Translation) string {
 	if models.Cache == nil {
 		return ""
 	}
-	key := "share/photo/" + name.En.String
+	key := "share/photo/" + strconv.FormatInt(name.Id, 10)
 	if url, err := models.Cache.Get(key).Result(); err == nil {
 		return url
 	}
@@ -211,20 +211,28 @@ func speciesPhoto(name models.Translation) string {
 		return ""
 	}
 	go func() {
-		models.Cache.Set(key, wikipedia.Photo("en", name, 1280), time.Second*time.Duration(config.AppConfig.WikipediaCacheDuration))
+		photo := wikipedia.Photo("en", name, 1280)
+		// No picture may be Wikipedia failing for a moment, so it is asked again sooner.
+		ttl := time.Second * time.Duration(config.AppConfig.WikipediaCacheDuration)
+		if photo == "" {
+			ttl = min(ttl, time.Hour)
+		}
+		models.Cache.Set(key, photo, ttl)
 	}()
 	return ""
 }
 
 // shareDay is a day and month, for lists where the year is clear from the page.
 func shareDay(t time.Time, lang string) string {
+	t = t.In(config.Location())
 	return fmt.Sprintf("%d %s", t.Day(), shareMonths[lang][t.Month()-1])
 }
 
 // shareDate is a day the way the share pages write it, with the year when it isn't this one.
 func shareDate(t time.Time, lang string) string {
+	t = t.In(config.Location())
 	d := fmt.Sprintf("%d %s", t.Day(), shareMonths[lang][t.Month()-1])
-	if t.Year() != time.Now().Year() {
+	if t.Year() != time.Now().In(t.Location()).Year() {
 		d += " " + strconv.Itoa(t.Year())
 	}
 	return d
@@ -271,7 +279,9 @@ func (s *Site) shareCompetitionPage(c *gin.Context) {
 	}
 	info := race.Info
 	now := time.Now()
-	last := info.Until.Add(-time.Second)
+	loc := config.Location()
+	last := info.Until.Add(-time.Second).In(loc)
+	from := info.From.In(loc)
 	fill := func(text string, v any) string { return strings.Replace(text, "{0}", fmt.Sprint(v), 1) }
 
 	switch info.Status {
@@ -289,10 +299,10 @@ func (s *Site) shareCompetitionPage(c *gin.Context) {
 		}
 	default:
 		// Whole calendar days after today, rounded so a DST change doesn't cut one off.
-		y, m, d := now.In(last.Location()).Date()
-		today := time.Date(y, m, d, 0, 0, 0, 0, last.Location())
+		y, m, d := now.In(loc).Date()
+		today := time.Date(y, m, d, 0, 0, 0, 0, loc)
 		y, m, d = last.Date()
-		days := int(math.Round(time.Date(y, m, d, 0, 0, 0, 0, last.Location()).Sub(today).Hours() / 24))
+		days := int(math.Round(time.Date(y, m, d, 0, 0, 0, 0, loc).Sub(today).Hours() / 24))
 		switch {
 		case days < 1:
 			data["Status"] = t["LastDay"]
@@ -302,15 +312,15 @@ func (s *Site) shareCompetitionPage(c *gin.Context) {
 			data["Status"] = fill(t["DaysLeft"], days)
 		}
 	}
-	if info.From.Year() == last.Year() {
-		data["Period"] = fmt.Sprintf("%d %s – %d %s %d", info.From.Day(), shareMonths[lang][info.From.Month()-1], last.Day(), shareMonths[lang][last.Month()-1], last.Year())
+	if from.Year() == last.Year() {
+		data["Period"] = fmt.Sprintf("%d %s – %d %s %d", from.Day(), shareMonths[lang][from.Month()-1], last.Day(), shareMonths[lang][last.Month()-1], last.Year())
 	} else {
 		data["Period"] = shareDate(info.From, lang) + " – " + shareDate(last, lang)
 	}
 	if info.EndOnReports.Int64 > 0 {
 		data["Goal"] = fill(t["FirstTo"], info.EndOnReports.Int64)
 	}
-	data["CanJoin"] = info.Status != "finished" && now.Before(info.JoinUntil) && (info.MaxCompetitors.Int64 == 0 || int64(info.Participants) < info.MaxCompetitors.Int64)
+	data["CanJoin"] = race.Joinable
 
 	// Bars measure against the winning count, the list, or the leader.
 	target := int(info.EndOnReports.Int64)

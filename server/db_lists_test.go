@@ -129,6 +129,15 @@ func TestDBSharedLists(t *testing.T) {
 	if r := s.call(t, owner, "GET", "/v1/lists/"+old, nil); r.Status == http.StatusOK {
 		t.Errorf("old id still opens: %s", r.Raw)
 	}
+	// A sighting saved offline before the list got its new id still lands on it.
+	if r := newReport(t, s, owner, species[0], old); r.Status != http.StatusOK {
+		t.Fatalf("report with the old list id = %d: %s", r.Status, r.Raw)
+	}
+	var onList int64
+	models.DB.Table("list_reports").Joins("JOIN lists ON lists.id=list_reports.list_id").Where("lists.uuid=?", renewed).Count(&onList)
+	if onList != 2 {
+		t.Errorf("list has %d sightings, want 2", onList)
+	}
 	r = s.must(t, owner, http.StatusOK, "POST", "/v1/lists/"+renewed+"/visibility", map[string]any{"visibility": models.VisibilityPrivate})
 	if r.Body["uuid"] != renewed {
 		t.Errorf("making it private changed its id to %v", r.Body["uuid"])

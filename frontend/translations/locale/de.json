@@ -116,7 +116,7 @@
 	"InvitationsSent": "Einladungen gesendet",
 	"InviteFriends": "Freunde einladen",
 	"InviteHint": "Gib die Benutzernamen der Personen ein, die du einladen möchtest. Sie finden die Einladung unter Wettbewerbe.",
-	"ShowNamePublic": "Ich bin einverstanden, dass mein Anzeigename „{0}“ und welche Arten ich an welchem Tag finde, allen angezeigt werden, die den Wettbewerb sehen können, auch auf seiner Teilen-Seite.",
+	"ShowNamePublic": "Ich bin einverstanden, dass mein Anzeigename „{0}“ und welche Arten ich an welchem Tag in welcher Gemeinde finde, allen angezeigt werden, die den Wettbewerb sehen können, auch auf seiner Teilen-Seite.",
 	"ShowNamePrivate": "Ich bin einverstanden, dass mein Anzeigename „{0}“ und wie viele Arten ich finde, den anderen im Wettbewerb angezeigt werden.",
 	"ChangeDisplayName": "Anzeigenamen ändern",
 	"JoinCompetition": "Teilnehmen",

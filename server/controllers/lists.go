@@ -459,11 +459,14 @@ func ListsVisibility(c *gin.Context) {
 	// An old 6-character id is too easy to guess to be shared, so the list gets
 	// a new id when it stops being private; links to the old id stop working.
 	visibility := models.ListVisibility(*r.Visibility)
+	columns := map[string]any{"visibility": visibility}
 	uuid := list.Uuid
 	if visibility != models.VisibilityPrivate && len(uuid) < utils.ShortUuidLength {
 		uuid = utils.GenerateShortUuid()
+		columns["uuid"] = uuid
+		columns["previous_uuid"] = list.Uuid
 	}
-	if err := models.DB.Model(&list).UpdateColumns(map[string]any{"visibility": visibility, "uuid": uuid}).Error; err != nil {
+	if err := models.DB.Model(&list).UpdateColumns(columns).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
@@ -828,18 +831,27 @@ func ShareList(uuid string) (*SharedList, error) {
 	return &result, nil
 }
 
-// ShareListOwner is the uuid of the owner of a list that can be shared, for
-// its share page's live updates.
-func ShareListOwner(uuid string) (string, error) {
-	var owners []string
+// ShareListKeys are what a shareable list's share page watches for live
+// updates (package live): its owner, and the species list it follows if any.
+func ShareListKeys(uuid string) ([]string, error) {
+	var rows []struct {
+		Owner    string
+		Template zero.String
+	}
 	if err := models.DB.Table("lists").Joins("JOIN users ON users.id=lists.user_id").
+		Joins("LEFT JOIN "+table.ListTemplates+" lt ON lt.id=lists.list_template_id").
 		Where("lists.uuid=?", uuid).Where("lists.visibility<>?", models.VisibilityPrivate).
 		Where("CHAR_LENGTH(lists.uuid)>=?", utils.ShortUuidLength).Where("lists.archived IS NULL").
-		Limit(1).Pluck("users.uuid", &owners).Error; err != nil {
-		return "", err
+		Select("users.uuid AS owner, lt.uuid AS template").
+		Limit(1).Scan(&rows).Error; err != nil {
+		return nil, err
 	}
-	if len(owners) == 0 {
-		return "", gorm.ErrRecordNotFound
+	if len(rows) == 0 {
+		return nil, gorm.ErrRecordNotFound
 	}
-	return owners[0], nil
+	keys := []string{"user:" + rows[0].Owner}
+	if rows[0].Template.Valid {
+		keys = append(keys, "template:"+rows[0].Template.String)
+	}
+	return keys, nil
 }

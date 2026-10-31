@@ -41,3 +41,6 @@ site:
   # The AGPL asks you to offer your users the source of what runs here. This
   # repository when empty; point it at your fork if you change the code.
   source-url: ""
+  # The time zone days are told in on share pages and counted in for
+  # competitions; Europe/Stockholm when empty.
+  time-zone: ""

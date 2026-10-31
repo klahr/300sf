@@ -59,7 +59,7 @@ type Site struct {
 	share     func(uuid string) (*controllers.SharedList, error)
 	shareRace func(uuid string) (*controllers.SharedCompetition, error)
 	areas     func(uuid string) ([]controllers.SharedArea, error)
-	listOwner func(uuid string) (string, error)
+	listKeys  func(uuid string) ([]string, error)
 	raceKeys  func(uuid string) ([]string, error)
 	photo     func(name models.Translation) string
 	stats     func() (*controllers.SiteStats, error)
@@ -77,7 +77,7 @@ func New(cfg config.Site, files fs.FS) (*Site, error) {
 	if files == nil {
 		files = embedded
 	}
-	s := &Site{files: files, cfg: cfg, landing: map[string]map[string]any{}, compare: controllers.CompareLists, share: controllers.ShareList, shareRace: controllers.ShareCompetition, areas: controllers.ShareCompetitionAreas, listOwner: controllers.ShareListOwner, raceKeys: controllers.ShareCompetitionKeys, photo: speciesPhoto, stats: controllers.GetSiteStats, authorize: controllers.CheckAuthorizeRequest}
+	s := &Site{files: files, cfg: cfg, landing: map[string]map[string]any{}, compare: controllers.CompareLists, share: controllers.ShareList, shareRace: controllers.ShareCompetition, areas: controllers.ShareCompetitionAreas, listKeys: controllers.ShareListKeys, raceKeys: controllers.ShareCompetitionKeys, photo: speciesPhoto, stats: controllers.GetSiteStats, authorize: controllers.CheckAuthorizeRequest}
 
 	funcs := template.FuncMap{
 		"year":   func() int { return time.Now().Year() },

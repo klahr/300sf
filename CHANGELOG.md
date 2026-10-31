@@ -8,6 +8,18 @@ Versions are git tags `X.Y.Z`, cut with `make patch|minor|major`.
 
 ## [Unreleased]
 
+### Added
+
+- `site.time-zone` in the config: the time zone share pages tell days in and
+  competitions count them in (Europe/Stockholm when empty).
+
+### Changed
+
+- Joining a public competition asks you to agree to showing in which
+  municipality you find species too, as its share page's map shows that.
+- API: a competition's `latest` and `ended_at` days start at midnight in the
+  site's time zone instead of UTC.
+
 ### Fixed
 
 - A checklist's share page counts sightings that have no start time, instead
@@ -20,6 +32,18 @@ Versions are git tags `X.Y.Z`, cut with `make patch|minor|major`.
   competition was won, like the standings, and loads faster.
 - A competition's share page counts the days left in calendar days, and says
   "1 day left".
+- Share pages show days in Swedish time, so a competition starting 1 October
+  no longer shows 30 September, nor a sighting just after midnight the day before.
+- Share pages update when a sighting's municipality is found after it was
+  saved, and when the species list a list or competition follows changes.
+- Choosing who can see a checklist while it is still being shared no longer
+  fails and leaves it shared.
+- A competition's share page offers joining only while it is open for joining.
+- Sightings saved offline still land on a checklist that got a new id when it
+  was shared since.
+- A species' picture that Wikipedia failed to give is asked for again within
+  the hour, and species without an English name no longer share one picture.
+- A competition's share page and live updates query the database less.
 
 ### Security
 

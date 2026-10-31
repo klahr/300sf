@@ -127,6 +127,9 @@ func liveChanges(c *gin.Context) {
 	switch {
 	case strings.HasPrefix(path, "/v1/competitions/:uuid"):
 		live.Notify("competition:" + c.Param("uuid"))
+	case strings.HasPrefix(path, "/v1/list_templates/:uuid"):
+		// The lists that follow a species list, and competitions on it, change with it.
+		live.Notify("template:" + c.Param("uuid"))
 	case strings.HasPrefix(path, "/v1/reports"), strings.HasPrefix(path, "/v1/lists"),
 		path == "/v1/users/display_name", path == "/v1/users/portrait":
 		if user := c.GetString("uuid"); user != "" {

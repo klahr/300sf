@@ -296,13 +296,16 @@ func TestShareCompetitionPage(t *testing.T) {
 
 	order := models.Translation{Model: models.Model{Id: 1}, Sv: zero.StringFrom("Tättingar")}
 	tit := models.Translation{Model: models.Model{Id: 2}, Sv: zero.StringFrom("Talgoxe")}
-	from := time.Date(2025, 3, 1, 0, 0, 0, 0, time.UTC)
+	// The app sends midnight in Sweden, which is the day before in UTC.
+	stockholm, _ := time.LoadLocation("Europe/Stockholm")
+	from := time.Date(2025, 3, 1, 0, 0, 0, 0, stockholm).UTC()
+	until := time.Date(2025, 6, 1, 0, 0, 0, 0, stockholm).UTC()
 	anna := controllers.CompetitionPerson{DisplayName: "<b>Anna</b>", Portrait: "3.webp"}
 	s.shareRace = func(uuid string) (*controllers.SharedCompetition, error) {
 		return &controllers.SharedCompetition{
 			Info: &controllers.CompetitionInfo{
 				Uuid: uuid, Name: models.Translation{Sv: zero.StringFrom("Vårracet")}, Status: "finished",
-				From: from, Until: from.AddDate(0, 3, 0), EndedAt: null.TimeFrom(from.AddDate(0, 3, 0)), Participants: 1, ListSize: 2,
+				From: from, Until: until, EndedAt: null.TimeFrom(until), Participants: 1, ListSize: 2,
 				Standings: []controllers.CompetitionStanding{{Rank: 1, User: anna, Count: 1}},
 			},
 			Species: []controllers.SharedCompetitionSpecies{{Uuid: "s1", Name: tit, Order: order, Finders: 1, First: from}},
@@ -541,11 +544,11 @@ func TestAuthorizePage(t *testing.T) {
 // A share page's live connection says "changed" when its list's owner changes something, and only then.
 func TestShareLiveConnection(t *testing.T) {
 	s, r := newTestSite(t, cfg)
-	s.listOwner = func(uuid string) (string, error) {
+	s.listKeys = func(uuid string) ([]string, error) {
 		if uuid != "abcdefghjk" {
-			return "", errors.New("not found")
+			return nil, errors.New("not found")
 		}
-		return "owner-uuid", nil
+		return []string{"user:owner-uuid"}, nil
 	}
 	server := httptest.NewServer(r)
 	defer server.Close()

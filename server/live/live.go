@@ -5,7 +5,8 @@
 // them and tells its own connections; without Redis they stay in this one.
 //
 // A change is a key: "user:<uuid>" when a user's sightings or lists changed,
-// "competition:<uuid>" when who takes part in a competition did.
+// "competition:<uuid>" when who takes part in a competition did,
+// "template:<uuid>" when a species list's species did.
 package live
 
 import (
@@ -82,6 +83,9 @@ func changed(key string) {
 	}
 	mu.Unlock()
 
+	// Every page of one competition watches the same keys, so they are given
+	// again once for all of them.
+	var reload []*watcher
 	for _, w := range all {
 		w.mu.Lock()
 		hit := slices.Contains(w.keys, key)
@@ -90,23 +94,30 @@ func changed(key string) {
 			continue
 		}
 		if w.refresh != nil && strings.HasPrefix(key, "competition:") {
-			go w.reload()
+			reload = append(reload, w)
 			continue
 		}
 		w.notify()
 	}
+	if len(reload) > 0 {
+		go refreshAll(reload)
+	}
 }
 
-// reload gives the watcher its keys again and then tells it, away from the
-// subscriber so that its queries hold up no other watcher. On an error (nil
-// keys) the old keys stay, so a failed query doesn't silence the page.
-func (w *watcher) reload() {
-	if keys := w.refresh(); keys != nil {
-		w.mu.Lock()
-		w.keys = keys
-		w.mu.Unlock()
+// refreshAll gives watchers of one competition their keys again and then tells
+// them, away from the subscriber so that its queries hold up no other watcher.
+// On an error (nil keys) the old keys stay, so a failed query doesn't silence
+// the pages.
+func refreshAll(watchers []*watcher) {
+	keys := watchers[0].refresh()
+	for _, w := range watchers {
+		if keys != nil {
+			w.mu.Lock()
+			w.keys = keys
+			w.mu.Unlock()
+		}
+		w.notify()
 	}
-	w.notify()
 }
 
 func (w *watcher) notify() {

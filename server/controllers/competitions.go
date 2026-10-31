@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/klahr/300sf/server/config"
 	"github.com/klahr/300sf/server/models"
 	"github.com/klahr/300sf/server/table"
 	"github.com/klahr/300sf/server/utils"
@@ -135,22 +136,18 @@ type competitionSighting struct {
 
 // competitionStandings ranks the participants and tells when the competition was won, if it ended
 // by someone reaching end_on_reports species. Ties go to whoever got there first.
-func competitionStandings(competition *models.Competition, participants []models.User) ([]CompetitionStanding, null.Time, error) {
+func competitionStandings(competition *models.Competition, participants []models.User, sightings []competitionSighting) ([]CompetitionStanding, null.Time) {
 	if len(participants) == 0 {
-		return []CompetitionStanding{}, null.Time{}, nil
+		return []CompetitionStanding{}, null.Time{}
 	}
 
-	sightings, err := competitionFirstSightings(competition, participants)
-	if err != nil {
-		return nil, null.Time{}, err
-	}
 	standings, wonAt := rankCompetition(participants, sightings, competition.EndOnReports.Int64)
 	// Other participants see these, so they tell no more than the day of a
 	// sighting.
 	for i := range standings {
 		standings[i].Latest = toDay(standings[i].Latest)
 	}
-	return standings, toDay(wonAt), nil
+	return standings, toDay(wonAt)
 }
 
 // competitionAt is when a report counts as made.
@@ -189,12 +186,14 @@ func competitionFirstSightings(competition *models.Competition, participants []m
 	return sightings, err
 }
 
-// toDay rounds t down to its day (UTC).
+// toDay rounds t down to the start of its day in the site's time zone.
 func toDay(t null.Time) null.Time {
 	if !t.Valid {
 		return t
 	}
-	return null.TimeFrom(t.Time.UTC().Truncate(24 * time.Hour))
+	loc := config.Location()
+	y, m, d := t.Time.In(loc).Date()
+	return null.TimeFrom(time.Date(y, m, d, 0, 0, 0, 0, loc))
 }
 
 // rankCompetition turns each participant's first sightings of the species into standings. With
@@ -256,10 +255,18 @@ func competitionInfo(competition *models.Competition, viewer *models.User, withS
 	if err != nil {
 		return nil, err
 	}
-	standings, wonAt, err := competitionStandings(competition, participants)
-	if err != nil {
-		return nil, err
+	var sightings []competitionSighting
+	if len(participants) > 0 {
+		if sightings, err = competitionFirstSightings(competition, participants); err != nil {
+			return nil, err
+		}
 	}
+	return competitionInfoFrom(competition, participants, sightings, viewer, withStandings), nil
+}
+
+// competitionInfoFrom is competitionInfo from participants and sightings already loaded.
+func competitionInfoFrom(competition *models.Competition, participants []models.User, sightings []competitionSighting, viewer *models.User, withStandings bool) *CompetitionInfo {
+	standings, wonAt := competitionStandings(competition, participants, sightings)
 
 	info := CompetitionInfo{
 		Uuid:           competition.Uuid,
@@ -326,7 +333,7 @@ func competitionInfo(competition *models.Competition, viewer *models.User, withS
 	if withStandings && (competition.Visibility == models.VisibilityPublic || info.Joined || info.IsCreator || info.Invited) {
 		info.Standings = standings
 	}
-	return &info, nil
+	return &info
 }
 
 // competitionUuidLength is the length of competition ids since the rewrite (96
@@ -876,13 +883,17 @@ type SharedFind struct {
 }
 
 // SharedCompetition is a public competition as its share page shows it:
-// standings, species and finds to the day, never where anyone was.
+// standings, species and finds to the day. Where anyone was shows only as
+// how many species were found in each municipality (ShareCompetitionAreas),
+// which participants agree to when they join.
 type SharedCompetition struct {
 	Info *CompetitionInfo
 	// The list's species, or every species found when there is no list.
 	Species []SharedCompetitionSpecies
 	// The newest finds, newest first.
 	Latest []SharedFind
+	// Whether a visitor who signs in can join now.
+	Joinable bool
 }
 
 // SharedArea is how many species of a competition were found in a zone.
@@ -911,14 +922,11 @@ func ShareCompetition(uuid string) (*SharedCompetition, error) {
 	if err != nil {
 		return nil, err
 	}
-	info, err := competitionInfo(competition, nil, true)
-	if err != nil {
-		return nil, err
-	}
 	sightings, err := competitionFirstSightings(competition, participants)
 	if err != nil {
 		return nil, err
 	}
+	info := competitionInfoFrom(competition, participants, sightings, nil, true)
 	// Once won, later sightings don't count.
 	if _, wonAt := rankCompetition(participants, sightings, competition.EndOnReports.Int64); wonAt.Valid {
 		var counted []competitionSighting
@@ -958,7 +966,7 @@ func ShareCompetition(uuid string) (*SharedCompetition, error) {
 		}
 	}
 
-	result := SharedCompetition{Info: info}
+	result := SharedCompetition{Info: info, Joinable: competitionJoinable(competition, info, time.Now()) == nil}
 	byId := map[int64]models.Species{}
 	for _, s := range species {
 		byId[s.Id] = s
@@ -1066,13 +1074,23 @@ func roundGeoJSON(raw []byte) json.RawMessage {
 }
 
 // ShareCompetitionKeys are what a public competition's share page watches for
-// live updates (package live): the competition and each participant.
+// live updates (package live): the competition, its species list and each
+// participant.
 func ShareCompetitionKeys(uuid string) ([]string, error) {
 	competition, participants, err := loadPublicCompetition(uuid)
 	if err != nil {
 		return nil, err
 	}
 	keys := []string{"competition:" + competition.Uuid}
+	if competition.ListTemplateId.Valid {
+		var templates []string
+		if err := models.DB.Table(table.ListTemplates).Where("id=?", competition.ListTemplateId.Int64).Pluck("uuid", &templates).Error; err != nil {
+			return nil, err
+		}
+		for _, t := range templates {
+			keys = append(keys, "template:"+t)
+		}
+	}
 	for _, p := range participants {
 		keys = append(keys, "user:"+p.Uuid)
 	}

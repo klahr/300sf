@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
+	_ "time/tzdata" // for site.time-zone, whether or not the system has zoneinfo
 
 	"gopkg.in/yaml.v2"
 )
@@ -68,13 +70,29 @@ type Site struct {
 	// Where visitors get the source of the code running here, which the
 	// AGPL requires: point it at your fork if you change the code.
 	SourceUrl string `yaml:"source-url"`
+	// The IANA time zone the share pages tell days in, and competitions count
+	// them in; Europe/Stockholm when empty.
+	TimeZone string `yaml:"time-zone"`
+	location *time.Location
+}
+
+// Location is the site's time zone (Site.TimeZone).
+func Location() *time.Location {
+	if AppConfig == nil || AppConfig.Site.location == nil {
+		return defaultLocation
+	}
+	return AppConfig.Site.location
 }
 
 const (
 	defaultSourceUrl      = "https://github.com/klahr/300sf"
 	defaultMapTiles       = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
 	defaultMapAttribution = `&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors`
+	defaultTimeZone       = "Europe/Stockholm"
 )
+
+// With time/tzdata this always loads.
+var defaultLocation, _ = time.LoadLocation(defaultTimeZone)
 
 func (c *App) Parse(data []byte) error {
 	if err := yaml.Unmarshal(data, c); err != nil {
@@ -87,6 +105,14 @@ func (c *App) Parse(data []byte) error {
 		c.Site.MapTiles = defaultMapTiles
 		c.Site.MapAttribution = defaultMapAttribution
 	}
+	if c.Site.TimeZone == "" {
+		c.Site.TimeZone = defaultTimeZone
+	}
+	loc, err := time.LoadLocation(c.Site.TimeZone)
+	if err != nil {
+		return fmt.Errorf("site.time-zone: %w", err)
+	}
+	c.Site.location = loc
 	return nil
 }
 

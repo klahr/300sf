@@ -123,7 +123,8 @@ func setReportFields(tx *gorm.DB, user models.User, report *models.Report, r rep
 
 	report.Lists = []models.List{}
 	if len(r.ListUuids) > 0 {
-		if err := tx.Where("uuid IN ?", r.ListUuids).Where("user_id=?", user.Id).Find(&report.Lists).Error; err != nil {
+		// A list may have a new id since the sighting was saved offline (previous_uuid).
+		if err := tx.Where("(uuid IN ? OR previous_uuid IN ?)", r.ListUuids, r.ListUuids).Where("user_id=?", user.Id).Find(&report.Lists).Error; err != nil {
 			return false, err
 		}
 	}
@@ -935,7 +936,7 @@ func reportAndList(c *gin.Context) (models.Report, models.List, bool) {
 		c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorRecordNotFound, Message: "sighting not found"})
 		return report, list, false
 	}
-	if err := models.DB.Where("uuid=? AND user_id=?", r.ListUuid, user.Id).First(&list).Error; err != nil {
+	if err := models.DB.Where("(uuid=? OR previous_uuid=?) AND user_id=?", r.ListUuid, r.ListUuid, user.Id).First(&list).Error; err != nil {
 		c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorRecordNotFound, Message: "list not found"})
 		return report, list, false
 	}
