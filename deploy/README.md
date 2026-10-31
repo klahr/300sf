@@ -49,15 +49,31 @@ Redis holds the sessions, so flushing it signs everyone out too; give it a
 password (`requirepass`, and `redis-password` in the config) and bind it to
 `127.0.0.1`. MariaDB, too, should listen on `127.0.0.1` only.
 
+## Prebuilt images
+
+CI publishes an image to `ghcr.io/klahr/300sf` for every release tag
+(`:X.Y.Z` and `:latest`), once the tests pass. A server that runs it builds
+nothing, so it needs no Node or Go and little memory. Enable it once:
+
+```bash
+echo 'COMPOSE_FILE=docker-compose.yml:compose.prod.yaml' >> .env   # in deploy/
+```
+
+[`compose.prod.yaml`](compose.prod.yaml) then runs the published image and
+leaves the analyzer out (`--profile analyzer` adds it). `make -C .. upgrade`
+pulls the newest release and pins it as `VERSION` in `.env`, so a later
+`docker compose up -d` keeps running it.
+
 ## Upgrading
 
 1. Back up the database.
-2. Check out the new release (`git fetch --tags && git checkout <version>`) and
-   read its section in [`CHANGELOG.md`](../CHANGELOG.md).
+2. `git fetch --tags` and read the new release's section in
+   [`CHANGELOG.md`](../CHANGELOG.md).
 3. Apply the migrations at the end of `server/db.sql` that are newer than your
    database.
 4. Add any new settings from `server/config.yml.sample` you want.
-5. `make -C .. deploy`.
+5. `make -C .. upgrade`: the release's image from ghcr.io with prebuilt images
+   enabled, otherwise the tag built here.
 
 ## Reverse proxy
 

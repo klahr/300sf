@@ -1,2 +1,4 @@
 .claude/
 *.sql.gz
+# Local compose settings (COMPOSE_FILE, VERSION), per host.
+deploy/.env

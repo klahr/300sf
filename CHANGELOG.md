@@ -19,6 +19,9 @@ Versions are git tags `X.Y.Z`, cut with `make patch|minor|major`.
 - Admins set the donation page's progress, raised and goal, under
   Admin → Donation; it was fixed in the code before.
 - API: `GET /v1/admin/stats` (admin), `GET /v1/donation` and `PUT /v1/donation` (admin).
+- Prebuilt images: CI publishes `ghcr.io/klahr/300sf:X.Y.Z` and `:latest` for
+  every release, `deploy/compose.prod.yaml` runs it, and `make upgrade` pulls
+  and pins the latest release, so the server builds nothing.
 - Welcome posts: a news post marked "Welcome new accounts" shows on the
   dashboard of accounts made in the last 30 days, however old the post is,
   and never as unread to older accounts (`welcome` on announcements).

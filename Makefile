@@ -1,4 +1,4 @@
-.PHONY: help test test-db image deploy major minor patch _bump latest
+.PHONY: help test test-db image deploy upgrade major minor patch _bump latest
 
 .DEFAULT_GOAL := help
 
@@ -15,6 +15,8 @@ help:
 	@echo "    make test-db    The API against a real database and Redis (Docker)"
 	@echo "    make image      Build the Docker image, stamped with the version"
 	@echo "    make deploy     Build and (re)start the production stack in deploy/"
+	@echo "    make upgrade    Run the latest release: pulled from ghcr.io with"
+	@echo "                    deploy/compose.prod.yaml, built here without it"
 	@echo ""
 	@echo "  Release"
 	@echo "    make patch|minor|major"
@@ -48,6 +50,29 @@ image:
 
 deploy:
 	cd deploy && docker compose up -d --build
+
+# The latest release tag. With deploy/compose.prod.yaml enabled (COMPOSE_FILE
+# in deploy/.env) its image is pulled from ghcr.io, where CI publishes every
+# release, and pinned as VERSION in deploy/.env; nothing is built here.
+# Without it the tag is checked out and built as make deploy does. Back up the
+# database and apply the release's migrations first (deploy/README.md).
+upgrade:
+	git fetch --tags
+	@LATEST=$$($(LATEST_TAG)); \
+	if [ -z "$$LATEST" ]; then echo "No release tags found."; exit 1; fi; \
+	echo "Upgrading to $$LATEST"; \
+	if (cd deploy && docker compose config --images 2>/dev/null | grep -q '^ghcr\.io/'); then \
+		cd deploy && VERSION="$$LATEST" docker compose pull 300sf && \
+		VERSION="$$LATEST" docker compose up -d --no-build 300sf && \
+		touch .env && \
+		if grep -q '^VERSION=' .env; then sed -i "s/^VERSION=.*/VERSION=$$LATEST/" .env; \
+		else printf '\n# The release running here; set by make upgrade.\nVERSION=%s\n' "$$LATEST" >> .env; fi && \
+		echo "Pinned VERSION=$$LATEST in deploy/.env"; \
+	else \
+		git checkout -q "$$LATEST" && \
+		(cd deploy && VERSION="$$LATEST" docker compose up -d --build); \
+		status=$$?; git checkout -q -; exit $$status; \
+	fi
 
 # --- Release -----------------------------------------------------------------
 
