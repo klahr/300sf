@@ -54,7 +54,17 @@ Versions are git tags `X.Y.Z`, cut with `make patch|minor|major`.
   (`/oauth/register`, `/oauth/authorize`, `/oauth/token`, `/oauth/revoke`, `/.well-known/oauth-*`).
 - Complete API documentation at `/docs`.
 - Edit a sighting, including which bird it was, from the sighting's page.
-- Choose who can see a checklist on comparison links: only you, anyone with the link, or everyone.
+- Choose who can see a checklist's share page and comparison links: only you or anyone
+  with the link.
+- Share pages: every checklist that isn't private has one (`/share/<list>`), and every
+  public competition (`/share/competition/<id>`) with its standings, species, newest
+  finds and a map of where species were found. Made for a TV, they update themselves
+  as sightings come in, and never show where anyone was or their notes.
+- Creating or joining a competition asks you to agree to showing your display name, and in a
+  public competition your finds by day, to the others.
+- Find a bird on the landing page: search all species, read about them and hear
+  their song without an account.
+- API: `GET /v1/species/search` and `GET /v1/species/:uuid` work without signing in.
 - Change your display name, username and email in your profile; the old address is told
   about a new one.
 - API: the same, as `PUT /v1/reports/:uuid`, `POST /v1/lists/:uuid/visibility` and
@@ -69,6 +79,9 @@ Versions are git tags `X.Y.Z`, cut with `make patch|minor|major`.
 - API: a checklist's `from` and `until` take a date or an RFC 3339 time, and anything
   else is refused instead of ignored.
 - Signing up with a username that is taken says so (409, code 4006) instead of failing.
+- Public checklists are now shared with a link: nothing listed them, so it was the
+  same. Existing ones are changed by a migration, and a public visibility (2) is
+  stored as with a link (1).
 
 ### Removed
 
