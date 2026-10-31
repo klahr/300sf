@@ -8,6 +8,36 @@ Versions are git tags `X.Y.Z`, cut with `make patch|minor|major`.
 
 ## [Unreleased]
 
+### Added
+
+- CI also publishes the bird sound identification service with every release,
+  as `ghcr.io/klahr/300sf-analyzer`; `COMPOSE_PROFILES=analyzer` in
+  `deploy/.env` runs it, and `make upgrade` pulls it along.
+
+### Changed
+
+- The species' songs and calls play in the app's own player, with play and
+  pause, a bar to move in the recording and the time, one recording at a time,
+  instead of the browser's controls, which made the species details scroll
+  sideways on a phone.
+- The landing page only shows bird sound identification when it is on
+  (`site.analyze-endpoint`): the feature, its question and the example in the
+  illustration.
+
+### Fixed
+
+- A checklist that got a new id when it was shared can still be opened,
+  renamed, recoloured, archived and exported with its old id by its owner, on a
+  device that hasn't caught up yet; for anyone else the old id stays closed.
+- The admin statistics count days, weeks and months in the database's own time
+  zone, so the newest signups are no longer left out around midnight.
+- After a failed save, the share sheet no longer sends a choice made meanwhile
+  behind the error message.
+- Share pages no longer reload when a sighting's municipality is looked up but
+  was already known.
+- With `wikipedia-cache-duration` set to 0, a species picture that Wikipedia
+  failed to give is asked for again within the hour instead of never.
+
 ## [0.2.0] - 2026-10-31
 
 ### Added

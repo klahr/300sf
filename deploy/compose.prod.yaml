@@ -1,7 +1,7 @@
 # Production overlay: run the image CI publishes to ghcr.io for each release
 # tag instead of building on this host, so a small server is enough. The
-# analyzer is left out unless asked for (--profile analyzer); BirdNET needs
-# more memory than a small server has.
+# analyzer (BirdNET, about 400 MB of memory) is left out unless its profile is
+# on: COMPOSE_PROFILES=analyzer in deploy/.env.
 #
 # Enable it once in deploy/.env:
 #
@@ -14,4 +14,5 @@ services:
     image: ghcr.io/klahr/300sf:${VERSION:-latest}
 
   analyzer:
+    image: ghcr.io/klahr/300sf-analyzer:${VERSION:-latest}
     profiles: [analyzer]

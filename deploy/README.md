@@ -60,7 +60,10 @@ echo 'COMPOSE_FILE=docker-compose.yml:compose.prod.yaml' >> .env   # in deploy/
 ```
 
 [`compose.prod.yaml`](compose.prod.yaml) then runs the published image and
-leaves the analyzer out (`--profile analyzer` adds it). `make -C .. upgrade`
+leaves the analyzer out. CI publishes it too, as `ghcr.io/klahr/300sf-analyzer`;
+to run it, add `COMPOSE_PROFILES=analyzer` to `.env` and set
+`site.analyze-endpoint` to `http://127.0.0.1:8095/analyze`. BirdNET takes about
+400 MB of memory. `make -C .. upgrade`
 pulls the newest release and pins it as `VERSION` in `.env`, so a later
 `docker compose up -d` keeps running it.
 

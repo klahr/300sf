@@ -62,8 +62,8 @@ upgrade:
 	if [ -z "$$LATEST" ]; then echo "No release tags found."; exit 1; fi; \
 	echo "Upgrading to $$LATEST"; \
 	if (cd deploy && docker compose config --images 2>/dev/null | grep -q '^ghcr\.io/'); then \
-		cd deploy && VERSION="$$LATEST" docker compose pull 300sf && \
-		VERSION="$$LATEST" docker compose up -d --no-build 300sf && \
+		cd deploy && VERSION="$$LATEST" docker compose pull && \
+		VERSION="$$LATEST" docker compose up -d --no-build && \
 		touch .env && \
 		if grep -q '^VERSION=' .env; then sed -i "s/^VERSION=.*/VERSION=$$LATEST/" .env; \
 		else printf '\n# The release running here; set by make upgrade.\nVERSION=%s\n' "$$LATEST" >> .env; fi && \
