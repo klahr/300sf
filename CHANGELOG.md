@@ -8,6 +8,8 @@ Versions are git tags `X.Y.Z`, cut with `make patch|minor|major`.
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-01
+
 ### Added
 
 - CI also publishes the bird sound identification service with every release,
