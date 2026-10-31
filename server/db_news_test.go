@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/klahr/300sf/server/models"
 )
 
 func newPost(t *testing.T, s *dbServer, admin *testUser, title string, extra map[string]any) string {
@@ -168,5 +170,23 @@ func TestDBNewsPaging(t *testing.T) {
 	late := s.signUp(t)
 	if got := mine(get(s.must(t, late, http.StatusOK, "GET", "/v1/announcements/list", nil).Body, "data"), ours...); len(got) != 0 {
 		t.Errorf("a new account has old posts unread: %v", got)
+	}
+
+	// A welcome post greets new accounts however old it is, and nobody else.
+	welcome := newPost(t, s, admin, "Welcome", map[string]any{"welcome": true})
+	time.Sleep(1100 * time.Millisecond)
+	newcomer := s.signUp(t)
+	if got := mine(get(s.must(t, newcomer, http.StatusOK, "GET", "/v1/announcements/list", nil).Body, "data"), welcome); !equal(got, []string{welcome}) {
+		t.Errorf("a new account's unread posts = %v, want the welcome post", got)
+	}
+	s.must(t, newcomer, http.StatusOK, "PUT", "/v1/announcements/"+welcome+"/read", nil)
+	if got := mine(get(s.must(t, newcomer, http.StatusOK, "GET", "/v1/announcements/list", nil).Body, "data"), welcome); len(got) != 0 {
+		t.Errorf("the welcome post is still unread after reading it: %v", got)
+	}
+	if err := models.DB.Table("users").Where("uuid=?", reader.Uuid).Update("timestamp", time.Now().AddDate(0, -2, 0)).Error; err != nil {
+		t.Fatal(err)
+	}
+	if got := mine(get(s.must(t, reader, http.StatusOK, "GET", "/v1/announcements/list", nil).Body, "data"), welcome); len(got) != 0 {
+		t.Errorf("an old account got the welcome post: %v", got)
 	}
 }

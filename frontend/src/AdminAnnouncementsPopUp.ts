@@ -283,6 +283,22 @@ namespace AdminNews {
 		sheet.field(grid, App.translations.TakeDownAfter, until);
 		from.addEventListener("input", update);
 		until.addEventListener("input", update);
+		const welcomeRow = document.createElement("div");
+		welcomeRow.className = "check-row";
+		const welcome = document.createElement("input");
+		welcome.type = "checkbox";
+		welcome.id = "news-welcome";
+		welcome.checked = post ? post.welcome : false;
+		const welcomeLabel = document.createElement("label");
+		welcomeLabel.htmlFor = welcome.id;
+		welcomeLabel.textContent = App.translations.NewsWelcome;
+		welcomeRow.appendChild(welcome);
+		welcomeRow.appendChild(welcomeLabel);
+		when.appendChild(welcomeRow);
+		const welcomeHint = document.createElement("p");
+		welcomeHint.className = "details";
+		welcomeHint.textContent = App.translations.NewsWelcomeHint;
+		when.appendChild(welcomeHint);
 
 		const error = document.createElement("p");
 		error.className = "details error";
@@ -366,6 +382,7 @@ namespace AdminNews {
 				from: fromLocalInput(from.value),
 				until: fromLocalInput(until.value),
 				draft: draft,
+				welcome: welcome.checked,
 			};
 			actions.forEach(a => Ui.setBusy(a, true));
 			const request = post ? new HttpRequest("PUT", "/v1/announcements/" + post.uuid, d) : new HttpRequest("POST", "/v1/announcements", d);

@@ -27,4 +27,6 @@ type Announcement struct {
 	OnHold zero.Time     `json:"on_hold"`
 	Icon   string        `json:"icon"`
 	Color  string        `json:"color"`
+	// Welcome posts greet new accounts: unread for them however old the post.
+	Welcome bool `json:"welcome"`
 }

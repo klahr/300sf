@@ -40,7 +40,7 @@ function openAdminUserPopUp(user: Models.User): void {
 		Admin.row(rows, App.translations.Access, u.scopes || "", null);
 		Admin.row(rows, App.translations.LastSeen, Utils.isValidDate(u.last_seen_at as any) ? Utils.toYYYY_MM_DD_hh_mm(u.last_seen_at as any) : App.translations.Never, null);
 		Admin.row(rows, App.translations.Sightings, String((data.reports || []).length), null);
-		if (u.language) {
+		if (u.language && u.language.code) {
 			Admin.row(rows, App.translations.Language, u.language.code, null);
 		}
 	}, function (status: any, data: Responses.GeneralErrorResponse, error: any) {

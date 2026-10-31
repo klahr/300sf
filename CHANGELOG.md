@@ -12,6 +12,16 @@ Versions are git tags `X.Y.Z`, cut with `make patch|minor|major`.
 
 - `site.time-zone` in the config: the time zone share pages tell days in and
   competitions count them in (Europe/Stockholm when empty).
+- Statistics for admins, under Admin → Statistics: accounts, signups, weekly
+  and monthly active users, sightings, checklists and competitions created per
+  week, retention by signup month, shared checklists and recent competitions'
+  participants. Active means having reported a sighting.
+- Admins set the donation page's progress, raised and goal, under
+  Admin → Donation; it was fixed in the code before.
+- API: `GET /v1/admin/stats` (admin), `GET /v1/donation` and `PUT /v1/donation` (admin).
+- Welcome posts: a news post marked "Welcome new accounts" shows on the
+  dashboard of accounts made in the last 30 days, however old the post is,
+  and never as unread to older accounts (`welcome` on announcements).
 
 ### Changed
 
@@ -44,6 +54,7 @@ Versions are git tags `X.Y.Z`, cut with `make patch|minor|major`.
 - A species' picture that Wikipedia failed to give is asked for again within
   the hour, and species without an English name no longer share one picture.
 - A competition's share page and live updates query the database less.
+- The admin user details show the user's language.
 
 ### Security
 

@@ -28,5 +28,6 @@ namespace Models {
 		on_hold: Date | null;
 		published_at: Date;
 		reads: number;
+		welcome: boolean;
 	}
 }

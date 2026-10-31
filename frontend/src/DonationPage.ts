@@ -1,3 +1,4 @@
+/// <reference path="HttpRequest.ts"/>
 /// <reference path="utils/Date.ts"/>
 /// <reference path="Page.ts"/>
 /// <reference path="ui/Input.ts"/>
@@ -34,20 +35,23 @@ class DonationPage extends Page {
 		funding.className = "section-card funding";
 		this.container.appendChild(funding);
 
-		const needed = 2352;
-		const current = 1000;
+		// The progress is set under Admin → Donation.
 		const amount = document.createElement("p");
 		amount.className = "funding-amount";
-		amount.innerHTML = "<strong>" + current.toLocaleString(App.language) + "</strong> / " + needed.toLocaleString(App.language) + " SEK " + App.translations.Raised;
 		funding.appendChild(amount);
 
 		const bar = new Ui.ProgressBar();
 		this.mChildren.push(bar);
 		funding.appendChild(bar.container);
-		requestAnimationFrame(function () {
+		new HttpRequest("GET", "/v1/donation", null).process(function (status: any, data: { raised: number, goal: number }) {
+			amount.innerHTML = "<strong>" + data.raised.toLocaleString(App.language) + "</strong> / " + data.goal.toLocaleString(App.language) + " SEK " + App.translations.Raised;
 			requestAnimationFrame(function () {
-				bar.setProgress(current / needed * 100);
+				requestAnimationFrame(function () {
+					bar.setProgress(Math.min(100, data.raised / data.goal * 100));
+				});
 			});
+		}, function () {
+			funding.style.display = "none";
 		});
 
 		const amountDesc = document.createElement("p");

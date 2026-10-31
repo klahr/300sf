@@ -317,7 +317,7 @@ func UsersGetUser(c *gin.Context) {
 	}
 
 	var user models.User
-	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("deleted_at IS NULL").First(&user).Error; err != nil {
+	if err := models.DB.Preload("Language").Where("uuid=?", c.Param("uuid")).Where("deleted_at IS NULL").First(&user).Error; err != nil {
 		log.Error(c, 0, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),

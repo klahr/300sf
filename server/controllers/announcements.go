@@ -64,9 +64,13 @@ func newsPost(a models.Announcement, read bool) NewsPost {
 	return NewsPost{Uuid: a.Uuid, Title: a.Title, Body: a.Body, Icon: a.Icon, Color: a.Color, PublishedAt: at, Read: read}
 }
 
+// welcomeFor is how long after signing up an account is greeted by welcome posts.
+const welcomeFor = 30 * 24 * time.Hour
+
 // readIds are the posts among announcements that the user has read. Posts
 // from before the user signed up count as read, so a new account doesn't
-// start with the whole history unread.
+// start with the whole history unread; welcome posts are the other way
+// round, unread for new accounts and read for everyone else.
 func readIds(user *models.User, announcements []models.Announcement) (map[int64]bool, error) {
 	read := map[int64]bool{}
 	if len(announcements) == 0 {
@@ -75,7 +79,11 @@ func readIds(user *models.User, announcements []models.Announcement) (map[int64]
 	ids := make([]int64, len(announcements))
 	for i, a := range announcements {
 		ids[i] = a.Id
-		if newsPost(a, false).PublishedAt.Before(user.Timestamp) {
+		if a.Welcome {
+			if time.Since(user.Timestamp) > welcomeFor {
+				read[a.Id] = true
+			}
+		} else if newsPost(a, false).PublishedAt.Before(user.Timestamp) {
 			read[a.Id] = true
 		}
 	}
@@ -142,9 +150,15 @@ func AnnouncementsList(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, GeneralErrorResponse{Message: err.Error(), Code: ErrorRecordNotFound})
 		return
 	}
+	// The same rule as readIds: welcome posts for new accounts only, others
+	// from after the account was made.
+	unread := "(" + publishedAt + ">=? AND NOT announcements.welcome)"
+	if time.Since(user.Timestamp) <= welcomeFor {
+		unread = "(" + publishedAt + ">=? OR announcements.welcome)"
+	}
 	var announcements []models.Announcement
 	if err := published(models.DB.Model(&models.Announcement{}), time.Now()).
-		Where(publishedAt+">=?", user.Timestamp).
+		Where(unread, user.Timestamp).
 		Joins("LEFT JOIN announcement_users ON announcement_users.announcement_id=announcements.id AND announcement_users.user_id=?", user.Id).
 		Where("announcement_users.announcement_id IS NULL").
 		Order(publishedAt + " DESC").Order("announcements.id DESC").
@@ -209,7 +223,8 @@ type newsRequest struct {
 	Icon  string               `json:"icon"`
 	Color string               `json:"color"`
 	// A draft is on hold: nobody sees it until it is published.
-	Draft bool `json:"draft"`
+	Draft   bool `json:"draft"`
+	Welcome bool `json:"welcome"`
 }
 
 func trimText(t models.LocalizedText) models.LocalizedText {
@@ -259,6 +274,7 @@ func (r *newsRequest) apply(a *models.Announcement) {
 	a.Until = r.Until
 	a.Icon = r.Icon
 	a.Color = r.Color
+	a.Welcome = r.Welcome
 }
 
 // Announcements writes a new post.
@@ -313,7 +329,7 @@ func AnnouncementsUpdate(c *gin.Context) {
 	r.apply(&announcement)
 	// Select every field, so cleared dates and texts are saved as empty.
 	if err := models.DB.Model(&announcement).
-		Select("name", "title_sv", "title_en", "title_de", "body_sv", "body_en", "body_de", "from", "until", "icon", "color").
+		Select("name", "title_sv", "title_en", "title_de", "body_sv", "body_en", "body_de", "from", "until", "icon", "color", "welcome").
 		Updates(&announcement).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, GeneralErrorResponse{Message: err.Error(), Code: ErrorInsert})
 		return

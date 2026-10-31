@@ -1368,3 +1368,16 @@ UPDATE `300sf`.`lists` SET `visibility` = 1 WHERE `visibility` = 2;
 ALTER TABLE `300sf`.`lists`
   ADD COLUMN `previous_uuid` VARCHAR(32) NULL AFTER `uuid`,
   ADD INDEX `previous_uuid_idx` (`previous_uuid` ASC);
+
+-- Values admins set on the site, such as the donation progress.
+CREATE TABLE `300sf`.`settings` (
+  `name` VARCHAR(64) NOT NULL,
+  `value` TEXT NOT NULL,
+  PRIMARY KEY (`name`));
+INSERT INTO `300sf`.`settings` (`name`, `value`) VALUES
+  ('donation_raised', '1000'),
+  ('donation_goal', '2352');
+
+-- Welcome posts greet new accounts on their dashboard, however old the post.
+ALTER TABLE `300sf`.`announcements`
+  ADD COLUMN `welcome` TINYINT(1) NOT NULL DEFAULT 0 AFTER `color`;

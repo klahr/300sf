@@ -6,6 +6,7 @@
 /// <reference path="AdminCatalogPopUp.ts"/>
 /// <reference path="AdminZonesPopUp.ts"/>
 /// <reference path="AdminTranslationsPopUp.ts"/>
+/// <reference path="AdminStatsPopUp.ts"/>
 
 class AdminPage extends Page {
 	private mTools: HTMLDivElement;
@@ -21,12 +22,14 @@ class AdminPage extends Page {
 		this.mTools = document.createElement("div");
 		this.mTools.className = "manage-list";
 		this.container.appendChild(this.mTools);
+		this.addEntry(App.translations.Statistics, "monitoring", AdminStats.open);
 		this.addEntry(App.translations.SpeciesPlural, "raven", openAdminSpeciesPopUp);
 		this.addEntry(App.translations.Catalog, "category", openAdminCatalogPopUp);
 		this.addEntry(App.translations.Zones, "map", openAdminZonesPopUp);
 		this.addEntry(App.translations.Translations, "translate", openAdminTranslationsPopUp);
 		this.addEntry(App.translations.Announcements, "campaign", openAdminAnnouncementsPopUp);
 		this.addEntry(App.translations.Users, "group", openAdminUsersPopUp);
+		this.addEntry(App.translations.Donation, "volunteer_activism", openAdminDonationPopUp);
 
 		const inviteLbl = document.createElement("h2");
 		inviteLbl.textContent = App.translations.Invite;

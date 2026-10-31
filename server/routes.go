@@ -362,6 +362,11 @@ func setupPrivateRoutes(r gin.IRouter) {
 	r.DELETE("/v1/announcements/:uuid", apiKeyMiddleware, adminMiddleware, controllers.AnnouncementsDelete)
 
 	r.POST("/v1/invite", apiKeyMiddleware, adminMiddleware, controllers.Invite)
+
+	// Admin statistics and the donation page's progress
+	r.GET("/v1/admin/stats", apiKeyMiddleware, adminMiddleware, controllers.AdminStats)
+	r.GET("/v1/donation", noneMiddleware, controllers.DonationGet)
+	r.PUT("/v1/donation", apiKeyMiddleware, adminMiddleware, controllers.DonationSet)
 }
 
 // setupConnectRoutes lets apps such as Claude connect to accounts: OAuth
