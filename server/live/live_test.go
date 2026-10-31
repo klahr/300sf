@@ -48,3 +48,18 @@ func TestWatchersHearTheirKeys(t *testing.T) {
 		t.Error("heard after stopping")
 	}
 }
+
+// A refresh that fails keeps the keys it had, so the page still hears them.
+func TestFailedRefreshKeepsKeys(t *testing.T) {
+	race, stop := Watch([]string{"competition:failing", "user:olle"}, func() []string { return nil })
+	defer stop()
+
+	Notify("competition:failing")
+	if !received(race) {
+		t.Error("competition change not heard")
+	}
+	Notify("user:olle")
+	if !received(race) {
+		t.Error("user:olle not heard after a failed refresh")
+	}
+}

@@ -75,7 +75,7 @@ class EditListPopUp {
 				});
 			};
 			// Lists shared before ids grew longer get a new one on the server first.
-			if (visibility === String(ShareChecklist.visibility(list)) && list.uuid.length >= 10) {
+			if (visibility === String(ShareChecklist.visibility(list)) && ShareChecklist.hasLongId(list)) {
 				copy();
 				return;
 			}

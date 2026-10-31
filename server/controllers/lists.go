@@ -799,7 +799,7 @@ func ShareList(uuid string) (*SharedList, error) {
 		First     time.Time
 	}
 	if err := models.DB.Table("list_reports").
-		Select("reports.species_id AS species_id, MIN(reports.`from`) AS first").
+		Select("reports.species_id AS species_id, MIN(COALESCE(reports.`from`, reports.timestamp)) AS first").
 		Joins("JOIN reports ON reports.id=list_reports.report_id").
 		Where("list_reports.list_id=?", list.Id).
 		Where("reports.archived IS NULL").

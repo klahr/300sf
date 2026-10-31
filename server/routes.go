@@ -131,6 +131,17 @@ func apiKeyMiddleware(c *gin.Context) {
 	c.Next()
 }
 
+// optionalApiKeyMiddleware is apiKeyMiddleware for routes open to visitors: a
+// valid token's API key is checked as usual, and without one the request goes
+// on as a visitor's.
+func optionalApiKeyMiddleware(c *gin.Context) {
+	if parseToken(c.Request.Header.Get("Authorization")) == nil {
+		c.Next()
+		return
+	}
+	apiKeyMiddleware(c)
+}
+
 func Health(c *gin.Context) {
 	type response struct {
 		Version string `json:"version"`
@@ -267,8 +278,8 @@ func SetupRoutes(r gin.IRouter, signIn, signOut gin.HandlerFunc) {
 	// Species
 	r.GET("/v1/species/list", apiKeyMiddleware, readMiddleware, controllers.SpeciesList)
 	// Species are public, for the search on the landing page.
-	r.GET("/v1/species/search", noneMiddleware, controllers.SpeciesSearch)
-	r.GET("/v1/species/:uuid", noneMiddleware, controllers.SpeciesDetails)
+	r.GET("/v1/species/search", optionalApiKeyMiddleware, noneMiddleware, controllers.SpeciesSearch)
+	r.GET("/v1/species/:uuid", optionalApiKeyMiddleware, noneMiddleware, controllers.SpeciesDetails)
 	r.POST("/v1/species/:uuid/set_rarity", apiKeyMiddleware, adminMiddleware, controllers.SpeciesSetRarity)
 
 	// Reports

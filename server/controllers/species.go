@@ -231,7 +231,7 @@ func SpeciesDetails(c *gin.Context) {
 
 	// Not yet cached means asking Wikipedia and xeno-canto, which visitors
 	// without an account may only do now and then.
-	if c.GetHeader("Authorization") == "" && Throttled("species/"+ClientNetwork(c.ClientIP()), 20, time.Minute) {
+	if c.GetString("uuid") == "" && Throttled("species/"+ClientNetwork(c.ClientIP()), 20, time.Minute) {
 		c.JSON(http.StatusTooManyRequests, gin.H{"message": "too many requests", "code": ErrorTooManyApiCalls})
 		return
 	}
@@ -332,7 +332,7 @@ func loadSearchCatalog() (searchCatalog, error) {
 // like the app's search: names that start with the query first, Swedish
 // species before others.
 func SpeciesSearch(c *gin.Context) {
-	if c.GetHeader("Authorization") == "" && Throttled("species-search/"+ClientNetwork(c.ClientIP()), 120, time.Minute) {
+	if c.GetString("uuid") == "" && Throttled("species-search/"+ClientNetwork(c.ClientIP()), 120, time.Minute) {
 		c.JSON(http.StatusTooManyRequests, gin.H{"message": "too many requests", "code": ErrorTooManyApiCalls})
 		return
 	}

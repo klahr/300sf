@@ -22,7 +22,8 @@ type watcher struct {
 	mu   sync.Mutex
 	keys []string
 	// refresh gives the keys again after a competition changed, since who
-	// takes part may have; nil when they never change.
+	// takes part may have, or nil on an error; refresh is nil when they never
+	// change.
 	refresh func() []string
 	ch      chan struct{}
 }
@@ -84,15 +85,33 @@ func changed(key string) {
 	for _, w := range all {
 		w.mu.Lock()
 		hit := slices.Contains(w.keys, key)
-		if hit && w.refresh != nil && strings.HasPrefix(key, "competition:") {
-			w.keys = w.refresh()
-		}
 		w.mu.Unlock()
-		if hit {
-			select {
-			case w.ch <- struct{}{}:
-			default:
-			}
+		if !hit {
+			continue
 		}
+		if w.refresh != nil && strings.HasPrefix(key, "competition:") {
+			go w.reload()
+			continue
+		}
+		w.notify()
+	}
+}
+
+// reload gives the watcher its keys again and then tells it, away from the
+// subscriber so that its queries hold up no other watcher. On an error (nil
+// keys) the old keys stay, so a failed query doesn't silence the page.
+func (w *watcher) reload() {
+	if keys := w.refresh(); keys != nil {
+		w.mu.Lock()
+		w.keys = keys
+		w.mu.Unlock()
+	}
+	w.notify()
+}
+
+func (w *watcher) notify() {
+	select {
+	case w.ch <- struct{}{}:
+	default:
 	}
 }

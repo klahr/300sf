@@ -991,11 +991,20 @@ func ShareCompetitionAreas(uuid string) ([]SharedArea, error) {
 	if len(participants) == 0 {
 		return areas, nil
 	}
+	sightings, err := competitionFirstSightings(competition, participants)
+	if err != nil {
+		return nil, err
+	}
+	reports := competitionReports(competition, participants)
+	// Once won, later sightings don't count, as on the rest of the page.
+	if _, wonAt := rankCompetition(participants, sightings, competition.EndOnReports.Int64); wonAt.Valid {
+		reports = reports.Where(competitionAt+" <= ?", wonAt.Time)
+	}
 	var counts []struct {
 		ZoneId  int64
 		Species int
 	}
-	if err := competitionReports(competition, participants).
+	if err := reports.
 		Select("r.zone_id AS zone_id, COUNT(DISTINCT r.species_id) AS species").
 		Where("r.zone_id IS NOT NULL").
 		Group("r.zone_id").
@@ -1004,9 +1013,21 @@ func ShareCompetitionAreas(uuid string) ([]SharedArea, error) {
 		Scan(&counts).Error; err != nil {
 		return nil, err
 	}
+	ids := make([]int64, len(counts))
+	for i, c := range counts {
+		ids[i] = c.ZoneId
+	}
+	var zones []models.Zone
+	if err := models.DB.Preload("Name").Where("id IN ?", ids).Find(&zones).Error; err != nil {
+		return nil, err
+	}
+	byId := map[int64]models.Zone{}
+	for _, z := range zones {
+		byId[z.Id] = z
+	}
 	for _, c := range counts {
-		var zone models.Zone
-		if err := models.DB.Preload("Name").First(&zone, c.ZoneId).Error; err != nil || len(zone.Polygon) == 0 {
+		zone, ok := byId[c.ZoneId]
+		if !ok || len(zone.Polygon) == 0 {
 			continue
 		}
 		areas = append(areas, SharedArea{Name: zone.Name, Species: c.Species, Polygon: roundGeoJSON(zone.Polygon)})

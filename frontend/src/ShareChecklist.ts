@@ -12,6 +12,11 @@ namespace ShareChecklist {
 		return window.location.origin + "/share/" + list.uuid;
 	}
 
+	// Whether the list's id is long enough for its page to open: utils.ShortUuidLength on the server.
+	export function hasLongId(list: Models.List): boolean {
+		return list.uuid.length >= 10;
+	}
+
 	// A checklist is private or shared with a link; one made public before is shared with a link.
 	export function visibility(list: Models.List): number {
 		return list.visibility === Models.Visibility.Public ? Models.Visibility.Hidden : list.visibility;
@@ -104,7 +109,7 @@ namespace ShareChecklist {
 		};
 
 		show();
-		if (list.visibility !== Models.Visibility.Private && list.uuid.length < 10) {
+		if (list.visibility !== Models.Visibility.Private && !hasLongId(list)) {
 			save(list.visibility);
 		}
 		sheet.open(function () { });

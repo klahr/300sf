@@ -8,6 +8,25 @@ Versions are git tags `X.Y.Z`, cut with `make patch|minor|major`.
 
 ## [Unreleased]
 
+### Fixed
+
+- A checklist's share page counts sightings that have no start time, instead
+  of showing their species as not seen.
+- Share pages work without Redis, and a species' picture is looked up once,
+  however many screens show the page.
+- A competition's share page keeps updating when looking up who takes part
+  fails for a moment, and many open pages no longer hold each other up.
+- The map on a competition's share page leaves out sightings after the
+  competition was won, like the standings, and loads faster.
+- A competition's share page counts the days left in calendar days, and says
+  "1 day left".
+
+### Security
+
+- Species search and species details are rate limited for anyone not signed
+  in, also when an invalid token is sent; a valid token's API key is checked
+  as before, including revoked keys and their limits.
+
 ## [0.1.0] - 2026-10-31
 
 ### Added

@@ -3,6 +3,7 @@ package site
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -23,6 +24,7 @@ var shareTexts = map[string]map[string]string{
 		"Competition":      "Tävling",
 		"Participants":     "deltagare",
 		"DaysLeft":         "{0} dagar kvar",
+		"OneDayLeft":       "1 dag kvar",
 		"LastDay":          "Sista dagen",
 		"StartsOn":         "Startar {0}",
 		"FinishedOn":       "Avslutad {0}",
@@ -56,6 +58,7 @@ var shareTexts = map[string]map[string]string{
 		"Competition":      "Competition",
 		"Participants":     "participants",
 		"DaysLeft":         "{0} days left",
+		"OneDayLeft":       "1 day left",
 		"LastDay":          "Last day",
 		"StartsOn":         "Starts {0}",
 		"FinishedOn":       "Finished {0}",
@@ -89,6 +92,7 @@ var shareTexts = map[string]map[string]string{
 		"Competition":      "Wettbewerb",
 		"Participants":     "Teilnehmende",
 		"DaysLeft":         "Noch {0} Tage",
+		"OneDayLeft":       "Noch 1 Tag",
 		"LastDay":          "Letzter Tag",
 		"StartsOn":         "Beginnt am {0}",
 		"FinishedOn":       "Beendet am {0}",
@@ -149,9 +153,6 @@ func (s *Site) sharePage(c *gin.Context) {
 		return
 	}
 
-	date := func(t time.Time) string {
-		return fmt.Sprintf("%d %s", t.Day(), shareMonths[lang][t.Month()-1])
-	}
 	recent := map[int64]bool{}
 	for _, l := range list.Latest {
 		recent[l.Name.Id] = true
@@ -164,7 +165,7 @@ func (s *Site) sharePage(c *gin.Context) {
 		g := groups[len(groups)-1]
 		e := shareSpecies{Uuid: sp.Uuid, Name: sp.Name, Seen: !sp.Seen.IsZero(), Recent: recent[sp.Name.Id]}
 		if e.Seen {
-			e.Date = date(sp.Seen)
+			e.Date = shareDay(sp.Seen, lang)
 			g.Seen++
 		}
 		g.Species = append(g.Species, e)
@@ -182,11 +183,11 @@ func (s *Site) sharePage(c *gin.Context) {
 	data["Groups"] = groups
 	if len(list.Latest) > 0 {
 		newest := list.Latest[0]
-		data["Newest"] = shareSpecies{Uuid: newest.Uuid, Name: newest.Name, Seen: true, Date: date(newest.Seen)}
+		data["Newest"] = shareSpecies{Uuid: newest.Uuid, Name: newest.Name, Seen: true, Date: shareDay(newest.Seen, lang)}
 		data["Photo"] = s.photo(newest.Name)
 		var more []shareSpecies
 		for _, l := range list.Latest[1:] {
-			more = append(more, shareSpecies{Uuid: l.Uuid, Name: l.Name, Seen: true, Date: date(l.Seen)})
+			more = append(more, shareSpecies{Uuid: l.Uuid, Name: l.Name, Seen: true, Date: shareDay(l.Seen, lang)})
 		}
 		data["More"] = more
 	}
@@ -195,11 +196,19 @@ func (s *Site) sharePage(c *gin.Context) {
 
 // speciesPhoto is a large Wikipedia picture of a species, or "" while there is
 // none. Wikipedia is slow, so a picture not yet looked up is fetched in the
-// background and shows when the page next reloads.
+// background and shows when the page next reloads. Without Redis there is no
+// picture, as there would be nowhere to keep it.
 func speciesPhoto(name models.Translation) string {
+	if models.Cache == nil {
+		return ""
+	}
 	key := "share/photo/" + name.En.String
 	if url, err := models.Cache.Get(key).Result(); err == nil {
 		return url
+	}
+	// One lookup at a time, however many screens reload before it is done.
+	if ok, err := models.Cache.SetNX(key+"/fetching", 1, time.Minute).Result(); err != nil || !ok {
+		return ""
 	}
 	go func() {
 		models.Cache.Set(key, wikipedia.Photo("en", name, 1280), time.Second*time.Duration(config.AppConfig.WikipediaCacheDuration))
@@ -262,6 +271,7 @@ func (s *Site) shareCompetitionPage(c *gin.Context) {
 	}
 	info := race.Info
 	now := time.Now()
+	last := info.Until.Add(-time.Second)
 	fill := func(text string, v any) string { return strings.Replace(text, "{0}", fmt.Sprint(v), 1) }
 
 	switch info.Status {
@@ -278,14 +288,20 @@ func (s *Site) shareCompetitionPage(c *gin.Context) {
 			data["Winner"] = info.Standings[0].User
 		}
 	default:
-		days := int(info.Until.Sub(now).Hours() / 24)
-		if days < 1 {
+		// Whole calendar days after today, rounded so a DST change doesn't cut one off.
+		y, m, d := now.In(last.Location()).Date()
+		today := time.Date(y, m, d, 0, 0, 0, 0, last.Location())
+		y, m, d = last.Date()
+		days := int(math.Round(time.Date(y, m, d, 0, 0, 0, 0, last.Location()).Sub(today).Hours() / 24))
+		switch {
+		case days < 1:
 			data["Status"] = t["LastDay"]
-		} else {
+		case days == 1:
+			data["Status"] = t["OneDayLeft"]
+		default:
 			data["Status"] = fill(t["DaysLeft"], days)
 		}
 	}
-	last := info.Until.Add(-time.Second)
 	if info.From.Year() == last.Year() {
 		data["Period"] = fmt.Sprintf("%d %s – %d %s %d", info.From.Day(), shareMonths[lang][info.From.Month()-1], last.Day(), shareMonths[lang][last.Month()-1], last.Year())
 	} else {

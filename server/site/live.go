@@ -33,7 +33,8 @@ func (s *Site) liveCompetition(c *gin.Context) {
 		return
 	}
 	s.serveLive(c, keys, func() []string {
-		// A competition that is no longer public is watched for nothing.
+		// Nil on an error, such as the competition no longer being public: the
+		// old keys stay, and the page finds out when it fetches itself again.
 		keys, _ := s.raceKeys(uuid)
 		return keys
 	})
