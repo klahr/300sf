@@ -444,7 +444,7 @@ func ReportsListByList(c *gin.Context) {
 	}
 
 	var list models.List
-	if err := models.DB.Where("uuid=?", r.ListUuid).Where("user_id=?", user.Id).First(&list).Error; err != nil {
+	if err := models.DB.Scopes(ownList(user.Id, r.ListUuid)).First(&list).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -690,7 +690,7 @@ func ReportsExport(c *gin.Context) {
 	}
 
 	var list models.List
-	if err := models.DB.Where("uuid=?", r.ListUuid).Where("user_id=?", user.Id).Preload("Name").First(&list).Error; err != nil {
+	if err := models.DB.Scopes(ownList(user.Id, r.ListUuid)).Preload("Name").First(&list).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -936,7 +936,7 @@ func reportAndList(c *gin.Context) (models.Report, models.List, bool) {
 		c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorRecordNotFound, Message: "sighting not found"})
 		return report, list, false
 	}
-	if err := models.DB.Where("(uuid=? OR previous_uuid=?) AND user_id=?", r.ListUuid, r.ListUuid, user.Id).First(&list).Error; err != nil {
+	if err := models.DB.Scopes(ownList(user.Id, r.ListUuid)).First(&list).Error; err != nil {
 		c.JSON(http.StatusBadRequest, GeneralErrorResponse{Code: ErrorRecordNotFound, Message: "list not found"})
 		return report, list, false
 	}

@@ -441,5 +441,7 @@
 	"DonationGoalSek": "Ziel (SEK)",
 	"DonationHint": "Wird auf der Spendenseite als Fortschrittsbalken angezeigt.",
 	"NewsWelcome": "Neue Konten begrüßen",
-	"NewsWelcomeHint": "Wird Konten, die in den letzten 30 Tagen angelegt wurden, auf der Startseite gezeigt, bis sie es schließen, egal wie alt der Beitrag ist. Ältere Konten sehen ihn nie als ungelesen."
+	"NewsWelcomeHint": "Wird Konten, die in den letzten 30 Tagen angelegt wurden, auf der Startseite gezeigt, bis sie es schließen, egal wie alt der Beitrag ist. Ältere Konten sehen ihn nie als ungelesen.",
+	"Play": "Abspielen",
+	"Pause": "Pause"
 }

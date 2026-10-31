@@ -441,5 +441,7 @@
 	"DonationGoalSek": "Mål (kr)",
 	"DonationHint": "Visas på donationssidan som en förloppsindikator.",
 	"NewsWelcome": "Välkomna nya konton",
-	"NewsWelcomeHint": "Visas på startsidan för konton skapade de senaste 30 dagarna tills de stänger det, hur gammalt inlägget än är. Äldre konton ser det aldrig som oläst."
+	"NewsWelcomeHint": "Visas på startsidan för konton skapade de senaste 30 dagarna tills de stänger det, hur gammalt inlägget än är. Äldre konton ser det aldrig som oläst.",
+	"Play": "Spela",
+	"Pause": "Pausa"
 }

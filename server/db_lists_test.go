@@ -126,9 +126,18 @@ func TestDBSharedLists(t *testing.T) {
 		t.Fatalf("shared old list got id %q", renewed)
 	}
 	s.must(t, friend, http.StatusOK, "GET", "/v1/lists/"+renewed, nil)
-	if r := s.call(t, owner, "GET", "/v1/lists/"+old, nil); r.Status == http.StatusOK {
-		t.Errorf("old id still opens: %s", r.Raw)
+	// The old id is too easy to guess for anyone else, but the owner's devices
+	// may not have caught up with the new one yet.
+	if r := s.call(t, friend, "GET", "/v1/lists/"+old, nil); r.Status == http.StatusOK {
+		t.Errorf("old id opens for someone else: %s", r.Raw)
 	}
+	if r := s.do(t, "10.250.1.4", "", "POST", "/v1/lists/compare", map[string]any{"uuids": []string{old}}); r.Status == http.StatusOK {
+		t.Errorf("compare opened the old id: %s", r.Raw)
+	}
+	if r := s.must(t, owner, http.StatusOK, "GET", "/v1/lists/"+old, nil); get(r.Body, "result", "uuid") != renewed {
+		t.Errorf("the owner's old id opened %v, want %s", get(r.Body, "result", "uuid"), renewed)
+	}
+	s.must(t, owner, http.StatusNoContent, "POST", "/v1/lists/"+old+"/color", map[string]any{"color": "#2f7d32"})
 	// A sighting saved offline before the list got its new id still lands on it.
 	if r := newReport(t, s, owner, species[0], old); r.Status != http.StatusOK {
 		t.Fatalf("report with the old list id = %d: %s", r.Status, r.Raw)

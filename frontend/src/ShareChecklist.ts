@@ -109,6 +109,8 @@ namespace ShareChecklist {
 				changed();
 				window.dispatchEvent(new Event("listschanged"));
 			}, function () {
+				// A choice made meanwhile was made against this save; after an error the user chooses again.
+				wanted = null;
 				new Ui.MessageBox(App.translations.Error, App.translations.SomethingWentWrong, "/img/messagebox-256.webp", "var(--error-color)", function () { });
 			}, function () {
 				saving = false;

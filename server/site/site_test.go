@@ -74,6 +74,32 @@ func bootData(t *testing.T, body string) map[string]any {
 	return boot
 }
 
+// Sound identification is only shown when it is on (site.analyze-endpoint),
+// and the features after it still alternate sides.
+func TestLandingPageIdentify(t *testing.T) {
+	_, r := newTestSite(t, cfg)
+	off := get(r, "300sf.se", "/?lang=sv").Body.String()
+	on := cfg
+	on.AnalyzeEndpoint = "http://127.0.0.1:8095/analyze"
+	_, r = newTestSite(t, on)
+	with := get(r, "300sf.se", "/?lang=sv").Body.String()
+
+	for _, text := range []string{"Vem är det som sjunger?", "Hur säker är artbestämningen på läten?", "Bestämd på lätet", "vem som sjunger i buskaget"} {
+		if strings.Contains(off, text) {
+			t.Errorf("identification off, but the page has %q", text)
+		}
+		if !strings.Contains(with, text) {
+			t.Errorf("identification on, but the page lacks %q", text)
+		}
+	}
+	if got := strings.Count(off, `class="showcase flip reveal"`); got != 2 {
+		t.Errorf("%d of 5 features mirrored, want 2", got)
+	}
+	if got := strings.Count(with, `class="showcase flip reveal"`); got != 3 {
+		t.Errorf("%d of 6 features mirrored, want 3", got)
+	}
+}
+
 func TestLandingPage(t *testing.T) {
 	_, r := newTestSite(t, cfg)
 

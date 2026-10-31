@@ -80,7 +80,8 @@ func perPeriod(q *gorm.DB, period, count string, keys []string, layout string) (
 
 func AdminStats(c *gin.Context) {
 	log.Info(c, 0, "AdminStats")
-	res, err := adminStats(time.Now().UTC())
+	// The database keeps local times (loc=Local in data-source), so periods are counted in them.
+	res, err := adminStats(time.Now())
 	if err != nil {
 		log.Error(c, ErrorInternalServerError, err.Error())
 		c.JSON(http.StatusInternalServerError, GeneralErrorResponse{Code: ErrorInternalServerError, Message: err.Error()})
@@ -93,13 +94,13 @@ func adminStats(now time.Time) (*AdminStatsResponse, error) {
 	var res AdminStatsResponse
 	db := models.DB
 
-	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	monday := today.AddDate(0, 0, -((int(today.Weekday()) + 6) % 7))
 	first := monday.AddDate(0, 0, -7*(statsWeeks-1))
 	for i := 0; i < statsWeeks; i++ {
 		res.Weeks = append(res.Weeks, first.AddDate(0, 0, 7*i).Format(time.DateOnly))
 	}
-	firstMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC).AddDate(0, -(statsMonths - 1), 0)
+	firstMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location()).AddDate(0, -(statsMonths - 1), 0)
 	for i := 0; i < statsMonths; i++ {
 		res.Months = append(res.Months, firstMonth.AddDate(0, i, 0).Format("2006-01"))
 	}

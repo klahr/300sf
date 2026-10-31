@@ -2789,6 +2789,8 @@ div.photo-strip>button.photo:hover>img {
 
 div.sound-list {
 	display: grid;
+	/* minmax(0, …): a card never makes the sheet wider than the screen. */
+	grid-template-columns: minmax(0, 1fr);
 	gap: 10px;
 }
 
@@ -2804,12 +2806,121 @@ div.sound-head {
 	gap: 12px;
 }
 
-div.sound-head>span.material-symbols-outlined {
+/* Play and pause, in the colour the waveform icon had. */
+button.sound-play {
+	display: grid;
+	place-items: center;
+	flex: none;
+	width: 40px;
+	height: 40px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
 	color: var(--accent);
 	background-color: color-mix(in srgb, var(--accent) 16%, transparent);
-	border-radius: 10px;
-	padding: 7px;
-	font-size: 20px;
+	cursor: pointer;
+	transition: background-color var(--dur) var(--ease-out), transform var(--dur) var(--ease-out);
+}
+
+button.sound-play:hover {
+	background-color: color-mix(in srgb, var(--accent) 26%, transparent);
+}
+
+button.sound-play:active {
+	transform: scale(0.94);
+}
+
+button.sound-play>span.material-symbols-outlined {
+	font-size: 24px;
+	font-variation-settings: 'FILL' 1;
+}
+
+div.sound-card.playing button.sound-play {
+	color: var(--paper);
+	background-color: var(--accent);
+}
+
+div.sound-card.loading button.sound-play>span {
+	animation: sound-wait 1s ease-in-out infinite alternate;
+}
+
+@keyframes sound-wait {
+	to {
+		opacity: 0.35;
+	}
+}
+
+div.sound-bar {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-top: 10px;
+}
+
+/* A thin track with a taller hit area, so it is easy to tap on a phone. */
+div.sound-track {
+	position: relative;
+	flex: 1;
+	min-width: 0;
+	height: 20px;
+	cursor: pointer;
+	touch-action: none;
+}
+
+div.sound-track::before,
+div.sound-fill {
+	position: absolute;
+	top: 50%;
+	left: 0;
+	height: 4px;
+	border-radius: 2px;
+	transform: translateY(-50%);
+}
+
+div.sound-track::before {
+	content: "";
+	right: 0;
+	background-color: var(--line-strong);
+}
+
+div.sound-fill {
+	width: 0;
+	background-color: var(--accent);
+}
+
+div.sound-fill::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	right: -6px;
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	background-color: var(--accent);
+	transform: translateY(-50%) scale(0);
+	transition: transform var(--dur) var(--ease-out);
+}
+
+div.sound-card.playing div.sound-fill::after,
+div.sound-track:hover div.sound-fill::after,
+div.sound-track:focus-visible div.sound-fill::after {
+	transform: translateY(-50%) scale(1);
+}
+
+div.sound-track:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+	border-radius: 4px;
+}
+
+span.sound-time {
+	flex: none;
+	/* Room for "0:00 / 0:00", so every card's track ends in the same place. */
+	min-width: 6.2em;
+	color: var(--ink-soft);
+	font-size: 0.8em;
+	font-variant-numeric: tabular-nums;
+	text-align: right;
 }
 
 div.sound-head>div {
@@ -2829,7 +2940,6 @@ div.sound-head p.details {
 	text-overflow: ellipsis;
 }
 
-div.sound-card>audio,
 section.sheet-section>audio {
 	display: block;
 	width: 100%;

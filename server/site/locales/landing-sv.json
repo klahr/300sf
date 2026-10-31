@@ -1,6 +1,7 @@
 {
 	"Name": "300 Svenska Fåglar",
 	"MetaDescription": "Kryssa fåglar i mobilen. Håll koll på årslistan och alla dina fynd, ta reda på vem som sjunger i buskaget och tävla mot skådarkompisarna. Gratis, direkt i webbläsaren.",
+	"MetaDescriptionNoIdentify": "Kryssa fåglar i mobilen. Håll koll på årslistan och alla dina fynd, och tävla mot skådarkompisarna. Gratis, direkt i webbläsaren.",
 	"Language": "Språk",
 	"Menu": "Huvudmeny",
 	"NavSearch": "Slå upp en fågel",
@@ -51,37 +52,37 @@
 	"FeaturesLede": "Byggt av skådare, för skådare i Sverige. Snabbt i fält och med alla detaljer när du kommit hem.",
 	"Showcase": [
 		{
-			"eyebrow": "Listor",
+			"eyebrow": "Listor", "mock": "lists",
 			"title": "En lista för varje jakt",
 			"text": "Börja med Sveriges 300 vanligaste fåglar, eller gör egna listor: årslistan, tomtlistan eller resan till Öland.",
 			"points": ["Färdig lista med de 300 vanligaste arterna", "Hur många egna listor som helst", "Se direkt hur många du har kvar på varje lista"]
 		},
 		{
-			"eyebrow": "Fynd",
+			"eyebrow": "Fynd", "mock": "sighting",
 			"title": "Var och när, utan att du behöver tänka på det",
 			"text": "Varje fynd sparas med datum och plats och hamnar automatiskt i rätt län och kommun.",
 			"points": ["Platsen från mobilen, eller sätt ut en nål på kartan", "Antal, ålder, kön och kommentar om du vill", "Ta ut allt som CSV eller JSON"]
 		},
 		{
-			"eyebrow": "Läten",
+			"eyebrow": "Läten", "mock": "sound",
 			"title": "Vem är det som sjunger?",
 			"text": "Spela in upp till tio sekunder så får du de troligaste arterna och hur säker bedömningen är. Välj rätt art och rapportera den direkt.",
 			"points": ["Spelar in med mobilens mikrofon", "Föreslår arter som brukar finnas i Sverige vid den här tiden på året", "Artbestämning med BirdNET"]
 		},
 		{
-			"eyebrow": "Tävlingar",
+			"eyebrow": "Tävlingar", "mock": "competition",
 			"title": "Kryssa i kapp med kompisarna",
 			"text": "Bestäm period och artlista, bjud in skådarkompisarna och se vem som drar ifrån.",
 			"points": ["Ni sätter reglerna: period, lista och hur många som får vara med", "Först till ett visst antal arter kan vinna", "Bjud in kompisar eller öppna för alla"]
 		},
 		{
-			"eyebrow": "AI-assistenter",
+			"eyebrow": "AI-assistenter", "mock": "chat",
 			"title": "Rapportera i en chatt",
 			"text": "Koppla Claude eller en annan AI-assistent till dina listor. Berätta vad du har sett, eller fråga hur året ser ut.",
 			"points": ["Rapportera fynd och fråga om listorna med egna ord", "Du godkänner assistenten och kan koppla bort den när du vill", "Koppla in den under Inställningar › Hantera API-nycklar"]
 		},
 		{
-			"eyebrow": "Dela",
+			"eyebrow": "Dela", "mock": "share",
 			"title": "Listan på storbild",
 			"text": "Varje lista har en egen sida att dela. Visa den på tv:n i klubbstugan eller skicka länken till en kompis. Sidan uppdaterar sig själv när du kryssar nya arter.",
 			"points": ["En länk per lista, inget konto behövs för att titta", "Gjord för tv-skärmen, funkar i mobilen också", "Visar arter och datum, aldrig var du såg dem"]
@@ -127,7 +128,7 @@
 		{ "q": "Vilka fåglar finns med?", "a": "Den färdiga listan har Sveriges 300 vanligaste fåglar. På egna listor kan du lägga till vilken som helst av de över 2 000 arterna." },
 		{ "q": "Måste jag ladda ner en app?", "a": "Nej, 300 Svenska Fåglar körs i webbläsaren, i mobilen, på surfplattan och på datorn." },
 		{ "q": "Kan jag ta med mig mina data?", "a": "Ja. Ladda ner en lista som kalkylark (CSV), eller alla dina data på en gång, när du vill." },
-		{ "q": "Hur säker är artbestämningen på läten?", "a": "Se den som ett förslag, inte som en säker bestämning. Den fungerar bäst med en tydlig inspelning av en fågel som sjunger nära." }
+		{ "q": "Hur säker är artbestämningen på läten?", "needs": "identify", "a": "Se den som ett förslag, inte som en säker bestämning. Den fungerar bäst med en tydlig inspelning av en fågel som sjunger nära." }
 	],
 	"CtaTitle": "Börja kryssa i dag",
 	"CtaText": "Gratis och klart på en minut. Nästa fågel du ser kan bli ditt första kryss.",

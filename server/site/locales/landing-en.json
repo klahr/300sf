@@ -1,6 +1,7 @@
 {
 	"Name": "300 Swedish Birds",
 	"MetaDescription": "The checklist for birders in Sweden. Tick off species, log where and when you saw them, identify birds by their song and compete with friends. Free, in your browser.",
+	"MetaDescriptionNoIdentify": "The checklist for birders in Sweden. Tick off species, log where and when you saw them and compete with friends. Free, in your browser.",
 	"Language": "Language",
 	"Menu": "Main menu",
 	"NavSearch": "Find a bird",
@@ -51,37 +52,37 @@
 	"FeaturesLede": "Built by birders for birders in Sweden: quick to use in the field, and with all the details when you get home.",
 	"Showcase": [
 		{
-			"eyebrow": "Checklists",
+			"eyebrow": "Checklists", "mock": "lists",
 			"title": "A list for every goal",
 			"text": "Start from the 300 most common Swedish birds, or make your own list for the year, the garden or a single trip.",
 			"points": ["Ready-made list of the 300 most common species", "Your own lists, as many as you like", "Progress for every list at a glance"]
 		},
 		{
-			"eyebrow": "Sightings",
+			"eyebrow": "Sightings", "mock": "sighting",
 			"title": "Where and when, kept for you",
 			"text": "Each sighting keeps its date and position and is placed in the right county and municipality automatically.",
 			"points": ["Position from your phone or a pin on the map", "Count, age, sex and a comment when you want them", "Export everything as CSV or JSON"]
 		},
 		{
-			"eyebrow": "Identify by sound",
+			"eyebrow": "Identify by sound", "mock": "sound",
 			"title": "Hear a bird you don't know?",
 			"text": "Record up to ten seconds of song and get the most likely species, with how sure the guess is. Pick one to report it.",
 			"points": ["Works with the phone's microphone", "Suggests species that occur in Sweden at this time of year", "Recognition by BirdNET"]
 		},
 		{
-			"eyebrow": "Competitions",
+			"eyebrow": "Competitions", "mock": "competition",
 			"title": "Bird together with friends",
 			"text": "Set a period and a species list, invite your friends and follow who gets furthest.",
 			"points": ["Your own rules: period, list and number of participants", "Optionally the first to reach a number of species wins", "Invite friends or open it to everyone"]
 		},
 		{
-			"eyebrow": "AI assistants",
+			"eyebrow": "AI assistants", "mock": "chat",
 			"title": "Report birds in a chat",
 			"text": "Connect Claude or another AI assistant and talk to your lists: tell it what you saw, or ask how your year is going.",
 			"points": ["Report sightings and ask about your lists in plain words", "You approve the assistant and can disconnect it whenever you like", "Connect it under Settings › Manage API keys"]
 		},
 		{
-			"eyebrow": "Share",
+			"eyebrow": "Share", "mock": "share",
 			"title": "Your list on the big screen",
 			"text": "Every checklist has a page of its own to share. Put it on the TV at the bird club or send it to a friend: it keeps itself up to date as you add species.",
 			"points": ["One link per list, no account needed to look", "Made for a TV, works on a phone too", "Shows species and dates, never where you saw them"]
@@ -127,7 +128,7 @@
 		{ "q": "Which birds are included?", "a": "The ready-made list has the 300 most common birds in Sweden. Your own lists can include any of over 2,000 species in the catalogue." },
 		{ "q": "Do I need to install an app?", "a": "No. 300 Swedish Birds runs in the browser on your phone, tablet and computer." },
 		{ "q": "Can I get my data out?", "a": "Yes. Download a list as a spreadsheet (CSV) or all your data at once, whenever you like." },
-		{ "q": "How reliable is the sound identification?", "a": "It is a suggestion, not a certain identification. It works best with a clear recording of a singing bird, close by." }
+		{ "q": "How reliable is the sound identification?", "needs": "identify", "a": "It is a suggestion, not a certain identification. It works best with a clear recording of a singing bird, close by." }
 	],
 	"CtaTitle": "Start your list today",
 	"CtaText": "Free, and ready in a minute. The next bird you see could be the first one on it.",

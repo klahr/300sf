@@ -7,11 +7,11 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="description" content="{{.MetaDescription}}">
+	<meta name="description" content="{{if $.Identify}}{{.MetaDescription}}{{else}}{{.MetaDescriptionNoIdentify}}{{end}}">
 	<meta name="theme-color" content="#070707">
 	<meta property="og:type" content="website">
 	<meta property="og:title" content="{{.Name}}">
-	<meta property="og:description" content="{{.MetaDescription}}">
+	<meta property="og:description" content="{{if $.Identify}}{{.MetaDescription}}{{else}}{{.MetaDescriptionNoIdentify}}{{end}}">
 	<title>{{.Name}}</title>
 	<link rel="icon" href="/img/99249498-452f-4b0b-a1f5-45902f7ffe48.png" type="image/png">
 	<link rel="alternate" hreflang="sv" href="/?lang=sv">
@@ -123,11 +123,13 @@
 						</ol>
 					</div>
 				</div>
+				{{if $.Identify}}
 				<div class="float float-id" aria-hidden="true">
 					<span class="float-icon mic"><svg><use href="#i-mic"/></svg></span>
 					<span class="float-text"><small>{{.MockIdentified}}</small><b>{{.MockIdentifiedName}}</b></span>
 					<span class="float-value">99%</span>
 				</div>
+				{{end}}
 				<div class="float float-new" aria-hidden="true">
 					<span class="float-icon new"><svg><use href="#i-check"/></svg></span>
 					<span class="float-text"><b>{{.MockNewTitle}}</b><small>{{.MockNewText}}</small></span>
@@ -154,8 +156,8 @@
 				<p>{{.FeaturesLede}}</p>
 			</header>
 
-			{{range $i, $f := .Showcase}}
-			<article class="showcase{{if or (eq $i 1) (eq $i 3) (eq $i 5)}} flip{{end}} reveal">
+			{{range $s := $.Showcase}}{{$f := $s.Item}}
+			<article class="showcase{{if $s.Flip}} flip{{end}} reveal">
 				<div class="showcase-copy">
 					<p class="eyebrow">{{$f.eyebrow}}</p>
 					<h3>{{$f.title}}</h3>
@@ -165,7 +167,7 @@
 					</ul>
 				</div>
 				<div class="showcase-visual" aria-hidden="true">
-					{{if eq $i 0}}
+					{{if eq $f.mock "lists"}}
 					<div class="card mock-lists">
 						{{range $t.MockLists}}
 						<div class="mock-listcard" style="--done: {{.seen}}; --of: {{.total}}">
@@ -174,7 +176,7 @@
 						</div>
 						{{end}}
 					</div>
-					{{else if eq $i 1}}
+					{{else if eq $f.mock "sighting"}}
 					<div class="card mock-sighting">
 						<div class="mock-map">
 							<svg class="map-art" viewBox="0 0 400 170" preserveAspectRatio="xMidYMid slice">
@@ -203,7 +205,7 @@
 							</ul>
 						</div>
 					</div>
-					{{else if eq $i 2}}
+					{{else if eq $f.mock "sound"}}
 					<div class="card mock-identify">
 						<div class="mock-mic">
 							<span class="pulse"></span>
@@ -218,11 +220,11 @@
 						</div>
 						{{end}}
 					</div>
-					{{else if eq $i 3}}
+					{{else if eq $f.mock "competition"}}
 					<div class="card mock-screen">
 						<img src="/img/competition-{{$lang}}.webp" alt="" width="1600" height="900" loading="lazy" decoding="async">
 					</div>
-					{{else if eq $i 4}}
+					{{else if eq $f.mock "chat"}}
 					<div class="card mock-chat">
 						{{range $t.MockChat}}
 						<p class="{{.from}}">{{.text}}</p>
@@ -273,12 +275,12 @@
 				<h2>{{.FaqTitle}}</h2>
 			</header>
 			<div class="faq">
-				{{range .Faq}}
+				{{range .Faq}}{{if or (not .needs) $.Identify}}
 				<details>
 					<summary>{{.q}}</summary>
 					<p>{{.a}}{{if .link}} <a href="{{.link}}?lang={{$.Lang}}">{{.linkText}}</a>{{end}}</p>
 				</details>
-				{{end}}
+				{{end}}{{end}}
 			</div>
 		</div>
 	</section>

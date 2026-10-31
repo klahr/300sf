@@ -214,8 +214,9 @@ func speciesPhoto(name models.Translation) string {
 		photo := wikipedia.Photo("en", name, 1280)
 		// No picture may be Wikipedia failing for a moment, so it is asked again sooner.
 		ttl := time.Second * time.Duration(config.AppConfig.WikipediaCacheDuration)
-		if photo == "" {
-			ttl = min(ttl, time.Hour)
+		// A cache duration of 0 keeps entries for good, which "no picture" must not be.
+		if photo == "" && (ttl <= 0 || ttl > time.Hour) {
+			ttl = time.Hour
 		}
 		models.Cache.Set(key, photo, ttl)
 	}()

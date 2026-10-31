@@ -441,5 +441,7 @@
 	"DonationGoalSek": "Goal (SEK)",
 	"DonationHint": "Shown on the donation page as a progress bar.",
 	"NewsWelcome": "Welcome new accounts",
-	"NewsWelcomeHint": "Shown on the dashboard of accounts made in the last 30 days until they close it, however old the post is. Older accounts never see it as unread."
+	"NewsWelcomeHint": "Shown on the dashboard of accounts made in the last 30 days until they close it, however old the post is. Older accounts never see it as unread.",
+	"Play": "Play",
+	"Pause": "Pause"
 }

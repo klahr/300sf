@@ -178,7 +178,7 @@ func ListsArchive(c *gin.Context) {
 		return
 	}
 
-	if err := models.DB.Table(table.Lists).Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).Where("archived IS NULL").UpdateColumn("archived", time.Now()).Error; err != nil {
+	if err := models.DB.Table(table.Lists).Scopes(ownList(user.Id, c.Param("uuid"))).Where("archived IS NULL").UpdateColumn("archived", time.Now()).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -223,7 +223,7 @@ func ListsRestore(c *gin.Context) {
 		return
 	}
 
-	if err := models.DB.Table(table.Lists).Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).Where("archived IS NOT NULL").UpdateColumn("archived", nil).Error; err != nil {
+	if err := models.DB.Table(table.Lists).Scopes(ownList(user.Id, c.Param("uuid"))).Where("archived IS NOT NULL").UpdateColumn("archived", nil).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -247,7 +247,7 @@ func ListsDelete(c *gin.Context) {
 	}
 
 	var list models.List
-	if err := tx.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).Where("archived IS NOT NULL").First(&list).Error; err != nil {
+	if err := tx.Scopes(ownList(user.Id, c.Param("uuid"))).Where("archived IS NOT NULL").First(&list).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -301,7 +301,7 @@ func ListsRename(c *gin.Context) {
 	}
 
 	var list models.List
-	if err := models.DB.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).First(&list).Error; err != nil {
+	if err := models.DB.Scopes(ownList(user.Id, c.Param("uuid"))).First(&list).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -341,7 +341,7 @@ func ListsColor(c *gin.Context) {
 	}
 
 	var list models.List
-	if err := models.DB.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).First(&list).Error; err != nil {
+	if err := models.DB.Scopes(ownList(user.Id, c.Param("uuid"))).First(&list).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -404,7 +404,7 @@ func ListsTimespan(c *gin.Context) {
 	}
 
 	var list models.List
-	if err := models.DB.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).First(&list).Error; err != nil {
+	if err := models.DB.Scopes(ownList(user.Id, c.Param("uuid"))).First(&list).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -449,7 +449,7 @@ func ListsVisibility(c *gin.Context) {
 	}
 
 	var list models.List
-	if err := models.DB.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).First(&list).Error; err != nil {
+	if err := models.DB.Scopes(ownList(user.Id, c.Param("uuid"))).First(&list).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -487,7 +487,8 @@ func ListsDetails(c *gin.Context) {
 		return
 	}
 
-	if err := models.DB.Where("uuid=?", c.Param("uuid")).Where("user_id=? OR (visibility<>? AND CHAR_LENGTH(uuid)>=?)", user.Id, models.VisibilityPrivate, utils.ShortUuidLength).Where("archived IS NULL").Preload("Name").Preload("Species.Name").Preload("Species.Order.Name").First(&result).Error; err != nil {
+	// The owner may still use the id the list had before it was shared.
+	if err := models.DB.Where("(uuid=? OR (previous_uuid=? AND user_id=?))", c.Param("uuid"), c.Param("uuid"), user.Id).Where("(user_id=? OR (visibility<>? AND CHAR_LENGTH(uuid)>=?))", user.Id, models.VisibilityPrivate, utils.ShortUuidLength).Where("archived IS NULL").Preload("Name").Preload("Species.Name").Preload("Species.Order.Name").First(&result).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -519,7 +520,7 @@ func ListsReports(c *gin.Context) {
 	}
 
 	var list models.List
-	if err := tx.Where("user_id=?", user.Id).Where("uuid=?", c.Param("uuid")).First(&list).Error; err != nil {
+	if err := tx.Scopes(ownList(user.Id, c.Param("uuid"))).First(&list).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -771,6 +772,15 @@ type SharedList struct {
 	Species []SharedSpecies
 	// Latest are the most recently seen species, newest first.
 	Latest []SharedSpecies
+}
+
+// ownList finds the user's list by its id, or by the id it had before it got a
+// longer one when shared (previous_uuid), which a device that hasn't caught up
+// may still use.
+func ownList(userId int64, uuid string) func(*gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Where("user_id=?", userId).Where("(uuid=? OR previous_uuid=?)", uuid, uuid)
+	}
 }
 
 // ShareList is the progress of a list that is not private, under the same

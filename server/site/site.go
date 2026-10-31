@@ -369,11 +369,33 @@ func (s *Site) render(c *gin.Context, status int, name string, data gin.H) {
 	}
 }
 
+// showcaseItem is a feature on the landing page, every other one mirrored.
+type showcaseItem struct {
+	Item map[string]any
+	Flip bool
+}
+
+// showcase is the landing page's features, without sound identification when it is
+// off (site.analyze-endpoint), mirrored by where they end up.
+func showcase(texts map[string]any, identify bool) []showcaseItem {
+	items, _ := texts["Showcase"].([]any)
+	var out []showcaseItem
+	for _, it := range items {
+		item, ok := it.(map[string]any)
+		if !ok || (item["mock"] == "sound" && !identify) {
+			continue
+		}
+		out = append(out, showcaseItem{Item: item, Flip: len(out)%2 == 1})
+	}
+	return out
+}
+
 func (s *Site) landingData(c *gin.Context, signedInGoesToApp bool) gin.H {
 	lang := language(c, []string{"en", "sv"}, "en")
 	// Songs come from xeno-canto, which needs a key; without one the search doesn't promise them.
 	sound := config.AppConfig != nil && config.AppConfig.XenoCantoKey != ""
-	return gin.H{"Lang": lang, "T": s.landing[lang], "SignedInGoesToApp": signedInGoesToApp, "Stats": s.siteStats(), "SourceUrl": s.cfg.SourceUrl, "Sound": sound}
+	identify := s.cfg.AnalyzeEndpoint != ""
+	return gin.H{"Lang": lang, "T": s.landing[lang], "SignedInGoesToApp": signedInGoesToApp, "Stats": s.siteStats(), "SourceUrl": s.cfg.SourceUrl, "Sound": sound, "Identify": identify, "Showcase": showcase(s.landing[lang], identify)}
 }
 
 // siteStats are the landing page's community numbers, counted at most every 15 minutes. Nil when

@@ -443,6 +443,8 @@ class Translations {
         DonationHint: "Shown on the donation page as a progress bar.",
         NewsWelcome: "Welcome new accounts",
         NewsWelcomeHint: "Shown on the dashboard of accounts made in the last 30 days until they close it, however old the post is. Older accounts never see it as unread.",
+        Play: "Play",
+        Pause: "Pause",
     }
     static sv = {
         SignIn: "Logga in",
@@ -888,6 +890,8 @@ class Translations {
         DonationHint: "Visas på donationssidan som en förloppsindikator.",
         NewsWelcome: "Välkomna nya konton",
         NewsWelcomeHint: "Visas på startsidan för konton skapade de senaste 30 dagarna tills de stänger det, hur gammalt inlägget än är. Äldre konton ser det aldrig som oläst.",
+        Play: "Spela",
+        Pause: "Pausa",
     }
     static de = {
         SignIn: "Anmelden",
@@ -1333,5 +1337,7 @@ class Translations {
         DonationHint: "Wird auf der Spendenseite als Fortschrittsbalken angezeigt.",
         NewsWelcome: "Neue Konten begrüßen",
         NewsWelcomeHint: "Wird Konten, die in den letzten 30 Tagen angelegt wurden, auf der Startseite gezeigt, bis sie es schließen, egal wie alt der Beitrag ist. Ältere Konten sehen ihn nie als ungelesen.",
+        Play: "Abspielen",
+        Pause: "Pause",
     }
 }

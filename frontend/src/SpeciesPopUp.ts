@@ -164,6 +164,11 @@ function wikipediaHeroUrl(wikipedia: any): string {
 	return photos.length > 0 ? getThumbnailFromUrl(photos[0], "960px") : "";
 }
 
+// The recording playing now: starting another stops it.
+let playingSound: HTMLAudioElement | null = null;
+
+// A recording in the app's own player: the browser's controls are wider than a phone's sheet and
+// look different in every browser.
 function soundCard(species: Models.Species, recording: Models.Recording): HTMLElement {
 	const card = document.createElement("div");
 	card.className = "sound-card";
@@ -172,10 +177,15 @@ function soundCard(species: Models.Species, recording: Models.Recording): HTMLEl
 	head.className = "sound-head";
 	card.appendChild(head);
 
-	const icon = document.createElement("span");
-	icon.className = "material-symbols-outlined";
-	icon.textContent = "graphic_eq";
-	head.appendChild(icon);
+	const audio = new Audio();
+	audio.preload = "none";
+	audio.src = recording.url;
+
+	const play = document.createElement("button");
+	play.className = "sound-play";
+	play.setAttribute("aria-label", App.translations.Play);
+	play.innerHTML = "<span class='material-symbols-outlined'>play_arrow</span>";
+	head.appendChild(play);
 
 	const text = document.createElement("div");
 	head.appendChild(text);
@@ -195,18 +205,115 @@ function soundCard(species: Models.Species, recording: Models.Recording): HTMLEl
 	more.setAttribute("aria-label", App.translations.Details);
 	more.innerHTML = "<span class='material-symbols-outlined'>map</span>";
 	more.addEventListener("click", function () {
+		audio.pause();
 		openRecordingPopUp(species, recording);
 	});
 	head.appendChild(more);
 
-	const audio = document.createElement("audio");
-	audio.setAttribute("controls", "");
-	audio.setAttribute("preload", "none");
-	const source = document.createElement("source");
-	source.src = recording.url;
-	source.type = "audio/mpeg";
-	audio.appendChild(source);
-	card.appendChild(audio);
+	// Where the recording is, tapped or dragged to move in it, and the time.
+	const bar = document.createElement("div");
+	bar.className = "sound-bar";
+	const track = document.createElement("div");
+	track.className = "sound-track";
+	track.setAttribute("role", "slider");
+	track.setAttribute("aria-label", type.textContent);
+	track.setAttribute("aria-valuemin", "0");
+	track.tabIndex = 0;
+	const fill = document.createElement("div");
+	fill.className = "sound-fill";
+	track.appendChild(fill);
+	bar.appendChild(track);
+	const time = document.createElement("span");
+	time.className = "sound-time";
+	time.textContent = "0:00";
+	bar.appendChild(time);
+	card.appendChild(bar);
+
+	const clock = function (seconds: number): string {
+		const s = Math.floor(seconds || 0);
+		return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+	};
+	const show = function (): void {
+		const length = isFinite(audio.duration) ? audio.duration : 0;
+		fill.style.width = (length > 0 ? audio.currentTime / length * 100 : 0) + "%";
+		time.textContent = length > 0 ? clock(audio.currentTime) + " / " + clock(length) : clock(audio.currentTime);
+		track.setAttribute("aria-valuemax", String(Math.round(length)));
+		track.setAttribute("aria-valuenow", String(Math.round(audio.currentTime)));
+	};
+	const playing = function (on: boolean): void {
+		card.classList.toggle("playing", on);
+		(play.firstChild as HTMLElement).textContent = on ? "pause" : "play_arrow";
+		play.setAttribute("aria-label", on ? App.translations.Pause : App.translations.Play);
+	};
+	audio.addEventListener("timeupdate", show);
+	audio.addEventListener("loadedmetadata", show);
+	audio.addEventListener("play", function () {
+		if (playingSound && playingSound !== audio) {
+			playingSound.pause();
+		}
+		playingSound = audio;
+		playing(true);
+	});
+	audio.addEventListener("pause", function () {
+		playing(false);
+	});
+	audio.addEventListener("ended", function () {
+		audio.currentTime = 0;
+		playing(false);
+		show();
+	});
+	audio.addEventListener("waiting", function () {
+		card.classList.add("loading");
+	});
+	audio.addEventListener("playing", function () {
+		card.classList.remove("loading");
+	});
+
+	play.addEventListener("click", function () {
+		if (audio.paused) {
+			audio.play().catch(function () {
+				playing(false);
+			});
+		} else {
+			audio.pause();
+		}
+	});
+
+	const seek = function (clientX: number): void {
+		if (!isFinite(audio.duration) || audio.duration <= 0) {
+			return;
+		}
+		const r = track.getBoundingClientRect();
+		audio.currentTime = Math.min(1, Math.max(0, (clientX - r.left) / r.width)) * audio.duration;
+		show();
+	};
+	track.addEventListener("pointerdown", function (e) {
+		seek(e.clientX);
+		track.setPointerCapture(e.pointerId);
+	});
+	track.addEventListener("pointermove", function (e) {
+		if (track.hasPointerCapture(e.pointerId)) {
+			seek(e.clientX);
+		}
+	});
+	track.addEventListener("keydown", function (e) {
+		if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+			e.preventDefault();
+			audio.currentTime = Math.max(0, audio.currentTime + (e.key === "ArrowLeft" ? -5 : 5));
+			show();
+		}
+	});
+
+	// Closing the sheet takes the card away; the sound must not play on unseen.
+	const stopWhenGone = new MutationObserver(function () {
+		if (!card.isConnected) {
+			audio.pause();
+			stopWhenGone.disconnect();
+		}
+	});
+	requestAnimationFrame(function () {
+		stopWhenGone.observe(document.body, { childList: true, subtree: true });
+	});
 
 	return card;
 }

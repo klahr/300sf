@@ -132,7 +132,9 @@ func placeKey(lat, lon float64) string {
 }
 
 func setZone(reportId, zoneId int64) {
-	if err := models.DB.Table(table.Reports).Where("id=?", reportId).Update("zone_id", zoneId).Error; err != nil {
+	res := models.DB.Table(table.Reports).Where("id=?", reportId).Update("zone_id", zoneId)
+	// Nothing changed (the zone was already known), so there is nothing to tell.
+	if res.Error != nil || res.RowsAffected == 0 {
 		return
 	}
 	// The sighting may only now count in a competition limited to some zones.
