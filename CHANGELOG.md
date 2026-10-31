@@ -8,6 +8,8 @@ Versions are git tags `X.Y.Z`, cut with `make patch|minor|major`.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-31
+
 ### Added
 
 - `site.time-zone` in the config: the time zone share pages tell days in and
