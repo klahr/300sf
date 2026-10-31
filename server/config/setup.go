@@ -42,6 +42,9 @@ type App struct {
 	// municipality of sightings in places no zone covers yet. Empty disables
 	// it. See geocoder/ for the public service's usage policy.
 	GeocoderEndpoint string `yaml:"geocoder-endpoint"`
+	// xeno-canto's API key, for the species' songs and calls
+	// (https://xeno-canto.org/account). Empty means no recordings.
+	XenoCantoKey string `yaml:"xeno-canto-key"`
 	// Where the contact form's messages go, sent from this address too.
 	// Empty turns the form off.
 	ContactEmail string `yaml:"contact-email"`

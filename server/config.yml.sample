@@ -25,6 +25,9 @@ delete-accounts-interval: 0  # 0 disables account deletion job
 # whole site: https://operations.osmfoundation.org/policies/nominatim/
 # Run your own Nominatim for more; empty disables it.
 geocoder-endpoint: "https://nominatim.openstreetmap.org"
+# xeno-canto's API key, for the species' songs and calls; get one under
+# https://xeno-canto.org/account. Empty means no recordings.
+xeno-canto-key: ""
 site:
   host: "300sf.se"
   redirect-hosts:

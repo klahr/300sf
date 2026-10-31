@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 )
 
@@ -27,8 +29,10 @@ type Recording struct {
 	Cnt      string `json:"cnt"`
 	Loc      string `json:"loc"`
 	Lat      string `json:"lat"`
-	Lng      string `json:"lng"`
-	Alt      string `json:"alt"`
+	// API v3 calls it lon; v2 called it lng.
+	Lon string `json:"lon"`
+	Lng string `json:"lng"`
+	Alt string `json:"alt"`
 }
 
 type RecordingsResponse struct {
@@ -37,19 +41,42 @@ type RecordingsResponse struct {
 	Recordings    []Recording `json:"recordings"`
 }
 
-var client = &http.Client{Timeout: 10 * time.Second}
+var (
+	client   = &http.Client{Timeout: 10 * time.Second}
+	endpoint = "https://xeno-canto.org/api/3/recordings"
+)
 
-func Recordings(query string) RecordingsResponse {
+// Longitude is the recording's longitude, whichever name it came under.
+func (r Recording) Longitude() string {
+	if r.Lon != "" {
+		return r.Lon
+	}
+	return r.Lng
+}
+
+// Recordings are the best (quality A) recordings of a species, by its
+// scientific name, from API v3; key is required (v2 is gone).
+func Recordings(key, scientificName string) (RecordingsResponse, error) {
 	var response RecordingsResponse
-
-	q := fmt.Sprintf("https://xeno-canto.org/api/2/recordings?query=%s%%20q:A", query)
+	parts := strings.Fields(scientificName)
+	if key == "" || len(parts) < 2 {
+		return response, nil
+	}
+	// v3 only takes tagged queries: the genus and the species.
+	query := fmt.Sprintf("gen:%s sp:%s q:A", parts[0], strings.ToLower(parts[1]))
+	q := endpoint + "?query=" + url.QueryEscape(query) + "&key=" + url.QueryEscape(key)
 
 	r, err := client.Get(q)
-	if err == nil {
-		defer r.Body.Close()
-		body, _ := io.ReadAll(r.Body)
-		json.Unmarshal(body, &response)
+	if err != nil {
+		return response, err
 	}
-
-	return response
+	defer r.Body.Close()
+	if r.StatusCode != http.StatusOK {
+		return response, fmt.Errorf("xeno-canto: %s", r.Status)
+	}
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		return response, err
+	}
+	return response, json.Unmarshal(body, &response)
 }

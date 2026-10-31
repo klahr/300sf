@@ -210,7 +210,8 @@ func SpeciesDetails(c *gin.Context) {
 
 	lang := wikipedia.Language(c.GetString("app_language"))
 	// Keyed by species, not path: the same details are asked for at / and /api.
-	cacheKey := "/v1/species/" + c.Param("uuid") + "?lang=" + lang
+	// v3: details cached before xeno-canto's API v3 have no recordings.
+	cacheKey := "/v1/species/v3/" + c.Param("uuid") + "?lang=" + lang
 	cached, err := models.Cache.Get(cacheKey).Result()
 	if err == redis.Nil {
 	} else if err != nil {
@@ -245,10 +246,11 @@ func SpeciesDetails(c *gin.Context) {
 		return
 	}
 
-	q := result.Name.En.String
-	q = strings.ReplaceAll(q, " ", "%20")
-
-	recordings := xenocanto.Recordings(q).Recordings
+	found, recErr := xenocanto.Recordings(config.AppConfig.XenoCantoKey, result.Name.La.String)
+	if recErr != nil {
+		log.Warning(c, 0, "xeno-canto: "+recErr.Error())
+	}
+	recordings := found.Recordings
 	var recs []models.Recording
 	for i, r := range recordings {
 		if i >= 25 {
@@ -266,7 +268,7 @@ func SpeciesDetails(c *gin.Context) {
 			Country:   r.Cnt,
 			Location:  r.Loc,
 			Latitude:  utils.Str2Float(r.Lat),
-			Longitude: utils.Str2Float(r.Lng),
+			Longitude: utils.Str2Float(r.Longitude()),
 		})
 	}
 
@@ -282,8 +284,13 @@ func SpeciesDetails(c *gin.Context) {
 		Wikipedia:  wikipedia.GetData(lang, result.Name),
 	}
 
+	ttl := time.Second * time.Duration(config.AppConfig.WikipediaCacheDuration)
+	// Without the recordings, ask again soon rather than keep the gap for days.
+	if recErr != nil && (ttl <= 0 || ttl > time.Hour) {
+		ttl = time.Hour
+	}
 	if cached, err := json.Marshal(r); err == nil {
-		models.Cache.Set(cacheKey, cached, time.Second*time.Duration(config.AppConfig.WikipediaCacheDuration))
+		models.Cache.Set(cacheKey, cached, ttl)
 	}
 
 	c.JSON(http.StatusOK, r)

@@ -37,6 +37,7 @@
 	"StatSpecies": "species reported",
 	"SearchTitle": "Which bird did you see?",
 	"SearchLede": "Look up any of the over 2,000 species in the catalogue, read about it and hear its song. No account needed.",
+	"SearchLedeNoSound": "Look up any of the over 2,000 species in the catalogue and read about it. No account needed.",
 	"SearchPlaceholder": "Search by name, like blackbird or Turdus",
 	"SearchNone": "No species with that name.",
 	"SearchListen": "Listen",

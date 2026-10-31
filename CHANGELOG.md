@@ -38,6 +38,11 @@ Versions are git tags `X.Y.Z`, cut with `make patch|minor|major`.
 
 ### Fixed
 
+- Species' songs and calls play again: xeno-canto closed its API v2, so no
+  species had recordings. The server uses API v3, which needs a key
+  (`xeno-canto-key` in the config); without one there are no recordings, and
+  the landing page's bird search no longer promises them.
+
 - A checklist's share page counts sightings that have no start time, instead
   of showing their species as not seen.
 - Share pages work without Redis, and a species' picture is looked up once,
@@ -61,6 +66,10 @@ Versions are git tags `X.Y.Z`, cut with `make patch|minor|major`.
   the hour, and species without an English name no longer share one picture.
 - A competition's share page and live updates query the database less.
 - The admin user details show the user's language.
+- The bird search on the landing page clears the last bird's picture as soon
+  as another is chosen, shimmers while the new one loads and shows the 300sf
+  mark when a species has no picture; its pictures are sharp, in a size that
+  fits the screen, and its results are no longer covered by the text below them.
 
 ### Security
 

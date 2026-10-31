@@ -371,7 +371,9 @@ func (s *Site) render(c *gin.Context, status int, name string, data gin.H) {
 
 func (s *Site) landingData(c *gin.Context, signedInGoesToApp bool) gin.H {
 	lang := language(c, []string{"en", "sv"}, "en")
-	return gin.H{"Lang": lang, "T": s.landing[lang], "SignedInGoesToApp": signedInGoesToApp, "Stats": s.siteStats(), "SourceUrl": s.cfg.SourceUrl}
+	// Songs come from xeno-canto, which needs a key; without one the search doesn't promise them.
+	sound := config.AppConfig != nil && config.AppConfig.XenoCantoKey != ""
+	return gin.H{"Lang": lang, "T": s.landing[lang], "SignedInGoesToApp": signedInGoesToApp, "Stats": s.siteStats(), "SourceUrl": s.cfg.SourceUrl, "Sound": sound}
 }
 
 // siteStats are the landing page's community numbers, counted at most every 15 minutes. Nil when

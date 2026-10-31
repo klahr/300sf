@@ -9,8 +9,16 @@ window.SpeciesCard = (function () {
 		return (lang === "sv" ? t.sv : lang === "de" ? t.de : t.en) || t.en || t.sv || t.la || "";
 	}
 
+	// The API's thumbnail is small. Wikimedia serves the same picture in standard widths
+	// (250px, 330px, 500px, 960px, ...), so ask for one that fits; the app does the same
+	// (SpeciesPopUp.ts). Tracking parameters must not end up in the path.
+	function resized(url, width) {
+		return url.split(/[?#]/)[0].replace(/\/\d+px-([^/]+)$/, "/" + width + "px-$1");
+	}
+
 	return function (card, lang) {
 		var photo = card.querySelector(".species-card-photo img");
+		var frame = photo.parentNode;
 		var failed = card.querySelector(".species-card-failed");
 		var listen = card.querySelector("[data-listen]");
 		var wiki = card.querySelector(".species-card-wiki");
@@ -69,7 +77,12 @@ window.SpeciesCard = (function () {
 				card.querySelector(".species-card-order").textContent = "";
 				card.querySelector(".species-card-summary").textContent = "";
 				failed.hidden = true;
+				// The last bird's picture goes at once; the frame shimmers until this one's is in.
 				photo.hidden = true;
+				photo.removeAttribute("srcset");
+				photo.removeAttribute("src");
+				frame.classList.add("waiting");
+				frame.classList.remove("empty");
 				listen.hidden = true;
 				wiki.hidden = true;
 				card.hidden = false;
@@ -94,8 +107,34 @@ window.SpeciesCard = (function () {
 					var w = d.wikipedia || {};
 					card.querySelector(".species-card-summary").textContent = w.summary || "";
 					if (w.thumbnail) {
-						photo.src = w.thumbnail;
-						photo.hidden = false;
+						var url = resized(w.thumbnail, 500);
+						photo.onload = function () {
+							if (photo.getAttribute("src") === url) {
+								frame.classList.remove("waiting");
+								photo.hidden = false;
+							}
+						};
+						photo.onerror = function () {
+							if (photo.getAttribute("src") !== url) {
+								return;
+							}
+							// No thumbnail is wider than the photo itself: fall back to the API's own.
+							if (photo.hasAttribute("srcset")) {
+								photo.removeAttribute("srcset");
+								url = w.thumbnail;
+								photo.src = url;
+								return;
+							}
+							frame.classList.remove("waiting");
+							frame.classList.add("empty");
+						};
+						// Full width on a phone, a 200px column beside the text otherwise.
+						photo.sizes = "(max-width: 640px) 100vw, 200px";
+						photo.srcset = url + " 500w, " + resized(w.thumbnail, 960) + " 960w";
+						photo.src = url;
+					} else {
+						frame.classList.remove("waiting");
+						frame.classList.add("empty");
 					}
 					if (w.url) {
 						wiki.href = w.url;
@@ -110,6 +149,8 @@ window.SpeciesCard = (function () {
 				}).catch(function () {
 					if (chosen === species) {
 						card.classList.remove("loading");
+						frame.classList.remove("waiting");
+						frame.classList.add("empty");
 						failed.hidden = false;
 					}
 				});

@@ -37,6 +37,7 @@
 	"StatSpecies": "olika arter",
 	"SearchTitle": "Vad var det för fågel?",
 	"SearchLede": "Sök bland de över 2 000 arterna, läs på och lyssna på lätet. Du behöver inget konto.",
+	"SearchLedeNoSound": "Sök bland de över 2 000 arterna och läs på. Du behöver inget konto.",
 	"SearchPlaceholder": "Skriv ett namn, till exempel koltrast eller Turdus",
 	"SearchNone": "Hittar ingen art som heter så.",
 	"SearchListen": "Lyssna",

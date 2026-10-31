@@ -81,7 +81,7 @@
 
 				<div id="lookup-card">{{template "species-card" .}}</div>
 			</div>
-			<p class="lookup-lede">{{.SearchLede}}</p>
+			<p class="lookup-lede">{{if $.Sound}}{{.SearchLede}}{{else}}{{.SearchLedeNoSound}}{{end}}</p>
 		</div>
 	</section>
 

@@ -706,6 +706,8 @@ svg {
 	padding: 72px 0 40px;
 	text-align: center;
 	isolation: isolate;
+	/* Above the hero after it, which the results list hangs over. */
+	z-index: 1;
 }
 
 .lookup::before {
