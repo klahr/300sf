@@ -8,6 +8,8 @@ Versions are git tags `X.Y.Z`, cut with `make patch|minor|major`.
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-31
+
 ### Added
 
 - Report sightings offline; they are sent when the connection is back.
