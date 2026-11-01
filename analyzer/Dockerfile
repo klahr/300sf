@@ -3,7 +3,7 @@
 # recordings here; point site.analyze-endpoint at http://<host>:8080/analyze.
 #
 # BirdNET-Analyzer's code is MIT licensed; its model is CC BY-NC-SA 4.0 (non-commercial use).
-FROM python:3.11-slim
+FROM python:3.15-slim
 
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends ffmpeg libsndfile1 \
